@@ -96,8 +96,6 @@ namespace Point.Collections
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void LogError(LogChannel channel, in string msg, UnityEngine.Object context)
         {
-            if ((s_LogChannel & channel) != channel) return;
-
             UnityEngine.Debug.LogError(LogStringFormat(channel, in msg, 2), context);
         }
 
@@ -111,8 +109,6 @@ namespace Point.Collections
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void ToLogError(this string msg, LogChannel channel = LogChannel.Default)
         {
-            if ((s_LogChannel & channel) != channel) return;
-
             LogError(channel, in msg);
         }
 
