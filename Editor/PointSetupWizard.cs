@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+// Copyright 2021 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,17 +13,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Point.Collections
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Point.Collections.Editor
 {
-    /// <summary>
-    /// 객체(혹은 구조체)가 유효한지 검사하는 interface 입니다.
-    /// </summary>
-    public interface IValidation
+    public class PointSetupWizard : MonoBehaviour
     {
-        /// <summary>
-        /// 이 객체(혹은 구조체)가 유효한지 반환합니다.
-        /// </summary>
-        /// <returns></returns>
-        bool IsValid();
+        // Start is called before the first frame update
+        void Start()
+        {
+        
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+        
+        }
     }
 }

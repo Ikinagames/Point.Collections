@@ -1,5 +1,6 @@
-﻿// Copyright 2021 Seung Ha Kim
-// 
+﻿// Copyright 2021 Ikina Games
+// Author : Seung Ha Kim (Syadeu)
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -22,9 +23,10 @@ namespace Point.Collections
 {
     internal sealed class CollectionUtility : CLSSingleTone<CollectionUtility>
     {
-        private Unity.Mathematics.Random m_Random;
+        private static Unity.Mathematics.Random m_Random;
 
-        public CollectionUtility()
+        [RuntimeInitializeOnLoadMethod]
+        public static void Initialize()
         {
             m_Random = new Unity.Mathematics.Random();
             m_Random.InitState();

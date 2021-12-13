@@ -1,4 +1,5 @@
-﻿// Copyright 2021 Seung Ha Kim
+﻿// Copyright 2021 Ikina Games
+// Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
