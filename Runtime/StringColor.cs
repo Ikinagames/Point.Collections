@@ -1,6 +1,6 @@
 ﻿// Copyright 2021 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,20 +13,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using UnityEditor;
-
-namespace Point.Collections.Editor
+namespace Point.Collections
 {
-    public static class AssetHelper
+    /// <inheritdoc path="https://docs.unity3d.com/Packages/com.unity.ugui@1.0/manual/StyledText.html"/>
+    public enum StringColor
     {
-        public static T LoadAsset<T>(string name, string label) where T : UnityEngine.Object
-        {
-            var assets = AssetDatabase.FindAssets($"{name} l:{label} t:{typeof(T).Name}");
-            if (assets.Length == 0) return null;
-
-            string guid = assets[0];
-            string path = AssetDatabase.GUIDToAssetPath(guid);
-            return AssetDatabase.LoadAssetAtPath<T>(path);
-        }
+        black,
+        blue,
+        brown,
+        cyan,
+        darkblue,
+        fuchsia,
+        green,
+        grey,
+        lightblue,
+        lime,
+        magenta,
+        maroon,
+        navy,
+        olive,
+        orange,
+        purple,
+        red,
+        silver,
+        teal,
+        white,
+        yellow
     }
 }

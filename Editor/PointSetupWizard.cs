@@ -45,13 +45,59 @@ namespace Point.Collections.Editor
             }
         }
 
+        private Rect m_CopyrightRect = new Rect(175, 475, 245, 20);
+
         private Texture2D m_EnableTexture;
         private Texture2D m_DisableTexture;
 
+        private GUIStyle titleStyle;
+        private GUIStyle iconStyle;
+
         private void OnEnable()
         {
-            m_DisableTexture = AssetHelper.LoadAsset<Texture2D>("CrossYellow", "CoreSystemEditor");
-            m_EnableTexture = AssetHelper.LoadAsset<Texture2D>("TickGreen", "CoreSystemEditor");
+            m_DisableTexture = AssetHelper.LoadAsset<Texture2D>("CrossYellow", "PointEditor");
+            m_EnableTexture = AssetHelper.LoadAsset<Texture2D>("TickGreen", "PointEditor");
+
+            titleStyle = new GUIStyle();
+            titleStyle.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
+            titleStyle.wordWrap = true;
+            titleStyle.fontStyle = FontStyle.Bold;
+            titleStyle.alignment = TextAnchor.MiddleCenter;
+
+            iconStyle = new GUIStyle();
+            iconStyle.alignment = TextAnchor.MiddleCenter;
+        }
+        private void OnGUI()
+        {
+            GUILayout.Space(20);
+            EditorUtilities.StringHeader("Setup", 30, true);
+            GUILayout.Space(10);
+            EditorUtilities.Line();
+            GUILayout.Space(10);
+
+            //DrawToolbar();
+
+            EditorUtilities.Line();
+
+            //using (new EditorUtilities.BoxBlock(Color.black))
+            //{
+            //    switch ((ToolbarNames)m_SelectedToolbar)
+            //    {
+            //        case ToolbarNames.General:
+            //            m_GeneralMenu.OnGUI();
+            //            break;
+            //        case ToolbarNames.Scene:
+            //            m_SceneMenu.OnGUI();
+            //            break;
+            //        case ToolbarNames.Prefab:
+            //            m_PrefabMenu.OnGUI();
+            //            break;
+            //        default:
+            //            break;
+            //    }
+            //}
+
+            EditorGUI.LabelField(m_CopyrightRect, EditorUtilities.String("Copyright 2021 Ikina Games. All rights reserved.", 11), EditorStyleUtilities.CenterStyle);
         }
     }
 }
