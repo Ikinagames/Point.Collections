@@ -25,7 +25,7 @@ namespace Point.Collections
     {
         private const string
             c_WhiteSpace = " ",
-            c_MessagePrefix = "[Point]",
+            c_MessagePrefix = "[<color=lime>Point</color>]",
             c_Context = "[{0}]";
 
         public static string StringFormat(string msg)
@@ -47,39 +47,58 @@ namespace Point.Collections
         }
         public static LogChannel s_LogChannel = (LogChannel)~0;
 
-        private static string LogStringFormat(LogChannel channel, in string msg)
+        private static string LogStringFormat(LogChannel channel, in string msg, int type)
         {
+            string chan = Native.TypeHelper.Enum<LogChannel>.ToString(channel);
+            string context;
+            switch (type)
+            {
+                // norm
+                default:
+                case 0:
+                    context = string.Format(c_Context, chan);
+                    break;
+                // warn
+                case 1:
+                    context = string.Format(c_Context, HTMLString.String(in chan, StringColor.maroon));
+                    break;
+                // err
+                case 2:
+                    context = string.Format(c_Context, HTMLString.String(in chan, StringColor.teal));
+                    break;
+            }
+
             return c_MessagePrefix + string.Format(c_Context, channel.ToString()) + c_WhiteSpace + msg;
         }
 
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
-        public static void Log(LogChannel channel, in string msg)
-        {
-            if ((s_LogChannel & channel) != channel) return;
-
-            UnityEngine.Debug.Log(LogStringFormat(channel, in msg));
-        }
+        public static void Log(LogChannel channel, in string msg) => Log(channel, in msg, null);
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void Log(LogChannel channel, in string msg, UnityEngine.Object context)
         {
             if ((s_LogChannel & channel) != channel) return;
 
-            UnityEngine.Debug.Log(LogStringFormat(channel, in msg), context);
+            UnityEngine.Debug.Log(LogStringFormat(channel, in msg, 0), context);
         }
 
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
-        public static void LogError(LogChannel channel, in string msg)
+        public static void LogWarning(LogChannel channel, in string msg) => LogWarning(channel, in msg, null);
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+        public static void LogWarning(LogChannel channel, in string msg, UnityEngine.Object context)
         {
             if ((s_LogChannel & channel) != channel) return;
 
-            UnityEngine.Debug.LogError(LogStringFormat(channel, in msg));
+            UnityEngine.Debug.LogWarning(LogStringFormat(channel, in msg, 1), context);
         }
+
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+        public static void LogError(LogChannel channel, in string msg) => LogError(channel, in msg, null);
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void LogError(LogChannel channel, in string msg, UnityEngine.Object context)
         {
             if ((s_LogChannel & channel) != channel) return;
 
-            UnityEngine.Debug.LogError(LogStringFormat(channel, in msg), context);
+            UnityEngine.Debug.LogError(LogStringFormat(channel, in msg, 2), context);
         }
 
         [System.Diagnostics.Conditional("UNITY_EDITOR")]

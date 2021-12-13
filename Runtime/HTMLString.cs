@@ -23,8 +23,8 @@ namespace Point.Collections
             original += txt;
         }
 
-        public static string String(string text, StringColor color) => $"<color={color}>{text}</color>";
-        public static string String(string text, int size) => $"<size={size}>{text}</size>";
-        public static string String(string text, StringColor color, int size) => String(String(text, color), size);
+        public static string String(in string text, StringColor color) => $"<color={color}>{text}</color>";
+        public static string String(in string text, int size) => $"<size={size}>{text}</size>";
+        public static string String(in string text, StringColor color, int size) => String(String(text, color), size);
     }
 }

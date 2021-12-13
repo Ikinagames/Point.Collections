@@ -35,6 +35,7 @@ namespace Point.Collections
         #endregion
 
         public override bool EnableLog => false;
+        public override bool HideInInspector => true;
 
         public event Action OnApplicationShutdown;
 

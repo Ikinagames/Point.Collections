@@ -30,7 +30,7 @@ namespace Point.Collections
                 if (!UnityEditorInternal.InternalEditorUtility.CurrentThreadIsMainThread())
                 {
                     Point.LogError(Point.LogChannel.Collections,
-                        $"{nameof(StaticMonobehaviour<T>)} is only can initialized in main thread but current thread looks like outside of UnityEngine. This is not allowed.");
+                        $"{nameof(StaticMonobehaviour<T>)} is only can be initialized in main thread but current thread looks like outside of UnityEngine. This is not allowed.");
 
                     throw new System.Exception("Internal error. See error log.");
                 }
@@ -39,11 +39,16 @@ namespace Point.Collections
                 {
                     UnityEngine.GameObject obj = new UnityEngine.GameObject();
                     DontDestroyOnLoad(obj);
+                    T t = obj.AddComponent<T>();
+
 #if UNITY_EDITOR
                     obj.name = $"{nameof(T)}: StaticMonobehaviour";
+                    if (t.HideInInspector)
+                    {
+                        obj.hideFlags = HideFlags.HideInHierarchy;
+                    }
 #endif
 
-                    T t = obj.AddComponent<T>();
                     Application.quitting += t.OnShutdown;
 
                     t.OnInitialize();
