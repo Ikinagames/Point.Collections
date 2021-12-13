@@ -30,6 +30,12 @@ namespace Point.Collections
         {
             m_Random = new Unity.Mathematics.Random();
             m_Random.InitState();
+
+            Type[] types = TypeHelper.GetTypes((other) => TypeHelper.TypeOf<IStaticInitializer>.Type.IsAssignableFrom(other));
+            for (int i = 0; i < types.Length; i++)
+            {
+                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(types[i].TypeHandle);
+            }
         }
 
         public int CreateHashCode() => m_Random.NextInt(int.MinValue, int.MaxValue);

@@ -13,10 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Point.Collections
+using UnityEditor;
+
+namespace Point.Collections.Editor
 {
-    /// <summary>
-    /// <see langword="static"/> constructor 를 가지고 있으면 런타임 중 호출하지 않아도 즉시 호출합니다.
-    /// </summary>
-    public interface IStaticInitializer { }
+    public static class AssetHelper
+    {
+        public static T LoadAsset<T>(string name, string label) where T : UnityEngine.Object
+        {
+            string guid = AssetDatabase.FindAssets($"{name} l:{label} t:{typeof(T).Name}")[0];
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            return AssetDatabase.LoadAssetAtPath<T>(path);
+        }
+    }
 }

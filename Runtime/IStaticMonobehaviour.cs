@@ -15,8 +15,12 @@
 
 namespace Point.Collections
 {
-    /// <summary>
-    /// <see langword="static"/> constructor 를 가지고 있으면 런타임 중 호출하지 않아도 즉시 호출합니다.
-    /// </summary>
-    public interface IStaticInitializer { }
+    public interface IStaticMonobehaviour
+    {
+        bool EnableLog { get; }
+        bool HideInInspector { get; }
+
+        void OnInitialize();
+        void OnShutdown();
+    }
 }

@@ -16,21 +16,42 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 namespace Point.Collections.Editor
 {
-    public class PointSetupWizard : MonoBehaviour
+    public sealed class PointSetupWizard : EditorWindow, IStaticInitializer
     {
-        // Start is called before the first frame update
-        void Start()
+        static PointSetupWizard()
         {
-        
+            EditorApplication.delayCall -= Startup;
+            EditorApplication.delayCall += Startup;
+        }
+        static void Startup()
+        {
+            if (Application.isPlaying || EditorApplication.isPlayingOrWillChangePlaymode) return;
+
+            //if (!new GeneralMenu().Predicate() ||
+            //    !new SceneMenu().Predicate() ||
+            //    !new PrefabMenu().Predicate())
+            //{
+            //    CoreSystemMenuItems.CoreSystemSetupWizard();
+            //    return;
+            //}
+
+            //if (!CoreSystemSettings.Instance.m_HideSetupWizard)
+            {
+                PointMenuItems.CoreSystemSetupWizard();
+            }
         }
 
-        // Update is called once per frame
-        void Update()
+        private Texture2D m_EnableTexture;
+        private Texture2D m_DisableTexture;
+
+        private void OnEnable()
         {
-        
+            m_DisableTexture = AssetHelper.LoadAsset<Texture2D>("CrossYellow", "CoreSystemEditor");
+            m_EnableTexture = AssetHelper.LoadAsset<Texture2D>("TickGreen", "CoreSystemEditor");
         }
     }
 }
