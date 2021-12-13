@@ -91,6 +91,7 @@ namespace Point.Collections
             UnityEngine.Debug.LogWarning(LogStringFormat(channel, in msg, 1), context);
         }
 
+        public static string LogErrorString(LogChannel channel, in string msg) => LogStringFormat(channel, in msg, 2);
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void LogError(LogChannel channel, in string msg) => LogError(channel, in msg, null);
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
