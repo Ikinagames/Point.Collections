@@ -99,5 +99,46 @@ namespace Point.Collections.Editor
 
             EditorGUI.LabelField(m_CopyrightRect, EditorUtilities.String("Copyright 2021 Ikina Games. All rights reserved.", 11), EditorStyleUtilities.CenterStyle);
         }
+
+        #region Toolbar
+
+        //private readonly Dictionary<ToolbarNames, Func<bool>> m_IsSetupDone = new Dictionary<ToolbarNames, Func<bool>>();
+        //private void DrawToolbar()
+        //{
+        //    const float spacing = 50;
+
+        //    EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+        //    GUILayout.Space(spacing);
+
+        //    string[] toolbarNames = Enum.GetNames(typeof(ToolbarNames));
+        //    for (int i = 0; i < toolbarNames.Length; i++)
+        //    {
+        //        bool done;
+        //        if (m_IsSetupDone.ContainsKey((ToolbarNames)i))
+        //        {
+        //            done = m_IsSetupDone[(ToolbarNames)i].Invoke();
+        //        }
+        //        else done = true;
+        //        DrawToolbarButton(i, toolbarNames[i], done);
+        //    }
+
+        //    GUILayout.Space(spacing);
+        //    EditorGUILayout.EndHorizontal();
+        //}
+        //private void DrawToolbarButton(int i, string name, bool enable)
+        //{
+        //    using (new EditorUtilities.BoxBlock(i.Equals(m_SelectedToolbar) ? Color.black : Color.gray))
+        //    {
+        //        EditorGUILayout.BeginHorizontal(GUILayout.Height(22));
+        //        if (GUILayout.Button(name, titleStyle))
+        //        {
+        //            m_SelectedToolbar = i;
+        //        }
+        //        GUILayout.Label(enable ? m_EnableTexture : m_DisableTexture, iconStyle);
+        //        EditorGUILayout.EndHorizontal();
+        //    }
+        //}
+
+        #endregion
     }
 }
