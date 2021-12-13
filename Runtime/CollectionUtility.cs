@@ -28,6 +28,8 @@ namespace Point.Collections
         [RuntimeInitializeOnLoadMethod]
         public static void Initialize()
         {
+            NativeDebug.Initialize();
+
             m_Random = new Unity.Mathematics.Random();
             m_Random.InitState();
 
