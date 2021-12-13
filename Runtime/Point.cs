@@ -44,6 +44,8 @@ namespace Point.Collections
 
             Collections = 0x0001,
             Audio = 0x0010,
+
+            Editor = 0x1000
         }
         public static LogChannel s_LogChannel = (LogChannel)~0;
 

@@ -173,5 +173,18 @@ namespace Point.Collections.Editor
                 GUI.backgroundColor = m_PrevColor;
             }
         }
+
+        public static bool Foldout(bool foldout, string name, int size = -1)
+        {
+            string firstKey = foldout ? EditorStyleUtilities.FoldoutOpendString : EditorStyleUtilities.FoldoutClosedString;
+            if (size < 0)
+            {
+                return EditorGUILayout.Foldout(foldout, HTMLString.String($"{firstKey} {name}", StringColor.grey), true, EditorStyleUtilities.HeaderStyle);
+            }
+            else
+            {
+                return EditorGUILayout.Foldout(foldout, HTMLString.String($"<size={size}>{firstKey} {name}</size>", StringColor.grey), true, EditorStyleUtilities.HeaderStyle);
+            }
+        }
     }
 }
