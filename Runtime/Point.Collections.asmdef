@@ -1,0 +1,20 @@
+{
+    "name": "Point.Collections",
+    "rootNamespace": "Point.Collections",
+    "references": [
+        "Unity.Mathematics",
+        "Unity.Burst",
+        "Unity.Collections"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Point.Collections.Native.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
