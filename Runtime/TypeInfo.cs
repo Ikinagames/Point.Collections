@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Point.Collections.Native;
 using System;
 using Unity.Burst;
 using Unity.Collections;

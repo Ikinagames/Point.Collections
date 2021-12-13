@@ -16,6 +16,7 @@ using UnityEngine;
 using Unity.Collections.LowLevel.Unsafe;
 using System;
 using Unity.Burst;
+using Point.Collections.Native;
 
 namespace Point.Collections
 {

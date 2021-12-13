@@ -12,28 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Unity.Collections.LowLevel.Unsafe;
 using System;
-using Unity.Burst;
-using Point.Collections.Native;
 
 namespace Point.Collections
 {
-    public struct TypeStatic
+    public abstract class CLSSingleTone<T> : IDisposable where T : class, new()
     {
-        public static SharedStatic<TypeInfo> GetValue(Type type)
+        private static T s_Instance;
+        public static T Instance
         {
-            return SharedStatic<TypeInfo>.GetOrCreate(
-                   TypeHelper.TypeOf<Type>.Type,
-                   type, (uint)UnsafeUtility.AlignOf<TypeInfo>());
+            get
+            {
+                if (s_Instance == null) s_Instance = new T();
+                return s_Instance;
+            }
         }
-    }
-    public struct TypeStatic<T>
-    {
-        private static readonly SharedStatic<TypeInfo> Value
-            = SharedStatic<TypeInfo>.GetOrCreate<Type, T>((uint)UnsafeUtility.AlignOf<TypeInfo>());
+        ~CLSSingleTone()
+        {
+            Dispose();
+        }
 
-        public static Type Type => Value.Data.Type;
-        public static TypeInfo TypeInfo => Value.Data;
+        public virtual void Dispose() { }
     }
 }
