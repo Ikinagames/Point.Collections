@@ -13,19 +13,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define POINT_COLLECTIONS_NATIVE
+using Unity.Burst;
+using Unity.Mathematics;
 
-using System.Runtime.InteropServices;
-
-namespace Point.Collections.Native
+namespace Point.Collections.Burst
 {
-    public static unsafe class NativeMath
+#if !POINT_COLLECTIONS_NATIVE
+    [BurstCompile]
+#endif
+    public static unsafe class BurstMath
     {
-#if POINT_COLLECTIONS_NATIVE
-        [DllImport("Ikinagames.Collections.Internal")]
-        public static extern void unity_todB(double* linear, double* output);
-        [DllImport("Ikinagames.Collections.Internal")]
-        public static extern void unity_fromdB(double* dB, double* output);
+#if !POINT_COLLECTIONS_NATIVE
+        public static void unity_todB(double* linear, double* output)
+        {
+            const double kMindB = -144;
+
+            if (*linear == 0) *output = kMindB;
+            else
+            {
+                *output = 20 * math.log10(*linear);
+            }
+        }
+        public static void unity_fromdB(double* dB, double* output)
+        {
+            *output = math.pow(10, *dB / 20);
+        }
 #endif
     }
 }
