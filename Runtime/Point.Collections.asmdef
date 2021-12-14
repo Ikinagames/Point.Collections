@@ -4,7 +4,8 @@
     "references": [
         "Unity.Mathematics",
         "Unity.Burst",
-        "Unity.Collections"
+        "Unity.Collections",
+        "Unity.Addressables"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -15,6 +16,12 @@
     ],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.addressables",
+            "expression": "1.16",
+            "define": "UNITY_ADDRESSABLES"
+        }
+    ],
     "noEngineReferences": false
 }
