@@ -71,7 +71,7 @@ namespace Point.Collections
 
             if (EnableLog)
             {
-                Point.Log(Point.LogChannel.Default,
+                Point.Log(Point.LogChannel.Collections,
                     $"Initialized {TypeHelper.TypeOf<T>.ToString()}");
             }
         }
@@ -81,7 +81,7 @@ namespace Point.Collections
 
             if (EnableLog)
             {
-                Point.Log(Point.LogChannel.Default,
+                Point.Log(Point.LogChannel.Collections,
                     $"Shutdown {TypeHelper.TypeOf<T>.ToString()}");
             }
         }

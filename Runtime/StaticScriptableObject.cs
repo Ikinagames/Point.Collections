@@ -68,8 +68,9 @@ namespace Point.Collections
                     s_Instance = Resources.Load<T>($"{path}/" + TypeHelper.TypeOf<T>.ToString());
                     if (s_Instance == null)
                     {
-                        Point.Log(Point.LogChannel.Default,
+                        Point.Log(Point.LogChannel.Collections,
                             $"Creating new StaticScriptableObject({TypeHelper.TypeOf<T>.ToString()}) asset");
+
                         s_Instance = CreateInstance<T>();
                         s_Instance.name = $"{TypeHelper.TypeOf<T>.Name}";
 
