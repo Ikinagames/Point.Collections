@@ -18,6 +18,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Unity.Burst;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Point.Collections
 {
@@ -218,7 +220,23 @@ namespace Point.Collections
         }
         public static TypeInfo ToTypeInfo(Type type)
         {
-            return TypeStatic.GetValue(type).Data;
+            if (!UnsafeUtility.IsUnmanaged(type))
+            {
+                Point.LogError(Point.LogChannel.Collections,
+                    $"Could not resovle type of {TypeHelper.ToString(type)} is not ValueType.");
+
+                return new TypeInfo(type, 0, 0, 0);
+            }
+
+            SharedStatic<TypeInfo> typeStatic = TypeStatic.GetValue(type);
+
+            if (typeStatic.Data.Type == null)
+            {
+                typeStatic.Data
+                    = new TypeInfo(type, UnsafeUtility.SizeOf(type), TypeHelper.AlignOf(type), CollectionUtility.CreateHashCode());
+            }
+
+            return typeStatic.Data;
         }
     }
 }

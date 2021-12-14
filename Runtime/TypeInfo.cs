@@ -32,7 +32,7 @@ namespace Point.Collections
 
         private readonly int m_HashCode;
 
-        [BurstDiscard]
+        [NotBurstCompatible]
         public Type Type
         {
             get
@@ -47,6 +47,7 @@ namespace Point.Collections
         public int Size => m_Size;
         public int Align => m_Align;
 
+        [NotBurstCompatible]
         internal TypeInfo(Type type, int size, int align, int hashCode)
         {
             m_TypeHandle = type.TypeHandle;
@@ -59,9 +60,6 @@ namespace Point.Collections
                 m_HashCode = hashCode * 397;
             }
         }
-
-        public static TypeInfo GetTypeInfo(Type type) => CollectionUtility.GetTypeInfo(type);
-        public static TypeInfo GetTypeInfo<T>() => CollectionUtility.GetTypeInfo(TypeHelper.TypeOf<T>.Type);
 
         public override int GetHashCode() => m_HashCode;
 

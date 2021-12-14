@@ -1,6 +1,6 @@
 ﻿// Copyright 2021 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
-//
+// 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,29 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using UnityEngine;
-using Unity.Collections.LowLevel.Unsafe;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
+#if UNITY_EDITOR
+#endif
+
 using System;
-using Unity.Burst;
-using Point.Collections.Native;
 
 namespace Point.Collections
 {
-    internal sealed class CollectionUtility : CLSSingleTone<CollectionUtility>
+    public sealed class AssetPathAttribute : Attribute
     {
-        private static Unity.Mathematics.Random m_Random;
-
-        public static void Initialize()
-        {
-            CollectionUtility ins = Instance;
-
-#if POINT_COLLECTIONS_NATIVE
-            NativeDebug.Initialize();
-#endif
-            m_Random = new Unity.Mathematics.Random();
-            m_Random.InitState();
-        }
-
-        public static int CreateHashCode() => m_Random.NextInt(int.MinValue, int.MaxValue);
+        public string Path;
     }
 }

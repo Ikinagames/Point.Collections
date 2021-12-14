@@ -14,6 +14,7 @@
 // limitations under the License.
 
 using System;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.Scripting;
 
@@ -25,7 +26,7 @@ namespace Point.Collections
         #region Statics
 
         [Preserve, RuntimeInitializeOnLoadMethod]
-        private static void Initialize()
+        public static void Initialize()
         {
             PointApplication app = Instance;
         }
@@ -40,6 +41,23 @@ namespace Point.Collections
 
         public event Action OnApplicationShutdown;
 
+        public override void OnInitialze()
+        {
+            const string c_Instance = "Instance";
+
+            CollectionUtility.Initialize();
+
+            Type[] types = TypeHelper.GetTypes((other) => TypeHelper.TypeOf<IStaticInitializer>.Type.IsAssignableFrom(other));
+            for (int i = 0; i < types.Length; i++)
+            {
+                if (TypeHelper.TypeOf<IStaticMonobehaviour>.Type.IsAssignableFrom(types[i]))
+                {
+                    types[i].GetProperty(c_Instance, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+                        .GetValue(null);
+                }
+                else System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(types[i].TypeHandle);
+            }
+        }
         public override void OnShutdown()
         {
             s_IsShutdown = true;
