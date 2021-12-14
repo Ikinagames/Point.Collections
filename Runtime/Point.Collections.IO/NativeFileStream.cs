@@ -13,25 +13,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
 using System;
 using System.IO;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.IO.LowLevel.Unsafe;
 
 namespace Point.Collections.IO
 {
+    [BurstCompatible]
     public struct NativeFileStream : IValidation, IDisposable
     {
         [NativeDisableUnsafePtrRestriction] private unsafe ReadCommand* m_Command;
         private ReadHandle m_Handle;
 
-        [BurstDiscard]
+        [NotBurstCompatible]
         public byte[] Read(string path)
         {
             return File.ReadAllBytes(path);
         }
+        [BurstCompatible]
         public TReader ReadAsync<TReader>(string path)
             where TReader : unmanaged, INativeReader
         {
@@ -57,8 +62,8 @@ namespace Point.Collections.IO
                 return rdr;
             }
         }
-        [BurstDiscard]
-        public void Close()
+        [BurstCompatible]
+        public void Dispose()
         {
 #if DEBUG_MODE
             if (!IsValid())
@@ -78,27 +83,7 @@ namespace Point.Collections.IO
                 UnsafeUtility.Free(m_Command, Allocator.Persistent);
             }
         }
-        void IDisposable.Dispose()
-        {
-#if DEBUG_MODE
-            if (!IsValid())
-            {
-                UnityEngine.Debug.LogError("Collection is not valid.");
-                return;
-            }
-#endif
-            unsafe
-            {
-                if (m_Command->Buffer != null)
-                {
-                    m_Handle.Dispose();
-                    UnsafeUtility.Free(m_Command->Buffer, Allocator.Persistent);
-                }
-
-                UnsafeUtility.Free(m_Command, Allocator.Persistent);
-            }
-        }
-
+        [BurstCompatible]
         public bool IsValid()
         {
             unsafe
