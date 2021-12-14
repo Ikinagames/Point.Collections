@@ -31,6 +31,8 @@ namespace Point.Collections
             public static readonly bool IsAbstract = Type.IsAbstract;
             public static readonly bool IsArray = Type.IsArray;
 
+            public static TypeInfo TypeInfo => ToTypeInfo(Type);
+
             private static Type[] s_Interfaces = null;
             public static Type[] Interfaces
             {
@@ -213,6 +215,10 @@ namespace Point.Collections
                 output += c_TEnd;
             }
             return output;
+        }
+        public static TypeInfo ToTypeInfo(Type type)
+        {
+            return TypeStatic.GetValue(type).Data;
         }
     }
 }

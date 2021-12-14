@@ -19,6 +19,7 @@ using UnityEngine.Scripting;
 
 namespace Point.Collections
 {
+    [AddComponentMenu("")]
     internal sealed class PointApplication : StaticMonobehaviour<PointApplication>
     {
         #region Statics
@@ -42,7 +43,7 @@ namespace Point.Collections
         public override void OnShutdown()
         {
             s_IsShutdown = true;
-
+            
             OnApplicationShutdown?.Invoke();
         }
     }
