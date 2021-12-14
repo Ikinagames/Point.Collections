@@ -26,6 +26,12 @@ namespace Point.Collections
     [Serializable]
     public struct Hash : IEquatable<Hash>
     {
+        public static Hash NewHash()
+        {
+            Guid guid = Guid.NewGuid();
+            return new Hash(FNV1a32.Calculate(guid.ToByteArray()));
+        }
+
         [SerializeField] private uint m_Value;
 #if DEBUG_MODE
         private Unity.Collections.FixedString512Bytes m_Key;
