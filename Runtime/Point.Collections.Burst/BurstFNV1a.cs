@@ -21,7 +21,7 @@ namespace Point.Collections.Burst
 #if !POINT_COLLECTIONS_NATIVE
     [BurstCompile]
 #endif
-    public static class BurstFNV1a
+    public static unsafe class BurstFNV1a
     {
 #if !POINT_COLLECTIONS_NATIVE
         private const uint
@@ -32,7 +32,7 @@ namespace Point.Collections.Burst
             kOffsetBasis64 = 14695981039346656037LU;
 
         [BurstDiscard]
-        public static unsafe void fnv1a32_str(in string str, uint* output)
+        public static void fnv1a32_str(in string str, uint* output)
         {
             if (str == null)
             {
@@ -48,9 +48,8 @@ namespace Point.Collections.Burst
                 fnv1a32_byte(buffer, &length, output);
             }
         }
-
         [BurstCompile]
-        public static unsafe void fnv1a32_byte(byte* buffer, int* length, uint* output)
+        public static void fnv1a32_byte(byte* buffer, int* length, uint* output)
         {
             if (buffer == null)
             {
@@ -67,6 +66,43 @@ namespace Point.Collections.Burst
             }
 
 			*output = hash;
+        }
+
+        [BurstDiscard]
+        public static void fnv1a64_str(in string str, ulong* output)
+        {
+            if (str == null)
+            {
+                *output = kOffsetBasis64;
+                return;
+            }
+
+            byte[] bytes = Encoding.Default.GetBytes(str);
+            int length = bytes.Length;
+
+            fixed (byte* buffer = bytes)
+            {
+                fnv1a64_byte(buffer, &length, output);
+            }
+        }
+        [BurstCompile]
+        public static void fnv1a64_byte(byte* buffer, int* length, ulong* output)
+        {
+            if (buffer == null)
+            {
+                *output = kOffsetBasis64;
+                return;
+            }
+
+            ulong hash = kOffsetBasis64;
+
+            for (int i = 0; i < *length; i++)
+            {
+                hash *= kPrime64;
+                hash ^= (ulong)buffer[i];
+            }
+
+            *output = hash;
         }
 #endif
     }

@@ -24,9 +24,10 @@ namespace Point.Collections.Burst
     public static unsafe class BurstMath
     {
 #if !POINT_COLLECTIONS_NATIVE
+        [BurstCompile]
         public static void unity_todB(double* linear, double* output)
         {
-            const double kMindB = -144;
+            const double kMindB = -80;
 
             if (*linear == 0) *output = kMindB;
             else
@@ -34,6 +35,7 @@ namespace Point.Collections.Burst
                 *output = 20 * math.log10(*linear);
             }
         }
+        [BurstCompile]
         public static void unity_fromdB(double* dB, double* output)
         {
             *output = math.pow(10, *dB / 20);
