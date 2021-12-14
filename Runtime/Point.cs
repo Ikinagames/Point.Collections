@@ -51,7 +51,7 @@ namespace Point.Collections
 
         private static string LogStringFormat(LogChannel channel, in string msg, int type)
         {
-            string chan = Native.TypeHelper.Enum<LogChannel>.ToString(channel);
+            string chan = TypeHelper.Enum<LogChannel>.ToString(channel);
             string context;
             switch (type)
             {
