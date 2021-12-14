@@ -1,6 +1,6 @@
 ﻿// Copyright 2021 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,36 +13,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
+using System.Collections.Generic;
 
 namespace Point.Collections
 {
-    public abstract class CLSSingleTone<T> : IDisposable where T : class, new()
+    public class DatastoreManager : CLSSingleTone<DatastoreManager>
     {
-        private static T s_Instance;
-        public static T Instance
+        private IDataStrategy m_AssetBundleStrategy;
+        public static IDataStrategy AssetBundle
         {
             get
             {
-                if (s_Instance == null)
+                if (Instance.m_AssetBundleStrategy == null)
                 {
-                    s_Instance = new T();
 
-                    (s_Instance as CLSSingleTone<T>).OnInitialize();
                 }
-                return s_Instance;
+
+                return Instance.m_AssetBundleStrategy;
             }
         }
-        ~CLSSingleTone()
+
+        private readonly List<IDatastore> m_Datastores;
+
+        public DatastoreManager()
         {
-            ((IDisposable)this).Dispose();
+            m_Datastores = new List<IDatastore>();
         }
-        void IDisposable.Dispose()
+        protected override void OnInitialize()
         {
-            OnDispose();
+
         }
 
-        protected virtual void OnInitialize() { }
-        protected virtual void OnDispose() { }
+        public void RegisterDatastore(IDatastore datastore)
+        {
+
+        }
     }
 }
