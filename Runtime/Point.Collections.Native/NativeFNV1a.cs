@@ -19,6 +19,7 @@ namespace Point.Collections.Native
 {
     public static class NativeFNV1a
     {
+#if POINT_COLLECTIONS_NATIVE
         [DllImport("Point.Collections.Native.Internal")]
         public static unsafe extern void fnv1a32_str([MarshalAs(UnmanagedType.LPWStr)] string str, uint* output);
         [DllImport("Point.Collections.Native.Internal")]
@@ -28,5 +29,6 @@ namespace Point.Collections.Native
         public static unsafe extern void fnv1a64_str([MarshalAs(UnmanagedType.LPWStr)] string str, ulong* output);
         [DllImport("Point.Collections.Native.Internal")]
         public static unsafe extern void fnv1a64_byte(byte* buffer, int* length, ulong* output);
+#endif
     }
 }

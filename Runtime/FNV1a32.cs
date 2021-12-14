@@ -22,7 +22,11 @@ namespace Point.Collections
             uint hash;
             unsafe
             {
+#if POINT_COLLECTIONS_NATIVE
                 Native.NativeFNV1a.fnv1a32_str(str, &hash);
+#else
+                Burst.BurstFNV1a.fnv1a32_str(in str, &hash);
+#endif
             }
             return hash;
         }
@@ -34,7 +38,11 @@ namespace Point.Collections
             {
                 fixed (byte* temp = bytes)
                 {
+#if POINT_COLLECTIONS_NATIVE
                     Native.NativeFNV1a.fnv1a32_byte(temp, &length, &hash);
+#else
+                    Burst.BurstFNV1a.fnv1a32_byte(temp, &length, &hash);
+#endif
                 }
             }
             return hash;
