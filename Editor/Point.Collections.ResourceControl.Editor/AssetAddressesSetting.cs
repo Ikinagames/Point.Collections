@@ -284,6 +284,10 @@ namespace Point.Collections.ResourceControl.Editor
                 m_RegisteredAssets.Add(m_AssetIDs[i], i);
             }
         }
+        private void UpdateAssetIfChanged(AssetID id)
+        {
+
+        }
 
         public bool IsTrackedAsset(in string assetPath) => IsTrackedAsset(new AssetID(new Hash(assetPath)));
         public bool IsTrackedAsset(in AssetID id) => m_RegisteredAssets.ContainsKey(id);
@@ -293,10 +297,21 @@ namespace Point.Collections.ResourceControl.Editor
             AssetID id = new AssetID(new Hash(assetPath));
             if (IsTrackedAsset(id))
             {
-                throw new Exception();
+                // AssetBundle 의 경로를 바꾸는 경우에도 호출되므로, 만약 번들의 경로가 바뀌었다면
+                // 해당 정보를 업데이트
+                UpdateAssetIfChanged(id);
+                return id;
             }
 
-            AssetID[] newArr = new AssetID[m_AssetIDs.Length];
+            AssetID[] newArr;
+            if (m_AssetIDs.Length == 0)
+            {
+                newArr = new AssetID[1];
+            }
+            else
+            {
+                newArr = new AssetID[m_AssetIDs.Length];
+            }
             Array.Copy(m_AssetIDs, newArr, m_AssetIDs.Length);
 
             newArr[newArr.Length - 1] = id;

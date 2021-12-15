@@ -20,6 +20,7 @@ namespace Point.Collections.ResourceControl
 {
     public sealed class ResourceAddresses : StaticScriptableObject<ResourceAddresses>
     {
-        
+        // AssetBundle.name
+        [SerializeField] private AssetID[] m_TrackedAssetBundles = Array.Empty<AssetID>();
     }
 }

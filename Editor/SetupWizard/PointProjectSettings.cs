@@ -27,12 +27,14 @@ namespace Point.Collections.Editor
 {
     public sealed class PointProjectSettings : EditorStaticScriptableObject<PointProjectSettings>
     {
+        [SerializeField] private bool[] m_OpenStaticSettings = Array.Empty<bool>();
         [SerializeField] private IPointStaticSetting[] m_StaticSettings = Array.Empty<IPointStaticSetting>();
 
         [SerializeField] private int m_Number;
 
         [SerializeField] private string m_SomeString;
 
+        public bool[] OpenStaticSettings => m_OpenStaticSettings;
         public IReadOnlyList<IPointStaticSetting> StaticSettings => m_StaticSettings;
 
         internal static SerializedObject GetSerializedSettings()
@@ -54,6 +56,7 @@ namespace Point.Collections.Editor
         {
             var customSettingsIter = TypeHelper.GetTypesIter((other) => !other.IsAbstract && !other.IsInterface && TypeHelper.TypeOf<IPointStaticSetting>.Type.IsAssignableFrom(other));
             m_StaticSettings = new IPointStaticSetting[customSettingsIter.Count()];
+            m_OpenStaticSettings = new bool[m_StaticSettings.Length];
 
             int index = 0;
             foreach (var type in customSettingsIter)
@@ -117,21 +120,7 @@ namespace Point.Collections.Editor
                 var list = PointProjectSettings.Instance.StaticSettings;
                 for (int i = 0; i < list.Count; i++)
                 {
-                    using (var settingChange = new EditorGUI.ChangeCheckScope())
-                    using (new EditorUtilities.BoxBlock(Color.white))
-                    {
-                        EditorUtilities.StringHeader(GetSettingDisplayName(list[i]));
-                        GUILayout.Space(3);
-
-                        EditorGUI.indentLevel++;
-                        list[i].OnSettingGUI(searchContext);
-                        EditorGUI.indentLevel--;
-
-                        if (settingChange.changed)
-                        {
-                            EditorUtility.SetDirty((UnityEngine.Object)list[i]);
-                        }
-                    }
+                    DrawSetting(i, list[i]);
 
                     if (i + 1 < list.Count) EditorUtilities.Line();
                 }
@@ -142,6 +131,29 @@ namespace Point.Collections.Editor
                 }
             }
             m_CustomSettings.ApplyModifiedProperties();
+
+            void DrawSetting(int i, IPointStaticSetting setting)
+            {
+                using (var settingChange = new EditorGUI.ChangeCheckScope())
+                using (new EditorUtilities.BoxBlock(Color.black))
+                {
+                    PointProjectSettings.Instance.OpenStaticSettings[i]
+                        = EditorUtilities.Foldout(PointProjectSettings.Instance.OpenStaticSettings[i], GetSettingDisplayName(setting), 20);
+
+                    GUILayout.Space(8);
+
+                    if (!PointProjectSettings.Instance.OpenStaticSettings[i]) return;
+
+                    EditorGUI.indentLevel++;
+                    setting.OnSettingGUI(searchContext);
+                    EditorGUI.indentLevel--;
+
+                    if (settingChange.changed)
+                    {
+                        EditorUtility.SetDirty((UnityEngine.Object)setting);
+                    }
+                }
+            }
         }
 
         private static string GetSettingDisplayName(IPointStaticSetting setting)

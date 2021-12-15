@@ -21,7 +21,7 @@ using UnityEditor;
 
 namespace Point.Collections.Editor
 {
-    public sealed class PointAssetProcessor : AssetPostprocessor
+    public sealed class PointAssetPostProcessor : AssetPostprocessor
     {
         private static string[]
             // https://docs.unity3d.com/Manual/class-AudioClip.html
@@ -37,6 +37,7 @@ namespace Point.Collections.Editor
             {
                 if (IsAudioAsset(in str))
                 {
+                    $"{str} reimport".ToLog();
                     PointProjectSettings.Instance.RegisterAsset(in str);
                 }
             }
@@ -97,6 +98,19 @@ namespace Point.Collections.Editor
             //    AudioImporter audioImporter = (AudioImporter)assetImporter;
             //    audioImporter.forceToMono = true;
             //}
+        }
+    }
+
+    internal sealed class PointAssetModificationProcessor : UnityEditor.AssetModificationProcessor
+    {
+        // https://docs.unity3d.com/ScriptReference/AssetModificationProcessor.html
+
+        static string[] OnWillSaveAssets(string[] paths)
+        {
+            UnityEngine.Debug.Log("OnWillSaveAssets");
+            foreach (string path in paths)
+                UnityEngine.Debug.Log(path);
+            return paths;
         }
     }
 }
