@@ -34,6 +34,12 @@ namespace Point.Collections
         where T : ScriptableObject
     {
         private static T s_Instance;
+        /// <summary>
+        /// <typeparamref name="T"/> 의 인스턴스를 반환합니다.
+        /// </summary>
+        /// <remarks>
+        /// 만약 인스턴스가 생성되지 않았다면 즉시 생성하여 반환합니다.
+        /// </remarks>
         public static T Instance
         {
             get
@@ -43,7 +49,7 @@ namespace Point.Collections
 #if UNITY_EDITOR
                     const string c_EditorAssetPath = "Assets/Resources/";
 
-                    if (!UnityEditorInternal.InternalEditorUtility.CurrentThreadIsMainThread())
+                    if (!IsThisMainThread())
                     {
                         Point.LogError(Point.LogChannel.Collections,
                             $"{TypeHelper.TypeOf<StaticScriptableObject<T>>.ToString()} is only can be initialized in main thread but current thread looks like outside of UnityEngine. This is not allowed.");
@@ -103,5 +109,20 @@ namespace Point.Collections
         public virtual bool RuntimeModifiable { get; } = false;
 
         protected virtual void OnInitialize() { }
+
+        /// <summary>
+        /// Editor Only, 만약 Runtime 에서 이 메소드가 호출되면 무조건 true 를 반환합니다.
+        /// </summary>
+        /// <returns></returns>
+        protected static bool IsThisMainThread()
+        {
+#if UNITY_EDITOR
+            if (!UnityEditorInternal.InternalEditorUtility.CurrentThreadIsMainThread())
+            {
+                return false;
+            }
+#endif
+            return true;
+        }
     }
 }

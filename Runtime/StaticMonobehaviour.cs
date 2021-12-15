@@ -13,6 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
 using Point.Collections.Native;
 using UnityEngine;
 
@@ -22,6 +26,12 @@ namespace Point.Collections
         where T : UnityEngine.MonoBehaviour, IStaticMonobehaviour
     {
         private static T s_Instance;
+        /// <summary>
+        /// <typeparamref name="T"/> 의 인스턴스를 반환합니다.
+        /// </summary>
+        /// <remarks>
+        /// 만약 인스턴스가 생성되지 않았다면 즉시 생성하여 반환합니다.
+        /// </remarks>
         public static T Instance
         {
             get
@@ -88,5 +98,20 @@ namespace Point.Collections
 
         public virtual void OnInitialze() { }
         public virtual void OnShutdown() { }
+
+        /// <summary>
+        /// Editor Only, 만약 Runtime 에서 이 메소드가 호출되면 무조건 true 를 반환합니다.
+        /// </summary>
+        /// <returns></returns>
+        protected static bool IsThisMainThread()
+        {
+#if UNITY_EDITOR
+            if (!UnityEditorInternal.InternalEditorUtility.CurrentThreadIsMainThread())
+            {
+                return false;
+            }
+#endif
+            return true;
+        }
     }
 }

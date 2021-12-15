@@ -163,14 +163,14 @@ namespace Point.Collections.ResourceControl.Editor
         {
             FieldInfo field = TypeHelper.TypeOf<ResourceAddresses>.GetFieldInfo("m_TrackedAssetBundles");
 
-            AssetID[] assetIDs = new AssetID[assetBundleNames.Length];
-            for (int i = 0; i < assetIDs.Length; i++)
-            {
-                assetIDs[i] = new AssetID(new Hash(assetBundleNames[i]));
-            }
+            //AssetBundleInfo[] bundles = new AssetBundleInfo[assetBundleNames.Length];
+            //for (int i = 0; i < bundles.Length; i++)
+            //{
+            //    bundles[i] = new AssetBundleInfo(assetBundleNames[i]);
+            //}
 
-            field.SetValue(ResourceAddresses.Instance, assetIDs);
-            EditorUtility.SetDirty(ResourceAddresses.Instance);
+            field.SetValue(other, assetBundleNames);
+            EditorUtility.SetDirty(other);
         }
     }
 }

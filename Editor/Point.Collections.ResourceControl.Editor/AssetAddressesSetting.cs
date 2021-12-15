@@ -74,9 +74,16 @@ namespace Point.Collections.ResourceControl.Editor
         [Serializable]
         private sealed class AssetBundleOptions
         {
+            [SerializeField] private bool m_CleanUpBeforeBuild = true;
             [SerializeField] private bool m_CopyToStreamingFolderAfterBuild = true;
             [SerializeField] private string[] m_TrackedAssetBundleNames = Array.Empty<string>();
+            [SerializeField] private bool m_UseAssetDatabase = true;
 
+            public bool CleanUpBeforeBuild
+            {
+                get => m_CleanUpBeforeBuild;
+                set => m_CleanUpBeforeBuild = value;
+            }
             public bool CopyToStreamingFolderAfterBuild
             {
                 get => m_CopyToStreamingFolderAfterBuild;
@@ -87,6 +94,11 @@ namespace Point.Collections.ResourceControl.Editor
                 get => m_TrackedAssetBundleNames;
                 set => m_TrackedAssetBundleNames = value;
             }
+            public bool UseAssetDatabase
+            {
+                get => m_UseAssetDatabase;
+                set => m_UseAssetDatabase = value;
+            }
         }
 
         [SerializeField] private AssetImportHandles m_AssetImportHandles = AssetImportHandles.None;
@@ -95,10 +107,10 @@ namespace Point.Collections.ResourceControl.Editor
 
         [SerializeField] private PlatformDependsPath[] m_PlatformDependsPaths = new PlatformDependsPath[]
         {
-            new PlatformDependsPath("AssetBundles/iOS", BuildTarget.iOS),
-            new PlatformDependsPath("AssetBundles/Android", BuildTarget.Android),
-            new PlatformDependsPath("AssetBundles/x86", BuildTarget.StandaloneWindows),
-            new PlatformDependsPath("AssetBundles/x64", BuildTarget.StandaloneWindows64, true),
+            new PlatformDependsPath("AssetBundles/iOS/", BuildTarget.iOS),
+            new PlatformDependsPath("AssetBundles/Android/", BuildTarget.Android),
+            new PlatformDependsPath("AssetBundles/x86/", BuildTarget.StandaloneWindows),
+            new PlatformDependsPath("AssetBundles/x64/", BuildTarget.StandaloneWindows64, true),
         };
         [SerializeField] private AssetBundleOptions m_AssetBundleOptions = new AssetBundleOptions();
 
@@ -171,13 +183,6 @@ namespace Point.Collections.ResourceControl.Editor
                     {
                         EditorGUILayout.LabelField("Tracked AssetBundles");
 
-                        //if (GUILayout.Button("+", GUILayout.Width(20)))
-                        //{
-                        //    string[] newArr = new string[m_AssetBundleOptions.TrackedAssetBundleNames.Length + 1];
-                        //    Array.Copy(m_AssetBundleOptions.TrackedAssetBundleNames, newArr, m_AssetBundleOptions.TrackedAssetBundleNames.Length);
-
-                        //    m_AssetBundleOptions.TrackedAssetBundleNames = newArr;
-                        //}
                         using (new EditorGUI.DisabledGroupScope(m_AssetBundleOptions.TrackedAssetBundleNames.Length == 0))
                         {
                             if (GUILayout.Button("-", GUILayout.Width(20)))
@@ -201,6 +206,19 @@ namespace Point.Collections.ResourceControl.Editor
                     {
                         string name = m_AssetBundleOptions.TrackedAssetBundleNames[i];
                         int index = temp.IndexOf(name);
+                        
+                        // AssetBundle 를 지웠거나 이름이 바뀐 경우
+                        if (index < 0)
+                        {
+                            var list = m_AssetBundleOptions.TrackedAssetBundleNames.ToList();
+                            list.RemoveAt(i);
+                            m_AssetBundleOptions.TrackedAssetBundleNames = list.ToArray();
+
+                            ResourceAddresses.Instance.UpdateAssetBundleID(m_AssetBundleOptions.TrackedAssetBundleNames);
+
+                            i--;
+                            continue;
+                        }
 
                         using (var change = new EditorGUI.ChangeCheckScope())
                         using (new EditorGUILayout.HorizontalScope())
@@ -291,6 +309,7 @@ namespace Point.Collections.ResourceControl.Editor
                             m_PlatformDependsPaths[i].Path,
                             BuildAssetBundleOptions.None,
                             m_PlatformDependsPaths[i].Target,
+                            m_AssetBundleOptions.CleanUpBeforeBuild,
                             m_AssetBundleOptions.CopyToStreamingFolderAfterBuild);
                     }
                 }
@@ -407,49 +426,65 @@ namespace Point.Collections.ResourceControl.Editor
             string path, 
             BuildAssetBundleOptions bundleOptions, 
             BuildTarget buildTarget,
+            bool cleanUp,
             bool copyToStreaming)
         {
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-
+            else
+            {
+                if (cleanUp) DeleteFilesRecursively(path);
+            }
             AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(
                 path,
                 bundleOptions, 
                 buildTarget);
+            if (manifest == null)
+            {
+                Point.LogError(Point.LogChannel.Editor,
+                    $"There is nothing to build.");
+
+                return null;
+            }
             
             if (copyToStreaming && !path.Equals(Application.streamingAssetsPath))
             {
-                string[] bundleNames = manifest.GetAllAssetBundles();
-                string[] allFiles = Directory.GetFiles(path);
-
-                if (!Directory.Exists(Application.streamingAssetsPath))
-                {
-                    Directory.CreateDirectory(Application.streamingAssetsPath);
-                }
-
-                for (int i = 0; i < allFiles.Length; i++)
-                {
-                    string fileName = Path.GetFileNameWithoutExtension(allFiles[i]);
-                    if (!bundleNames.Contains(fileName)) continue;
-
-                    fileName = Path.GetFileName(allFiles[i]);
-                    string dest = Path.Combine(Application.streamingAssetsPath, fileName);
-                    if (File.Exists(dest))
-                    {
-                        if (File.GetLastAccessTimeUtc(dest).Equals(File.GetLastAccessTimeUtc(allFiles[i])))
-                        {
-                            continue;
-                        }
-
-                        File.Delete(dest);
-                    }
-
-                    File.Copy(allFiles[i], dest);
-                }
+                CopyFilesRecursively(path, Application.streamingAssetsPath + Path.DirectorySeparatorChar);
             }
 
             return manifest;
         }
 
+        //private AssetBundleBuild GetAssetBuildInfo()
+        //{
+        //    AssetBundleBuild temp = new AssetBundleBuild();
+        //    temp.
+        //}
+        private static void DeleteFilesRecursively(string path)
+        {
+            foreach (string newPath in Directory.GetFiles(path, "*", SearchOption.AllDirectories))
+            {
+                File.Delete(newPath);
+            }
+
+            foreach (string dirPath in Directory.GetDirectories(path, "*", SearchOption.AllDirectories))
+            {
+                Directory.Delete(dirPath);
+            }
+        }
+        private static void CopyFilesRecursively(string sourcePath, string targetPath)
+        {
+            //Now Create all of the directories
+            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+            }
+
+            //Copy all the files & Replaces any files with the same name
+            foreach (string newPath in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+            }
+        }
         private void asd()
         {
             AssetDatabase.GetAllAssetBundleNames();

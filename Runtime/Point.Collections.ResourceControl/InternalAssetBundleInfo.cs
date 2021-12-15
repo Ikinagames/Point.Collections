@@ -17,29 +17,27 @@
 #define DEBUG_MODE
 #endif
 
-using UnityEngine;
-using Unity.Collections.LowLevel.Unsafe;
 using System;
-using Unity.Burst;
-using Point.Collections.Native;
+using Unity.Collections;
 
-namespace Point.Collections
+namespace Point.Collections.ResourceControl
 {
-    internal sealed class CollectionUtility : CLSSingleTone<CollectionUtility>
+    internal struct InternalAssetBundleInfo : IEquatable<InternalAssetBundleInfo>
     {
-        private Unity.Mathematics.Random m_Random;
+        internal readonly int m_Index;
+        internal bool m_IsLoaded;
+        private bool m_IsWebBundle;
 
-        public static void Initialize()
+        [NotBurstCompatible]
+        public string Name => ResourceAddresses.GetBundleName(in this);
+        
+        internal InternalAssetBundleInfo(int index, bool isWeb)
         {
-            CollectionUtility ins = Instance;
-
-#if POINT_COLLECTIONS_NATIVE
-            NativeDebug.Initialize();
-#endif
-            Instance.m_Random = new Unity.Mathematics.Random();
-            Instance.m_Random.InitState();
+            m_Index = index;
+            m_IsLoaded = false;
+            m_IsWebBundle = isWeb;
         }
 
-        public static int CreateHashCode() => Instance.m_Random.NextInt(int.MinValue, int.MaxValue);
+        public bool Equals(InternalAssetBundleInfo other) => m_Index.Equals(other.m_Index);
     }
 }
