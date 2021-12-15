@@ -80,7 +80,7 @@ namespace Point.Collections
 
             public static ConstructorInfo GetConstructorInfo(params Type[] args)
                 => TypeHelper.GetConstructorInfo(Type, args);
-            public static FieldInfo GetFieldInfo(string name) => TypeHelper.GetFieldInfo(Type, name);
+            public static FieldInfo GetFieldInfo(string name, BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) => TypeHelper.GetFieldInfo(Type, name, bindingFlags);
 
             /// <summary>
             /// Wrapper struct (아무 ValueType 맴버도 갖지 않은 구조체) 는 C# CLS 에서 무조건 1 byte 를 갖습니다. 

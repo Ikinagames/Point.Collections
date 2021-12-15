@@ -23,11 +23,19 @@ namespace Point.Collections.Editor
 {
     public sealed class PointProjectSettings : ScriptableObject
     {
-        [SerializeField]
-        private int m_Number;
+        public enum AssetImportHandles
+        {
+            None        =   0,
 
-        [SerializeField]
-        private string m_SomeString;
+            Audio       =   0x00001,
+
+            All         =   ~0
+        }
+
+        [SerializeField] private AssetImportHandles m_AssetImportHandles = AssetImportHandles.None;
+        [SerializeField] private int m_Number;
+
+        [SerializeField] private string m_SomeString;
 
         internal static PointProjectSettings GetOrCreateSettings()
         {
@@ -39,21 +47,16 @@ namespace Point.Collections.Editor
             }
 
             var settingsArr = AssetDatabase.LoadAllAssetsAtPath(PointProjectSettingsProvider.c_SettingsPath);
-            //$"{settingsArr.Length}".ToLog();
+            
             PointProjectSettings settings = settingsArr.Length == 0 ? null : (PointProjectSettings)settingsArr[0];
             if (settings == null)
-            //if (!File.Exists(PointProjectSettingsProvider.c_SettingsPath))
             {
                 settings = ScriptableObject.CreateInstance<PointProjectSettings>();
                 settings.m_Number = 42;
                 settings.m_SomeString = "The answer to the universe";
 
-                //string tempPath = Path.Combine("Assets", filename);
-
-                //AssetDatabase.CreateAsset(settings, tempPath);
                 AssetDatabase.CreateAsset(settings, PointProjectSettingsProvider.c_SettingsPath);
                 AssetDatabase.SaveAssets();
-                //File.Move(tempPath, PointProjectSettingsProvider.c_SettingsPath);
             }
             return settings;
         }
@@ -66,10 +69,11 @@ namespace Point.Collections.Editor
     internal sealed class PointProjectSettingsProvider : SettingsProvider
     {
         public const string c_SettingsPath = "Assets/Editor/PointProjectSettings.asset";
-        //public const string c_SettingsPath = "ProjectSettings/PointProjectSettings.asset";
 
         private sealed class Styles
         {
+            public static GUIContent 
+                AssetImportHandles = new GUIContent("Auto Asset Import", "해당 타입의 에셋이 등록되었을 때, 자동으로 ResourceAddresses 에서 해당 에셋을 관리합니다.");
             public static GUIContent number = new GUIContent("My Number");
             public static GUIContent someString = new GUIContent("Some string");
         }
@@ -78,19 +82,11 @@ namespace Point.Collections.Editor
         [SettingsProvider, InitializeOnLoadMethod]
         public static SettingsProvider CreatePointProjectSettingsProvider()
         {
-            //PointProjectSettings.GetOrCreateSettings();
+            var provider = new PointProjectSettingsProvider("Project/Point Framework", SettingsScope.Project);
 
-            //if (IsSettingsAvailable())
-            {
-                var provider = new PointProjectSettingsProvider("Project/PointProjectSettingsProvider", SettingsScope.Project);
-
-                // Automatically extract all keywords from the Styles.
-                provider.keywords = GetSearchKeywordsFromGUIContentProperties<Styles>();
-                return provider;
-            }
-
-            // Settings Asset doesn't exist yet; no need to display anything in the Settings window.
-            return null;
+            // Automatically extract all keywords from the Styles.
+            provider.keywords = GetSearchKeywordsFromGUIContentProperties<Styles>();
+            return provider;
         }
         public static bool IsSettingsAvailable()
         {
@@ -118,9 +114,25 @@ namespace Point.Collections.Editor
         }
         public override void OnGUI(string searchContext)
         {
-            // Use IMGUI to display UI:
+            using (new EditorUtilities.BoxBlock(Color.black))
+            {
+                EditorUtilities.StringHeader("Generals");
+                EditorGUILayout.Space();
+                EditorUtilities.Line();
+                EditorGUI.indentLevel++;
+
+                EditorGUILayout.PropertyField(m_CustomSettings.FindProperty("m_AssetImportHandles"), Styles.AssetImportHandles);
+
+                EditorGUI.indentLevel--;
+            }
+            
+
+            EditorUtilities.Line();
+            
             EditorGUILayout.PropertyField(m_CustomSettings.FindProperty("m_Number"), Styles.number);
             EditorGUILayout.PropertyField(m_CustomSettings.FindProperty("m_SomeString"), Styles.someString);
+
+            m_CustomSettings.ApplyModifiedProperties();
         }
     }
 }

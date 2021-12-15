@@ -33,8 +33,6 @@ namespace Point.Collections
     public abstract class StaticScriptableObject<T> : ScriptableObject
         where T : ScriptableObject
     {
-        private const string c_DefaultPath = "Assets/Resources/";
-
         private static T s_Instance;
         public static T Instance
         {
@@ -43,6 +41,8 @@ namespace Point.Collections
                 if (s_Instance == null)
                 {
 #if UNITY_EDITOR
+                    const string c_EditorAssetPath = "Assets/Resources/";
+
                     if (!UnityEditorInternal.InternalEditorUtility.CurrentThreadIsMainThread())
                     {
                         Point.LogError(Point.LogChannel.Collections,
@@ -55,17 +55,18 @@ namespace Point.Collections
                     var customPath = TypeHelper.TypeOf<T>.Type.GetCustomAttribute<AssetPathAttribute>();
                     if (customPath != null)
                     {
-                        path = Path.Combine(c_DefaultPath, customPath.Path);
+                        path = (customPath.Path);
                     }
-                    else path = Path.Combine(c_DefaultPath, "Point");
+                    else path = ("Point");
 
 #if UNITY_EDITOR
-                    if (!Directory.Exists(path))
+                    if (!Directory.Exists(Path.Combine(c_EditorAssetPath, path)))
                     {
-                        Directory.CreateDirectory(path);
+                        Directory.CreateDirectory(Path.Combine(c_EditorAssetPath, path));
                     }
+
 #endif
-                    s_Instance = Resources.Load<T>($"{path}/" + TypeHelper.TypeOf<T>.ToString());
+                    s_Instance = Resources.Load<T>($"{path}/{TypeHelper.TypeOf<T>.ToString()}");
                     if (s_Instance == null)
                     {
                         Point.Log(Point.LogChannel.Collections,
@@ -75,7 +76,7 @@ namespace Point.Collections
                         s_Instance.name = $"{TypeHelper.TypeOf<T>.Name}";
 
 #if UNITY_EDITOR
-                        AssetDatabase.CreateAsset(s_Instance, path + TypeHelper.TypeOf<T>.ToString() + ".asset");
+                        AssetDatabase.CreateAsset(s_Instance, $"{Path.Combine(c_EditorAssetPath, path)}/{TypeHelper.TypeOf<T>.ToString()}.asset");
 #endif
                     }
 
