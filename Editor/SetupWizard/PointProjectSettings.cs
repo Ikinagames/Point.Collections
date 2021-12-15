@@ -110,6 +110,8 @@ namespace Point.Collections.Editor
         }
         public override void OnGUI(string searchContext)
         {
+            EditorUtilities.Line();
+
             using (var change = new EditorGUI.ChangeCheckScope())
             {
                 var list = PointProjectSettings.Instance.StaticSettings;

@@ -42,18 +42,46 @@ namespace Point.Collections.ResourceControl.Editor
             AssetBundle,
             Addressable
         }
+        [Serializable]
+        private sealed class PlatformDependsPath
+        {
+            [SerializeField] private string m_Path = "AssetBundles/";
+            [SerializeField] private BuildTarget m_BuildTarget = BuildTarget.StandaloneWindows64;
+            [SerializeField] private bool m_Enable = false;
+
+            public string Path
+            {
+                get => m_Path;
+                set => m_Path = value;
+            }
+            public BuildTarget Target
+            {
+                get => m_BuildTarget;
+                set => m_BuildTarget = value;
+            }
+            public bool Enable
+            {
+                get => m_Enable;
+                set => m_Enable = value;
+            }
+
+            public PlatformDependsPath(BuildTarget target)
+            {
+                m_BuildTarget = target;
+            }
+            public PlatformDependsPath(string path, BuildTarget target, bool enable = false)
+            {
+                m_Path = path;
+                m_BuildTarget = target;
+            }
+        }
 
         [Serializable]
         private sealed class AssetBundleOptions
         {
-            [SerializeField] private string m_AssetBundlePath = "AssetBundles/";
             [SerializeField] private bool m_CopyToStreamingFolderAfterBuild = true;
 
-            public string AssetBundlePath
-            {
-                get => m_AssetBundlePath;
-                set => m_AssetBundlePath = value;
-            }
+            
             public bool CopyToStreamingFolderAfterBuild
             {
                 get => m_CopyToStreamingFolderAfterBuild;
@@ -65,8 +93,16 @@ namespace Point.Collections.ResourceControl.Editor
         [SerializeField] private AssetStrategy m_Strategy = AssetStrategy.AssetBundle;
         [SerializeField] private AssetID[] m_AssetIDs = Array.Empty<AssetID>();
 
+        [SerializeField] private PlatformDependsPath[] m_PlatformDependsPaths = new PlatformDependsPath[]
+        {
+            new PlatformDependsPath("AssetBundles/iOS", BuildTarget.iOS),
+            new PlatformDependsPath("AssetBundles/Android", BuildTarget.Android),
+            new PlatformDependsPath("AssetBundles/x86", BuildTarget.StandaloneWindows),
+            new PlatformDependsPath("AssetBundles/x64", BuildTarget.StandaloneWindows64, true),
+        };
         [SerializeField] private AssetBundleOptions m_AssetBundleOptions = new AssetBundleOptions();
 
+        [NonSerialized] private BuildTarget m_InspectedPlatformDepends = BuildTarget.StandaloneWindows64;
         [NonSerialized] private Dictionary<AssetID, int> m_RegisteredAssets;
 
         public AssetImportHandles ImportHandles => m_AssetImportHandles;
@@ -103,6 +139,13 @@ namespace Point.Collections.ResourceControl.Editor
                 m_AssetImportHandles
                     = (AssetImportHandles)EditorGUILayout.EnumFlagsField(GUIStyleContents.AssetImportHandles, m_AssetImportHandles);
 
+                EditorGUILayout.Space();
+
+                using (new EditorGUI.DisabledGroupScope(true))
+                {
+                    EditorGUILayout.IntField("Tracked Assets", m_AssetIDs.Length);
+                }
+
                 EditorGUI.indentLevel--;
             }
 
@@ -121,18 +164,55 @@ namespace Point.Collections.ResourceControl.Editor
 
                 m_AssetBundleOptions.CopyToStreamingFolderAfterBuild
                     = EditorGUILayout.ToggleLeft("Copy to StreamingAssets after build", m_AssetBundleOptions.CopyToStreamingFolderAfterBuild);
-                m_AssetBundleOptions.AssetBundlePath
-                    = EditorGUILayout.TextField("Path", m_AssetBundleOptions.AssetBundlePath);
+
+                m_InspectedPlatformDepends
+                        = (BuildTarget)EditorGUILayout.EnumPopup("Target Build", m_InspectedPlatformDepends);
+
+                PlatformDependsPath path = GetPlatformDependsPath(m_InspectedPlatformDepends);
+                EditorGUI.indentLevel++;
+
+                using (new EditorUtilities.BoxBlock(Color.red))
+                {
+                    path.Enable = EditorGUILayout.ToggleLeft("Enable Build", path.Enable);
+                    path.Path = EditorGUILayout.TextField("Path", path.Path);
+                }
+
+                EditorGUI.indentLevel--;
 
                 if (GUILayout.Button("Build"))
                 {
-                    BuildAssetBundles(
-                        m_AssetBundleOptions.AssetBundlePath, 
-                        BuildAssetBundleOptions.None, 
-                        BuildTarget.StandaloneWindows,
-                        m_AssetBundleOptions.CopyToStreamingFolderAfterBuild);
+                    for (int i = 0; i < m_PlatformDependsPaths.Length; i++)
+                    {
+                        if (!m_PlatformDependsPaths[i].Enable) continue;
+
+                        BuildAssetBundles(
+                            m_PlatformDependsPaths[i].Path,
+                            BuildAssetBundleOptions.None,
+                            m_PlatformDependsPaths[i].Target,
+                            m_AssetBundleOptions.CopyToStreamingFolderAfterBuild);
+                    }
                 }
                 EditorGUI.indentLevel--;
+            }
+
+            PlatformDependsPath GetPlatformDependsPath(BuildTarget buildTarget)
+            {   
+                for (int i = 0; i < m_PlatformDependsPaths.Length; i++)
+                {
+                    if (m_PlatformDependsPaths[i].Target.Equals(buildTarget))
+                    {
+                        return m_PlatformDependsPaths[i];
+                    }
+                }
+
+                PlatformDependsPath[] newArr = new PlatformDependsPath[m_PlatformDependsPaths.Length + 1];
+                Array.Copy(m_PlatformDependsPaths, newArr, m_PlatformDependsPaths.Length);
+                m_PlatformDependsPaths = newArr;
+
+                m_PlatformDependsPaths[m_PlatformDependsPaths.Length - 1]
+                    = new PlatformDependsPath(buildTarget);
+
+                return m_PlatformDependsPaths[m_PlatformDependsPaths.Length - 1];
             }
         }
 
@@ -223,6 +303,11 @@ namespace Point.Collections.ResourceControl.Editor
             {
                 string[] bundleNames = manifest.GetAllAssetBundles();
                 string[] allFiles = Directory.GetFiles(path);
+
+                if (!Directory.Exists(Application.streamingAssetsPath))
+                {
+                    Directory.CreateDirectory(Application.streamingAssetsPath);
+                }
 
                 for (int i = 0; i < allFiles.Length; i++)
                 {
