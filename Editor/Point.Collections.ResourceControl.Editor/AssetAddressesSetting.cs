@@ -165,38 +165,47 @@ namespace Point.Collections.ResourceControl.Editor
                 m_AssetBundleOptions.CopyToStreamingFolderAfterBuild
                     = EditorGUILayout.ToggleLeft("Copy to StreamingAssets after build", m_AssetBundleOptions.CopyToStreamingFolderAfterBuild);
 
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    EditorGUILayout.LabelField("Tracked AssetBundles");
-
-                    if (GUILayout.Button("-", GUILayout.Width(20)))
-                    {
-                        string[] newArr = new string[m_AssetBundleOptions.TrackedAssetBundleNames.Length - 1];
-                        Array.Copy(m_AssetBundleOptions.TrackedAssetBundleNames, newArr, newArr.Length);
-
-                        m_AssetBundleOptions.TrackedAssetBundleNames = newArr;
-                    }
-                    if (GUILayout.Button("+", GUILayout.Width(20)))
-                    {
-                        string[] newArr = new string[m_AssetBundleOptions.TrackedAssetBundleNames.Length + 1];
-                        Array.Copy(m_AssetBundleOptions.TrackedAssetBundleNames, newArr, m_AssetBundleOptions.TrackedAssetBundleNames.Length);
-
-                        m_AssetBundleOptions.TrackedAssetBundleNames = newArr;
-                    }
-                }
-                
                 using (new EditorUtilities.BoxBlock(Color.blue))
                 {
-                    List<string> allBundleNames = AssetDatabase.GetAllAssetBundleNames().ToList();
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        EditorGUILayout.LabelField("Tracked AssetBundles");
+
+                        //if (GUILayout.Button("+", GUILayout.Width(20)))
+                        //{
+                        //    string[] newArr = new string[m_AssetBundleOptions.TrackedAssetBundleNames.Length + 1];
+                        //    Array.Copy(m_AssetBundleOptions.TrackedAssetBundleNames, newArr, m_AssetBundleOptions.TrackedAssetBundleNames.Length);
+
+                        //    m_AssetBundleOptions.TrackedAssetBundleNames = newArr;
+                        //}
+                        using (new EditorGUI.DisabledGroupScope(m_AssetBundleOptions.TrackedAssetBundleNames.Length == 0))
+                        {
+                            if (GUILayout.Button("-", GUILayout.Width(20)))
+                            {
+                                string[] newArr = new string[m_AssetBundleOptions.TrackedAssetBundleNames.Length - 1];
+                                Array.Copy(m_AssetBundleOptions.TrackedAssetBundleNames, newArr, newArr.Length);
+
+                                m_AssetBundleOptions.TrackedAssetBundleNames = newArr;
+                                ResourceAddresses.Instance.UpdateAssetBundleID(m_AssetBundleOptions.TrackedAssetBundleNames);
+                            }
+                        }
+                    }
+
+                    EditorGUI.indentLevel++;
+
+                    List<string> temp = AssetDatabase.GetAllAssetBundleNames().ToList();
+                    temp.Insert(0, "None");
+                    string[] allBundleNames = temp.ToArray();
+
                     for (int i = 0; i < m_AssetBundleOptions.TrackedAssetBundleNames.Length; i++)
                     {
                         string name = m_AssetBundleOptions.TrackedAssetBundleNames[i];
-                        int index = allBundleNames.IndexOf(name);
+                        int index = temp.IndexOf(name);
 
                         using (var change = new EditorGUI.ChangeCheckScope())
                         using (new EditorGUILayout.HorizontalScope())
                         {
-                            index = EditorGUILayout.Popup(index, AssetDatabase.GetAllAssetBundleNames());
+                            index = EditorGUILayout.Popup(index, allBundleNames);
 
                             if (GUILayout.Button("-", GUILayout.Width(20)))
                             {
@@ -204,12 +213,24 @@ namespace Point.Collections.ResourceControl.Editor
                                 list.RemoveAt(i);
                                 i--;
                                 m_AssetBundleOptions.TrackedAssetBundleNames = list.ToArray();
+
+                                ResourceAddresses.Instance.UpdateAssetBundleID(m_AssetBundleOptions.TrackedAssetBundleNames);
                                 continue;
                             }
 
                             if (change.changed)
                             {
-                                if (m_AssetBundleOptions.TrackedAssetBundleNames.Contains(allBundleNames[index]))
+                                if (index == 0)
+                                {
+                                    var list = m_AssetBundleOptions.TrackedAssetBundleNames.ToList();
+                                    list.RemoveAt(i);
+                                    i--;
+                                    m_AssetBundleOptions.TrackedAssetBundleNames = list.ToArray();
+
+                                    ResourceAddresses.Instance.UpdateAssetBundleID(m_AssetBundleOptions.TrackedAssetBundleNames);
+                                    continue;
+                                }
+                                else if (m_AssetBundleOptions.TrackedAssetBundleNames.Contains(allBundleNames[index]))
                                 {
                                     Point.LogError(Point.LogChannel.Editor,
                                         $"Target AssetBundle({allBundleNames[index]}) already registered.");
@@ -217,27 +238,48 @@ namespace Point.Collections.ResourceControl.Editor
                                 else
                                 {
                                     m_AssetBundleOptions.TrackedAssetBundleNames[i] = allBundleNames[index];
+                                    ResourceAddresses.Instance.UpdateAssetBundleID(m_AssetBundleOptions.TrackedAssetBundleNames);
                                 }
                             }
                         }
                     }
+
+                    using (var change = new EditorGUI.ChangeCheckScope())
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        int newIndex = 0;
+                        newIndex = EditorGUILayout.Popup(newIndex, allBundleNames);
+
+                        if (change.changed && newIndex != 0)
+                        {
+                            string[] newArr = new string[m_AssetBundleOptions.TrackedAssetBundleNames.Length + 1];
+                            Array.Copy(m_AssetBundleOptions.TrackedAssetBundleNames, newArr, m_AssetBundleOptions.TrackedAssetBundleNames.Length);
+
+                            newArr[newArr.Length - 1] = allBundleNames[newIndex];
+
+                            m_AssetBundleOptions.TrackedAssetBundleNames = newArr;
+                            ResourceAddresses.Instance.UpdateAssetBundleID(m_AssetBundleOptions.TrackedAssetBundleNames);
+                        }
+                    }
+
+                    EditorGUI.indentLevel--;
                 }
 
                 EditorUtilities.Line();
 
-                m_InspectedPlatformDepends
-                        = (BuildTarget)EditorGUILayout.EnumPopup("Target Build", m_InspectedPlatformDepends);
-
-                PlatformDependsPath path = GetPlatformDependsPath(m_InspectedPlatformDepends);
-                EditorGUI.indentLevel++;
-
                 using (new EditorUtilities.BoxBlock(Color.red))
                 {
+                    m_InspectedPlatformDepends
+                        = (BuildTarget)EditorGUILayout.EnumPopup("Target Build", m_InspectedPlatformDepends);
+
+                    PlatformDependsPath path = GetPlatformDependsPath(m_InspectedPlatformDepends);
+                    EditorGUI.indentLevel++;
+
                     path.Enable = EditorGUILayout.ToggleLeft("Enable Build", path.Enable);
                     path.Path = EditorGUILayout.TextField("Path", path.Path);
-                }
 
-                EditorGUI.indentLevel--;
+                    EditorGUI.indentLevel--;
+                }
 
                 if (GUILayout.Button("Build"))
                 {

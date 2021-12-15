@@ -158,5 +158,19 @@ namespace Point.Collections.ResourceControl.Editor
         //}
 
         #endregion
+
+        public static void UpdateAssetBundleID(this ResourceAddresses other, params string[] assetBundleNames)
+        {
+            FieldInfo field = TypeHelper.TypeOf<ResourceAddresses>.GetFieldInfo("m_TrackedAssetBundles");
+
+            AssetID[] assetIDs = new AssetID[assetBundleNames.Length];
+            for (int i = 0; i < assetIDs.Length; i++)
+            {
+                assetIDs[i] = new AssetID(new Hash(assetBundleNames[i]));
+            }
+
+            field.SetValue(ResourceAddresses.Instance, assetIDs);
+            EditorUtility.SetDirty(ResourceAddresses.Instance);
+        }
     }
 }
