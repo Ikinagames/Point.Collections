@@ -31,6 +31,7 @@ namespace Point.Collections.ResourceControl
 
         [NativeDisableUnsafePtrRestriction]
         internal unsafe readonly IntPtr m_Pointer;
+        private readonly bool m_ExpectedLoadState;
         private ref InternalAssetBundleInfo Ref
         {
             get
@@ -43,16 +44,16 @@ namespace Point.Collections.ResourceControl
             }
         }
 
-        public bool IsLoaded
+        public bool IsDone
         {
             get
             {
                 if (!IsValid())
                 {
-                    return true;
+                    return m_ExpectedLoadState;
                 }
 
-                return Ref.m_IsLoaded;
+                return Ref.m_IsLoaded == m_ExpectedLoadState;
             }
         }
         [NotBurstCompatible]
@@ -71,9 +72,10 @@ namespace Point.Collections.ResourceControl
             }
         }
 
-        internal unsafe AssetBundleHandler(InternalAssetBundleInfo* p)
+        internal unsafe AssetBundleHandler(InternalAssetBundleInfo* p, bool expectedLoadState)
         {
             m_Pointer = (IntPtr)p;
+            m_ExpectedLoadState = expectedLoadState;
         }
 
         public bool IsValid() => !m_Pointer.Equals(IntPtr.Zero);

@@ -87,13 +87,9 @@ namespace Point.Collections.ResourceControl
         {
             return Instance.m_LoadedAssetBundles[assetBundle.m_Index];
         }
-        internal static AssetBundleHandler LoadAssetBundleAsync(in InternalAssetBundleInfo assetBundle)
+        internal static unsafe AssetBundleHandler LoadAssetBundleAsync(in InternalAssetBundleInfo assetBundle)
         {
-            AssetBundleHandler handler;
-            unsafe
-            {
-                handler = new AssetBundleHandler(GetAssetBundleInfoAtPointer(assetBundle.m_Index));
-            }
+            AssetBundleHandler handler = new AssetBundleHandler(GetAssetBundleInfoAtPointer(assetBundle.m_Index), true);
 
             if (IsAssetBundleLoaded(in assetBundle))
             {
@@ -103,13 +99,13 @@ namespace Point.Collections.ResourceControl
             string path = Path.Combine(Application.streamingAssetsPath, Instance.m_TrackedAssetBundles[assetBundle.m_Index]);
             if (!File.Exists(path))
             {
-                return AssetBundleHandler.Invalid;
+                return new AssetBundleHandler(null, true);
             }
 
             AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(path);
             // TODO : Temp
             AsyncLoadHandler asyncLoadHandler = new AsyncLoadHandler();
-            asyncLoadHandler.Initialize(assetBundle.m_Index, request);
+            asyncLoadHandler.Initialize(assetBundle.m_Index, request, true);
 
             return handler;
         }
@@ -117,11 +113,13 @@ namespace Point.Collections.ResourceControl
         {
             private int m_Index;
             private AssetBundleCreateRequest m_Request;
+            private bool m_ExpectedLoadState;
 
-            public void Initialize(int index, AssetBundleCreateRequest request)
+            public void Initialize(int index, AssetBundleCreateRequest request, bool expectedLoadState)
             {
                 m_Index = index;
                 m_Request = request;
+                m_ExpectedLoadState = expectedLoadState;
 
                 m_Request.completed += M_Request_completed;
             }
@@ -131,7 +129,7 @@ namespace Point.Collections.ResourceControl
                 Instance.m_LoadedAssetBundles[m_Index] = m_Request.assetBundle;
 
                 ref InternalAssetBundleInfo target = ref GetAssetBundleInfoAt(m_Index);
-                target.m_IsLoaded = true;
+                target.m_IsLoaded = m_ExpectedLoadState;
             }
         }
         

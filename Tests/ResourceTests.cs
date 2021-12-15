@@ -36,7 +36,7 @@ namespace Point.Collections.Tests
                 AssetBundleInfo info = ResourceAddresses.GetAssetBundleInfo(names[i]);
                 AssetBundleHandler handle = info.LoadAsync();
 
-                yield return new WaitUntil(() => handle.IsLoaded);
+                yield return new WaitUntil(() => handle.IsDone);
                 $"{info.Name} : {handle.AssetBundle != null}".ToLog();
             }
         }
