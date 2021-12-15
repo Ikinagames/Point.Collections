@@ -115,9 +115,11 @@ namespace Point.Collections.ResourceControl.Editor
             }
 
             int index = RegisteredAssets[prev];
+            RegisteredAssets.Remove(prev);
             AssetID[] ids = AssetIDs;
 
             ids[index] = target;
+            RegisteredAssets.Add(target, index);
             AssetIDs = ids;
 
             Point.Log(Point.LogChannel.Editor,

@@ -35,7 +35,6 @@ namespace Point.Collections.Editor
         {
             foreach (string str in importedAssets)
             {
-                Debug.Log("Reimported Asset: " + str);
                 if (IsAudioAsset(in str))
                 {
                     ResourceAddresses.Instance.RegisterAsset(in str);
@@ -43,15 +42,11 @@ namespace Point.Collections.Editor
             }
             foreach (string str in deletedAssets)
             {
-                Debug.Log("Deleted Asset: " + str);
-
                 HandleDeletedAsset(in str);
             }
 
             for (int i = 0; i < movedAssets.Length; i++)
             {
-                Debug.Log("Moved Asset: " + movedAssets[i] + " from: " + movedFromAssetPaths[i]);
-
                 HandleMovedAsset(in movedFromAssetPaths[i], in movedAssets[i]);
             }
         }
