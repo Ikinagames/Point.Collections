@@ -22,6 +22,7 @@ using Unity.Collections;
 
 namespace Point.Collections.ResourceControl
 {
+    [BurstCompatible]
     internal struct InternalAssetBundleInfo : IEquatable<InternalAssetBundleInfo>
     {
         internal readonly int m_Index;

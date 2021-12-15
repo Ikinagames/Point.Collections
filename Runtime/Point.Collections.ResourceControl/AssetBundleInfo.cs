@@ -18,11 +18,13 @@
 #endif
 
 using System;
+using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace Point.Collections.ResourceControl
 {
+    [BurstCompatible]
     public struct AssetBundleInfo : IValidation, IEquatable<AssetBundleInfo>
     {
         public static AssetBundleInfo Invalid => new AssetBundleInfo(IntPtr.Zero);
@@ -53,6 +55,7 @@ namespace Point.Collections.ResourceControl
                 return Ref.m_IsLoaded;
             }
         }
+        [NotBurstCompatible]
         public AssetBundle AssetBundle
         {
             get
@@ -73,6 +76,7 @@ namespace Point.Collections.ResourceControl
             m_Pointer = p;
         }
 
+        [NotBurstCompatible]
         public AssetBundle Load() => ResourceAddresses.LoadAssetBundle(Ref);
 
         public bool IsValid() => !Equals(Invalid);

@@ -18,11 +18,13 @@
 #endif
 
 using System;
+using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace Point.Collections.ResourceControl
 {
+    [BurstCompatible]
     public struct AssetBundleHandler : IValidation
     {
         [NativeDisableUnsafePtrRestriction]
@@ -51,6 +53,7 @@ namespace Point.Collections.ResourceControl
                 return Ref.m_IsLoaded;
             }
         }
+        [NotBurstCompatible]
         public AssetBundle AssetBundle
         {
             get
