@@ -17,24 +17,12 @@
 #define DEBUG_MODE
 #endif
 
-using UnityEngine;
-using System;
 
 namespace Point.Collections.ResourceControl
 {
-    [Serializable]
-    public struct AssetID : IEquatable<AssetID>
+    public enum AssetStrategy
     {
-        [SerializeField] private Hash m_Hash;
-
-        public Hash Hash => m_Hash;
-
-        public AssetID(Hash hash)
-        {
-            m_Hash = hash;
-        }
-
-        public bool Equals(AssetID other) => m_Hash.Equals(other.m_Hash);
-        public override string ToString() => m_Hash.ToString();
+        AssetBundle,
+        Addressable
     }
 }

@@ -37,11 +37,6 @@ namespace Point.Collections.ResourceControl.Editor
 
             All = ~0
         }
-        public enum AssetStrategy
-        {
-            AssetBundle,
-            Addressable
-        }
         [Serializable]
         private sealed class PlatformDependsPath
         {
@@ -80,12 +75,17 @@ namespace Point.Collections.ResourceControl.Editor
         private sealed class AssetBundleOptions
         {
             [SerializeField] private bool m_CopyToStreamingFolderAfterBuild = true;
+            [SerializeField] private string[] m_TrackedAssetBundleNames = Array.Empty<string>();
 
-            
             public bool CopyToStreamingFolderAfterBuild
             {
                 get => m_CopyToStreamingFolderAfterBuild;
                 set => m_CopyToStreamingFolderAfterBuild = value;
+            }
+            public string[] TrackedAssetBundleNames
+            {
+                get => m_TrackedAssetBundleNames;
+                set => m_TrackedAssetBundleNames = value;
             }
         }
 
@@ -164,6 +164,66 @@ namespace Point.Collections.ResourceControl.Editor
 
                 m_AssetBundleOptions.CopyToStreamingFolderAfterBuild
                     = EditorGUILayout.ToggleLeft("Copy to StreamingAssets after build", m_AssetBundleOptions.CopyToStreamingFolderAfterBuild);
+
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.LabelField("Tracked AssetBundles");
+
+                    if (GUILayout.Button("-", GUILayout.Width(20)))
+                    {
+                        string[] newArr = new string[m_AssetBundleOptions.TrackedAssetBundleNames.Length - 1];
+                        Array.Copy(m_AssetBundleOptions.TrackedAssetBundleNames, newArr, newArr.Length);
+
+                        m_AssetBundleOptions.TrackedAssetBundleNames = newArr;
+                    }
+                    if (GUILayout.Button("+", GUILayout.Width(20)))
+                    {
+                        string[] newArr = new string[m_AssetBundleOptions.TrackedAssetBundleNames.Length + 1];
+                        Array.Copy(m_AssetBundleOptions.TrackedAssetBundleNames, newArr, m_AssetBundleOptions.TrackedAssetBundleNames.Length);
+
+                        m_AssetBundleOptions.TrackedAssetBundleNames = newArr;
+                    }
+                }
+                
+                using (new EditorUtilities.BoxBlock(Color.blue))
+                {
+                    List<string> allBundleNames = AssetDatabase.GetAllAssetBundleNames().ToList();
+                    for (int i = 0; i < m_AssetBundleOptions.TrackedAssetBundleNames.Length; i++)
+                    {
+                        string name = m_AssetBundleOptions.TrackedAssetBundleNames[i];
+                        int index = allBundleNames.IndexOf(name);
+
+                        using (var change = new EditorGUI.ChangeCheckScope())
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            index = EditorGUILayout.Popup(index, AssetDatabase.GetAllAssetBundleNames());
+
+                            if (GUILayout.Button("-", GUILayout.Width(20)))
+                            {
+                                var list = m_AssetBundleOptions.TrackedAssetBundleNames.ToList();
+                                list.RemoveAt(i);
+                                i--;
+                                m_AssetBundleOptions.TrackedAssetBundleNames = list.ToArray();
+                                continue;
+                            }
+
+                            if (change.changed)
+                            {
+                                if (m_AssetBundleOptions.TrackedAssetBundleNames.Contains(allBundleNames[index]))
+                                {
+                                    Point.LogError(Point.LogChannel.Editor,
+                                        $"Target AssetBundle({allBundleNames[index]}) already registered.");
+                                }
+                                else
+                                {
+                                    m_AssetBundleOptions.TrackedAssetBundleNames[i] = allBundleNames[index];
+                                }
+                            }
+                        }
+                    }
+                }
+
+                EditorUtilities.Line();
 
                 m_InspectedPlatformDepends
                         = (BuildTarget)EditorGUILayout.EnumPopup("Target Build", m_InspectedPlatformDepends);
