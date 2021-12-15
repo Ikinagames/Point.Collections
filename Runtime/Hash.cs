@@ -42,7 +42,8 @@ namespace Point.Collections
         /// <summary>
         /// Editor only
         /// </summary>
-        public Unity.Collections.FixedString512Bytes Key => m_Key;
+        [NotBurstCompatible]
+        public string Key => m_Key.ToString();
 #endif
 
         public Hash(uint hash)

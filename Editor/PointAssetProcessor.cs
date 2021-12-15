@@ -24,7 +24,8 @@ namespace Point.Collections.Editor
     public sealed class PointAssetProcessor : AssetPostprocessor
     {
         private static string[]
-            s_AudioExtensions = new[] { ".wav", ".ogg", ".mp3" };
+            // https://docs.unity3d.com/Manual/class-AudioClip.html
+            s_AudioExtensions = new[] { ".aif", ".wav", ".ogg", ".mp3" };
 
         public static void OnPostprocessAllAssets(
             string[] importedAssets, 
@@ -51,6 +52,9 @@ namespace Point.Collections.Editor
         }
         private static bool IsAudioAsset(in string assetPath)
         {
+            if ((AssetAddressesSetting.Instance.ImportHandles & AssetAddressesSetting.AssetImportHandles.Audio)
+                != AssetAddressesSetting.AssetImportHandles.Audio) return false;
+
             string extension = Path.GetExtension(assetPath);
 
             return s_AudioExtensions.Contains(extension);

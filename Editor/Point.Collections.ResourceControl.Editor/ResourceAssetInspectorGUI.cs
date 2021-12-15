@@ -13,7 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Point.Collections.Editor;
 using UnityEditor;
+using UnityEngine;
 using UEditor = global::UnityEditor.Editor;
 
 namespace Point.Collections.ResourceControl.Editor
@@ -29,7 +31,30 @@ namespace Point.Collections.ResourceControl.Editor
 
         private static void OnPostHeaderGUI(UEditor editor)
         {
+            bool isTrackedAsset = editor.target.IsTrackedAsset();
+            string headerString = EditorUtilities.String("Asset", 13);
+            if (isTrackedAsset)
+            {
+                headerString += EditorUtilities.String(": Tracked", 10);
+            }
+            else
+            {
+                headerString += EditorUtilities.String(": None", 10);
+            }
 
+            EditorUtilities.Line();
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorUtilities.StringRich(headerString);
+
+                if (GUILayout.Button(isTrackedAsset ? "Remove" : "Add", GUILayout.Width(60)))
+                {
+                    if (isTrackedAsset) editor.target.RemoveAsset();
+                    else editor.target.RegisterAsset();
+                }
+            }
+
+            EditorUtilities.Line();
         }
     }
 }
