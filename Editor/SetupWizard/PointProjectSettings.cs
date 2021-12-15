@@ -18,58 +18,58 @@ using System.IO;
 using UnityEditor;
 using UnityEngine.UIElements;
 using UnityEngine;
+using System;
+using System.Reflection;
+using System.Linq;
+using System.ComponentModel;
 
 namespace Point.Collections.Editor
 {
-    public sealed class PointProjectSettings : ScriptableObject
+    public sealed class PointProjectSettings : EditorStaticScriptableObject<PointProjectSettings>
     {
-        public enum AssetImportHandles
-        {
-            None        =   0,
+        [SerializeField] private IPointStaticSetting[] m_StaticSettings = Array.Empty<IPointStaticSetting>();
 
-            Audio       =   0x00001,
-
-            All         =   ~0
-        }
-
-        [SerializeField] private AssetImportHandles m_AssetImportHandles = AssetImportHandles.None;
         [SerializeField] private int m_Number;
 
         [SerializeField] private string m_SomeString;
 
-        internal static PointProjectSettings GetOrCreateSettings()
-        {
-            string filename = Path.GetFileName(PointProjectSettingsProvider.c_SettingsPath);
-            string path = PointProjectSettingsProvider.c_SettingsPath.Substring(0, PointProjectSettingsProvider.c_SettingsPath.Length - filename.Length);
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-
-            var settingsArr = AssetDatabase.LoadAllAssetsAtPath(PointProjectSettingsProvider.c_SettingsPath);
-            
-            PointProjectSettings settings = settingsArr.Length == 0 ? null : (PointProjectSettings)settingsArr[0];
-            if (settings == null)
-            {
-                settings = ScriptableObject.CreateInstance<PointProjectSettings>();
-                settings.m_Number = 42;
-                settings.m_SomeString = "The answer to the universe";
-
-                AssetDatabase.CreateAsset(settings, PointProjectSettingsProvider.c_SettingsPath);
-                AssetDatabase.SaveAssets();
-            }
-            return settings;
-        }
+        public IReadOnlyList<IPointStaticSetting> StaticSettings => m_StaticSettings;
 
         internal static SerializedObject GetSerializedSettings()
         {
-            return new SerializedObject(GetOrCreateSettings());
+            return new SerializedObject(Instance);
+        }
+
+        public TSetting GetSetting<TSetting>() where TSetting : class, IPointStaticSetting
+        {
+            for (int i = 0; i < m_StaticSettings.Length; i++)
+            {
+                if (m_StaticSettings[i] is TSetting setting) return setting;
+            }
+
+            return null;
+        }
+
+        protected override void OnInitialize()
+        {
+            var customSettingsIter = TypeHelper.GetTypesIter((other) => !other.IsAbstract && !other.IsInterface && TypeHelper.TypeOf<IPointStaticSetting>.Type.IsAssignableFrom(other));
+            m_StaticSettings = new IPointStaticSetting[customSettingsIter.Count()];
+
+            int index = 0;
+            foreach (var type in customSettingsIter)
+            {
+                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+
+                var insField = type.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+                IPointStaticSetting setting = insField.GetGetMethod().Invoke(null, null) as IPointStaticSetting;
+                m_StaticSettings[index] = setting;
+
+                index++;
+            }
         }
     }
     internal sealed class PointProjectSettingsProvider : SettingsProvider
     {
-        public const string c_SettingsPath = "Assets/Editor/PointProjectSettings.asset";
-
         private sealed class Styles
         {
             public static GUIContent 
@@ -87,10 +87,6 @@ namespace Point.Collections.Editor
             // Automatically extract all keywords from the Styles.
             provider.keywords = GetSearchKeywordsFromGUIContentProperties<Styles>();
             return provider;
-        }
-        public static bool IsSettingsAvailable()
-        {
-            return File.Exists(c_SettingsPath);
         }
 
         private SerializedObject m_CustomSettings;
@@ -114,25 +110,48 @@ namespace Point.Collections.Editor
         }
         public override void OnGUI(string searchContext)
         {
-            using (new EditorUtilities.BoxBlock(Color.black))
+            using (var change = new EditorGUI.ChangeCheckScope())
             {
-                EditorUtilities.StringHeader("Generals");
-                EditorGUILayout.Space();
-                EditorUtilities.Line();
-                EditorGUI.indentLevel++;
+                var list = PointProjectSettings.Instance.StaticSettings;
+                for (int i = 0; i < list.Count; i++)
+                {
+                    using (var settingChange = new EditorGUI.ChangeCheckScope())
+                    using (new EditorUtilities.BoxBlock(Color.white))
+                    {
+                        EditorUtilities.StringHeader(GetSettingDisplayName(list[i]));
+                        GUILayout.Space(3);
 
-                EditorGUILayout.PropertyField(m_CustomSettings.FindProperty("m_AssetImportHandles"), Styles.AssetImportHandles);
+                        EditorGUI.indentLevel++;
+                        list[i].OnGUI(searchContext);
+                        EditorGUI.indentLevel--;
 
-                EditorGUI.indentLevel--;
+                        if (settingChange.changed)
+                        {
+                            EditorUtility.SetDirty((UnityEngine.Object)list[i]);
+                        }
+                    }
+
+                    if (i + 1 < list.Count) EditorUtilities.Line();
+                }
+
+                if (change.changed)
+                {
+                    EditorUtility.SetDirty(PointProjectSettings.Instance);
+                }
             }
-            
-
-            EditorUtilities.Line();
-            
-            EditorGUILayout.PropertyField(m_CustomSettings.FindProperty("m_Number"), Styles.number);
-            EditorGUILayout.PropertyField(m_CustomSettings.FindProperty("m_SomeString"), Styles.someString);
-
             m_CustomSettings.ApplyModifiedProperties();
+        }
+
+        private static string GetSettingDisplayName(IPointStaticSetting setting)
+        {
+            Type t = setting.GetType();
+            DisplayNameAttribute nameAttribute = t.GetCustomAttribute<DisplayNameAttribute>();
+            if (nameAttribute != null)
+            {
+                return nameAttribute.DisplayName;
+            }
+
+            return TypeHelper.ToString(t);
         }
     }
 }

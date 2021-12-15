@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Point.Collections.Editor;
 using Point.Collections.ResourceControl;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,17 +24,11 @@ namespace Point.Collections.ResourceControl.Editor
 {
     public static class ResourceAddressesEditorUtils
     {
-        private static SerializedObject s_Target;
-        public static SerializedObject Target
+        private static AssetAddressesSetting Setting
         {
             get
             {
-                if (s_Target == null)
-                {
-                    s_Target = new SerializedObject(ResourceAddresses.Instance);
-                }
-
-                return s_Target;
+                return PointProjectSettings.Instance.GetSetting<AssetAddressesSetting>();
             }
         }
 
@@ -47,7 +42,7 @@ namespace Point.Collections.ResourceControl.Editor
                 if (s_AssetIDsField == null)
                 {
                     s_AssetIDsField
-                        = TypeHelper.TypeOf<ResourceAddresses>.GetFieldInfo("m_AssetIDs");
+                        = TypeHelper.TypeOf<AssetAddressesSetting>.GetFieldInfo("m_AssetIDs");
                 }
 
                 return s_AssetIDsField;
@@ -57,13 +52,13 @@ namespace Point.Collections.ResourceControl.Editor
         {
             get
             {
-                return (AssetID[])AssetIDsField.GetValue(ResourceAddresses.Instance);
+                return (AssetID[])AssetIDsField.GetValue(Setting);
             }
             set
             {
-                AssetIDsField.SetValue(ResourceAddresses.Instance, value);
-                EditorUtility.SetDirty(ResourceAddresses.Instance);
-                AssetDatabase.SaveAssetIfDirty(ResourceAddresses.Instance);
+                AssetIDsField.SetValue(Setting, value);
+                EditorUtility.SetDirty(PointProjectSettings.Instance);
+                AssetDatabase.SaveAssetIfDirty(PointProjectSettings.Instance);
             }
         }
         private static Dictionary<AssetID, int> s_RegisteredAssets;
@@ -94,12 +89,12 @@ namespace Point.Collections.ResourceControl.Editor
             }
         }
 
-        public static bool IsTrackedAsset(this ResourceAddresses _, in string assetPath)
+        public static bool IsTrackedAsset(this PointProjectSettings _, in string assetPath)
         {
             AssetID id = new AssetID(new Hash(assetPath));
             return RegisteredAssets.ContainsKey(id);
         }
-        public static AssetID UpdateAsset(this ResourceAddresses _, in string prevAssetPath, in string targetAssetPath)
+        public static AssetID UpdateAsset(this PointProjectSettings _, in string prevAssetPath, in string targetAssetPath)
         {
             AssetID 
                 prev = new AssetID(new Hash(prevAssetPath)),
@@ -127,7 +122,7 @@ namespace Point.Collections.ResourceControl.Editor
 
             return target;
         }
-        public static AssetID RegisterAsset(this ResourceAddresses _, in string assetPath)
+        public static AssetID RegisterAsset(this PointProjectSettings _, in string assetPath)
         {
             AssetID id = new AssetID(new Hash(assetPath));
             if (RegisteredAssets.ContainsKey(id))
@@ -147,7 +142,7 @@ namespace Point.Collections.ResourceControl.Editor
 
             return id;
         }
-        public static void RemoveAssets(this ResourceAddresses _, in string[] assetPaths)
+        public static void RemoveAssets(this PointProjectSettings _, in string[] assetPaths)
         {
             AssetID[] ids = new AssetID[assetPaths.Length];
             int[] indics = new int[assetPaths.Length];
@@ -173,7 +168,7 @@ namespace Point.Collections.ResourceControl.Editor
             Point.Log(Point.LogChannel.Editor,
                 $"Multiple assets({ids[0].Hash}, and {ids.Length - 1} more assets) has been removed and no longer tracked by resource manager.");
         }
-        public static void RemoveAsset(this ResourceAddresses _, in string assetPath)
+        public static void RemoveAsset(this PointProjectSettings _, in string assetPath)
         {
             AssetID id = new AssetID(new Hash(assetPath));
             if (!RegisteredAssets.ContainsKey(id))

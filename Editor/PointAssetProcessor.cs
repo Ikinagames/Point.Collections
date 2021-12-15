@@ -18,7 +18,6 @@ using Point.Collections.ResourceControl.Editor;
 using System.IO;
 using System.Linq;
 using UnityEditor;
-using UnityEngine;
 
 namespace Point.Collections.Editor
 {
@@ -37,7 +36,7 @@ namespace Point.Collections.Editor
             {
                 if (IsAudioAsset(in str))
                 {
-                    ResourceAddresses.Instance.RegisterAsset(in str);
+                    PointProjectSettings.Instance.RegisterAsset(in str);
                 }
             }
             foreach (string str in deletedAssets)
@@ -59,15 +58,15 @@ namespace Point.Collections.Editor
 
         private static void HandleMovedAsset(in string from, in string to)
         {
-            if (!ResourceAddresses.Instance.IsTrackedAsset(in from)) return;
+            if (!PointProjectSettings.Instance.IsTrackedAsset(in from)) return;
 
-            ResourceAddresses.Instance.UpdateAsset(in from, in to);
+            PointProjectSettings.Instance.UpdateAsset(in from, in to);
         }
         private static void HandleDeletedAsset(in string assetPath)
         {
-            if (!ResourceAddresses.Instance.IsTrackedAsset(in assetPath)) return;
+            if (!PointProjectSettings.Instance.IsTrackedAsset(in assetPath)) return;
 
-            ResourceAddresses.Instance.RemoveAsset(in assetPath);
+            PointProjectSettings.Instance.RemoveAsset(in assetPath);
         }
 
         public void OnPreprocessAsset()

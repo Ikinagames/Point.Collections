@@ -1,6 +1,6 @@
 ﻿// Copyright 2021 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
-//
+// 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,10 +16,13 @@
 using System;
 using UnityEngine;
 
-namespace Point.Collections.ResourceControl
+namespace Point.Collections.Editor
 {
-    public sealed class ResourceAddresses : StaticScriptableObject<ResourceAddresses>
+    public abstract class PointStaticSettingBase<T> : EditorStaticScriptableObject<T>, IPointStaticSetting
+        where T : ScriptableObject
     {
-        
+        void IPointStaticSetting.OnGUI(string searchContext) => OnGUI(searchContext);
+
+        protected virtual void OnGUI(string searchContext) { }
     }
 }
