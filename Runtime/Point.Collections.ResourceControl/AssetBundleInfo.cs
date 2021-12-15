@@ -70,6 +70,19 @@ namespace Point.Collections.ResourceControl
                 return ResourceAddresses.GetAssetBundle(Ref);
             }
         }
+        [NotBurstCompatible]
+        public string Name
+        {
+            get
+            {
+                if (!IsValid())
+                {
+                    throw new InvalidOperationException();
+                }
+
+                return ResourceAddresses.GetBundleName(Ref);
+            }
+        }
 
         internal AssetBundleInfo(IntPtr p)
         {
@@ -78,6 +91,8 @@ namespace Point.Collections.ResourceControl
 
         [NotBurstCompatible]
         public AssetBundle Load() => ResourceAddresses.LoadAssetBundle(Ref);
+        [NotBurstCompatible]
+        public AssetBundleHandler LoadAsync() => ResourceAddresses.LoadAssetBundleAsync(Ref);
 
         public bool IsValid() => !Equals(Invalid);
         public bool Equals(AssetBundleInfo other) => m_Pointer.Equals(other.m_Pointer);

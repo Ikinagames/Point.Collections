@@ -101,8 +101,15 @@ namespace Point.Collections.ResourceControl
             }
 
             string path = Path.Combine(Application.streamingAssetsPath, Instance.m_TrackedAssetBundles[assetBundle.m_Index]);
+            if (!File.Exists(path))
+            {
+                return AssetBundleHandler.Invalid;
+            }
+
             AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(path);
-            
+            // TODO : Temp
+            AsyncLoadHandler asyncLoadHandler = new AsyncLoadHandler();
+            asyncLoadHandler.Initialize(assetBundle.m_Index, request);
 
             return handler;
         }
@@ -137,6 +144,10 @@ namespace Point.Collections.ResourceControl
             }
 
             string path = Path.Combine(Application.streamingAssetsPath, Instance.m_TrackedAssetBundles[assetBundle.m_Index]);
+            if (!File.Exists(path))
+            {
+                return null;
+            }
             AssetBundle bundle = AssetBundle.LoadFromFile(path);
 
             Instance.m_LoadedAssetBundles[assetBundle.m_Index] = bundle;

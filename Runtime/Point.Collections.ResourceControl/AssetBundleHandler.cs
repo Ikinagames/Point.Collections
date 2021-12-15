@@ -27,6 +27,8 @@ namespace Point.Collections.ResourceControl
     [BurstCompatible]
     public struct AssetBundleHandler : IValidation
     {
+        public static AssetBundleHandler Invalid => default(AssetBundleHandler);
+
         [NativeDisableUnsafePtrRestriction]
         internal unsafe readonly IntPtr m_Pointer;
         private ref InternalAssetBundleInfo Ref
@@ -47,7 +49,7 @@ namespace Point.Collections.ResourceControl
             {
                 if (!IsValid())
                 {
-                    throw new InvalidOperationException();
+                    return true;
                 }
 
                 return Ref.m_IsLoaded;
@@ -60,7 +62,7 @@ namespace Point.Collections.ResourceControl
             {
                 if (!IsValid())
                 {
-                    throw new InvalidOperationException();
+                    return null;
                 }
 
                 if (!Ref.m_IsLoaded) return null;
