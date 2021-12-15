@@ -122,7 +122,7 @@ namespace Point.Collections.Editor
                         GUILayout.Space(3);
 
                         EditorGUI.indentLevel++;
-                        list[i].OnGUI(searchContext);
+                        list[i].OnSettingGUI(searchContext);
                         EditorGUI.indentLevel--;
 
                         if (settingChange.changed)

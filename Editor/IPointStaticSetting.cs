@@ -17,6 +17,6 @@ namespace Point.Collections.Editor
 {
     public interface IPointStaticSetting
     {
-        void OnGUI(string searchContext);
+        void OnSettingGUI(string searchContext);
     }
 }

@@ -13,16 +13,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using UnityEngine;
+using UnityEditor;
+using UEditor = global::UnityEditor.Editor;
 
-namespace Point.Collections.Editor
+namespace Point.Collections.ResourceControl.Editor
 {
-    public abstract class PointStaticSettingBase<T> : EditorStaticScriptableObject<T>, IPointStaticSetting
-        where T : ScriptableObject
+    public sealed class ResourceAssetInspectorGUI
     {
-        void IPointStaticSetting.OnSettingGUI(string searchContext) => OnSettingGUI(searchContext);
+        [InitializeOnLoadMethod]
+        static void Intialize()
+        {
+            UEditor.finishedDefaultHeaderGUI -= OnPostHeaderGUI;
+            UEditor.finishedDefaultHeaderGUI += OnPostHeaderGUI;
+        }
 
-        protected virtual void OnSettingGUI(string searchContext) { }
+        private static void OnPostHeaderGUI(UEditor editor)
+        {
+
+        }
     }
 }

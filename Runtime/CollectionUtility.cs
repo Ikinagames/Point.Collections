@@ -23,7 +23,7 @@ namespace Point.Collections
 {
     internal sealed class CollectionUtility : CLSSingleTone<CollectionUtility>
     {
-        private static Unity.Mathematics.Random m_Random;
+        private Unity.Mathematics.Random m_Random;
 
         public static void Initialize()
         {
@@ -32,10 +32,10 @@ namespace Point.Collections
 #if POINT_COLLECTIONS_NATIVE
             NativeDebug.Initialize();
 #endif
-            m_Random = new Unity.Mathematics.Random();
-            m_Random.InitState();
+            Instance.m_Random = new Unity.Mathematics.Random();
+            Instance.m_Random.InitState();
         }
 
-        public static int CreateHashCode() => m_Random.NextInt(int.MinValue, int.MaxValue);
+        public static int CreateHashCode() => Instance.m_Random.NextInt(int.MinValue, int.MaxValue);
     }
 }

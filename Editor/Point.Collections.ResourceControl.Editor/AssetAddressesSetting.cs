@@ -52,7 +52,7 @@ namespace Point.Collections.ResourceControl.Editor
                 AssetImportHandles = new GUIContent("Auto Asset Import", "해당 타입의 에셋이 등록되었을 때, 자동으로 ResourceAddresses 에서 해당 에셋을 관리합니다.");
         }
 
-        protected override void OnGUI(string searchContext)
+        protected override void OnSettingGUI(string searchContext)
         {
             using (new EditorUtilities.BoxBlock(Color.black))
             {
