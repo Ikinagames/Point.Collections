@@ -116,6 +116,15 @@ namespace Point.Collections.ResourceControl
 
         public string[] GetAllAssetNames()
         {
+            if (!IsLoaded)
+            {
+                Point.LogError(Point.LogChannel.Collections,
+                    $"You\'re trying to get all asset names that didn\'t loaded AssetBundle. " +
+                    $"This is not allowed.");
+
+                return Array.Empty<string>();
+            }
+
             var values = Ref.m_Assets.GetValueArray(AllocatorManager.Temp);
 
             string[] arr = values.Select(other => other.m_Key.ToString()).ToArray();

@@ -205,6 +205,11 @@ namespace Point.Collections.ResourceControl
             info.m_Path = string.Empty;
             info.m_IsLoaded = false;
 
+            if (info.m_Assets.IsCreated)
+            {
+                info.m_Assets.Dispose();
+            }
+
             Instance.m_AssetBundles[index] = null;
         }
 
@@ -261,7 +266,14 @@ namespace Point.Collections.ResourceControl
             var assetNames = assetBundle.GetAllAssetNames().Select(str => (FixedString4096Bytes)str).ToArray();
             NativeArray<FixedString4096Bytes> names = new NativeArray<FixedString4096Bytes>(assetNames, Allocator.TempJob);
 
-            p->m_Assets = new UnsafeHashMap<Hash, InternalAssetInfo>(names.Length, AllocatorManager.Persistent);
+            if (!p->m_Assets.IsCreated)
+            {
+                p->m_Assets = new UnsafeHashMap<Hash, InternalAssetInfo>(names.Length, AllocatorManager.Persistent);
+            }
+            else
+            {
+                p->m_Assets.Clear();
+            }
 
             UpdateAssetInfoJob job = new UpdateAssetInfoJob()
             {
