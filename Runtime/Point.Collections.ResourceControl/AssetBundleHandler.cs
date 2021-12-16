@@ -25,60 +25,59 @@ using UnityEngine;
 
 namespace Point.Collections.ResourceControl
 {
-    [BurstCompatible]
-    public struct AssetBundleHandler : IValidation
-    {
-        public static AssetBundleHandler Invalid => default(AssetBundleHandler);
+    //[BurstCompatible]
+    //public struct AssetBundleHandler : IValidation
+    //{
+    //    public static AssetBundleHandler Invalid => default(AssetBundleHandler);
 
-        [NativeDisableUnsafePtrRestriction]
-        internal unsafe readonly IntPtr m_Pointer;
-        private readonly bool m_ExpectedLoadState;
-        private ref InternalAssetBundleInfo Ref
-        {
-            get
-            {
-                unsafe
-                {
-                    InternalAssetBundleInfo* p = (InternalAssetBundleInfo*)m_Pointer.ToPointer();
-                    return ref *p;
-                }
-            }
-        }
+    //    [NativeDisableUnsafePtrRestriction]
+    //    internal unsafe readonly IntPtr m_Pointer;
 
-        public bool IsDone
-        {
-            get
-            {
-                if (!IsValid())
-                {
-                    return true;
-                }
+    //    private ref InternalAssetBundleInfo Ref
+    //    {
+    //        get
+    //        {
+    //            unsafe
+    //            {
+    //                InternalAssetBundleInfo* p = (InternalAssetBundleInfo*)m_Pointer.ToPointer();
+    //                return ref *p;
+    //            }
+    //        }
+    //    }
 
-                return Ref.m_IsLoaded == m_ExpectedLoadState;
-            }
-        }
-        [NotBurstCompatible]
-        public AssetBundle AssetBundle
-        {
-            get
-            {
-                if (!IsValid())
-                {
-                    return null;
-                }
+    //    public bool IsDone
+    //    {
+    //        get
+    //        {
+    //            if (!IsValid())
+    //            {
+    //                return true;
+    //            }
 
-                if (!Ref.m_IsLoaded) return null;
+    //            return Ref.m_IsLoaded;
+    //        }
+    //    }
+    //    [NotBurstCompatible]
+    //    public AssetBundle AssetBundle
+    //    {
+    //        get
+    //        {
+    //            if (!IsValid())
+    //            {
+    //                return null;
+    //            }
 
-                return ResourceManager.GetAssetBundle(Ref);
-            }
-        }
+    //            if (!Ref.m_IsLoaded) return null;
 
-        internal unsafe AssetBundleHandler(InternalAssetBundleInfo* p, bool expectedLoadState)
-        {
-            m_Pointer = (IntPtr)p;
-            m_ExpectedLoadState = expectedLoadState;
-        }
+    //            return ResourceManager.GetAssetBundle(Ref);
+    //        }
+    //    }
 
-        public bool IsValid() => !m_Pointer.Equals(IntPtr.Zero);
-    }
+    //    internal unsafe AssetBundleHandler(InternalAssetBundleInfo* p)
+    //    {
+    //        m_Pointer = (IntPtr)p;
+    //    }
+
+    //    public bool IsValid() => !m_Pointer.Equals(IntPtr.Zero);
+    //}
 }

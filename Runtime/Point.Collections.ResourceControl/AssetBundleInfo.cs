@@ -32,15 +32,14 @@ namespace Point.Collections.ResourceControl
 
         [NativeDisableUnsafePtrRestriction]
         internal unsafe readonly IntPtr m_Pointer;
-        private ref InternalAssetBundleInfo Ref
+        private unsafe ref InternalAssetBundleInfo Ref
         {
             get
             {
-                unsafe
-                {
-                    InternalAssetBundleInfo* p = (InternalAssetBundleInfo*)m_Pointer.ToPointer();
-                    return ref *p;
-                }
+                InternalAssetBundleInfo* p = (InternalAssetBundleInfo*)m_Pointer.ToPointer();
+                p->m_JobHandle.Complete();
+
+                return ref *p;
             }
         }
 
@@ -68,20 +67,7 @@ namespace Point.Collections.ResourceControl
 
                 if (!Ref.m_IsLoaded) return null;
 
-                return ResourceManager.GetAssetBundle(Ref);
-            }
-        }
-        [NotBurstCompatible]
-        public string Name
-        {
-            get
-            {
-                if (!IsValid())
-                {
-                    throw new InvalidOperationException();
-                }
-
-                return ResourceAddresses.GetBundleName(Ref);
+                return ResourceManager.GetAssetBundle(Ref.m_Index);
             }
         }
 
@@ -91,11 +77,27 @@ namespace Point.Collections.ResourceControl
         }
 
         [NotBurstCompatible]
-        public AssetBundle Load() => ResourceManager.LoadAssetBundle(Ref);
-        public void Unload() => ResourceManager.UnloadAssetBundle(Ref);
+        public AssetBundle Load()
+        {
+            if (!IsValid())
+            {
+                throw new Exception();
+            }
 
-        [NotBurstCompatible]
-        public AssetBundleHandler LoadAsync() => ResourceManager.LoadAssetBundleAsync(Ref);
+            return ResourceManager.LoadAssetBundle(ref Ref);
+        }
+        public void Unload(bool unloadAllLoadedObjects)
+        {
+            if (!IsValid())
+            {
+                throw new Exception();
+            }
+
+            ResourceManager.UnloadAssetBundle(ref Ref, unloadAllLoadedObjects);
+        }
+
+        //[NotBurstCompatible]
+        //public AssetBundleHandler LoadAsync() => ResourceManager.LoadAssetBundleAsync(Ref);
 
         public bool IsValid() => !Equals(Invalid);
         public bool Equals(AssetBundleInfo other) => m_Pointer.Equals(other.m_Pointer);

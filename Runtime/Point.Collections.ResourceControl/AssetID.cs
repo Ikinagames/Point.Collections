@@ -22,19 +22,19 @@ using System;
 
 namespace Point.Collections.ResourceControl
 {
-    [Serializable]
-    public struct AssetID : IEquatable<AssetID>
-    {
-        [SerializeField] private Hash m_Hash;
+    //[Serializable]
+    //public struct AssetID : IEquatable<AssetID>
+    //{
+    //    [SerializeField] private Hash m_Hash;
 
-        public Hash Hash => m_Hash;
+    //    public Hash Hash => m_Hash;
 
-        public AssetID(Hash hash)
-        {
-            m_Hash = hash;
-        }
+    //    public AssetID(Hash hash)
+    //    {
+    //        m_Hash = hash;
+    //    }
 
-        public bool Equals(AssetID other) => m_Hash.Equals(other.m_Hash);
-        public override string ToString() => m_Hash.ToString();
-    }
+    //    public bool Equals(AssetID other) => m_Hash.Equals(other.m_Hash);
+    //    public override string ToString() => m_Hash.ToString();
+    //}
 }

@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Unity.Collections;
+
 namespace Point.Collections
 {
     public static class FNV1a32
@@ -25,6 +27,20 @@ namespace Point.Collections
 #if POINT_COLLECTIONS_NATIVE
                 Native.NativeFNV1a.fnv1a32_str(str, &hash);
 #else
+                Burst.BurstFNV1a.fnv1a32_str(in str, &hash);
+#endif
+            }
+            return hash;
+        }
+        public static uint Calculate(in FixedString4096Bytes str)
+        {
+            uint hash;
+            unsafe
+            {
+#if POINT_COLLECTIONS_NATIVE
+                Native.NativeFNV1a.fnv1a32_str(str, &hash);
+#else
+                
                 Burst.BurstFNV1a.fnv1a32_str(in str, &hash);
 #endif
             }

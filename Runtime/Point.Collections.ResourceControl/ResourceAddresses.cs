@@ -30,15 +30,8 @@ namespace Point.Collections.ResourceControl
     [PreferBinarySerialization]
     public sealed class ResourceAddresses : StaticScriptableObject<ResourceAddresses>
     {
-        // AssetBundle.name
-        [SerializeField] private string[] m_TrackedAssetBundles = Array.Empty<string>();
-        [SerializeField] private TrackedAsset[] m_TrackedAssets = Array.Empty<TrackedAsset>();
+        [SerializeField] private AssetPathField[] m_StreamingAssetBundles = Array.Empty<AssetPathField>();
 
-        public IReadOnlyList<string> TrackedAssetBundleNames => m_TrackedAssetBundles;
-
-        internal static string GetBundleName(in InternalAssetBundleInfo assetBundle)
-        {
-            return Instance.m_TrackedAssetBundles[assetBundle.m_Index];
-        }
+        public IReadOnlyList<AssetPathField> StreamingAssetBundles => m_StreamingAssetBundles;
     }
 }

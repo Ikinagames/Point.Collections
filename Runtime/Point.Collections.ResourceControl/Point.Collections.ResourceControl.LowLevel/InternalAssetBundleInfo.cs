@@ -19,26 +19,50 @@
 
 using System;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
 
 namespace Point.Collections.ResourceControl.LowLevel
 {
     [BurstCompatible]
-    internal struct InternalAssetBundleInfo : IEquatable<InternalAssetBundleInfo>
+    internal struct InternalAssetBundleInfo : IEquatable<InternalAssetBundleInfo>, IDisposable
     {
-        internal readonly int m_Index;
-        internal bool m_IsLoaded;
-        private bool m_IsWebBundle;
+        public readonly int m_Index;
 
-        [NotBurstCompatible]
-        public string Name => ResourceAddresses.GetBundleName(in this);
-        
-        internal InternalAssetBundleInfo(int index, bool isWeb)
+        public FixedString4096Bytes m_Path;
+        public bool m_IsWebRequest;
+
+        public bool m_IsLoaded;
+        public JobHandle m_JobHandle;
+
+        [NativeDisableUnsafePtrRestriction]
+        public UnsafeHashMap<Hash, InternalAssetInfo> m_Assets;
+
+        public InternalAssetBundleInfo(int index)
         {
             m_Index = index;
+
+            m_Path = string.Empty;
+            m_IsWebRequest = false;
+
             m_IsLoaded = false;
-            m_IsWebBundle = isWeb;
+            m_JobHandle = default;
+
+            m_Assets = default;
         }
 
+        public void Dispose()
+        {
+            if (m_Assets.IsCreated)
+            {
+                m_Assets.Dispose();
+            }
+        }
         public bool Equals(InternalAssetBundleInfo other) => m_Index.Equals(other.m_Index);
+    }
+    internal struct InternalAssetInfo
+    {
+        public FixedString4096Bytes m_Key;
+        public bool m_IsLoaded;
     }
 }

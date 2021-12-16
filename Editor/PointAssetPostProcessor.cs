@@ -27,52 +27,51 @@ namespace Point.Collections.Editor
             // https://docs.unity3d.com/Manual/class-AudioClip.html
             s_AudioExtensions = new[] { ".aif", ".wav", ".ogg", ".mp3" };
 
-        public static void OnPostprocessAllAssets(
-            string[] importedAssets, 
-            string[] deletedAssets, 
-            string[] movedAssets, 
-            string[] movedFromAssetPaths)
-        {
-            foreach (string str in importedAssets)
-            {
-                if (IsAudioAsset(in str))
-                {
-                    $"{str} reimport".ToLog();
-                    PointProjectSettings.Instance.RegisterAsset(in str);
-                }
-            }
-            foreach (string str in deletedAssets)
-            {
-                HandleDeletedAsset(in str);
-            }
+        //public static void OnPostprocessAllAssets(
+        //    string[] importedAssets, 
+        //    string[] deletedAssets, 
+        //    string[] movedAssets, 
+        //    string[] movedFromAssetPaths)
+        //{
+        //    foreach (string str in importedAssets)
+        //    {
+        //        if (IsAudioAsset(in str))
+        //        {
+        //            PointProjectSettings.Instance.RegisterAsset(in str);
+        //        }
+        //    }
+        //    foreach (string str in deletedAssets)
+        //    {
+        //        HandleDeletedAsset(in str);
+        //    }
 
-            for (int i = 0; i < movedAssets.Length; i++)
-            {
-                HandleMovedAsset(in movedFromAssetPaths[i], in movedAssets[i]);
-            }
-        }
-        private static bool IsAudioAsset(in string assetPath)
-        {
-            if ((AssetAddressesSetting.Instance.ImportHandles & AssetAddressesSetting.AssetImportHandles.Audio)
-                != AssetAddressesSetting.AssetImportHandles.Audio) return false;
+        //    for (int i = 0; i < movedAssets.Length; i++)
+        //    {
+        //        HandleMovedAsset(in movedFromAssetPaths[i], in movedAssets[i]);
+        //    }
+        //}
+        //private static bool IsAudioAsset(in string assetPath)
+        //{
+        //    if ((AssetAddressesSetting.Instance.ImportHandles & AssetAddressesSetting.AssetImportHandles.Audio)
+        //        != AssetAddressesSetting.AssetImportHandles.Audio) return false;
 
-            string extension = Path.GetExtension(assetPath);
+        //    string extension = Path.GetExtension(assetPath);
 
-            return s_AudioExtensions.Contains(extension);
-        }
+        //    return s_AudioExtensions.Contains(extension);
+        //}
 
-        private static void HandleMovedAsset(in string from, in string to)
-        {
-            if (!PointProjectSettings.Instance.IsTrackedAsset(in from)) return;
+        //private static void HandleMovedAsset(in string from, in string to)
+        //{
+        //    if (!PointProjectSettings.Instance.IsTrackedAsset(in from)) return;
 
-            PointProjectSettings.Instance.UpdateAsset(in from, in to);
-        }
-        private static void HandleDeletedAsset(in string assetPath)
-        {
-            if (!PointProjectSettings.Instance.IsTrackedAsset(in assetPath)) return;
+        //    PointProjectSettings.Instance.UpdateAsset(in from, in to);
+        //}
+        //private static void HandleDeletedAsset(in string assetPath)
+        //{
+        //    if (!PointProjectSettings.Instance.IsTrackedAsset(in assetPath)) return;
 
-            PointProjectSettings.Instance.RemoveAsset(in assetPath);
-        }
+        //    PointProjectSettings.Instance.RemoveAsset(in assetPath);
+        //}
 
         public void OnPreprocessAsset()
         {

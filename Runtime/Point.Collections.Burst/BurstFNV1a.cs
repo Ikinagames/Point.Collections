@@ -15,6 +15,7 @@
 
 using System.Text;
 using Unity.Burst;
+using Unity.Collections;
 
 namespace Point.Collections.Burst
 {
@@ -63,6 +64,25 @@ namespace Point.Collections.Burst
             {
                 hash *= kPrime32;
                 hash ^= (uint)buffer[i];
+            }
+
+			*output = hash;
+        }
+        [BurstCompile]
+        public static void fnv1a32_str(in FixedString4096Bytes str, uint* output)
+        {
+            if (str.Length == 0)
+            {
+                *output = kOffsetBasis32;
+                return;
+            }
+
+            uint hash = kOffsetBasis32;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                hash *= kPrime32;
+                hash ^= (uint)str[i];
             }
 
 			*output = hash;

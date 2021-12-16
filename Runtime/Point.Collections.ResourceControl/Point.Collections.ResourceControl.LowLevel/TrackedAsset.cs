@@ -19,32 +19,44 @@
 
 using UnityEngine;
 using System;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Point.Collections.ResourceControl.LowLevel
 {
-    [Serializable]
-    public class TrackedAsset
-    {
-        [SerializeField] private string m_Path;
-        [SerializeField] private string m_Key;
+    //[Serializable]
+    //public struct TrackedAsset : IValidation
+    //{
+    //    [NativeDisableUnsafePtrRestriction]
+    //    private unsafe InternalAssetBundleInfo* m_BundlePointer;
+    //    private unsafe ref InternalAssetBundleInfo BundleRef => ref *m_BundlePointer;
 
-        [SerializeField] private string m_Bundle;
+    //    public bool IsLoaded
+    //    {
+    //        get
+    //        {
+    //            if (!IsValid())
+    //            {
+    //                Point.LogError(Point.LogChannel.Collections,
+    //                    $"You are trying to un invalid tracked asset. This is not allowed.");
 
-        public string Path => m_Path;
-        public string Key
-        {
-            get => m_Key;
-            set => m_Key = value;
-        }
+    //                return false;
+    //            }
 
-        public string Bundle => m_Bundle;
+    //            if (!BundleRef.m_IsLoaded) return false;
 
-        public TrackedAsset(string assetPath, string bundle)
-        {
-            m_Path = assetPath;
-            m_Key = assetPath;
 
-            m_Bundle = bundle;
-        }
-    }
+    //            return true;
+    //        }
+    //    }
+
+    //    public bool IsValid()
+    //    {
+    //        unsafe
+    //        {
+    //            if (m_BundlePointer == null) return false;
+    //        }
+
+    //        return true;
+    //    }
+    //}
 }

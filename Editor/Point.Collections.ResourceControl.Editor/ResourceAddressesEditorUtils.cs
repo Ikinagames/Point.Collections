@@ -15,6 +15,7 @@
 
 using Point.Collections.Editor;
 using Point.Collections.ResourceControl;
+using Point.Collections.ResourceControl.LowLevel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -24,106 +25,107 @@ namespace Point.Collections.ResourceControl.Editor
 {
     public static class ResourceAddressesEditorUtils
     {
-        private static AssetAddressesSetting Setting
-        {
-            get
-            {
-                return PointProjectSettings.Instance.GetSetting<AssetAddressesSetting>();
-            }
-        }
-
-        #region AssetID
-
-        public static bool IsTrackedAsset(this UnityEngine.Object obj)
-        {
-            string path = AssetDatabase.GetAssetPath(obj);
-            return Setting.IsTrackedAsset(in path);
-        }
-        public static bool IsTrackedAsset(this PointProjectSettings _, in string assetPath)
-        {
-            return Setting.IsTrackedAsset(in assetPath);
-        }
-        public static AssetID UpdateAsset(this PointProjectSettings _, in string prevAssetPath, in string targetAssetPath)
-        {
-            return Setting.UpdateAsset(in prevAssetPath, in targetAssetPath);
-        }
-        public static AssetID RegisterAsset(this UnityEngine.Object obj)
-        {
-            string path = AssetDatabase.GetAssetPath(obj);
-            return Setting.RegisterAsset(in path);
-        }
-        public static AssetID RegisterAsset(this PointProjectSettings _, in string assetPath)
-        {
-            return Setting.RegisterAsset(in assetPath);
-        }
-        //public static void RemoveAssets(this PointProjectSettings _, in string[] assetPaths)
+        //private static AssetAddressesSetting Setting
         //{
-        //    AssetID[] ids = new AssetID[assetPaths.Length];
-        //    int[] indics = new int[assetPaths.Length];
-        //    for (int i = 0; i < assetPaths.Length; i++)
+        //    get
         //    {
-        //        ids[i] = new AssetID(new Hash(assetPaths[i]));
-        //        if (!RegisteredAssets.ContainsKey(ids[i]))
-        //        {
-        //            throw new System.Exception();
-        //        }
-
-        //        indics[i] = RegisteredAssets[ids[i]];
-        //        RegisteredAssets.Remove(ids[i]);
+        //        return PointProjectSettings.Instance.GetSetting<AssetAddressesSetting>();
         //    }
-
-        //    List<AssetID> temp = AssetIDs.ToList();
-        //    for (int i = 0; i < indics.Length; i++)
-        //    {
-        //        temp.RemoveAt(indics[i]);
-        //    }
-        //    AssetIDs = temp.ToArray();
-
-        //    Point.Log(Point.LogChannel.Editor,
-        //        $"Multiple assets({ids[0].Hash}, and {ids.Length - 1} more assets) has been removed and no longer tracked by resource manager.");
-        //}
-        public static void RemoveAsset(this UnityEngine.Object obj)
-        {
-            string path = AssetDatabase.GetAssetPath(obj);
-            Setting.RemoveAsset(in path);
-        }
-        public static void RemoveAsset(this PointProjectSettings _, in string assetPath)
-        {
-            Setting.RemoveAsset(in assetPath);
-        }
-
-        public static UnityEngine.Object GetAsset(this in AssetID other)
-        {
-            string path = other.Hash.Key;
-            return AssetDatabase.LoadAssetAtPath(path, TypeHelper.TypeOf<UnityEngine.Object>.Type);
-        }
-
-        public static bool HasAssetBundle(this in AssetID other)
-        {
-            // https://docs.unity3d.com/ScriptReference/AssetDatabase.GetImplicitAssetBundleName.html
-            string bundleName = AssetDatabase.GetImplicitAssetBundleName(other.Hash.Key);
-            return !string.IsNullOrEmpty(bundleName);
-        }
-        //public static UnityEngine.AssetBundle GetAssetBundle(this in AssetID other)
-        //{
-        //    string name = AssetDatabase.GetImplicitAssetBundleName(other.Hash.Key);
-        //    return 
         //}
 
-        #endregion
+        //#region AssetID
 
-        public static void UpdateAssetBundleID(this ResourceAddresses other, params string[] assetBundleNames)
-        {
-            FieldInfo field = TypeHelper.TypeOf<ResourceAddresses>.GetFieldInfo("m_TrackedAssetBundles");
+        //public static bool IsTrackedAsset(this UnityEngine.Object obj)
+        //{
+        //    string path = AssetDatabase.GetAssetPath(obj);
+        //    return Setting.IsTrackedAsset(in path);
+        //}
+        //public static bool IsTrackedAsset(this PointProjectSettings _, in string assetPath)
+        //{
+        //    return Setting.IsTrackedAsset(in assetPath);
+        //}
+        //public static AssetID UpdateAsset(this PointProjectSettings _, in string prevAssetPath, in string targetAssetPath)
+        //{
+        //    return Setting.UpdateAsset(in prevAssetPath, in targetAssetPath);
+        //}
+        //public static AssetID RegisterAsset(this UnityEngine.Object obj)
+        //{
+        //    string path = AssetDatabase.GetAssetPath(obj);
+        //    return Setting.RegisterAsset(in path);
+        //}
+        //public static AssetID RegisterAsset(this PointProjectSettings _, in string assetPath)
+        //{
+        //    return Setting.RegisterAsset(in assetPath);
+        //}
+        ////public static void RemoveAssets(this PointProjectSettings _, in string[] assetPaths)
+        ////{
+        ////    AssetID[] ids = new AssetID[assetPaths.Length];
+        ////    int[] indics = new int[assetPaths.Length];
+        ////    for (int i = 0; i < assetPaths.Length; i++)
+        ////    {
+        ////        ids[i] = new AssetID(new Hash(assetPaths[i]));
+        ////        if (!RegisteredAssets.ContainsKey(ids[i]))
+        ////        {
+        ////            throw new System.Exception();
+        ////        }
 
-            //AssetBundleInfo[] bundles = new AssetBundleInfo[assetBundleNames.Length];
-            //for (int i = 0; i < bundles.Length; i++)
-            //{
-            //    bundles[i] = new AssetBundleInfo(assetBundleNames[i]);
-            //}
+        ////        indics[i] = RegisteredAssets[ids[i]];
+        ////        RegisteredAssets.Remove(ids[i]);
+        ////    }
 
-            field.SetValue(other, assetBundleNames);
-            EditorUtility.SetDirty(other);
-        }
+        ////    List<AssetID> temp = AssetIDs.ToList();
+        ////    for (int i = 0; i < indics.Length; i++)
+        ////    {
+        ////        temp.RemoveAt(indics[i]);
+        ////    }
+        ////    AssetIDs = temp.ToArray();
+
+        ////    Point.Log(Point.LogChannel.Editor,
+        ////        $"Multiple assets({ids[0].Hash}, and {ids.Length - 1} more assets) has been removed and no longer tracked by resource manager.");
+        ////}
+        //public static void RemoveAsset(this UnityEngine.Object obj)
+        //{
+        //    string path = AssetDatabase.GetAssetPath(obj);
+        //    Setting.RemoveAsset(in path);
+        //}
+        //public static void RemoveAsset(this PointProjectSettings _, in string assetPath)
+        //{
+        //    Setting.RemoveAsset(in assetPath);
+        //}
+
+        //public static UnityEngine.Object GetAsset(this in AssetID other)
+        //{
+        //    string path = other.Hash.Key;
+        //    return AssetDatabase.LoadAssetAtPath(path, TypeHelper.TypeOf<UnityEngine.Object>.Type);
+        //}
+
+        //public static bool HasAssetBundle(this in AssetID other)
+        //{
+        //    // https://docs.unity3d.com/ScriptReference/AssetDatabase.GetImplicitAssetBundleName.html
+        //    string bundleName = AssetDatabase.GetImplicitAssetBundleName(other.Hash.Key);
+        //    return !string.IsNullOrEmpty(bundleName);
+        //}
+        ////public static UnityEngine.AssetBundle GetAssetBundle(this in AssetID other)
+        ////{
+        ////    string name = AssetDatabase.GetImplicitAssetBundleName(other.Hash.Key);
+        ////    return 
+        ////}
+
+        //#endregion
+
+        //public static void UpdateAssetBundleID(this ResourceAddresses other, params string[] assetBundleNames)
+        //{
+        //    FieldInfo field = TypeHelper.TypeOf<ResourceAddresses>.GetFieldInfo("m_TrackedAssetBundles");
+
+        //    TrackedBundle[] bundles = new TrackedBundle[assetBundleNames.Length];
+        //    for (int i = 0; i < bundles.Length; i++)
+        //    {
+        //        string[] assetPaths = AssetDatabase.GetAssetPathsFromAssetBundle(assetBundleNames[i]);
+        //        bundles[i] = new TrackedBundle(assetBundleNames[i], assetPaths);
+        //    }
+
+        //    field.SetValue(other, bundles);
+        //    EditorUtility.SetDirty(other);
+        //}
     }
 }

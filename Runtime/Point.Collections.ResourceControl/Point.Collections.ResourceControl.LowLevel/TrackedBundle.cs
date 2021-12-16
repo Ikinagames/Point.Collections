@@ -18,28 +18,23 @@
 #endif
 
 using UnityEngine;
+using System;
 
 namespace Point.Collections.ResourceControl.LowLevel
 {
-    //internal sealed class AssetBundleLoadAsyncHandler
+    //[Serializable]
+    //public class TrackedBundle
     //{
-    //    private int m_Index;
-    //    private AssetBundleCreateRequest m_Request;
-        
-    //    public void Initialize(int index, AssetBundleCreateRequest request)
+    //    [SerializeField] private string m_Name;
+    //    [SerializeField] private string[] m_AssetPaths;
+
+    //    public string Name => m_Name;
+    //    public int AssetCount => m_AssetPaths.Length;
+
+    //    public TrackedBundle(string name, string[] assetPaths)
     //    {
-    //        m_Index = index;
-    //        m_Request = request;
-
-    //        m_Request.completed += M_Request_completed;
-    //    }
-
-    //    private unsafe void M_Request_completed(AsyncOperation obj)
-    //    {
-    //        ResourceManager.RegisterAssetBundleAssetAt(m_Index, m_Request.assetBundle);
-
-    //        ref InternalAssetBundleInfo target = ref ResourceManager.GetAssetBundleInfoAt(m_Index);
-    //        target.m_IsLoaded = true;
+    //        m_Name = name;
+    //        m_AssetPaths = assetPaths;
     //    }
     //}
 }

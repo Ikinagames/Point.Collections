@@ -17,9 +17,14 @@ using Point.Collections.ResourceControl.LowLevel;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
+using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Point.Collections.ResourceControl
 {
@@ -28,167 +33,142 @@ namespace Point.Collections.ResourceControl
         public override bool EnableLog => false;
         public override bool HideInInspector => true;
 
-        private NativeArray<InternalAssetBundleInfo> m_AssetBundleInfos;
-        private AssetBundle[] m_LoadedAssetBundles = Array.Empty<AssetBundle>();
+        private NativeList<InternalAssetBundleInfo> m_AssetBundleInfos;
+        private List<AssetBundle> m_AssetBundles;
 
         public override void OnInitialze()
         {
-            var trackedAssetBundleNames = ResourceAddresses.Instance.TrackedAssetBundleNames;
-
-            m_AssetBundleInfos = new NativeArray<InternalAssetBundleInfo>(trackedAssetBundleNames.Count, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
-            m_LoadedAssetBundles = new AssetBundle[trackedAssetBundleNames.Count];
-
+            m_AssetBundleInfos = new NativeList<InternalAssetBundleInfo>(AllocatorManager.Persistent);
+            m_AssetBundles = new List<AssetBundle>();
+        }
+        public override void OnShutdown()
+        {
             for (int i = 0; i < m_AssetBundleInfos.Length; i++)
             {
-                m_AssetBundleInfos[i] = new InternalAssetBundleInfo(i, false);
-            }
-        }
-        private void OnDestroy()
-        {
-            for (int i = 0; i < m_LoadedAssetBundles.Length; i++)
-            {
-                if (m_LoadedAssetBundles[i] == null) continue;
-
-                m_LoadedAssetBundles[i].Unload(true);
+                m_AssetBundleInfos[i].Dispose();
             }
 
             m_AssetBundleInfos.Dispose();
-            m_LoadedAssetBundles = null;
+            m_AssetBundles = null;
+        }
+
+        public static AssetBundleInfo RegisterAssetBundle(string path, bool webRequest)
+        {
+            int index = Instance.m_AssetBundles.Count;
+
+            InternalAssetBundleInfo info = new InternalAssetBundleInfo(index)
+            {
+                m_Path = path,
+                m_IsWebRequest = webRequest
+            };
+
+            Instance.m_AssetBundleInfos.Add(info);
+            Instance.m_AssetBundles.Add(null);
+
+            return GetAssetBundleInfo(in index);
+        }
+        public static AssetBundleInfo RegisterAssetBundle(AssetBundle assetBundle)
+        {
+            int index = Instance.m_AssetBundles.Count;
+
+            InternalAssetBundleInfo info = new InternalAssetBundleInfo(index)
+            {
+                m_IsLoaded = true
+            };
+
+            Instance.m_AssetBundleInfos.Add(info);
+            Instance.m_AssetBundles.Add(assetBundle);
+
+            return GetAssetBundleInfo(in index);
         }
 
         #region Internal
 
-        internal static unsafe ref InternalAssetBundleInfo GetAssetBundleInfoAt(int index)
+        internal static unsafe AssetBundleInfo GetAssetBundleInfo(in int index)
         {
-            InternalAssetBundleInfo* buffer
-                    = (InternalAssetBundleInfo*)NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(Instance.m_AssetBundleInfos);
+            ref InternalAssetBundleInfo temp = ref Instance.m_AssetBundleInfos.ElementAt(index);
 
-            return ref UnsafeUtility.ArrayElementAsRef<InternalAssetBundleInfo>(buffer, index);
+            AssetBundleInfo info = new AssetBundleInfo((IntPtr)UnsafeUtility.AddressOf(ref temp));
+
+            return info;
         }
-        internal static unsafe InternalAssetBundleInfo* GetAssetBundleInfoAtPointer(int index)
+        internal static unsafe AssetBundle GetAssetBundle(in int index)
         {
-            InternalAssetBundleInfo* buffer
-                    = (InternalAssetBundleInfo*)NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(Instance.m_AssetBundleInfos);
-
-            return buffer + index;
+            return Instance.m_AssetBundles[index];
         }
 
-        internal static void RegisterAssetBundleAssetAt(int index, AssetBundle assetBundle)
+        internal static unsafe AssetBundle LoadAssetBundle(ref InternalAssetBundleInfo p)
+            => LoadAssetBundle((InternalAssetBundleInfo*)UnsafeUtility.AddressOf(ref p));
+        internal static unsafe AssetBundle LoadAssetBundle(InternalAssetBundleInfo* p)
         {
-            Instance.m_LoadedAssetBundles[index] = assetBundle;
-        }
-        internal static bool IsAssetBundleLoaded(in InternalAssetBundleInfo assetBundle)
-        {
-            return Instance.m_LoadedAssetBundles[assetBundle.m_Index] != null;
-        }
-        internal static AssetBundle GetAssetBundle(in InternalAssetBundleInfo assetBundle)
-        {
-            return Instance.m_LoadedAssetBundles[assetBundle.m_Index];
-        }
-        internal static unsafe AssetBundleHandler LoadAssetBundleAsync(in InternalAssetBundleInfo assetBundle)
-        {
-            AssetBundleHandler handler = new AssetBundleHandler(GetAssetBundleInfoAtPointer(assetBundle.m_Index), true);
-
-            if (IsAssetBundleLoaded(in assetBundle))
+            int index = p->m_Index;
+            if (!p->m_IsWebRequest)
             {
-                return handler;
+                AssetBundle bundle = AssetBundle.LoadFromFile(p->m_Path.ToString());
+
+                Instance.m_AssetBundles[index] = bundle;
+                p->m_IsLoaded = true;
+
+                UpdateAssetInfos(p, bundle);
+
+                return bundle;
             }
 
-            string path = Path.Combine(Application.streamingAssetsPath, ResourceAddresses.GetBundleName(in assetBundle));
-            if (!File.Exists(path))
-            {
-                return new AssetBundleHandler(null, true);
-            }
-
-            AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(path);
-            // TODO : Temp
-            AssetBundleLoadAsyncHandler asyncLoadHandler = new AssetBundleLoadAsyncHandler();
-            asyncLoadHandler.Initialize(assetBundle.m_Index, request);
-
-            return handler;
-        }
-        internal static unsafe AssetBundle LoadAssetBundle(in InternalAssetBundleInfo assetBundle)
-        {
-            if (IsAssetBundleLoaded(in assetBundle))
-            {
-                return Instance.m_LoadedAssetBundles[assetBundle.m_Index];
-            }
-
-            string path = Path.Combine(Application.streamingAssetsPath, ResourceAddresses.GetBundleName(in assetBundle));
-            if (!File.Exists(path))
-            {
-                return null;
-            }
-            AssetBundle bundle = AssetBundle.LoadFromFile(path);
-
-            Instance.m_LoadedAssetBundles[assetBundle.m_Index] = bundle;
-
-            ref InternalAssetBundleInfo target = ref GetAssetBundleInfoAt(assetBundle.m_Index);
-            target.m_IsLoaded = true;
-
-            return bundle;
-        }
-        internal static unsafe void UnloadAssetBundle(in InternalAssetBundleInfo assetBundle)
-        {
-            if (!IsAssetBundleLoaded(in assetBundle))
-            {
-                return;
-            }
-
-            Instance.m_LoadedAssetBundles[assetBundle.m_Index].Unload(true);
-            Instance.m_LoadedAssetBundles[assetBundle.m_Index] = null;
-
-            ref InternalAssetBundleInfo target = ref GetAssetBundleInfoAt(assetBundle.m_Index);
-            target.m_IsLoaded = false;
+            throw new NotImplementedException();
         }
 
-        public static bool IsTrackedAssetBundle(in string bundleName, out AssetBundleInfo assetBundle)
+        internal static unsafe void UnloadAssetBundle(ref InternalAssetBundleInfo p, bool unloadAllLoadedObjects)
+            => UnloadAssetBundle((InternalAssetBundleInfo*)UnsafeUtility.AddressOf(ref p), unloadAllLoadedObjects);
+        internal static unsafe void UnloadAssetBundle(InternalAssetBundleInfo* p, bool unloadAllLoadedObjects)
         {
-            var trackedAssetBundleNames = ResourceAddresses.Instance.TrackedAssetBundleNames;
+            int index = p->m_Index;
 
-            for (int i = 0; i < trackedAssetBundleNames.Count; i++)
+            p->m_IsLoaded = false;
+
+            Instance.m_AssetBundles[index].Unload(unloadAllLoadedObjects);
+            Instance.m_AssetBundles[index] = null;
+        }
+
+        private static unsafe JobHandle UpdateAssetInfos(InternalAssetBundleInfo* p, AssetBundle assetBundle)
+        {
+            var assetNames = assetBundle.GetAllAssetNames().Select(str => (FixedString4096Bytes)str).ToArray();
+            NativeArray<FixedString4096Bytes> names = new NativeArray<FixedString4096Bytes>(assetNames, Allocator.TempJob);
+
+            p->m_Assets = new UnsafeHashMap<Hash, InternalAssetInfo>(names.Length, AllocatorManager.Persistent);
+
+            UpdateAssetInfoJob job = new UpdateAssetInfoJob()
             {
-                if (trackedAssetBundleNames[i].Equals(bundleName))
+                m_Names = names,
+                m_HashMap = p->m_Assets.AsParallelWriter()
+            };
+
+            JobHandle handle = job.Schedule(names.Length, 64);
+            p->m_JobHandle = JobHandle.CombineDependencies(p->m_JobHandle, handle);
+
+            return handle;
+        }
+
+        [BurstCompile(CompileSynchronously = true)]
+        private struct UpdateAssetInfoJob : IJobParallelFor
+        {
+            [ReadOnly, DeallocateOnJobCompletion] public NativeArray<FixedString4096Bytes> m_Names;
+            [WriteOnly] public UnsafeHashMap<Hash, InternalAssetInfo>.ParallelWriter m_HashMap;
+
+            public void Execute(int i)
+            {
+                InternalAssetInfo assetInfo = new InternalAssetInfo()
                 {
-                    unsafe
-                    {
-                        assetBundle = new AssetBundleInfo((IntPtr)GetAssetBundleInfoAtPointer(i));
-                    }
-                    return true;
-                }
+                    m_Key = m_Names[i],
+                    m_IsLoaded = false,
+                };
+
+
+                Hash hash = new Hash(FNV1a32.Calculate(m_Names[i]));
+
+                m_HashMap.TryAdd(hash, assetInfo);
             }
-
-            assetBundle = AssetBundleInfo.Invalid;
-            return false;
-        }
-        public static AssetBundleInfo GetAssetBundleInfo(string bundleName)
-        {
-            var trackedAssetBundleNames = ResourceAddresses.Instance.TrackedAssetBundleNames;
-
-            for (int i = 0; i < trackedAssetBundleNames.Count; i++)
-            {
-                if (trackedAssetBundleNames[i].Equals(bundleName))
-                {
-                    unsafe
-                    {
-                        return new AssetBundleInfo((IntPtr)GetAssetBundleInfoAtPointer(i));
-                    }
-                }
-            }
-
-            return AssetBundleInfo.Invalid;
         }
 
         #endregion
-
-        //public AssetBundle LoadAssetBundle(string assetBundlePath)
-        //{
-        //    string name = Path.GetFileName(assetBundlePath);
-            
-        //    if (IsTrackedAssetBundle(in assetBundlePath, out AssetBundleInfo bundleInfo))
-        //    {
-        //        return bundleInfo.Load();
-        //    }
-        //}
     }
 }

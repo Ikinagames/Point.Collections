@@ -22,7 +22,7 @@ namespace Point.Collections
     /// <see cref="UnityEngine.Object"/> 의 reletive path 를 담을 수 있습니다.
     /// </summary>
     [System.Serializable]
-    public abstract class AssetPathField : IEquatable<AssetPathField>
+    public class AssetPathField : IEquatable<AssetPathField>
     {
         [SerializeField] protected string p_AssetPath = string.Empty;
 
@@ -64,7 +64,7 @@ namespace Point.Collections
     }
     /// <inheritdoc cref="AssetPathField"/>
     /// <typeparam name="T"></typeparam>
-    public abstract class AssetPathField<T> : AssetPathField, IEquatable<AssetPathField<T>>
+    public class AssetPathField<T> : AssetPathField, IEquatable<AssetPathField<T>>
         where T : UnityEngine.Object
     {
         public override System.Type TargetType => TypeHelper.TypeOf<T>.Type;
