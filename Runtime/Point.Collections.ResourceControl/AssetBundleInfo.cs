@@ -17,6 +17,7 @@
 #define DEBUG_MODE
 #endif
 
+using Point.Collections.ResourceControl.LowLevel;
 using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -67,7 +68,7 @@ namespace Point.Collections.ResourceControl
 
                 if (!Ref.m_IsLoaded) return null;
 
-                return ResourceAddresses.GetAssetBundle(Ref);
+                return ResourceManager.GetAssetBundle(Ref);
             }
         }
         [NotBurstCompatible]
@@ -90,11 +91,11 @@ namespace Point.Collections.ResourceControl
         }
 
         [NotBurstCompatible]
-        public AssetBundle Load() => ResourceAddresses.LoadAssetBundle(Ref);
-        public void Unload() => ResourceAddresses.UnloadAssetBundle(Ref);
+        public AssetBundle Load() => ResourceManager.LoadAssetBundle(Ref);
+        public void Unload() => ResourceManager.UnloadAssetBundle(Ref);
 
         [NotBurstCompatible]
-        public AssetBundleHandler LoadAsync() => ResourceAddresses.LoadAssetBundleAsync(Ref);
+        public AssetBundleHandler LoadAsync() => ResourceManager.LoadAssetBundleAsync(Ref);
 
         public bool IsValid() => !Equals(Invalid);
         public bool Equals(AssetBundleInfo other) => m_Pointer.Equals(other.m_Pointer);

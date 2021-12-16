@@ -17,6 +17,7 @@
 #define DEBUG_MODE
 #endif
 
+using Point.Collections.ResourceControl.LowLevel;
 using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -68,7 +69,7 @@ namespace Point.Collections.ResourceControl
 
                 if (!Ref.m_IsLoaded) return null;
 
-                return ResourceAddresses.GetAssetBundle(Ref);
+                return ResourceManager.GetAssetBundle(Ref);
             }
         }
 

@@ -36,9 +36,9 @@ namespace Point.Collections.ResourceControl.LowLevel
 
         private unsafe void M_Request_completed(AsyncOperation obj)
         {
-            ResourceAddresses.RegisterAssetBundleAssetAt(m_Index, m_Request.assetBundle);
+            ResourceManager.RegisterAssetBundleAssetAt(m_Index, m_Request.assetBundle);
 
-            ref InternalAssetBundleInfo target = ref ResourceAddresses.GetAssetBundleInfoAt(m_Index);
+            ref InternalAssetBundleInfo target = ref ResourceManager.GetAssetBundleInfoAt(m_Index);
             target.m_IsLoaded = true;
         }
     }

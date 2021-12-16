@@ -20,7 +20,7 @@
 using System;
 using Unity.Collections;
 
-namespace Point.Collections.ResourceControl
+namespace Point.Collections.ResourceControl.LowLevel
 {
     [BurstCompatible]
     internal struct InternalAssetBundleInfo : IEquatable<InternalAssetBundleInfo>

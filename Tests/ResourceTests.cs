@@ -22,7 +22,7 @@ namespace Point.Collections.Tests
             $"loading bundles {names.Count}".ToLog();
             for (int i = 0; i < names.Count; i++)
             {
-                AssetBundleInfo info = ResourceAddresses.GetAssetBundleInfo(names[i]);
+                AssetBundleInfo info = ResourceManager.GetAssetBundleInfo(names[i]);
                 AssetBundle bundle = info.Load();
                 $"{info.Name} : {bundle != null}".ToLog();
             }
@@ -34,14 +34,14 @@ namespace Point.Collections.Tests
             var names = ResourceAddresses.Instance.TrackedAssetBundleNames;
             for (int i = 0; i < names.Count; i++)
             {
-                AssetBundleInfo info = ResourceAddresses.GetAssetBundleInfo(names[i]);
+                AssetBundleInfo info = ResourceManager.GetAssetBundleInfo(names[i]);
                 info.Unload();
                 $"{info.Name} : isloaded?{info.IsLoaded} : bundleNull?{info.AssetBundle == null}".ToLog();
             }
 
             for (int i = 0; i < names.Count; i++)
             {
-                AssetBundleInfo info = ResourceAddresses.GetAssetBundleInfo(names[i]);
+                AssetBundleInfo info = ResourceManager.GetAssetBundleInfo(names[i]);
                 Assert.IsFalse(info.IsLoaded, $"bundle({info.Name}) is not unloaded.");
             }
         }
@@ -52,7 +52,7 @@ namespace Point.Collections.Tests
             var names = ResourceAddresses.Instance.TrackedAssetBundleNames;
             for (int i = 0; i < names.Count; i++)
             {
-                AssetBundleInfo info = ResourceAddresses.GetAssetBundleInfo(names[i]);
+                AssetBundleInfo info = ResourceManager.GetAssetBundleInfo(names[i]);
                 Assert.False(info.IsLoaded, "bundle is already loaded.");
 
                 AssetBundleHandler handle = info.LoadAsync();
@@ -68,7 +68,7 @@ namespace Point.Collections.Tests
             var names = ResourceAddresses.Instance.TrackedAssetBundleNames;
             for (int i = 0; i < names.Count; i++)
             {
-                AssetBundleInfo info = ResourceAddresses.GetAssetBundleInfo(names[i]);
+                AssetBundleInfo info = ResourceManager.GetAssetBundleInfo(names[i]);
                 Assert.IsTrue(info.IsLoaded, "bundle is not loaded.");
 
                 foreach (var item in info.AssetBundle.GetAllAssetNames())
