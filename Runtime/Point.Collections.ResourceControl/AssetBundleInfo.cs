@@ -29,20 +29,19 @@ namespace Point.Collections.ResourceControl
     [BurstCompatible]
     public struct AssetBundleInfo : IValidation, IEquatable<AssetBundleInfo>
     {
-        public static AssetBundleInfo Invalid => new AssetBundleInfo(IntPtr.Zero, 0);
+        public static AssetBundleInfo Invalid => default(AssetBundleInfo);
 
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe readonly IntPtr m_Pointer;
+        internal unsafe readonly UnsafeAssetBundleInfo* m_Pointer;
         internal readonly uint m_Generation;
 
-        internal unsafe ref InternalAssetBundleInfo Ref
+        internal unsafe ref UnsafeAssetBundleInfo Ref
         {
             get
             {
-                InternalAssetBundleInfo* p = (InternalAssetBundleInfo*)m_Pointer.ToPointer();
-                p->m_JobHandle.Complete();
+                m_Pointer->m_JobHandle.Complete();
 
-                return ref *p;
+                return ref *m_Pointer;
             }
         }
 
@@ -70,11 +69,11 @@ namespace Point.Collections.ResourceControl
 
                 if (!Ref.m_IsLoaded) return null;
 
-                return ResourceManager.GetAssetBundle(Ref.m_Index).AssetBundle;
+                return ResourceManager.GetAssetBundle(Ref.index).AssetBundle;
             }
         }
 
-        internal AssetBundleInfo(IntPtr p, uint generation)
+        internal unsafe AssetBundleInfo(UnsafeAssetBundleInfo* p, uint generation)
         {
             m_Pointer = p;
             m_Generation = generation;
@@ -90,6 +89,19 @@ namespace Point.Collections.ResourceControl
 
             return ResourceManager.LoadAssetBundle(ref Ref);
         }
+        public void LoadAsync()
+        {
+            if (!IsValid())
+            {
+                throw new Exception();
+            }
+
+            unsafe
+            {
+                ResourceManager.LoadAssetBundleAsync(m_Pointer);
+            }
+        }
+
         public void Unload(bool unloadAllLoadedObjects)
         {
 #if DEBUG_MODE
@@ -98,15 +110,20 @@ namespace Point.Collections.ResourceControl
                 throw new Exception();
             }
 
-            UnsafeHashMap<Hash, InternalAssetInfo>.Enumerator iter = Ref.m_Assets.GetEnumerator();
+            if (!Ref.assets.IsCreated)
+            {
+                throw new Exception();
+            }
+
+            UnsafeHashMap<Hash, UnsafeAssetInfo>.Enumerator iter = Ref.assets.GetEnumerator();
             while (iter.MoveNext())
             {
-                KeyValue<Hash, InternalAssetInfo> temp = iter.Current;
+                KeyValue<Hash, UnsafeAssetInfo> temp = iter.Current;
 
-                if (temp.Value.m_ReferencedCount > 0)
+                if (temp.Value.referencedCount > 0)
                 {
                     Point.LogError(Point.LogChannel.Collections,
-                        $"Asset({temp.Key}) has {temp.Value.m_ReferencedCount} of references that didn\'t reserved. " +
+                        $"Asset({temp.Key}) has {temp.Value.referencedCount} of references that didn\'t reserved. " +
                         $"This is not allowed.");
                 }
             }
@@ -114,6 +131,7 @@ namespace Point.Collections.ResourceControl
             ResourceManager.UnloadAssetBundle(ref Ref, unloadAllLoadedObjects);
         }
 
+        [NotBurstCompatible]
         public string[] GetAllAssetNames()
         {
             if (!IsLoaded)
@@ -125,31 +143,40 @@ namespace Point.Collections.ResourceControl
                 return Array.Empty<string>();
             }
 
-            var values = Ref.m_Assets.GetValueArray(AllocatorManager.Temp);
+            var values = Ref.assets.GetValueArray(AllocatorManager.Temp);
 
             string[] arr = values.Select(other => other.m_Key.ToString()).ToArray();
             values.Dispose();
 
             return arr;
         }
-        public AssetInfo LoadAsset(string key)
+        public AssetInfo LoadAsset(in FixedString4096Bytes key)
         {
-            return ResourceManager.LoadAsset(ref Ref, key);
+            return ResourceManager.LoadAsset(ref Ref, in key);
         }
-        public void Reserve(AssetInfo asset)
+        public void Reserve(ref AssetInfo asset)
         {
             unsafe
             {
-                if (asset.m_BundlePointer != (InternalAssetBundleInfo*)m_Pointer.ToPointer())
+                if (asset.m_BundlePointer != m_Pointer)
                 {
                     throw new Exception();
                 }
 
-                ResourceManager.Reserve(asset.m_BundlePointer, asset.m_Key);
+                Hash key = asset.key;
+
+                //ResourceManager.Reserve(asset.m_BundlePointer, asset.key);
+                BurstResourceFunction.reserve_assets(m_Pointer, &key, 1);
             }
         }
 
         public bool IsValid() => !Equals(Invalid);
-        public bool Equals(AssetBundleInfo other) => m_Pointer.Equals(other.m_Pointer);
+        public bool Equals(AssetBundleInfo other)
+        {
+            unsafe
+            {
+                return m_Pointer == other.m_Pointer;
+            }
+        }
     }
 }

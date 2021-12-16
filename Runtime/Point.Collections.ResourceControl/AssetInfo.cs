@@ -25,9 +25,9 @@ namespace Point.Collections.ResourceControl
     public struct AssetInfo
     {
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe readonly InternalAssetBundleInfo* m_BundlePointer;
+        internal unsafe readonly UnsafeAssetBundleInfo* m_BundlePointer;
 
-        internal readonly Hash m_Key;
+        internal readonly Hash key;
 
         public UnityEngine.Object Asset
         {
@@ -35,24 +35,28 @@ namespace Point.Collections.ResourceControl
             {
                 unsafe
                 {
-                    var bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer->m_Index);
-                    return bundleInfo.m_Assets[m_Key];
+                    var bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer->index);
+                    return bundleInfo.m_Assets[key];
                 }
             }
         }
 
-        internal unsafe AssetInfo(InternalAssetBundleInfo* bundle, Hash key)
+        internal unsafe AssetInfo(UnsafeAssetBundleInfo* bundle, Hash key)
         {
             m_BundlePointer = bundle;
             
-            m_Key = key;
+            this.key = key;
         }
 
         public void Reserve()
         {
             unsafe
             {
-                ResourceManager.Reserve(m_BundlePointer, m_Key);
+                fixed (Hash* hash = &key)
+                {
+                    BurstResourceFunction.reserve_assets(m_BundlePointer, hash, 1);
+                }
+                //ResourceManager.Reserve(m_BundlePointer, key);
             }
         }
     }

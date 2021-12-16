@@ -36,12 +36,12 @@ namespace Point.Collections
 
         #endregion
 
-        public override bool EnableLog => false;
-        public override bool HideInInspector => true;
+        protected override bool EnableLog => false;
+        protected override bool HideInInspector => true;
 
         public event Action OnApplicationShutdown;
 
-        public override void OnInitialze()
+        protected override void OnInitialze()
         {
             const string c_Instance = "Instance";
 
@@ -58,7 +58,7 @@ namespace Point.Collections
                 else System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(types[i].TypeHandle);
             }
         }
-        public override void OnShutdown()
+        protected override void OnShutdown()
         {
             s_IsShutdown = true;
             

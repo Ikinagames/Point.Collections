@@ -45,7 +45,7 @@ namespace Point.Collections.Tests
             $"loading bundles {names.Count}".ToLog();
             for (int i = 0; i < names.Count; i++)
             {
-                AssetBundleInfo info = ResourceManager.RegisterAssetBundle(names[i].AssetPath, false);
+                AssetBundleInfo info = ResourceManager.RegisterAssetBundlePath(names[i].AssetPath);
                 info.Load();
 
                 Assert.IsTrue(info.IsLoaded);
@@ -59,6 +59,31 @@ namespace Point.Collections.Tests
                 ResourceManager.UnregisterAssetBundle(info);
             }
         }
+        [UnityTest]
+        public IEnumerator AssetBundleLoadAsyncTest()
+        {
+            var names = ResourceAddresses.Instance.StreamingAssetBundles;
+            $"loading bundles {names.Count}".ToLog();
+            for (int i = 0; i < names.Count; i++)
+            {
+                AssetBundleInfo info = ResourceManager.RegisterAssetBundlePath(names[i].AssetPath);
+                info.LoadAsync();
+
+                yield return new WaitUntil(() => info.IsLoaded);
+
+                Assert.IsTrue(info.IsLoaded);
+                Assert.NotNull(info.AssetBundle);
+
+                info.Unload(true);
+
+                Assert.IsFalse(info.IsLoaded);
+                Assert.Null(info.AssetBundle);
+
+                ResourceManager.UnregisterAssetBundle(info);
+            }
+
+            yield return null;
+        }
 
         [Test]
         public void AssetBundleLoadAssetsTest()
@@ -66,7 +91,7 @@ namespace Point.Collections.Tests
             var names = ResourceAddresses.Instance.StreamingAssetBundles;
             for (int i = 0; i < names.Count; i++)
             {
-                AssetBundleInfo info = ResourceManager.RegisterAssetBundle(names[i].AssetPath, false);
+                AssetBundleInfo info = ResourceManager.RegisterAssetBundlePath(names[i].AssetPath);
                 info.Load();
 
                 string[] assetNames = info.GetAllAssetNames();

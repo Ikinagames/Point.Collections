@@ -106,7 +106,7 @@ namespace Point.Collections
         /// <see langword="true"/> 일 경우, 런타임에서도 원본이 수정되어 저장됩니다.<br/>
         /// 기본값은 <see langword="false"/>입니다.
         /// </summary>
-        public virtual bool RuntimeModifiable { get; } = false;
+        protected virtual bool RuntimeModifiable { get; } = false;
 
         protected virtual void OnInitialize() { }
 

@@ -22,13 +22,13 @@ using Unity.Collections;
 
 namespace Point.Collections.ResourceControl.LowLevel
 {
-    internal struct InternalAssetInfo : IEquatable<InternalAssetInfo>
+    internal struct UnsafeAssetInfo : IEquatable<UnsafeAssetInfo>
     {
         public FixedString4096Bytes m_Key;
-        public bool m_IsLoaded;
+        public bool loaded;
 
-        public uint m_ReferencedCount;
+        public uint referencedCount;
 
-        public bool Equals(InternalAssetInfo other) => m_Key.Equals(other.m_Key);
+        public bool Equals(UnsafeAssetInfo other) => m_Key.Equals(other.m_Key);
     }
 }

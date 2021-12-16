@@ -72,8 +72,11 @@ namespace Point.Collections
 
         public static bool HasInstance => s_Instance != null;
 
-        public virtual bool EnableLog => true;
-        public virtual bool HideInInspector => false;
+        bool IStaticMonobehaviour.EnableLog => EnableLog;
+        bool IStaticMonobehaviour.HideInInspector => HideInInspector;
+
+        protected virtual bool EnableLog => true;
+        protected virtual bool HideInInspector => false;
 
         void IStaticMonobehaviour.OnInitialize()
         {
@@ -96,8 +99,8 @@ namespace Point.Collections
             }
         }
 
-        public virtual void OnInitialze() { }
-        public virtual void OnShutdown() { }
+        protected virtual void OnInitialze() { }
+        protected virtual void OnShutdown() { }
 
         /// <summary>
         /// Editor Only, 만약 Runtime 에서 이 메소드가 호출되면 무조건 true 를 반환합니다.
