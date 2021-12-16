@@ -104,12 +104,12 @@ namespace Point.Collections.Editor
     {
         // https://docs.unity3d.com/ScriptReference/AssetModificationProcessor.html
 
-        static string[] OnWillSaveAssets(string[] paths)
-        {
-            UnityEngine.Debug.Log("OnWillSaveAssets");
-            foreach (string path in paths)
-                UnityEngine.Debug.Log(path);
-            return paths;
-        }
+        //static string[] OnWillSaveAssets(string[] paths)
+        //{
+        //    UnityEngine.Debug.Log("OnWillSaveAssets");
+        //    foreach (string path in paths)
+        //        UnityEngine.Debug.Log(path);
+        //    return paths;
+        //}
     }
 }

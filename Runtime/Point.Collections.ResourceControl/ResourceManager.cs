@@ -162,7 +162,6 @@ namespace Point.Collections.ResourceControl
                     m_IsLoaded = false,
                 };
 
-
                 Hash hash = new Hash(FNV1a32.Calculate(m_Names[i]));
 
                 m_HashMap.TryAdd(hash, assetInfo);
