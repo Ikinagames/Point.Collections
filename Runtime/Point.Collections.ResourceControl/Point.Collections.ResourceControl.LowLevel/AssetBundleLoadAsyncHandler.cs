@@ -17,14 +17,29 @@
 #define DEBUG_MODE
 #endif
 
-namespace Point.Collections.ResourceControl
-{
-    public sealed class AssetBundleDatastore : Datastore<AssetBundleDataProvider>
-    {
-        public AssetBundleDatastore(AssetBundleDataProvider provider, string bundlePath)
-            : base(provider, bundlePath)
-        {
+using UnityEngine;
 
+namespace Point.Collections.ResourceControl.LowLevel
+{
+    internal sealed class AssetBundleLoadAsyncHandler
+    {
+        private int m_Index;
+        private AssetBundleCreateRequest m_Request;
+        
+        public void Initialize(int index, AssetBundleCreateRequest request)
+        {
+            m_Index = index;
+            m_Request = request;
+
+            m_Request.completed += M_Request_completed;
+        }
+
+        private unsafe void M_Request_completed(AsyncOperation obj)
+        {
+            ResourceAddresses.RegisterAssetBundleAssetAt(m_Index, m_Request.assetBundle);
+
+            ref InternalAssetBundleInfo target = ref ResourceAddresses.GetAssetBundleInfoAt(m_Index);
+            target.m_IsLoaded = true;
         }
     }
 }

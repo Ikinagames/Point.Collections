@@ -1,6 +1,6 @@
 ﻿// Copyright 2021 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
-//
+// 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,28 +13,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
+using UnityEngine;
 using System;
 
-namespace Point.Collections.ResourceControl
+namespace Point.Collections.ResourceControl.LowLevel
 {
-    public readonly struct DatastoreID : IValidation, IEquatable<DatastoreID>
+    [Serializable]
+    public class TrackedAsset
     {
-        internal readonly int m_Index;
-        internal readonly Hash m_Hash;
+        [SerializeField] private string m_Path;
+        [SerializeField] private string m_Key;
 
-        public IDatastore Datastore => ResourceManager.Instance.GetDatastore(this);
+        [SerializeField] private string m_Bundle;
 
-        internal DatastoreID(int index, Hash hash)
+        public string Path => m_Path;
+        public string Key
         {
-            m_Index = index;
-            m_Hash = hash;
+            get => m_Key;
+            set => m_Key = value;
         }
 
-        public bool Equals(DatastoreID other)
-        {
-            return m_Index.Equals(other) && m_Hash.Equals(other);
-        }
+        public string Bundle => m_Bundle;
 
-        public bool IsValid() => ResourceManager.Instance.IsValidID(this);
+        public TrackedAsset(string assetPath, string bundle)
+        {
+            m_Path = assetPath;
+            m_Key = assetPath;
+
+            m_Bundle = bundle;
+        }
     }
 }

@@ -34,52 +34,6 @@ namespace Point.Collections.ResourceControl.Editor
 
         #region AssetID
 
-        //private static FieldInfo s_AssetIDsField;
-        //private static FieldInfo AssetIDsField
-        //{
-        //    get
-        //    {
-        //        if (s_AssetIDsField == null)
-        //        {
-        //            s_AssetIDsField
-        //                = TypeHelper.TypeOf<AssetAddressesSetting>.GetFieldInfo("m_AssetIDs");
-        //        }
-
-        //        return s_AssetIDsField;
-        //    }
-        //}
-        //private static AssetID[] AssetIDs
-        //{
-        //    get
-        //    {
-        //        return (AssetID[])AssetIDsField.GetValue(Setting);
-        //    }
-        //    set
-        //    {
-        //        AssetIDsField.SetValue(Setting, value);
-        //        EditorUtility.SetDirty(PointProjectSettings.Instance);
-        //        AssetDatabase.SaveAssetIfDirty(PointProjectSettings.Instance);
-        //    }
-        //}
-        //private static Dictionary<AssetID, int> s_RegisteredAssets;
-        //private static Dictionary<AssetID, int> RegisteredAssets
-        //{
-        //    get
-        //    {
-        //        if (s_RegisteredAssets == null)
-        //        {
-        //            s_RegisteredAssets = new Dictionary<AssetID, int>();
-        //            AssetID[] ids = AssetIDs;
-        //            for (int i = 0; i < ids.Length; i++)
-        //            {
-        //                s_RegisteredAssets.Add(ids[i], i);
-        //            }
-        //        }
-
-        //        return s_RegisteredAssets;
-        //    }
-        //}
-
         public static bool IsTrackedAsset(this UnityEngine.Object obj)
         {
             string path = AssetDatabase.GetAssetPath(obj);
@@ -87,8 +41,7 @@ namespace Point.Collections.ResourceControl.Editor
         }
         public static bool IsTrackedAsset(this PointProjectSettings _, in string assetPath)
         {
-            AssetID id = new AssetID(new Hash(assetPath));
-            return Setting.IsTrackedAsset(in id);
+            return Setting.IsTrackedAsset(in assetPath);
         }
         public static AssetID UpdateAsset(this PointProjectSettings _, in string prevAssetPath, in string targetAssetPath)
         {

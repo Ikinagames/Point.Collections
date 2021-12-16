@@ -50,7 +50,7 @@ namespace Point.Collections.ResourceControl
             {
                 if (!IsValid())
                 {
-                    return m_ExpectedLoadState;
+                    return true;
                 }
 
                 return Ref.m_IsLoaded == m_ExpectedLoadState;

@@ -17,6 +17,7 @@
 #define DEBUG_MODE
 #endif
 
+using Point.Collections.ResourceControl.LowLevel;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,6 +32,7 @@ namespace Point.Collections.ResourceControl
     {
         // AssetBundle.name
         [SerializeField] private string[] m_TrackedAssetBundles = Array.Empty<string>();
+        [SerializeField] private TrackedAsset[] m_TrackedAssets = Array.Empty<TrackedAsset>();
 
         private NativeArray<InternalAssetBundleInfo> m_AssetBundleInfos;
         private AssetBundle[] m_LoadedAssetBundles = Array.Empty<AssetBundle>();
@@ -75,6 +77,11 @@ namespace Point.Collections.ResourceControl
             return buffer + index;
         }
 
+        internal static void RegisterAssetBundleAssetAt(int index, AssetBundle assetBundle)
+        {
+            Instance.m_LoadedAssetBundles[index] = assetBundle;
+        }
+
         internal static string GetBundleName(in InternalAssetBundleInfo assetBundle)
         {
             return Instance.m_TrackedAssetBundles[assetBundle.m_Index];
@@ -104,37 +111,12 @@ namespace Point.Collections.ResourceControl
 
             AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(path);
             // TODO : Temp
-            AsyncLoadHandler asyncLoadHandler = new AsyncLoadHandler();
-            asyncLoadHandler.Initialize(assetBundle.m_Index, request, true);
+            AssetBundleLoadAsyncHandler asyncLoadHandler = new AssetBundleLoadAsyncHandler();
+            asyncLoadHandler.Initialize(assetBundle.m_Index, request);
 
             return handler;
         }
-        private sealed class AsyncLoadHandler
-        {
-            private int m_Index;
-            private AssetBundleCreateRequest m_Request;
-            private bool m_ExpectedLoadState;
-
-            public void Initialize(int index, AssetBundleCreateRequest request, bool expectedLoadState)
-            {
-                m_Index = index;
-                m_Request = request;
-                m_ExpectedLoadState = expectedLoadState;
-
-                m_Request.completed += M_Request_completed;
-            }
-
-            private unsafe void M_Request_completed(AsyncOperation obj)
-            {
-                Instance.m_LoadedAssetBundles[m_Index] = m_Request.assetBundle;
-
-                ref InternalAssetBundleInfo target = ref GetAssetBundleInfoAt(m_Index);
-                target.m_IsLoaded = m_ExpectedLoadState;
-            }
-        }
-        
-
-        internal static AssetBundle LoadAssetBundle(in InternalAssetBundleInfo assetBundle)
+        internal static unsafe AssetBundle LoadAssetBundle(in InternalAssetBundleInfo assetBundle)
         {
             if (IsAssetBundleLoaded(in assetBundle))
             {
@@ -150,14 +132,25 @@ namespace Point.Collections.ResourceControl
 
             Instance.m_LoadedAssetBundles[assetBundle.m_Index] = bundle;
 
-            unsafe
-            {
-                ref InternalAssetBundleInfo target = ref GetAssetBundleInfoAt(assetBundle.m_Index);
-                target.m_IsLoaded = true;
-            }
-            
+            ref InternalAssetBundleInfo target = ref GetAssetBundleInfoAt(assetBundle.m_Index);
+            target.m_IsLoaded = true;
+
             return bundle;
         }
+        internal static unsafe void UnloadAssetBundle(in InternalAssetBundleInfo assetBundle)
+        {
+            if (!IsAssetBundleLoaded(in assetBundle))
+            {
+                return;
+            }
+
+            Instance.m_LoadedAssetBundles[assetBundle.m_Index].Unload(true);
+            Instance.m_LoadedAssetBundles[assetBundle.m_Index] = null;
+
+            ref InternalAssetBundleInfo target = ref GetAssetBundleInfoAt(assetBundle.m_Index);
+            target.m_IsLoaded = false;
+        }
+
         public static AssetBundleInfo GetAssetBundleInfo(string bundleName)
         {
             ResourceAddresses resources = Instance;

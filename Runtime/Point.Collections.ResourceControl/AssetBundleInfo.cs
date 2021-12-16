@@ -91,6 +91,8 @@ namespace Point.Collections.ResourceControl
 
         [NotBurstCompatible]
         public AssetBundle Load() => ResourceAddresses.LoadAssetBundle(Ref);
+        public void Unload() => ResourceAddresses.UnloadAssetBundle(Ref);
+
         [NotBurstCompatible]
         public AssetBundleHandler LoadAsync() => ResourceAddresses.LoadAssetBundleAsync(Ref);
 

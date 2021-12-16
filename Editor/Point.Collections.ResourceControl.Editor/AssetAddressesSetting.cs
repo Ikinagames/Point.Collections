@@ -103,7 +103,7 @@ namespace Point.Collections.ResourceControl.Editor
 
         [SerializeField] private AssetImportHandles m_AssetImportHandles = AssetImportHandles.None;
         [SerializeField] private AssetStrategy m_Strategy = AssetStrategy.AssetBundle;
-        [SerializeField] private AssetID[] m_AssetIDs = Array.Empty<AssetID>();
+        [SerializeField] private string[] m_TrackedAssets = Array.Empty<string>();
 
         [SerializeField] private PlatformDependsPath[] m_PlatformDependsPaths = new PlatformDependsPath[]
         {
@@ -119,7 +119,7 @@ namespace Point.Collections.ResourceControl.Editor
 
         public AssetImportHandles ImportHandles => m_AssetImportHandles;
         public AssetStrategy Strategy => m_Strategy;
-        public IReadOnlyList<AssetID> AssetIDs => m_AssetIDs;
+        public IReadOnlyList<string> AssetIDs => m_TrackedAssets;
 
         private static class GUIStyleContents
         {
@@ -158,7 +158,7 @@ namespace Point.Collections.ResourceControl.Editor
 
                 using (new EditorGUI.DisabledGroupScope(true))
                 {
-                    EditorGUILayout.IntField("Tracked Assets", m_AssetIDs.Length);
+                    EditorGUILayout.IntField("Tracked Assets", m_TrackedAssets.Length);
                 }
 
                 EditorGUI.indentLevel--;
@@ -176,6 +176,9 @@ namespace Point.Collections.ResourceControl.Editor
                 EditorUtilities.StringRich("AssetBundle", 13);
                 EditorUtilities.Line();
                 EditorGUI.indentLevel++;
+
+                m_AssetBundleOptions.CleanUpBeforeBuild
+                    = EditorGUILayout.ToggleLeft("Cleanup destination folder before build", m_AssetBundleOptions.CleanUpBeforeBuild);
 
                 m_AssetBundleOptions.CopyToStreamingFolderAfterBuild
                     = EditorGUILayout.ToggleLeft("Copy to StreamingAssets after build", m_AssetBundleOptions.CopyToStreamingFolderAfterBuild);
@@ -343,9 +346,9 @@ namespace Point.Collections.ResourceControl.Editor
         private void HashAssets()
         {
             m_RegisteredAssets = new Dictionary<AssetID, int>();
-            for (int i = 0; i < m_AssetIDs.Length; i++)
+            for (int i = 0; i < m_TrackedAssets.Length; i++)
             {
-                m_RegisteredAssets.Add(m_AssetIDs[i], i);
+                m_RegisteredAssets.Add(new AssetID(new Hash(m_TrackedAssets[i])), i);
             }
         }
         private void UpdateAssetIfChanged(AssetID id)
@@ -353,12 +356,12 @@ namespace Point.Collections.ResourceControl.Editor
 
         }
 
-        public bool IsTrackedAsset(in string assetPath) => IsTrackedAsset(new AssetID(new Hash(assetPath)));
+        public bool IsTrackedAsset(in string assetPath) => IsTrackedAsset(new AssetID(new Hash(assetPath.ToLower())));
         public bool IsTrackedAsset(in AssetID id) => m_RegisteredAssets.ContainsKey(id);
 
         public AssetID RegisterAsset(in string assetPath)
         {
-            AssetID id = new AssetID(new Hash(assetPath));
+            AssetID id = new AssetID(new Hash(assetPath.ToLower()));
             if (IsTrackedAsset(id))
             {
                 // AssetBundle 의 경로를 바꾸는 경우에도 호출되므로, 만약 번들의 경로가 바뀌었다면
@@ -367,29 +370,30 @@ namespace Point.Collections.ResourceControl.Editor
                 return id;
             }
 
-            AssetID[] newArr;
-            if (m_AssetIDs.Length == 0)
+            string[] newArr;
+            if (m_TrackedAssets.Length == 0)
             {
-                newArr = new AssetID[1];
+                newArr = new string[1];
             }
             else
             {
-                newArr = new AssetID[m_AssetIDs.Length];
+                newArr = new string[m_TrackedAssets.Length];
             }
-            Array.Copy(m_AssetIDs, newArr, m_AssetIDs.Length);
+            Array.Copy(m_TrackedAssets, newArr, m_TrackedAssets.Length);
 
-            newArr[newArr.Length - 1] = id;
-            m_AssetIDs = newArr;
+            newArr[newArr.Length - 1] = assetPath.ToLower();
+            m_TrackedAssets = newArr;
 
             m_RegisteredAssets.Add(id, newArr.Length - 1);
 
+            EditorUtility.SetDirty(Instance);
             return id;
         }
         public AssetID UpdateAsset(in string prevAssetPath, in string targetAssetPath)
         {
             AssetID
-                prev = new AssetID(new Hash(prevAssetPath)),
-                target = new AssetID(new Hash(targetAssetPath));
+                prev = new AssetID(new Hash(prevAssetPath.ToLower())),
+                target = new AssetID(new Hash(targetAssetPath.ToLower()));
 
             if (!IsTrackedAsset(prev))
             {
@@ -403,26 +407,29 @@ namespace Point.Collections.ResourceControl.Editor
             int index = m_RegisteredAssets[prev];
             m_RegisteredAssets.Remove(prev);
             
-            m_AssetIDs[index] = target;
+            m_TrackedAssets[index] = targetAssetPath.ToLower();
             m_RegisteredAssets.Add(target, index);
 
+            EditorUtility.SetDirty(Instance);
             return target;
         }
         public void RemoveAsset(in string assetPath)
         {
-            AssetID id = new AssetID(new Hash(assetPath));
+            AssetID id = new AssetID(new Hash(assetPath.ToLower()));
             if (!m_RegisteredAssets.ContainsKey(id))
             {
                 throw new System.Exception();
             }
 
-            List<AssetID> temp = m_AssetIDs.ToList();
+            List<string> temp = m_TrackedAssets.ToList();
             int index = m_RegisteredAssets[id];
 
             temp.RemoveAt(index);
-            m_AssetIDs = temp.ToArray();
+            m_TrackedAssets = temp.ToArray();
 
             HashAssets();
+
+            EditorUtility.SetDirty(Instance);
         }
 
         private static AssetBundleManifest BuildAssetBundles(
@@ -435,7 +442,7 @@ namespace Point.Collections.ResourceControl.Editor
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             else
             {
-                if (cleanUp) DeleteFilesRecursively(path);
+                if (cleanUp) EditorUtilities.DeleteFilesRecursively(path);
             }
             AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(
                 path,
@@ -451,43 +458,13 @@ namespace Point.Collections.ResourceControl.Editor
             
             if (copyToStreaming && !path.Equals(Application.streamingAssetsPath))
             {
-                CopyFilesRecursively(path, Application.streamingAssetsPath + Path.DirectorySeparatorChar);
+                EditorUtilities.CopyFilesRecursively(path, Application.streamingAssetsPath + Path.DirectorySeparatorChar);
             }
 
             return manifest;
         }
 
-        //private AssetBundleBuild GetAssetBuildInfo()
-        //{
-        //    AssetBundleBuild temp = new AssetBundleBuild();
-        //    temp.
-        //}
-        private static void DeleteFilesRecursively(string path)
-        {
-            foreach (string newPath in Directory.GetFiles(path, "*", SearchOption.AllDirectories))
-            {
-                File.Delete(newPath);
-            }
-
-            foreach (string dirPath in Directory.GetDirectories(path, "*", SearchOption.AllDirectories))
-            {
-                Directory.Delete(dirPath);
-            }
-        }
-        private static void CopyFilesRecursively(string sourcePath, string targetPath)
-        {
-            //Now Create all of the directories
-            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
-            {
-                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
-            }
-
-            //Copy all the files & Replaces any files with the same name
-            foreach (string newPath in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
-            {
-                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
-            }
-        }
+        
         private void asd()
         {
             AssetDatabase.GetAllAssetBundleNames();

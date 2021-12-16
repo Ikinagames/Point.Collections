@@ -14,6 +14,7 @@
 // limitations under the License.
 
 using System;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -184,6 +185,33 @@ namespace Point.Collections.Editor
             else
             {
                 return EditorGUILayout.Foldout(foldout, HTMLString.String($"<size={size}>{firstKey} {name}</size>", StringColor.grey), true, EditorStyleUtilities.HeaderStyle);
+            }
+        }
+
+        public static void DeleteFilesRecursively(string path)
+        {
+            foreach (string newPath in Directory.GetFiles(path, "*", SearchOption.AllDirectories))
+            {
+                File.Delete(newPath);
+            }
+
+            foreach (string dirPath in Directory.GetDirectories(path, "*", SearchOption.AllDirectories))
+            {
+                Directory.Delete(dirPath);
+            }
+        }
+        public static void CopyFilesRecursively(string sourcePath, string targetPath)
+        {
+            //Now Create all of the directories
+            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+            }
+
+            //Copy all the files & Replaces any files with the same name
+            foreach (string newPath in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
             }
         }
     }
