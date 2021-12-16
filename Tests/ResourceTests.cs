@@ -104,6 +104,13 @@ namespace Point.Collections.Tests
                     var obj = info.LoadAsset(item);
                     Assert.NotNull(obj.Asset);
 
+                    if (obj.Asset is AudioClip audioClip)
+                    {
+                        $"{audioClip.loadState}".ToLog();
+                        audioClip.LoadAudioData();
+                        $"{audioClip.loadState}".ToLog();
+                    }
+
                     obj.Reserve();
                 }
 

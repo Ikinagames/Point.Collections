@@ -27,7 +27,6 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Networking;
 
