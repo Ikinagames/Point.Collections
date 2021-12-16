@@ -26,6 +26,7 @@ using Unity.IO.LowLevel.Unsafe;
 namespace Point.Collections.IO
 {
     [BurstCompatible]
+    [NativeContainer]
     public struct NativeFileStream : IValidation, IDisposable
     {
         [NativeDisableUnsafePtrRestriction] private unsafe ReadCommand* m_Command;
@@ -36,7 +37,7 @@ namespace Point.Collections.IO
         {
             return File.ReadAllBytes(path);
         }
-        [BurstCompatible]
+        [NotBurstCompatible]
         public TReader ReadAsync<TReader>(string path)
             where TReader : unmanaged, INativeReader
         {

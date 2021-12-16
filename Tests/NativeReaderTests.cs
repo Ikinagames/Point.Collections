@@ -20,7 +20,7 @@ namespace Point.Collections.Tests
 
             yield return new WaitUntil(() => rdr.IsReadable);
 
-            string txt = rdr.ReadData<string>();
+            string txt = rdr.ReadString();
 
             Debug.Log($"rdr: {txt}");
         }

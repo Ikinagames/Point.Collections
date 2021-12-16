@@ -27,56 +27,77 @@ namespace Point.Collections.IO.LowLevel
 {
     public struct UnsafeFileReader : INativeReader, IValidation
     {
-        private ReadHandle m_Handle;
-        [NativeDisableUnsafePtrRestriction] private unsafe byte* m_Data;
-        private long m_Size;
+        private ReadHandle handle;
+        [NativeDisableUnsafePtrRestriction] private unsafe byte* data;
+        private long size;
 
         public bool IsReadable
         {
             get
             {
-                return m_Handle.Status != ReadStatus.InProgress;
+                return handle.Status != ReadStatus.InProgress;
             }
         }
 
         void INativeReader.Initialize(ReadHandle handle, ReadCommand cmd)
         {
-            m_Handle = handle;
+            this.handle = handle;
             unsafe
             {
-                m_Data = (byte*)cmd.Buffer;
+                data = (byte*)cmd.Buffer;
             }
-            m_Size = cmd.Size;
+            size = cmd.Size;
         }
 
         public bool IsValid()
         {
             unsafe
             {
-                if (m_Data == null) return false;
+                if (data == null) return false;
             }
 
             return true;
         }
 
-        public unsafe byte* GetData() => m_Data;
-
-        public T ReadData<T>()
+        public unsafe byte* UnsafeGetData() => data;
+        public byte[] GetData()
         {
-            object data;
+            byte[] bytes = new byte[size];
             unsafe
             {
-                if (TypeHelper.TypeOf<T>.Type.Equals(TypeHelper.TypeOf<string>.Type))
+                fixed (byte* buffer = bytes)
                 {
-                    data = Encoding.Default.GetString(m_Data, (int)m_Size);
-                }
-                else
-                {
-                    data = Marshal.PtrToStructure<T>((IntPtr)m_Data);
+                    UnsafeUtility.MemCpy(buffer, data, size);
                 }
             }
 
-            return (T)data;
+            return bytes;
+        }
+
+        public string ReadString()
+        {
+            string data;
+            unsafe
+            {
+                data = Encoding.Default.GetString(this.data, (int)size);
+            }
+
+            return data;
+        }
+        public T ReadData<T>() where T : unmanaged
+        {
+#if DEBUG_MODE
+            if (UnsafeUtility.SizeOf<T>() != size)
+            {
+                throw new InvalidCastException($"binary size is not matched. " +
+                    $"expected {size} but {UnsafeUtility.SizeOf<T>()}({TypeHelper.TypeOf<T>.ToString()})");
+            }
+#endif
+            unsafe
+            {
+                UnsafeUtility.CopyPtrToStructure<T>(this.data, out T output);
+                return output;
+            }
         }
     }
 }

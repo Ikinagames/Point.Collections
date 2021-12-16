@@ -17,13 +17,13 @@
 #define DEBUG_MODE
 #endif
 
-#if UNITY_EDITOR
-#endif
-
 using System;
 
 namespace Point.Collections
 {
+    /// <summary>
+    /// <see cref="StaticScriptableObject{T}"/> 의 데이터 저장 경로를 지정할 수 있습니다.
+    /// </summary>
     public sealed class AssetPathAttribute : Attribute
     {
         public string Path;
