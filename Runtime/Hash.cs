@@ -26,6 +26,7 @@ namespace Point.Collections
     [Serializable]
     public struct Hash : IEquatable<Hash>
     {
+        public static Hash Empty => new Hash(0);
         public static Hash NewHash()
         {
             Guid guid = Guid.NewGuid();
@@ -121,5 +122,7 @@ namespace Point.Collections
         {
             return new Hash(x.m_Value | y.m_Value);
         }
+
+        public static implicit operator uint(Hash hash) => hash.m_Value;
     }
 }
