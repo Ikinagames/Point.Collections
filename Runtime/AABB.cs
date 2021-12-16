@@ -135,72 +135,17 @@ namespace Point.Collections
             Encapsulate(aabb.center + aabb.extents);
         }
 
-        public AABB Rotation(in quaternion rot, in float3 scale) => CalculateRotationWithVertices(in this, in rot, in scale);
-
-        private static AABB CalculateRotation(in AABB aabb, in quaternion quaternion)
+        public AABB Rotation(in quaternion rot, in float3 scale)
         {
-            float3
-                originCenter = aabb.center,
-                originExtents = aabb.extents,
-                originMin = (-originExtents + originCenter),
-                originMax = (originExtents + originCenter);
-            float4x4 trMatrix = float4x4.TRS(originCenter, quaternion, originExtents);
-
-            float3
-                minPos = math.mul(trMatrix, new float4(-originExtents * 2, 1)).xyz,
-                maxPos = math.mul(trMatrix, new float4(originExtents * 2, 1)).xyz;
-
-            AABB temp = new AABB(originCenter, float3.zero);
-
-            //temp.SetMinMax(
-            //    originMin - math.abs(originMin - minPos),
-            //    originMax + math.abs(originMax - maxPos));
-
-            // TODO : 최소 width, height 값이 설정되지않아 무한대로 축소함. 수정할 것.
-            temp.SetMinMax(
-                originMin + (minPos - originMin),
-                originMax + (maxPos - originMax));
-
-            //temp.SetMinMax(
-            //    math.min(originMin + (minPos - originMin), limitMinf),
-            //    math.max(originMax + (maxPos - originMax), limitMaxf));
-
-            return temp;
+            AABB result;
+            unsafe
+            {
+                Burst.BurstMath.aabb_calculateRotationWithVertices(in this, in rot, in scale, &result);
+            }
+            
+            return result;
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static AABB CalculateRotationWithVertices(in AABB aabb, in quaternion quaternion, in float3 scale)
-        {
-            float3
-                originCenter = aabb.center;
-            //originExtents = aabb.extents;
-            //float4x4 trMatrix = float4x4.TRS(originCenter, quaternion, originExtents);
-            float4x4 trMatrix = float4x4.TRS(originCenter, quaternion, scale * .5f);
 
-            AABB temp = new AABB(originCenter, float3.zero);
-
-            float3
-                min = aabb.min,
-                max = aabb.max,
-
-                a1 = new float3(min.x, max.y, min.z),
-                a2 = new float3(max.x, max.y, min.z),
-                a3 = new float3(max.x, min.y, min.z),
-
-                b1 = new float3(max.x, min.y, max.z),
-                b3 = new float3(min.x, max.y, max.z),
-                b4 = new float3(min.x, min.y, max.z);
-
-            temp.Encapsulate(math.mul(trMatrix, new float4((min - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(math.mul(trMatrix, new float4((a1 - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(math.mul(trMatrix, new float4((a2 - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(math.mul(trMatrix, new float4((a3 - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(math.mul(trMatrix, new float4((b1 - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(math.mul(trMatrix, new float4((max - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(math.mul(trMatrix, new float4((b3 - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(math.mul(trMatrix, new float4((b4 - originCenter) * 2, 1)).xyz);
-
-            return temp;
-        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NativeArray<float3> GetVertices(Allocator allocator)
         {
@@ -215,19 +160,6 @@ namespace Point.Collections
             temp[6] = new float3(min.x, max.y, max.z);
             temp[7] = new float3(min.x, min.y, max.z);
             return temp;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void GetVertices(NativeArray<float3> temp)
-        {
-            temp[0] = min;
-            temp[1] = new float3(min.x, max.y, min.z);
-            temp[2] = new float3(max.x, max.y, min.z);
-            temp[3] = new float3(max.x, min.y, min.z);
-
-            temp[4] = new float3(max.x, min.y, max.z);
-            temp[5] = max;
-            temp[6] = new float3(min.x, max.y, max.z);
-            temp[7] = new float3(min.x, min.y, max.z);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static float3[] GetVertices(in AABB aabb)
@@ -311,7 +243,7 @@ namespace Point.Collections
         /// <param name="p3">Vertex 3 of the triangle.</param>
         /// <param name="ray">The ray to test hit for.</param>
         /// <returns><c>true</c> when the ray hits the triangle, otherwise <c>false</c></returns>
-        private static bool IntersectTriangle(float3 p1, float3 p2, float3 p3, Ray ray, out float distance)
+        private static bool IntersectTriangle(in float3 p1, in float3 p2, in float3 p3, Ray ray, out float distance)
         {
             distance = 0;
             // Vectors from p1 to p2/p3 (edges)

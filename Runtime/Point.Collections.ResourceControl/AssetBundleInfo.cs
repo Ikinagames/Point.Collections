@@ -115,15 +115,12 @@ namespace Point.Collections.ResourceControl
                 throw new Exception();
             }
 
-            UnsafeHashMap<Hash, UnsafeAssetInfo>.Enumerator iter = Ref.assets.GetEnumerator();
-            while (iter.MoveNext())
+            for (int i = 0; i < Ref.assets.Length; i++)
             {
-                KeyValue<Hash, UnsafeAssetInfo> temp = iter.Current;
-
-                if (temp.Value.referencedCount > 0)
+                if (Ref.assets[i].referencedCount > 0)
                 {
                     Point.LogError(Point.LogChannel.Collections,
-                        $"Asset({temp.Key}) has {temp.Value.referencedCount} of references that didn\'t reserved. " +
+                        $"Asset({Ref.assets[i].key}) has {Ref.assets[i].referencedCount} of references that didn\'t reserved. " +
                         $"This is not allowed.");
                 }
             }
@@ -143,11 +140,13 @@ namespace Point.Collections.ResourceControl
                 return Array.Empty<string>();
             }
 
-            var values = Ref.assets.GetValueArray(AllocatorManager.Temp);
-
-            string[] arr = values.Select(other => other.m_Key.ToString()).ToArray();
-            values.Dispose();
-
+            var assets = Ref.assets;
+            string[] arr = new string[assets.Length];
+            for (int i = 0; i < arr.Length; i++)
+            {
+                arr[i] = assets[i].key.ToString();
+            }
+            
             return arr;
         }
         public AssetInfo LoadAsset(in FixedString4096Bytes key)
@@ -163,10 +162,7 @@ namespace Point.Collections.ResourceControl
                     throw new Exception();
                 }
 
-                Hash key = asset.key;
-
-                //ResourceManager.Reserve(asset.m_BundlePointer, asset.key);
-                BurstResourceFunction.reserve_assets(pointer, &key, 1);
+                ResourceManager.Reserve(pointer, in asset.key);
             }
         }
 

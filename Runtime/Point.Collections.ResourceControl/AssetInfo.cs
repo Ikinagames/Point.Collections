@@ -52,11 +52,7 @@ namespace Point.Collections.ResourceControl
         {
             unsafe
             {
-                fixed (Hash* hash = &key)
-                {
-                    BurstResourceFunction.reserve_assets(bundlePointer, hash, 1);
-                }
-                //ResourceManager.Reserve(m_BundlePointer, key);
+                ResourceManager.Reserve(bundlePointer, in key);
             }
         }
     }

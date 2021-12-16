@@ -24,19 +24,19 @@ namespace Point.Collections.ResourceControl.LowLevel
     [BurstCompile(CompileSynchronously = true)]
     internal static unsafe class BurstResourceFunction
     {
-        [BurstCompile(CompileSynchronously = true)]
-        public static void reserve_assets(UnsafeAssetBundleInfo* bundle, Hash* key, in int count)
-        {
-            int index = bundle->index;
+        //[BurstCompile(CompileSynchronously = true)]
+        //public static void reserve_assets(UnsafeAssetBundleInfo* bundle, Hash* key, in int count)
+        //{
+        //    int index = bundle->index;
 
-            for (int i = 0; i < count; i++)
-            {
-                UnsafeAssetInfo info = bundle->assets[key[i]];
+        //    for (int i = 0; i < count; i++)
+        //    {
+        //        UnsafeAssetInfo info = bundle->assets[key[i]];
 
-                info.referencedCount--;
+        //        info.referencedCount--;
 
-                bundle->assets[key[i]] = info;
-            }
-        }
+        //        bundle->assets[key[i]] = info;
+        //    }
+        //}
     }
 }

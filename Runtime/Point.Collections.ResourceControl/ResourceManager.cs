@@ -26,6 +26,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -41,6 +42,13 @@ namespace Point.Collections.ResourceControl
 
         private NativeList<UnsafeAssetBundleInfo> m_AssetBundleInfos;
         private List<AssetContainer> m_AssetBundles;
+
+        private JobHandle 
+            m_GlobalJobHandle,
+            m_MapingJobHandle;
+
+        // key = path, value = bundleIndex
+        private NativeHashMap<Hash, Mapped> m_MappedAssets;
 
         internal sealed class AssetContainer
         {
@@ -86,14 +94,29 @@ namespace Point.Collections.ResourceControl
                 m_Assets.Clear();
             }
         }
+        internal struct Mapped
+        {
+            public int bundleIndex;
+            public int assetIndex;
+
+            public Mapped(int bundle, int asset)
+            {
+                bundleIndex = bundle;
+                assetIndex = asset;
+            }
+        }
 
         protected override void OnInitialze()
         {
             m_AssetBundleInfos = new NativeList<UnsafeAssetBundleInfo>(AllocatorManager.Persistent);
             m_AssetBundles = new List<AssetContainer>();
+
+            m_MappedAssets = new NativeHashMap<Hash, Mapped>(1024, AllocatorManager.Persistent);
         }
         protected override void OnShutdown()
         {
+            m_MapingJobHandle.Complete();
+
             for (int i = 0; i < m_AssetBundleInfos.Length; i++)
             {
                 m_AssetBundleInfos[i].Dispose();
@@ -101,9 +124,11 @@ namespace Point.Collections.ResourceControl
 
             m_AssetBundleInfos.Dispose();
             m_AssetBundles = null;
+
+            m_MappedAssets.Dispose();
         }
 
-        private static int GetUnusedAssetBundleBuffer()
+        private int GetUnusedAssetBundleBuffer()
         {
             for (int i = 0; i < Instance.m_AssetBundleInfos.Length; i++)
             {
@@ -114,7 +139,7 @@ namespace Point.Collections.ResourceControl
             }
             return -1;
         }
-        private static bool TryGetAssetBundleWithPath(string path, out AssetBundleInfo assetBundle)
+        private bool TryGetAssetBundleWithPath(string path, out AssetBundleInfo assetBundle)
         {
             FixedString4096Bytes temp = path;
             for (int i = 0; i < Instance.m_AssetBundleInfos.Length; i++)
@@ -129,7 +154,7 @@ namespace Point.Collections.ResourceControl
             assetBundle = default;
             return false;
         }
-        private static bool TryGetAssetBundleWithBundle(AssetBundle bundle, out AssetBundleInfo assetBundle)
+        private bool TryGetAssetBundleWithBundle(AssetBundle bundle, out AssetBundleInfo assetBundle)
         {
             for (int i = 0; i < Instance.m_AssetBundles.Count; i++)
             {
@@ -147,7 +172,6 @@ namespace Point.Collections.ResourceControl
 
         public static AssetBundleInfo RegisterAssetBundlePath(string path)
         {
-            
             if (path.StartsWith("Assets"))
             {
                 path = path.Substring(6, path.Length - 6);
@@ -156,11 +180,16 @@ namespace Point.Collections.ResourceControl
             string uri = c_FileUri + Application.dataPath + path;
             return RegisterAssetBundleUri(uri);
         }
+        public static AssetBundleInfo RegisterAssetBundleAbsolutePath(string path)
+        {
+            string uri = c_FileUri + path;
+            return RegisterAssetBundleUri(uri);
+        }
         public static AssetBundleInfo RegisterAssetBundleUri(string uri, uint crc = 0)
         {
-            if (TryGetAssetBundleWithPath(uri, out var bundle)) return bundle;
+            if (Instance.TryGetAssetBundleWithPath(uri, out var bundle)) return bundle;
 
-            int index = GetUnusedAssetBundleBuffer();
+            int index = Instance.GetUnusedAssetBundleBuffer();
             if (index < 0)
             {
                 index = Instance.m_AssetBundles.Count;
@@ -192,9 +221,9 @@ namespace Point.Collections.ResourceControl
         }
         public static AssetBundleInfo RegisterAssetBundle(AssetBundle assetBundle)
         {
-            if (TryGetAssetBundleWithBundle(assetBundle, out var bundle)) return bundle;
+            if (Instance.TryGetAssetBundleWithBundle(assetBundle, out var bundle)) return bundle;
 
-            int index = GetUnusedAssetBundleBuffer();
+            int index = Instance.GetUnusedAssetBundleBuffer();
             if (index < 0)
             {
                 index = Instance.m_AssetBundles.Count;
@@ -311,42 +340,52 @@ namespace Point.Collections.ResourceControl
 
             if (!p->assets.IsCreated)
             {
-                p->assets = new UnsafeHashMap<Hash, UnsafeAssetInfo>(names.Length, AllocatorManager.Persistent);
+                p->assets = new UnsafeList<UnsafeAssetInfo>(names.Length, AllocatorManager.Persistent, NativeArrayOptions.UninitializedMemory);
+                p->assets.Length = names.Length;
             }
             else
             {
                 p->assets.Clear();
             }
 
+            Instance.m_MapingJobHandle.Complete();
+
             UpdateAssetInfoJob job = new UpdateAssetInfoJob()
             {
+                m_BundleIndex = p->index,
                 m_Names = names,
-                m_HashMap = p->assets.AsParallelWriter()
+                m_HashMap = p->assets.Ptr,
+                m_MappedAssets = Instance.m_MappedAssets.AsParallelWriter()
             };
 
-            JobHandle handle = job.Schedule(names.Length, 64);
+            JobHandle handle = job.Schedule(names.Length, 64, Instance.m_MapingJobHandle);
             p->m_JobHandle = JobHandle.CombineDependencies(p->m_JobHandle, handle);
+
+            Instance.m_MapingJobHandle = JobHandle.CombineDependencies(Instance.m_MapingJobHandle, handle);
 
             return handle;
         }
 
         [BurstCompile(CompileSynchronously = true)]
-        private struct UpdateAssetInfoJob : IJobParallelFor
+        private unsafe struct UpdateAssetInfoJob : IJobParallelFor
         {
+            [ReadOnly] public int m_BundleIndex;
             [ReadOnly, DeallocateOnJobCompletion] public NativeArray<FixedString4096Bytes> m_Names;
-            [WriteOnly] public UnsafeHashMap<Hash, UnsafeAssetInfo>.ParallelWriter m_HashMap;
+            [WriteOnly, NativeDisableUnsafePtrRestriction] public UnsafeAssetInfo* m_HashMap;
+            [WriteOnly] public NativeHashMap<Hash, Mapped>.ParallelWriter m_MappedAssets;
 
             public void Execute(int i)
             {
                 UnsafeAssetInfo assetInfo = new UnsafeAssetInfo()
                 {
-                    m_Key = m_Names[i],
+                    key = m_Names[i],
                     loaded = false,
                 };
 
                 Hash hash = new Hash(m_Names[i]);
 
-                m_HashMap.TryAdd(hash, assetInfo);
+                UnsafeUtility.WriteArrayElement(m_HashMap, i, assetInfo);
+                m_MappedAssets.TryAdd(hash, new Mapped(m_BundleIndex, i));
             }
         }
 
@@ -359,15 +398,11 @@ namespace Point.Collections.ResourceControl
                 throw new InvalidOperationException();
             }
 
-            int index = bundleP->index;
-            AssetContainer bundle = Instance.m_AssetBundles[index];
-
             string stringKey = key.ToString();
             Hash hash = new Hash(stringKey);
-            if (!bundleP->assets.TryGetValue(hash, out UnsafeAssetInfo assetInfo))
-            {
-                throw new Exception();
-            }
+            Mapped index = Instance.m_MappedAssets[hash];
+
+            ref UnsafeAssetInfo assetInfo = ref bundleP->assets.ElementAt(index.assetIndex);
 
             if (!assetInfo.loaded)
             {
@@ -376,8 +411,7 @@ namespace Point.Collections.ResourceControl
             }
             else assetInfo.referencedCount++;
 
-            bundleP->assets[hash] = assetInfo;
-
+            AssetContainer bundle = Instance.m_AssetBundles[index.bundleIndex];
             UnityEngine.Object obj = bundle.LoadAsset(stringKey);
 
             AssetInfo asset = new AssetInfo(bundleP, hash);
@@ -390,13 +424,8 @@ namespace Point.Collections.ResourceControl
                 throw new InvalidOperationException();
             }
 
-            int index = bundleP->index;
-            AssetContainer bundle = Instance.m_AssetBundles[index];
-
-            if (!bundleP->assets.TryGetValue(key, out UnsafeAssetInfo assetInfo))
-            {
-                throw new Exception("1");
-            }
+            Mapped index = Instance.m_MappedAssets[key];
+            ref UnsafeAssetInfo assetInfo = ref bundleP->assets.ElementAt(index.assetIndex);
 
             if (!assetInfo.loaded)
             {
@@ -404,7 +433,6 @@ namespace Point.Collections.ResourceControl
             }
 
             assetInfo.referencedCount--;
-            bundleP->assets[key] = assetInfo;
         }
 
         #endregion

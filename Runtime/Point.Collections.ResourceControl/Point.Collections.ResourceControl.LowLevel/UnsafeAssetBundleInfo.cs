@@ -40,7 +40,7 @@ namespace Point.Collections.ResourceControl.LowLevel
         public JobHandle m_JobHandle;
 
         [NativeDisableUnsafePtrRestriction]
-        public UnsafeHashMap<Hash, UnsafeAssetInfo> assets;
+        public UnsafeList<UnsafeAssetInfo> assets;
 
         public UnsafeAssetBundleInfo(int index)
         {

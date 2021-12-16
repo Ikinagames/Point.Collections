@@ -24,11 +24,11 @@ namespace Point.Collections.ResourceControl.LowLevel
 {
     internal struct UnsafeAssetInfo : IEquatable<UnsafeAssetInfo>
     {
-        public FixedString4096Bytes m_Key;
+        public FixedString4096Bytes key;
         public bool loaded;
 
         public uint referencedCount;
 
-        public bool Equals(UnsafeAssetInfo other) => m_Key.Equals(other.m_Key);
+        public bool Equals(UnsafeAssetInfo other) => key.Equals(other.key);
     }
 }

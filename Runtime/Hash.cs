@@ -17,6 +17,7 @@
 #define DEBUG_MODE
 #endif
 
+using Newtonsoft.Json;
 using System;
 using Unity.Collections;
 using UnityEngine;
@@ -24,6 +25,7 @@ using UnityEngine;
 namespace Point.Collections
 {
     [Serializable]
+    [JsonConverter(typeof(IO.Json.HashJsonConverter))]
     public struct Hash : IEquatable<Hash>
     {
         public static Hash Empty => new Hash(0);
