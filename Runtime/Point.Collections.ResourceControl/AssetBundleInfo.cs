@@ -45,6 +45,13 @@ namespace Point.Collections.ResourceControl
             }
         }
 
+        //public AssetInfo this[FixedString512Bytes key]
+        //{
+        //    get
+        //    {
+
+        //    }
+        //}
         public bool IsLoaded
         {
             get
@@ -54,7 +61,7 @@ namespace Point.Collections.ResourceControl
                     throw new InvalidOperationException();
                 }
 
-                return Ref.m_IsLoaded;
+                return Ref.loaded;
             }
         }
         [NotBurstCompatible]
@@ -67,7 +74,7 @@ namespace Point.Collections.ResourceControl
                     throw new InvalidOperationException();
                 }
 
-                if (!Ref.m_IsLoaded) return null;
+                if (!Ref.loaded) return null;
 
                 return ResourceManager.GetAssetBundle(Ref.index).AssetBundle;
             }
@@ -87,8 +94,12 @@ namespace Point.Collections.ResourceControl
                 throw new Exception();
             }
 
-            return ResourceManager.LoadAssetBundle(ref Ref);
+            unsafe
+            {
+                return ResourceManager.LoadAssetBundle(pointer);
+            }
         }
+        [NotBurstCompatible]
         public AsyncOperation LoadAsync()
         {
             if (!IsValid())
@@ -117,10 +128,10 @@ namespace Point.Collections.ResourceControl
 
             for (int i = 0; i < Ref.assets.Length; i++)
             {
-                if (Ref.assets[i].referencedCount > 0)
+                if (Ref.assets[i].checkSum != 0)
                 {
                     Point.LogError(Point.LogChannel.Collections,
-                        $"Asset({Ref.assets[i].key}) has {Ref.assets[i].referencedCount} of references that didn\'t reserved. " +
+                        $"Asset({Ref.assets[i].key}) has references that didn\'t reserved. " +
                         $"This is not allowed.");
                 }
             }
@@ -151,7 +162,10 @@ namespace Point.Collections.ResourceControl
         }
         public AssetInfo LoadAsset(in FixedString4096Bytes key)
         {
-            return ResourceManager.LoadAsset(ref Ref, in key);
+            unsafe
+            {
+                return ResourceManager.LoadAsset(pointer, in key);
+            }
         }
         public void Reserve(ref AssetInfo asset)
         {

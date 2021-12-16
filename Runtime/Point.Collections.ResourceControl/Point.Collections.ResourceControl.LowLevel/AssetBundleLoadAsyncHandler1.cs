@@ -43,7 +43,7 @@ namespace Point.Collections.ResourceControl.LowLevel
 
         private void M_WebRequest_completed(UnityEngine.AsyncOperation obj)
         {
-            m_Bundle->m_IsLoaded = true;
+            m_Bundle->loaded = true;
             //byte[] assetBundleBytes = m_WebRequest.downloadHandler.data;
             AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(m_WebRequest);
 

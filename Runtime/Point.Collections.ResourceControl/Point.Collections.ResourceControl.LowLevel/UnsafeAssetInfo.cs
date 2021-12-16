@@ -27,7 +27,7 @@ namespace Point.Collections.ResourceControl.LowLevel
         public FixedString4096Bytes key;
         public bool loaded;
 
-        public uint referencedCount;
+        public Hash checkSum;
 
         public bool Equals(UnsafeAssetInfo other) => key.Equals(other.key);
     }

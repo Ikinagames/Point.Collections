@@ -36,7 +36,7 @@ namespace Point.Collections.ResourceControl.LowLevel
         public FixedString4096Bytes uri;
         public uint crc;
 
-        public bool m_IsLoaded;
+        public bool loaded;
         public JobHandle m_JobHandle;
 
         [NativeDisableUnsafePtrRestriction]
@@ -51,7 +51,7 @@ namespace Point.Collections.ResourceControl.LowLevel
             uri = string.Empty;
             crc = 0;
 
-            m_IsLoaded = false;
+            loaded = false;
             m_JobHandle = default;
 
             assets = default;

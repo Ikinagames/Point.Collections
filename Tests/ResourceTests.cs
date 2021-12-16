@@ -1,6 +1,8 @@
 ﻿using NUnit.Framework;
 using Point.Collections.ResourceControl;
 using System.Collections;
+using System.IO;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -39,7 +41,7 @@ namespace Point.Collections.Tests
             }
         }
         [Test]
-        public void AssetBundleRegisterWithoutLoadedTest()
+        public void AssetBundleRegisterWithoutLoadedTestA()
         {
             var names = ResourceAddresses.Instance.StreamingAssetBundles;
             $"loading bundles {names.Count}".ToLog();
@@ -107,6 +109,68 @@ namespace Point.Collections.Tests
 
                 Assert.IsTrue(info.IsLoaded);
                 Assert.NotNull(info.AssetBundle);
+
+                info.Unload(true);
+
+                Assert.IsFalse(info.IsLoaded);
+                Assert.Null(info.AssetBundle);
+
+                ResourceManager.UnregisterAssetBundle(info);
+            }
+        }
+
+        [Test]
+        public void AssetBundleCheckSumTest()
+        {
+            var names = ResourceAddresses.Instance.StreamingAssetBundles;
+            for (int i = 0; i < names.Count; i++)
+            {
+                AssetBundleInfo info = ResourceManager.RegisterAssetBundlePath(names[i].AssetPath);
+                info.Load();
+
+                string[] assetNames = info.GetAllAssetNames();
+                foreach (var item in assetNames)
+                {
+                    Debug.Log(item);
+
+                    var obj = info.LoadAsset(item);
+                    Assert.NotNull(obj.Asset);
+                }
+
+                Assert.IsTrue(info.IsLoaded);
+                Assert.NotNull(info.AssetBundle);
+
+                info.Unload(true);
+                LogAssert.Expect(LogType.Error, new Regex(@""));
+
+                ResourceManager.UnregisterAssetBundle(info);
+            }
+        }
+
+        [Test]
+        public void AssetBundleUnregisterErrorTest()
+        {
+            var names = ResourceAddresses.Instance.StreamingAssetBundles;
+            for (int i = 0; i < names.Count; i++)
+            {
+                AssetBundleInfo info = ResourceManager.RegisterAssetBundlePath(names[i].AssetPath);
+                info.Load();
+
+                string[] assetNames = info.GetAllAssetNames();
+                foreach (var item in assetNames)
+                {
+                    Debug.Log(item);
+
+                    var obj = info.LoadAsset(item);
+                    Assert.NotNull(obj.Asset);
+
+                    obj.Reserve();
+                }
+
+                Assert.IsTrue(info.IsLoaded);
+                Assert.NotNull(info.AssetBundle);
+
+                Assert.Throws(typeof(InvalidDataException), () => ResourceManager.UnregisterAssetBundle(info));
 
                 info.Unload(true);
 
