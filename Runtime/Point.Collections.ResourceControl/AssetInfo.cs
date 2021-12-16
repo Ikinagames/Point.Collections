@@ -25,7 +25,7 @@ namespace Point.Collections.ResourceControl
     public struct AssetInfo
     {
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe readonly UnsafeAssetBundleInfo* m_BundlePointer;
+        internal unsafe readonly UnsafeAssetBundleInfo* bundlePointer;
 
         internal readonly Hash key;
 
@@ -35,7 +35,7 @@ namespace Point.Collections.ResourceControl
             {
                 unsafe
                 {
-                    var bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer->index);
+                    var bundleInfo = ResourceManager.GetAssetBundle(bundlePointer->index);
                     return bundleInfo.m_Assets[key];
                 }
             }
@@ -43,7 +43,7 @@ namespace Point.Collections.ResourceControl
 
         internal unsafe AssetInfo(UnsafeAssetBundleInfo* bundle, Hash key)
         {
-            m_BundlePointer = bundle;
+            bundlePointer = bundle;
             
             this.key = key;
         }
@@ -54,7 +54,7 @@ namespace Point.Collections.ResourceControl
             {
                 fixed (Hash* hash = &key)
                 {
-                    BurstResourceFunction.reserve_assets(m_BundlePointer, hash, 1);
+                    BurstResourceFunction.reserve_assets(bundlePointer, hash, 1);
                 }
                 //ResourceManager.Reserve(m_BundlePointer, key);
             }

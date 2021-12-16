@@ -32,16 +32,16 @@ namespace Point.Collections.ResourceControl
         public static AssetBundleInfo Invalid => default(AssetBundleInfo);
 
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe readonly UnsafeAssetBundleInfo* m_Pointer;
-        internal readonly uint m_Generation;
+        internal unsafe readonly UnsafeAssetBundleInfo* pointer;
+        internal readonly uint generation;
 
         internal unsafe ref UnsafeAssetBundleInfo Ref
         {
             get
             {
-                m_Pointer->m_JobHandle.Complete();
+                pointer->m_JobHandle.Complete();
 
-                return ref *m_Pointer;
+                return ref *pointer;
             }
         }
 
@@ -75,8 +75,8 @@ namespace Point.Collections.ResourceControl
 
         internal unsafe AssetBundleInfo(UnsafeAssetBundleInfo* p, uint generation)
         {
-            m_Pointer = p;
-            m_Generation = generation;
+            pointer = p;
+            this.generation = generation;
         }
 
         [NotBurstCompatible]
@@ -89,7 +89,7 @@ namespace Point.Collections.ResourceControl
 
             return ResourceManager.LoadAssetBundle(ref Ref);
         }
-        public void LoadAsync()
+        public AsyncOperation LoadAsync()
         {
             if (!IsValid())
             {
@@ -98,7 +98,7 @@ namespace Point.Collections.ResourceControl
 
             unsafe
             {
-                ResourceManager.LoadAssetBundleAsync(m_Pointer);
+                return ResourceManager.LoadAssetBundleAsync(pointer);
             }
         }
 
@@ -158,7 +158,7 @@ namespace Point.Collections.ResourceControl
         {
             unsafe
             {
-                if (asset.m_BundlePointer != m_Pointer)
+                if (asset.bundlePointer != pointer)
                 {
                     throw new Exception();
                 }
@@ -166,7 +166,7 @@ namespace Point.Collections.ResourceControl
                 Hash key = asset.key;
 
                 //ResourceManager.Reserve(asset.m_BundlePointer, asset.key);
-                BurstResourceFunction.reserve_assets(m_Pointer, &key, 1);
+                BurstResourceFunction.reserve_assets(pointer, &key, 1);
             }
         }
 
@@ -175,7 +175,7 @@ namespace Point.Collections.ResourceControl
         {
             unsafe
             {
-                return m_Pointer == other.m_Pointer;
+                return pointer == other.pointer;
             }
         }
     }

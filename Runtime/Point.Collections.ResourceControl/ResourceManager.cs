@@ -223,7 +223,7 @@ namespace Point.Collections.ResourceControl
             AssetBundleInfo bundleInfo = GetAssetBundleInfo(in index);
             unsafe
             {
-                UpdateAssetInfos(bundleInfo.m_Pointer, assetBundle);
+                UpdateAssetInfos(bundleInfo.pointer, assetBundle);
             }
 
             return bundleInfo;
@@ -282,14 +282,14 @@ namespace Point.Collections.ResourceControl
 
             return bundle;
         }
-        internal static unsafe void LoadAssetBundleAsync(UnsafeAssetBundleInfo* p)
+        internal static unsafe AsyncOperation LoadAssetBundleAsync(UnsafeAssetBundleInfo* p)
         {
             int index = p->index;
             var request = UnityWebRequestAssetBundle.GetAssetBundle(p->uri.ToString(), p->crc);
             //AssetBundle bundle = AssetBundle.LoadFromFile(p->uri.ToString());
 
             var handler = new AssetBundleLoadAsyncHandler();
-            handler.Initialize(p, GetAssetBundle(in index), request);
+            return handler.Initialize(p, GetAssetBundle(in index), request);
         }
 
         internal static unsafe void UnloadAssetBundle(ref UnsafeAssetBundleInfo p, bool unloadAllLoadedObjects)
