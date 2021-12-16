@@ -19,6 +19,7 @@
 
 using Point.Collections.ResourceControl.LowLevel;
 using System;
+using System.Linq;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
@@ -28,11 +29,13 @@ namespace Point.Collections.ResourceControl
     [BurstCompatible]
     public struct AssetBundleInfo : IValidation, IEquatable<AssetBundleInfo>
     {
-        public static AssetBundleInfo Invalid => new AssetBundleInfo(IntPtr.Zero);
+        public static AssetBundleInfo Invalid => new AssetBundleInfo(IntPtr.Zero, 0);
 
         [NativeDisableUnsafePtrRestriction]
         internal unsafe readonly IntPtr m_Pointer;
-        private unsafe ref InternalAssetBundleInfo Ref
+        internal readonly uint m_Generation;
+
+        internal unsafe ref InternalAssetBundleInfo Ref
         {
             get
             {
@@ -67,13 +70,14 @@ namespace Point.Collections.ResourceControl
 
                 if (!Ref.m_IsLoaded) return null;
 
-                return ResourceManager.GetAssetBundle(Ref.m_Index);
+                return ResourceManager.GetAssetBundle(Ref.m_Index).AssetBundle;
             }
         }
 
-        internal AssetBundleInfo(IntPtr p)
+        internal AssetBundleInfo(IntPtr p, uint generation)
         {
             m_Pointer = p;
+            m_Generation = generation;
         }
 
         [NotBurstCompatible]
@@ -88,16 +92,53 @@ namespace Point.Collections.ResourceControl
         }
         public void Unload(bool unloadAllLoadedObjects)
         {
+#if DEBUG_MODE
             if (!IsValid())
             {
                 throw new Exception();
             }
 
+            UnsafeHashMap<Hash, InternalAssetInfo>.Enumerator iter = Ref.m_Assets.GetEnumerator();
+            while (iter.MoveNext())
+            {
+                KeyValue<Hash, InternalAssetInfo> temp = iter.Current;
+
+                if (temp.Value.m_ReferencedCount > 0)
+                {
+                    Point.LogError(Point.LogChannel.Collections,
+                        $"Asset({temp.Key}) has {temp.Value.m_ReferencedCount} of references that didn\'t reserved. " +
+                        $"This is not allowed.");
+                }
+            }
+#endif
             ResourceManager.UnloadAssetBundle(ref Ref, unloadAllLoadedObjects);
         }
 
-        //[NotBurstCompatible]
-        //public AssetBundleHandler LoadAsync() => ResourceManager.LoadAssetBundleAsync(Ref);
+        public string[] GetAllAssetNames()
+        {
+            var values = Ref.m_Assets.GetValueArray(AllocatorManager.Temp);
+
+            string[] arr = values.Select(other => other.m_Key.ToString()).ToArray();
+            values.Dispose();
+
+            return arr;
+        }
+        public AssetInfo LoadAsset(string key)
+        {
+            return ResourceManager.LoadAsset(ref Ref, key);
+        }
+        public void Reserve(AssetInfo asset)
+        {
+            unsafe
+            {
+                if (asset.m_BundlePointer != (InternalAssetBundleInfo*)m_Pointer.ToPointer())
+                {
+                    throw new Exception();
+                }
+
+                ResourceManager.Reserve(asset.m_BundlePointer, asset.m_Key);
+            }
+        }
 
         public bool IsValid() => !Equals(Invalid);
         public bool Equals(AssetBundleInfo other) => m_Pointer.Equals(other.m_Pointer);

@@ -1,6 +1,6 @@
 ﻿// Copyright 2021 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,24 +17,18 @@
 #define DEBUG_MODE
 #endif
 
-using UnityEngine;
 using System;
+using Unity.Collections;
 
-namespace Point.Collections.ResourceControl
+namespace Point.Collections.ResourceControl.LowLevel
 {
-    //[Serializable]
-    //public struct AssetID : IEquatable<AssetID>
-    //{
-    //    [SerializeField] private Hash m_Hash;
+    internal struct InternalAssetInfo : IEquatable<InternalAssetInfo>
+    {
+        public FixedString4096Bytes m_Key;
+        public bool m_IsLoaded;
 
-    //    public Hash Hash => m_Hash;
+        public uint m_ReferencedCount;
 
-    //    public AssetID(Hash hash)
-    //    {
-    //        m_Hash = hash;
-    //    }
-
-    //    public bool Equals(AssetID other) => m_Hash.Equals(other.m_Hash);
-    //    public override string ToString() => m_Hash.ToString();
-    //}
+        public bool Equals(InternalAssetInfo other) => m_Key.Equals(other.m_Key);
+    }
 }

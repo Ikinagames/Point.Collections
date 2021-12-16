@@ -25,9 +25,13 @@ using Unity.Jobs;
 namespace Point.Collections.ResourceControl.LowLevel
 {
     [BurstCompatible]
-    internal struct InternalAssetBundleInfo : IEquatable<InternalAssetBundleInfo>, IDisposable
+    internal struct InternalAssetBundleInfo : IValidation, IEquatable<InternalAssetBundleInfo>, IDisposable
     {
+        public static InternalAssetBundleInfo Invalid => new InternalAssetBundleInfo(-1);
+
         public readonly int m_Index;
+        public uint m_Generation;
+        public bool m_Using;
 
         public FixedString4096Bytes m_Path;
         public bool m_IsWebRequest;
@@ -41,6 +45,8 @@ namespace Point.Collections.ResourceControl.LowLevel
         public InternalAssetBundleInfo(int index)
         {
             m_Index = index;
+            m_Generation = 0;
+            m_Using = false;
 
             m_Path = string.Empty;
             m_IsWebRequest = false;
@@ -59,10 +65,7 @@ namespace Point.Collections.ResourceControl.LowLevel
             }
         }
         public bool Equals(InternalAssetBundleInfo other) => m_Index.Equals(other.m_Index);
-    }
-    internal struct InternalAssetInfo
-    {
-        public FixedString4096Bytes m_Key;
-        public bool m_IsLoaded;
+
+        public bool IsValid() => m_Index >= 0 && m_Using;
     }
 }

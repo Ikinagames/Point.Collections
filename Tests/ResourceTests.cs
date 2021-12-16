@@ -34,6 +34,8 @@ namespace Point.Collections.Tests
 
                 Assert.IsFalse(info.IsLoaded);
                 Assert.Null(info.AssetBundle);
+
+                ResourceManager.UnregisterAssetBundle(info);
             }
         }
         [Test]
@@ -53,58 +55,42 @@ namespace Point.Collections.Tests
 
                 Assert.IsFalse(info.IsLoaded);
                 Assert.Null(info.AssetBundle);
+
+                ResourceManager.UnregisterAssetBundle(info);
             }
         }
 
-        //[Test, Order(1)]
-        //public void a1_AssetBundleUnloadTest()
-        //{
-        //    var names = ResourceAddresses.Instance.TrackedAssetBundles;
-        //    for (int i = 0; i < names.Count; i++)
-        //    {
-        //        AssetBundleInfo info = ResourceManager.GetAssetBundleInfo(names[i].Name);
-        //        info.Unload(true);
-        //        $"{info.Name} : isloaded?{info.IsLoaded} : bundleNull?{info.AssetBundle == null}".ToLog();
-        //    }
+        [Test]
+        public void AssetBundleLoadAssetsTest()
+        {
+            var names = ResourceAddresses.Instance.StreamingAssetBundles;
+            for (int i = 0; i < names.Count; i++)
+            {
+                AssetBundleInfo info = ResourceManager.RegisterAssetBundle(names[i].AssetPath, false);
+                info.Load();
 
-        //    for (int i = 0; i < names.Count; i++)
-        //    {
-        //        AssetBundleInfo info = ResourceManager.GetAssetBundleInfo(names[i].Name);
-        //        Assert.IsFalse(info.IsLoaded, $"bundle({info.Name}) is not unloaded.");
-        //    }
-        //}
+                string[] assetNames = info.GetAllAssetNames();
+                foreach (var item in assetNames)
+                {
+                    Debug.Log(item);
 
-        //[UnityTest, Order(2)]
-        //public IEnumerator b0_AssetBundleLoadAsyncTest()
-        //{
-        //    var names = ResourceAddresses.Instance.TrackedAssetBundles;
-        //    for (int i = 0; i < names.Count; i++)
-        //    {
-        //        AssetBundleInfo info = ResourceManager.GetAssetBundleInfo(names[i].Name);
-        //        Assert.False(info.IsLoaded, "bundle is already loaded.");
+                    var obj = info.LoadAsset(item);
+                    Assert.NotNull(obj.Asset);
 
-        //        AssetBundleHandler handle = info.LoadAsync();
+                    obj.Reserve();
+                }
 
-        //        yield return new WaitUntil(() => handle.IsDone);
-        //        $"{info.Name} : {handle.AssetBundle != null}".ToLog();
-        //    }
-        //}
+                Assert.IsTrue(info.IsLoaded);
+                Assert.NotNull(info.AssetBundle);
 
-        //[Test]
-        //public void b1_()
-        //{
-        //    var names = ResourceAddresses.Instance.TrackedAssetBundles;
-        //    for (int i = 0; i < names.Count; i++)
-        //    {
-        //        AssetBundleInfo info = ResourceManager.GetAssetBundleInfo(names[i].Name);
-        //        Assert.IsTrue(info.IsLoaded, $"bundle(has {info.AssetBundle != null}) is not loaded.");
+                info.Unload(true);
 
-        //        foreach (var item in info.AssetBundle.GetAllAssetNames())
-        //        {
-        //            Debug.Log(item);
-        //        };
-        //    }
-        //}
+                Assert.IsFalse(info.IsLoaded);
+                Assert.Null(info.AssetBundle);
+
+                ResourceManager.UnregisterAssetBundle(info);
+            }
+        }
 
         //[UnityTearDown]
         //public IEnumerator TearDown()

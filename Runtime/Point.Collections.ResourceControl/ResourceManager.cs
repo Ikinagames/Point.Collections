@@ -13,6 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
 using Point.Collections.ResourceControl.LowLevel;
 using System;
 using System.Collections.Generic;
@@ -34,12 +38,42 @@ namespace Point.Collections.ResourceControl
         public override bool HideInInspector => true;
 
         private NativeList<InternalAssetBundleInfo> m_AssetBundleInfos;
-        private List<AssetBundle> m_AssetBundles;
+        private List<AssetContainer> m_AssetBundles;
+
+        internal sealed class AssetContainer
+        {
+            private readonly AssetBundle m_AssetBundle;
+            public Dictionary<Hash, UnityEngine.Object> m_Assets;
+
+            public AssetBundle AssetBundle => m_AssetBundle;
+
+            public AssetContainer(AssetBundle assetBundle)
+            {
+                m_AssetBundle = assetBundle;
+                m_Assets = new Dictionary<Hash, UnityEngine.Object>();
+            }
+
+            public UnityEngine.Object GetAsset(Hash hash)
+            {
+                return m_Assets[hash];
+            }
+            public UnityEngine.Object LoadAsset(string key)
+            {
+                Hash hash = new Hash(key);
+
+                if (m_Assets.TryGetValue(hash, out var obj)) return obj;
+
+                obj = m_AssetBundle.LoadAsset(key);
+                m_Assets.Add(hash, obj);
+
+                return obj;
+            }
+        }
 
         public override void OnInitialze()
         {
             m_AssetBundleInfos = new NativeList<InternalAssetBundleInfo>(AllocatorManager.Persistent);
-            m_AssetBundles = new List<AssetBundle>();
+            m_AssetBundles = new List<AssetContainer>();
         }
         public override void OnShutdown()
         {
@@ -52,34 +86,126 @@ namespace Point.Collections.ResourceControl
             m_AssetBundles = null;
         }
 
+        private static int GetUnusedAssetBundleBuffer()
+        {
+            for (int i = 0; i < Instance.m_AssetBundleInfos.Length; i++)
+            {
+                if (!Instance.m_AssetBundleInfos[i].IsValid())
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        private static bool TryGetAssetBundleWithPath(string path, out AssetBundleInfo assetBundle)
+        {
+            FixedString4096Bytes temp = path;
+            for (int i = 0; i < Instance.m_AssetBundleInfos.Length; i++)
+            {
+                if (Instance.m_AssetBundleInfos[i].m_Path.Equals(temp))
+                {
+                    assetBundle = GetAssetBundleInfo(i);
+                    return true;
+                }
+            }
+
+            assetBundle = default;
+            return false;
+        }
+        private static bool TryGetAssetBundleWithBundle(AssetBundle bundle, out AssetBundleInfo assetBundle)
+        {
+            for (int i = 0; i < Instance.m_AssetBundles.Count; i++)
+            {
+                if (Instance.m_AssetBundles[i]?.AssetBundle == null) continue;
+                else if (Instance.m_AssetBundles[i].AssetBundle.Equals(bundle))
+                {
+                    assetBundle = GetAssetBundleInfo(i);
+                    return true;
+                }
+            }
+
+            assetBundle = default;
+            return false;
+        }
+
         public static AssetBundleInfo RegisterAssetBundle(string path, bool webRequest)
         {
-            int index = Instance.m_AssetBundles.Count;
+            if (TryGetAssetBundleWithPath(path, out var bundle)) return bundle;
 
-            InternalAssetBundleInfo info = new InternalAssetBundleInfo(index)
+            int index = GetUnusedAssetBundleBuffer();
+            if (index < 0)
             {
-                m_Path = path,
-                m_IsWebRequest = webRequest
-            };
+                index = Instance.m_AssetBundles.Count;
+                var info = new InternalAssetBundleInfo(index)
+                {
+                    m_Using = true,
 
-            Instance.m_AssetBundleInfos.Add(info);
-            Instance.m_AssetBundles.Add(null);
+                    m_Path = path,
+                    m_IsWebRequest = webRequest
+                };
+
+                Instance.m_AssetBundleInfos.Add(info);
+                Instance.m_AssetBundles.Add(null);
+            }
+            else
+            {
+                ref var info = ref Instance.m_AssetBundleInfos.ElementAt(index);
+                info.m_Generation++;
+
+                info.m_Using = true;
+
+                info.m_Path = path;
+                info.m_IsWebRequest = webRequest;
+
+                Instance.m_AssetBundles[index] = null;
+            }
 
             return GetAssetBundleInfo(in index);
         }
         public static AssetBundleInfo RegisterAssetBundle(AssetBundle assetBundle)
         {
-            int index = Instance.m_AssetBundles.Count;
+            if (TryGetAssetBundleWithBundle(assetBundle, out var bundle)) return bundle;
 
-            InternalAssetBundleInfo info = new InternalAssetBundleInfo(index)
+            int index = GetUnusedAssetBundleBuffer();
+            if (index < 0)
             {
-                m_IsLoaded = true
-            };
+                index = Instance.m_AssetBundles.Count;
+                var info = new InternalAssetBundleInfo(index)
+                {
+                    m_Using = true,
 
-            Instance.m_AssetBundleInfos.Add(info);
-            Instance.m_AssetBundles.Add(assetBundle);
+                    m_IsLoaded = true
+                };
+
+                Instance.m_AssetBundleInfos.Add(info);
+                Instance.m_AssetBundles.Add(new AssetContainer(assetBundle));
+            }
+            else
+            {
+                ref var info = ref Instance.m_AssetBundleInfos.ElementAt(index);
+                info.m_Generation++;
+
+                info.m_Using = true;
+
+                info.m_IsLoaded = true;
+
+                Instance.m_AssetBundles[index] = new AssetContainer(assetBundle);
+            }
 
             return GetAssetBundleInfo(in index);
+        }
+        public static void UnregisterAssetBundle(AssetBundleInfo assetBundle)
+        {
+            int index = assetBundle.Ref.m_Index;
+
+            ref var info = ref Instance.m_AssetBundleInfos.ElementAt(index);
+
+            info.m_Using = false;
+
+            info.m_Path = string.Empty;
+            info.m_IsLoaded = false;
+
+            Instance.m_AssetBundles[index] = null;
         }
 
         #region Internal
@@ -88,11 +214,12 @@ namespace Point.Collections.ResourceControl
         {
             ref InternalAssetBundleInfo temp = ref Instance.m_AssetBundleInfos.ElementAt(index);
 
-            AssetBundleInfo info = new AssetBundleInfo((IntPtr)UnsafeUtility.AddressOf(ref temp));
+            AssetBundleInfo info 
+                = new AssetBundleInfo((IntPtr)UnsafeUtility.AddressOf(ref temp), temp.m_Generation);
 
             return info;
         }
-        internal static unsafe AssetBundle GetAssetBundle(in int index)
+        internal static unsafe AssetContainer GetAssetBundle(in int index)
         {
             return Instance.m_AssetBundles[index];
         }
@@ -106,7 +233,7 @@ namespace Point.Collections.ResourceControl
             {
                 AssetBundle bundle = AssetBundle.LoadFromFile(p->m_Path.ToString());
 
-                Instance.m_AssetBundles[index] = bundle;
+                Instance.m_AssetBundles[index] = new AssetContainer(bundle);
                 p->m_IsLoaded = true;
 
                 UpdateAssetInfos(p, bundle);
@@ -125,7 +252,7 @@ namespace Point.Collections.ResourceControl
 
             p->m_IsLoaded = false;
 
-            Instance.m_AssetBundles[index].Unload(unloadAllLoadedObjects);
+            Instance.m_AssetBundles[index].AssetBundle.Unload(unloadAllLoadedObjects);
             Instance.m_AssetBundles[index] = null;
         }
 
@@ -166,6 +293,63 @@ namespace Point.Collections.ResourceControl
 
                 m_HashMap.TryAdd(hash, assetInfo);
             }
+        }
+
+        internal static unsafe AssetInfo LoadAsset(ref InternalAssetBundleInfo bundleP, in FixedString4096Bytes key)
+            => LoadAsset((InternalAssetBundleInfo*)UnsafeUtility.AddressOf(ref bundleP), key);
+        internal static unsafe AssetInfo LoadAsset(InternalAssetBundleInfo* bundleP, in FixedString4096Bytes key)
+        {
+            if (!bundleP->m_IsLoaded)
+            {
+                throw new InvalidOperationException();
+            }
+
+            int index = bundleP->m_Index;
+            AssetContainer bundle = Instance.m_AssetBundles[index];
+
+            string stringKey = key.ToString();
+            Hash hash = new Hash(stringKey);
+            if (!bundleP->m_Assets.TryGetValue(hash, out InternalAssetInfo assetInfo))
+            {
+                throw new Exception();
+            }
+
+            if (!assetInfo.m_IsLoaded)
+            {
+                assetInfo.m_ReferencedCount = 1;
+                assetInfo.m_IsLoaded = true;
+            }
+            else assetInfo.m_ReferencedCount++;
+
+            bundleP->m_Assets[hash] = assetInfo;
+
+            UnityEngine.Object obj = bundle.LoadAsset(stringKey);
+
+            AssetInfo asset = new AssetInfo(bundleP, hash);
+            return asset;
+        }
+        internal static unsafe void Reserve(InternalAssetBundleInfo* bundleP, Hash key)
+        {
+            if (!bundleP->m_IsLoaded)
+            {
+                throw new InvalidOperationException();
+            }
+
+            int index = bundleP->m_Index;
+            AssetContainer bundle = Instance.m_AssetBundles[index];
+
+            if (!bundleP->m_Assets.TryGetValue(key, out InternalAssetInfo assetInfo))
+            {
+                throw new Exception("1");
+            }
+
+            if (!assetInfo.m_IsLoaded)
+            {
+                throw new Exception("2");
+            }
+
+            assetInfo.m_ReferencedCount--;
+            bundleP->m_Assets[key] = assetInfo;
         }
 
         #endregion
