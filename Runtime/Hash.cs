@@ -60,6 +60,20 @@ namespace Point.Collections
             m_Key = key;
 #endif
         }
+        public Hash(FixedString4096Bytes key)
+        {
+            m_Value = FNV1a32.Calculate(key);
+#if DEBUG_MODE
+            m_Key = new FixedString512Bytes(key);
+#endif
+        }
+        public Hash(FixedString512Bytes key)
+        {
+            m_Value = FNV1a32.Calculate(key);
+#if DEBUG_MODE
+            m_Key = key;
+#endif
+        }
 
         public bool Equals(Hash other) => m_Value.Equals(other.m_Value);
         public override bool Equals(object obj)

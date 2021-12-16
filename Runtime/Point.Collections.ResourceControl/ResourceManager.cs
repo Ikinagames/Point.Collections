@@ -344,7 +344,7 @@ namespace Point.Collections.ResourceControl
                     loaded = false,
                 };
 
-                Hash hash = new Hash(FNV1a32.Calculate(m_Names[i]));
+                Hash hash = new Hash(m_Names[i]);
 
                 m_HashMap.TryAdd(hash, assetInfo);
             }
