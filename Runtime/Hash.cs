@@ -26,7 +26,7 @@ namespace Point.Collections
 {
     [Serializable]
     [JsonConverter(typeof(IO.Json.HashJsonConverter))]
-    public struct Hash : IEquatable<Hash>
+    public struct Hash : IEquatable<Hash>, IConvertible
     {
         public static Hash Empty => new Hash(0);
         public static Hash NewHash()
@@ -107,23 +107,38 @@ namespace Point.Collections
             return str;
         }
 
-        public static bool operator ==(Hash x, Hash y)
+        public TypeCode GetTypeCode() => TypeCode.UInt32;
+
+        public bool ToBoolean(IFormatProvider provider)
         {
-            return x.Equals(y);
-        }
-        public static bool operator !=(Hash x, Hash y)
-        {
-            return !x.Equals(y);
+            throw new NotImplementedException();
         }
 
-        public static Hash operator ^(Hash x, Hash y)
+        public sbyte ToSByte(IFormatProvider provider) => unchecked(Convert.ToSByte(m_Value));
+        public byte ToByte(IFormatProvider provider) => unchecked(Convert.ToByte(m_Value));
+        public char ToChar(IFormatProvider provider) => unchecked(Convert.ToChar(m_Value));
+        public short ToInt16(IFormatProvider provider) => unchecked(Convert.ToInt16(m_Value));
+        public ushort ToUInt16(IFormatProvider provider) => unchecked(Convert.ToUInt16(m_Value));
+        public int ToInt32(IFormatProvider provider) => unchecked(Convert.ToInt32(m_Value));
+        public float ToSingle(IFormatProvider provider) => unchecked(Convert.ToSingle(m_Value));
+        public long ToInt64(IFormatProvider provider) => Convert.ToInt64(m_Value);
+        public uint ToUInt32(IFormatProvider provider) => m_Value;
+        public ulong ToUInt64(IFormatProvider provider) => Convert.ToUInt64(m_Value);
+        public DateTime ToDateTime(IFormatProvider provider) => Convert.ToDateTime(m_Value);
+        public decimal ToDecimal(IFormatProvider provider) => Convert.ToDecimal(m_Value);
+        public double ToDouble(IFormatProvider provider) => Convert.ToDouble(m_Value);
+        public string ToString(IFormatProvider provider) => ToString();
+
+        public object ToType(Type conversionType, IFormatProvider provider)
         {
-            return new Hash(x.m_Value ^ y.m_Value);
+            throw new NotImplementedException();
         }
-        public static Hash operator |(Hash x, Hash y)
-        {
-            return new Hash(x.m_Value | y.m_Value);
-        }
+
+        public static bool operator ==(Hash x, Hash y) => x.Equals(y);
+        public static bool operator !=(Hash x, Hash y) => !x.Equals(y);
+
+        public static Hash operator ^(Hash x, Hash y) => new Hash(x.m_Value ^ y.m_Value);
+        public static Hash operator |(Hash x, Hash y) => new Hash(x.m_Value | y.m_Value);
 
         public static implicit operator uint(Hash hash) => hash.m_Value;
     }

@@ -427,14 +427,14 @@ namespace Point.Collections.ResourceControl
             Instance.m_ReferenceCheckSum ^= hash;
             return asset;
         }
-        internal static unsafe void Reserve(UnsafeAssetBundleInfo* bundleP, in Hash key)
+        internal static unsafe void Reserve(UnsafeAssetBundleInfo* bundleP, in AssetInfo key)
         {
             if (!bundleP->loaded)
             {
                 throw new InvalidOperationException();
             }
 
-            Mapped index = Instance.m_MappedAssets[key];
+            Mapped index = Instance.m_MappedAssets[key.key];
             ref UnsafeAssetInfo assetInfo = ref bundleP->assets.ElementAt(index.assetIndex);
 
             if (!assetInfo.loaded)
@@ -442,8 +442,8 @@ namespace Point.Collections.ResourceControl
                 throw new Exception("2");
             }
 
-            assetInfo.checkSum ^= key;
-            Instance.m_ReferenceCheckSum ^= key;
+            assetInfo.checkSum ^= key.key;
+            Instance.m_ReferenceCheckSum ^= key.key;
         }
 
         #endregion

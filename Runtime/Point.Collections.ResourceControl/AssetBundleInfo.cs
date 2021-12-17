@@ -176,7 +176,7 @@ namespace Point.Collections.ResourceControl
                     throw new Exception();
                 }
 
-                ResourceManager.Reserve(pointer, in asset.key);
+                ResourceManager.Reserve(pointer, in asset);
             }
         }
 
