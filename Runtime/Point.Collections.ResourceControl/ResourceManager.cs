@@ -441,7 +441,7 @@ namespace Point.Collections.ResourceControl
             {
                 throw new Exception("2");
             }
-
+            
             assetInfo.checkSum ^= key.key;
             Instance.m_ReferenceCheckSum ^= key.key;
         }
