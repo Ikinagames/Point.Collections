@@ -56,10 +56,7 @@ namespace Point.Collections.ResourceControl
         {
             get
             {
-                if (!IsValid())
-                {
-                    throw new InvalidOperationException();
-                }
+                this.ThrowIfIsNotValid();
 
                 return Ref.loaded;
             }
@@ -69,10 +66,7 @@ namespace Point.Collections.ResourceControl
         {
             get
             {
-                if (!IsValid())
-                {
-                    throw new InvalidOperationException();
-                }
+                this.ThrowIfIsNotValid();
 
                 if (!Ref.loaded) return null;
 
@@ -89,10 +83,7 @@ namespace Point.Collections.ResourceControl
         [NotBurstCompatible]
         public AssetBundle Load()
         {
-            if (!IsValid())
-            {
-                throw new Exception();
-            }
+            this.ThrowIfIsNotValid();
 
             unsafe
             {
@@ -102,10 +93,7 @@ namespace Point.Collections.ResourceControl
         [NotBurstCompatible]
         public AsyncOperation LoadAsync()
         {
-            if (!IsValid())
-            {
-                throw new Exception();
-            }
+            this.ThrowIfIsNotValid();
 
             unsafe
             {
@@ -115,12 +103,9 @@ namespace Point.Collections.ResourceControl
 
         public void Unload(bool unloadAllLoadedObjects)
         {
-#if DEBUG_MODE
-            if (!IsValid())
-            {
-                throw new Exception();
-            }
+            this.ThrowIfIsNotValid();
 
+#if DEBUG_MODE
             if (!Ref.assets.IsCreated)
             {
                 throw new Exception();
@@ -142,6 +127,8 @@ namespace Point.Collections.ResourceControl
         [NotBurstCompatible]
         public string[] GetAllAssetNames()
         {
+            this.ThrowIfIsNotValid();
+
             if (!IsLoaded)
             {
                 Point.LogError(Point.LogChannel.Collections,
@@ -162,6 +149,8 @@ namespace Point.Collections.ResourceControl
         }
         public AssetInfo LoadAsset(in FixedString4096Bytes key)
         {
+            this.ThrowIfIsNotValid();
+
             unsafe
             {
                 return ResourceManager.LoadAsset(pointer, in key);
@@ -169,6 +158,8 @@ namespace Point.Collections.ResourceControl
         }
         public void Reserve(ref AssetInfo asset)
         {
+            this.ThrowIfIsNotValid();
+
             unsafe
             {
                 if (asset.bundlePointer != pointer)

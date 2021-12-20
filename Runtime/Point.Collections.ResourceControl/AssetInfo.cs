@@ -18,11 +18,12 @@
 #endif
 
 using Point.Collections.ResourceControl.LowLevel;
+using System;
 using Unity.Collections.LowLevel.Unsafe;
 
 namespace Point.Collections.ResourceControl
 {
-    public struct AssetInfo
+    public struct AssetInfo : IValidation, IEquatable<AssetInfo>
     {
         [NativeDisableUnsafePtrRestriction]
         internal unsafe readonly UnsafeAssetBundleInfo* bundlePointer;
@@ -32,9 +33,11 @@ namespace Point.Collections.ResourceControl
         {
             get
             {
+                this.ThrowIfIsNotValid();
+
                 unsafe
                 {
-                    var bundleInfo = ResourceManager.GetAssetBundle(bundlePointer->index);
+                    ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(bundlePointer->index);
                     return bundleInfo.m_Assets[key];
                 }
             }
@@ -48,9 +51,31 @@ namespace Point.Collections.ResourceControl
 
         public void Reserve()
         {
+            this.ThrowIfIsNotValid();
+
             unsafe
             {
                 ResourceManager.Reserve(bundlePointer, in this);
+            }
+        }
+
+        public bool IsValid()
+        {
+            ResourceManager.AssetContainer bundle;
+            unsafe
+            {
+                if (bundlePointer == null) return false;
+
+                bundle = ResourceManager.GetAssetBundle(bundlePointer->index);
+            }
+
+            return bundle.m_Assets.ContainsKey(key);
+        }
+        public bool Equals(AssetInfo other)
+        {
+            unsafe
+            {
+                return bundlePointer == other.bundlePointer && key.Equals(other.key);
             }
         }
     }
