@@ -19,6 +19,7 @@
 
 using Newtonsoft.Json;
 using System;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using UnityEngine;
 
@@ -26,6 +27,7 @@ namespace Point.Collections
 {
     [Serializable]
     [JsonConverter(typeof(IO.Json.HashJsonConverter))]
+    [Guid("acdb109b-3a13-4ea2-8835-ef97b416cbb7")]
     public struct Hash : IEquatable<Hash>, IConvertible
     {
         public static Hash Empty => new Hash(0);

@@ -19,14 +19,19 @@
 
 using Point.Collections.ResourceControl.LowLevel;
 using System;
+using System.Runtime.InteropServices;
+using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
 namespace Point.Collections.ResourceControl
 {
+    [BurstCompatible]
+    [Guid("b92cc9a9-b577-4759-b623-d794bd86d430")]
     public struct AssetInfo : IValidation, IEquatable<AssetInfo>
     {
-        [NativeDisableUnsafePtrRestriction]
+        [NativeDisableUnsafePtrRestriction, NonSerialized]
         internal unsafe readonly UnsafeAssetBundleInfo* bundlePointer;
+        [NonSerialized]
         internal readonly Hash key;
 
         public UnityEngine.Object Asset

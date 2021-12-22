@@ -13,8 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Runtime.InteropServices;
+
 namespace Point.Collections
 {
+    [Guid("050394ad-7885-4ce6-a798-38cb96838472")]
     public enum Direction
     {
         NONE = 0,

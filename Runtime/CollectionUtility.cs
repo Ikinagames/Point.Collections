@@ -22,22 +22,55 @@ using Unity.Collections.LowLevel.Unsafe;
 using System;
 using Unity.Burst;
 using Point.Collections.Native;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using Point.Collections.IO.Json;
+using System.Reflection;
 
 namespace Point.Collections
 {
     internal sealed class CollectionUtility : CLSSingleTone<CollectionUtility>
     {
         private Unity.Mathematics.Random m_Random;
+        private JsonSerializerSettings m_JsonSettings;
+
+        public struct EngineTypeGuid
+        {
+            //public static Guid GameObject => 
+        }
+
+        public static JsonSerializerSettings JsonSerializerSettings => Instance.m_JsonSettings;
 
         public static void Initialize()
         {
             CollectionUtility ins = Instance;
-
+        }
+        protected override void OnInitialize()
+        {
 #if POINT_COLLECTIONS_NATIVE
             NativeDebug.Initialize();
 #endif
             Instance.m_Random = new Unity.Mathematics.Random();
             Instance.m_Random.InitState();
+
+            m_JsonSettings = new JsonSerializerSettings();
+            m_JsonSettings.Converters = new List<JsonConverter>()
+            {
+                Float3JsonConverter.Static,
+                Float2JsonConverter.Static,
+                QuaternionJsonConvereter.Static
+            };
+            Type[] customConverters = TypeHelper.GetTypes(other => !other.IsAbstract && TypeHelper.TypeOf<JsonConverter>.Type.IsAssignableFrom(other));
+            for (int i = 0; i < customConverters.Length; i++)
+            {
+                m_JsonSettings.Converters.Add((JsonConverter)Activator.CreateInstance(customConverters[i]));
+            }
+
+            JsonConvert.DefaultSettings = GetJsonSerializerSettings;
+        }
+        private static JsonSerializerSettings GetJsonSerializerSettings()
+        {
+            return JsonSerializerSettings;
         }
 
         public static int CreateHashCode() => Instance.m_Random.NextInt(int.MinValue, int.MaxValue);

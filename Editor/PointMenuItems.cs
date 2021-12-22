@@ -14,6 +14,7 @@
 // limitations under the License.
 
 using Point.Collections.Native;
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -35,5 +36,15 @@ namespace Point.Collections.Editor
             position.center = screenCenter / EditorGUIUtility.pixelsPerPoint;
             m_SetupWizard.position = position;
         }
+
+        [MenuItem("Point/Utils/Generate Guid")]
+        public static void GenerateGUID()
+        {
+            Guid guid = Guid.NewGuid();
+            EditorGUIUtility.systemCopyBuffer = guid.ToString();
+
+            Point.Log(Point.LogChannel.Editor, $"{guid} is copied to clipboard.");
+        }
+
     }
 }

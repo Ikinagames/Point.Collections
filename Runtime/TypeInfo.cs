@@ -15,6 +15,7 @@
 
 using Point.Collections.Native;
 using System;
+using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections;
 
@@ -24,6 +25,7 @@ namespace Point.Collections
     /// Runtime 중 기본 <see cref="System.Type"/> 의 정보를 저장하고, 해당 타입의 binary 크기, alignment를 저장합니다.
     /// </summary>
     [BurstCompatible]
+    [Guid("f090b023-0343-4436-811b-7ea2360503d0")]
     public readonly struct TypeInfo : IValidation, IEquatable<TypeInfo>
     {
         private readonly RuntimeTypeHandle m_TypeHandle;

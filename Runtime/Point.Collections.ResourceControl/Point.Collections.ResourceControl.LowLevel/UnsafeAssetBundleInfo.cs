@@ -18,6 +18,7 @@
 #endif
 
 using System;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -25,6 +26,7 @@ using Unity.Jobs;
 namespace Point.Collections.ResourceControl.LowLevel
 {
     [BurstCompatible]
+    [Guid("14ad9ef9-3c7c-4e60-96a3-2f3d602f9846")]
     internal struct UnsafeAssetBundleInfo : IValidation, IEquatable<UnsafeAssetBundleInfo>, IDisposable
     {
         public static UnsafeAssetBundleInfo Invalid => new UnsafeAssetBundleInfo(-1);

@@ -30,6 +30,14 @@ namespace Point.Collections
         {
             PointApplication app = Instance;
         }
+#if UNITY_EDITOR
+        [UnityEditor.InitializeOnLoadMethod]
+        public static void EditorInitialize()
+        {
+            CollectionUtility.Initialize();
+        }
+#endif
+
         private static bool s_IsShutdown = false;
 
         public static bool IsShutdown => s_IsShutdown;

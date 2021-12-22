@@ -18,10 +18,12 @@
 #endif
 
 using System;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 
 namespace Point.Collections.ResourceControl.LowLevel
 {
+    [Guid("a05b0346-54fa-44cf-975d-14082836aa61")]
     internal struct UnsafeAssetInfo : IEquatable<UnsafeAssetInfo>
     {
         public FixedString4096Bytes key;

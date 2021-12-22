@@ -23,6 +23,7 @@ using Unity.Mathematics;
 namespace Point.Collections
 {
     [StructLayout(LayoutKind.Sequential)]
+    [Guid("046cd326-9db5-4dc6-8562-85e84b51cfe0")]
     public struct BinaryGrid : IValidation, IEquatable<BinaryGrid>
     {
         private readonly AABB m_AABB;

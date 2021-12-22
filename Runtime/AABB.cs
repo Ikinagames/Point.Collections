@@ -27,6 +27,7 @@ namespace Point.Collections
     [BurstCompile(CompileSynchronously = true, DisableSafetyChecks = true)]
     [StructLayout(LayoutKind.Sequential)]
     [JsonConverter(typeof(IO.Json.AABBJsonConverter))]
+    [Guid("a4c54f61-12c0-4069-92ca-9d1881952f2d")]
     public struct AABB : IEquatable<AABB>
     {
         public static readonly AABB Zero = new AABB(float3.zero, float3.zero);

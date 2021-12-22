@@ -20,6 +20,7 @@
 using Point.Collections.ResourceControl.LowLevel;
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
@@ -27,6 +28,7 @@ using UnityEngine;
 namespace Point.Collections.ResourceControl
 {
     [BurstCompatible]
+    [Guid("42f15dc1-0626-4c38-84f8-641a3740fd0b")]
     public struct AssetBundleInfo : IValidation, IEquatable<AssetBundleInfo>
     {
         public static AssetBundleInfo Invalid => default(AssetBundleInfo);
