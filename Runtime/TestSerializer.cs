@@ -33,8 +33,8 @@ namespace Point.Collections
 
         private void Start()
         {
-            UnityEngine.Component[] components = prefab.GetComponents(TypeHelper.TypeOf<UnityEngine.Component>.Type);
-            output = EditorJsonUtility.ToJson(components, true);
+//             UnityEngine.Component[] components = prefab.GetComponents(TypeHelper.TypeOf<UnityEngine.Component>.Type);
+//             output = EditorJsonUtility.ToJson(components, true);
 
             //for (int i = 1; i < components.Length; i++)
             {

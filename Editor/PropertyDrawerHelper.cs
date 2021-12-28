@@ -140,5 +140,20 @@ namespace Point.Collections.Editor
             }
             return enm.Current;
         }
+
+        public static float GetPropertyHeight(int lineCount)
+        {
+            return lineHeight * lineCount;
+        }
+        public static void Space(ref Rect rect)
+        {
+            rect.y += lineHeight;
+        }
+
+        public static Rect GetRect(Rect position)
+        {
+            Rect rect = GUILayoutUtility.GetRect(position.width, PropertyDrawerHelper.lineHeight);
+            return rect;
+        }
     }
 }
