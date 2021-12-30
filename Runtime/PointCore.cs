@@ -125,17 +125,22 @@ namespace Point.Collections
 
         #endregion
 
+        #region Threading
+
+        [Unity.Collections.NotBurstCompatible]
         public static bool IsMainThread()
         {
             return PointApplication.Instance.MainThread.Validate();
         }
+        [Unity.Collections.NotBurstCompatible]
         [System.Diagnostics.Conditional("DEBUG_MODE")]
         public static void AssertMainThread()
         {
             AssertThreadAffinity(PointApplication.Instance.MainThread);
         }
+        [Unity.Collections.NotBurstCompatible]
         [System.Diagnostics.Conditional("DEBUG_MODE")]
-        public static void AssertThreadAffinity(Threading.ThreadInfo expectedAffinity)
+        public static void AssertThreadAffinity(in Threading.ThreadInfo expectedAffinity)
         {
             Threading.ThreadInfo currentThread = Threading.ThreadInfo.CurrentThread;
 
@@ -144,5 +149,7 @@ namespace Point.Collections
             LogError(LogChannel.Default,
                 $"Thread affinity error. Expected thread({expectedAffinity}) but {currentThread}");
         }
+
+        #endregion
     }
 }
