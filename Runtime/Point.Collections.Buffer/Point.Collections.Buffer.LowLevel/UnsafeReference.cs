@@ -23,12 +23,28 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace Point.Collections.Buffer.LowLevel
 {
+    /// <summary>
+    /// <see cref="System.IntPtr"/> 접근을 unsafe 없이 접근을 도와주는 구조체입니다.
+    /// </summary>
     [BurstCompatible]
-    public struct UnsafeReference
+    public struct UnsafeReference : IUnsafeReference
     {
         private bool m_IsCreated;
         [NativeDisableUnsafePtrRestriction]
         private unsafe void* m_Ptr;
+
+        public IntPtr this[int offset]
+        {
+            get
+            {
+                IntPtr ptr;
+                unsafe
+                {
+                    ptr = (IntPtr)m_Ptr;
+                }
+                return IntPtr.Add(ptr, offset);
+            }
+        }
 
         public unsafe void* Ptr => m_Ptr;
         public IntPtr IntPtr { get { unsafe { return (IntPtr)m_Ptr; } } }
@@ -45,13 +61,32 @@ namespace Point.Collections.Buffer.LowLevel
         }
     }
     [BurstCompatible]
-    public struct UnsafeReference<T> : IEquatable<UnsafeReference<T>>, IEquatable<UnsafeReference>
+    public struct UnsafeReference<T> : IUnsafeReference,
+        IEquatable<UnsafeReference<T>>, IEquatable<UnsafeReference>
         where T : unmanaged
     {
         private bool m_IsCreated;
         [NativeDisableUnsafePtrRestriction]
         private unsafe T* m_Ptr;
 
+        IntPtr IUnsafeReference.this[int offset]
+        {
+            get
+            {
+                IntPtr ptr;
+                unsafe
+                {
+                    ptr = (IntPtr)m_Ptr;
+                }
+                return IntPtr.Add(ptr, offset);
+            }
+        }
+        /// <summary>
+        /// <typeparamref name="T"/> 의 size * <paramref name="index"/> 만큼 
+        /// 포인터를 오른쪽으로 밀어서 반환합니다.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public ref T this[int index]
         {
             get
@@ -88,13 +123,6 @@ namespace Point.Collections.Buffer.LowLevel
             unsafe
             {
                 return ref *m_Ptr;
-            }
-        }
-        public void SetValue(in T item)
-        {
-            unsafe
-            {
-                *m_Ptr = item;
             }
         }
 

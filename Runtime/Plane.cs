@@ -15,10 +15,12 @@
 
 using System;
 using System.Globalization;
+using Unity.Collections;
 using Unity.Mathematics;
 
 namespace Point.Collections
 {
+    [BurstCompatible]
     public struct Plane
     {
         // sizeof(Plane) is not const in C# and so cannot be used in fixed arrays, so we define it here
@@ -30,14 +32,14 @@ namespace Point.Collections
         // Normal vector of the plane.
         public float3 normal
         {
-            get { return m_Normal; }
-            set { m_Normal = value; }
+            get => m_Normal;
+            set => m_Normal = value;
         }
         // Distance from the origin to the plane.
         public float distance
         {
-            get { return m_Distance; }
-            set { m_Distance = value; }
+            get => m_Distance;
+            set => m_Distance = value;
         }
 
         // Creates a plane.
