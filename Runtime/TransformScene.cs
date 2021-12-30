@@ -13,29 +13,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Newtonsoft.Json;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
+using Point.Collections.Buffer.LowLevel;
+using Point.Collections.Threading;
+using System;
 using Unity.Collections;
-using Unity.Mathematics;
-using UnityEngine;
 
 namespace Point.Collections
 {
-    [BurstCompatible]
-    public struct Transformation
+    public struct TransformScene : IDisposable
     {
-        [JsonProperty(Order = 0, PropertyName = "localRotation")]
-        public quaternion localRotation;
-        [JsonProperty(Order = 1, PropertyName = "localPosition")]
-        public float3 localPosition;
-        [JsonProperty(Order = 2, PropertyName = "localScale")]
-        public float3 localScale;
+        private UnsafeAllocator<Transformation> m_Buffer;
 
-        [NotBurstCompatible]
-        public Transformation(Transform tr)
+        private ThreadInfo m_Owner;
+
+        public TransformScene(int initialEntries)
         {
-            localPosition = tr.localPosition;
-            localRotation = tr.localRotation;
-            localScale = tr.localScale;
+            m_Buffer = new UnsafeAllocator<Transformation>(initialEntries, Allocator.Persistent);
+
+            m_Owner = ThreadInfo.CurrentThread;
+        }
+
+        public void Dispose()
+        {
+            m_Buffer.Dispose();
         }
     }
 }

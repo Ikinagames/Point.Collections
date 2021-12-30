@@ -51,6 +51,11 @@ namespace Point.Collections.Buffer.LowLevel
 
         public bool IsCreated => m_IsCreated;
 
+        public unsafe UnsafeReference(void* ptr)
+        {
+            m_Ptr = ptr;
+            m_IsCreated = true;
+        }
         public UnsafeReference(IntPtr ptr)
         {
             unsafe
@@ -59,6 +64,8 @@ namespace Point.Collections.Buffer.LowLevel
             }
             m_IsCreated = true;
         }
+
+        public static unsafe implicit operator UnsafeReference(void* p) => new UnsafeReference(p);
     }
     [BurstCompatible]
     public struct UnsafeReference<T> : IUnsafeReference,
@@ -157,6 +164,7 @@ namespace Point.Collections.Buffer.LowLevel
         }
 
         public static unsafe implicit operator UnsafeReference<T>(T* p) => new UnsafeReference<T>(p);
+        public static unsafe implicit operator UnsafeReference<T>(UnsafeReference p) => new UnsafeReference<T>(p.IntPtr);
         public static unsafe implicit operator T*(UnsafeReference<T> p) => p.m_Ptr;
     }
 }
