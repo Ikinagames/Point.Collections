@@ -28,7 +28,7 @@ namespace Point.Collections.ResourceControl
 {
     [BurstCompatible]
     [Guid("b92cc9a9-b577-4759-b623-d794bd86d430")]
-    public readonly struct AssetInfo : IValidation, IEquatable<AssetInfo>
+    public readonly struct AssetInfo : IValidation, IEquatable<AssetInfo>, IDisposable
     {
         public static AssetInfo Invalid => default(AssetInfo);
 
@@ -37,6 +37,13 @@ namespace Point.Collections.ResourceControl
         [NonSerialized]
         internal readonly Hash key;
 
+        /// <summary>
+        /// <seealso cref="UnityEngine.AssetBundle"/> 내 에셋.
+        /// </summary>
+        /// <remarks>
+        /// 반환된 객체는 <seealso cref="ResourceManager"/> 에서 <see cref="UnityEngine.AssetBundle"/> 단위로 관리되므로, 
+        /// <see cref="UnityEngine.Object.Destroy(UnityEngine.Object)"/> 등과 같은 행위가 절때로 일어나서는 안됩니다.
+        /// </remarks>
         public UnityEngine.Object Asset
         {
             get
@@ -53,14 +60,17 @@ namespace Point.Collections.ResourceControl
             bundlePointer = bundle;
             this.key = key;
         }
-
+        /// <summary>
+        /// 에셋의 레퍼런스를 반환합니다.
+        /// </summary>
         public void Reserve()
         {
-            this.ThrowIfIsNotValid();
-
-            ResourceManager.Reserve(bundlePointer, in this);
+            ((IDisposable)this).Dispose();
         }
-
+        /// <summary>
+        /// 유효한 에셋인지 반환합니다.
+        /// </summary>
+        /// <returns></returns>
         public bool IsValid()
         {
             ResourceManager.AssetContainer bundle;
@@ -73,6 +83,13 @@ namespace Point.Collections.ResourceControl
         public bool Equals(AssetInfo other)
         {
             return bundlePointer.Equals(other.bundlePointer) && key.Equals(other.key);
+        }
+
+        void IDisposable.Dispose()
+        {
+            this.ThrowIfIsNotValid();
+
+            ResourceManager.Reserve(bundlePointer, in this);
         }
     }
 }
