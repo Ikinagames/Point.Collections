@@ -27,7 +27,7 @@ using System.Threading.Tasks;
 
 namespace Point.Collections
 {
-    public static class Point
+    public static class PointCore
     {
         private const string
             c_WhiteSpace = " ",
@@ -125,6 +125,24 @@ namespace Point.Collections
 
         #endregion
 
-        //public static bool IsShutdown => IkinaApplication.IsShutdown;
+        public static bool IsMainThread()
+        {
+            return PointApplication.Instance.MainThread.Validate();
+        }
+        [System.Diagnostics.Conditional("DEBUG_MODE")]
+        public static void AssertMainThread()
+        {
+            AssertThreadAffinity(PointApplication.Instance.MainThread);
+        }
+        [System.Diagnostics.Conditional("DEBUG_MODE")]
+        public static void AssertThreadAffinity(Threading.ThreadInfo expectedAffinity)
+        {
+            Threading.ThreadInfo currentThread = Threading.ThreadInfo.CurrentThread;
+
+            if (expectedAffinity.Equals(currentThread)) return;
+
+            LogError(LogChannel.Default,
+                $"Thread affinity error. Expected thread({expectedAffinity}) but {currentThread}");
+        }
     }
 }

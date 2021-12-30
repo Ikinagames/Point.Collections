@@ -117,7 +117,7 @@ namespace Point.Collections.ResourceControl
             {
                 if (Ref.assets[i].checkSum != 0)
                 {
-                    Point.LogError(Point.LogChannel.Collections,
+                    PointCore.LogError(PointCore.LogChannel.Collections,
                         $"Asset({Ref.assets[i].key}) has references that didn\'t reserved. " +
                         $"This is not allowed.");
                 }
@@ -133,7 +133,7 @@ namespace Point.Collections.ResourceControl
 
             if (!IsLoaded)
             {
-                Point.LogError(Point.LogChannel.Collections,
+                PointCore.LogError(PointCore.LogChannel.Collections,
                     $"You\'re trying to get all asset names that didn\'t loaded AssetBundle. " +
                     $"This is not allowed.");
 

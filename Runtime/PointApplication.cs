@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Point.Collections.Threading;
 using System;
 using System.Reflection;
 using UnityEngine;
@@ -47,6 +48,10 @@ namespace Point.Collections
         protected override bool EnableLog => false;
         protected override bool HideInInspector => true;
 
+        private ThreadInfo m_MainThread;
+
+        public ThreadInfo MainThread => m_MainThread;
+
         public event Action OnApplicationShutdown;
 
         protected override void OnInitialze()
@@ -65,6 +70,10 @@ namespace Point.Collections
                 }
                 else System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(types[i].TypeHandle);
             }
+        }
+        private void Awake()
+        {
+            m_MainThread = ThreadInfo.CurrentThread;
         }
         protected override void OnShutdown()
         {

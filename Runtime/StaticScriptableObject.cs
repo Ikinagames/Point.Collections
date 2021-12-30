@@ -51,7 +51,7 @@ namespace Point.Collections
 
                     if (!IsThisMainThread())
                     {
-                        Point.LogError(Point.LogChannel.Collections,
+                        PointCore.LogError(PointCore.LogChannel.Collections,
                             $"{TypeHelper.TypeOf<StaticScriptableObject<T>>.ToString()} is only can be initialized in main thread but current thread looks like outside of UnityEngine. This is not allowed.");
 
                         throw new System.Exception("Internal error. See error log.");
@@ -75,7 +75,7 @@ namespace Point.Collections
                     s_Instance = Resources.Load<T>($"{path}/{TypeHelper.TypeOf<T>.ToString()}");
                     if (s_Instance == null)
                     {
-                        Point.Log(Point.LogChannel.Collections,
+                        PointCore.Log(PointCore.LogChannel.Collections,
                             $"Creating new StaticScriptableObject({TypeHelper.TypeOf<T>.ToString()}) asset");
 
                         s_Instance = CreateInstance<T>();

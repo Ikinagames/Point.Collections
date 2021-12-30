@@ -234,7 +234,7 @@ namespace Point.Collections.Editor
                     {
                         if (!InsertLayer(m_MissingLayers[i]))
                         {
-                            Point.LogError(Point.LogChannel.Editor,
+                            PointCore.LogError(PointCore.LogChannel.Editor,
                                 $"Could not add layer {m_MissingLayers[i]} because layer is full.");
                         }
                         else

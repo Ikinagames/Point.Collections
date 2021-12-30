@@ -222,7 +222,7 @@ namespace Point.Collections
         {
             if (!UnsafeUtility.IsUnmanaged(type))
             {
-                Point.LogError(Point.LogChannel.Collections,
+                PointCore.LogError(PointCore.LogChannel.Collections,
                     $"Could not resolve type of {TypeHelper.ToString(type)} is not ValueType.");
 
                 return new TypeInfo(type, 0, 0, 0);

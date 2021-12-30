@@ -251,7 +251,7 @@ namespace Point.Collections.ResourceControl.Editor
                                 }
                                 else if (m_AssetBundleOptions.TrackedAssetBundleNames.Contains(allBundleNames[index]))
                                 {
-                                    Point.LogError(Point.LogChannel.Editor,
+                                    PointCore.LogError(PointCore.LogChannel.Editor,
                                         $"Target AssetBundle({allBundleNames[index]}) already registered.");
                                 }
                                 else
@@ -354,7 +354,7 @@ namespace Point.Collections.ResourceControl.Editor
                 buildTarget);
             if (manifest == null)
             {
-                Point.LogError(Point.LogChannel.Editor,
+                PointCore.LogError(PointCore.LogChannel.Editor,
                     $"There is nothing to build.");
 
                 return null;
