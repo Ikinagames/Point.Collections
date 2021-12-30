@@ -20,18 +20,12 @@ namespace Point.Collections.Threading
 {
     public struct AtomicSafeInteger : IEquatable<AtomicSafeInteger>
     {
-        private int m_Value;
+        private volatile int m_Value;
 
         public int Value
         {
-            get
-            {
-                return m_Value;
-            }
-            set
-            {
-                Interlocked.Exchange(ref m_Value, value);
-            }
+            get => m_Value;
+            set => m_Value = value;
         }
 
         public AtomicSafeInteger(int value)

@@ -18,40 +18,48 @@ using System.Threading;
 
 namespace Point.Collections.Threading
 {
-    public struct AtomicSafeBoolen : IEquatable<AtomicSafeBoolen>
+    public struct AtomicSafeReference<T> where T : IEquatable<T>
     {
-        private volatile bool m_Value;
+        private T m_Value;
 
-        public bool Value
+        public T Value
         {
-            get => m_Value;
-            set => m_Value = value;
+            get
+            {
+                T temp;
+                Interlocked.MemoryBarrier();
+                temp = m_Value;
+                Interlocked.MemoryBarrier();
+
+                return temp;
+            }
+            set
+            {
+                Interlocked.MemoryBarrier();
+                m_Value = value;
+                Interlocked.MemoryBarrier();
+            }
         }
-        public AtomicSafeBoolen(bool value)
+
+        public AtomicSafeReference(T value)
         {
             m_Value = value;
         }
 
-        public bool Equals(AtomicSafeBoolen other) => m_Value.Equals(other.m_Value);
+        public bool Equals(AtomicSafeReference<T> other) => m_Value.Equals(other.m_Value);
         public override int GetHashCode() => m_Value.GetHashCode();
         public override bool Equals(object obj)
         {
-            if (obj is bool boolen)
+            if (obj is int integer)
             {
-                return Value.Equals(boolen);
+                return m_Value.Equals(integer);
             }
-            else if (obj is AtomicSafeBoolen atomicBoolen)
+            else if (obj is AtomicSafeReference<T> atomicInteger)
             {
-                return Value.Equals(atomicBoolen.Value);
+                return m_Value.Equals(atomicInteger.m_Value);
             }
 
             return false;
         }
-
-        public static bool operator ==(AtomicSafeBoolen a, bool b) => a.Value == b;
-        public static bool operator !=(AtomicSafeBoolen a, bool b) => a.Value != b;
-
-        public static implicit operator bool(AtomicSafeBoolen other) => other.Value;
-        public static implicit operator AtomicSafeBoolen(bool other) => new AtomicSafeBoolen(other);
     }
 }
