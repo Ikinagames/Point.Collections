@@ -24,14 +24,16 @@ using Unity.Collections.LowLevel.Unsafe;
 namespace Point.Collections.Buffer.LowLevel
 {
     [BurstCompatible]
-    public struct UnsafeAllocator : IDisposable
+    public struct UnsafeAllocator : IDisposable, IEquatable<UnsafeAllocator>
     {
-        private UnsafeReference m_Ptr;
+        private readonly UnsafeReference m_Ptr;
+        private readonly long m_Size;
         private readonly Allocator m_Allocator;
 
         private bool m_Created;
 
         public UnsafeReference Ptr => m_Ptr;
+        public long Size => m_Size;
         public bool Created => m_Created;
 
         public UnsafeAllocator(long size, int alignment, Allocator allocator)
@@ -40,6 +42,7 @@ namespace Point.Collections.Buffer.LowLevel
             {
                 m_Ptr = UnsafeUtility.Malloc(size, alignment, allocator);
             }
+            m_Size = size;
             m_Allocator = allocator;
 
             m_Created = true;
@@ -54,6 +57,8 @@ namespace Point.Collections.Buffer.LowLevel
             
             m_Created = false;
         }
+
+        public bool Equals(UnsafeAllocator other) => m_Ptr.Equals(other.m_Ptr);
     }
     [BurstCompatible]
     public struct UnsafeAllocator<T> : IDisposable
@@ -64,10 +69,25 @@ namespace Point.Collections.Buffer.LowLevel
         public UnsafeReference<T> Ptr => m_Allocator.Ptr;
         public bool Created => m_Allocator.Created;
 
-        public UnsafeAllocator(int count, Allocator allocator)
+        public ref T this[int index]
+        {
+            get
+            {
+#if DEBUG_MODE
+                if (index < 0 || index >= Length)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+#endif
+                return ref Ptr[index];
+            }
+        }
+        public int Length => Convert.ToInt32(m_Allocator.Size / UnsafeUtility.SizeOf<T>());
+
+        public UnsafeAllocator(int length, Allocator allocator)
         {
             m_Allocator = new UnsafeAllocator(
-                UnsafeUtility.SizeOf<T>() * count,
+                UnsafeUtility.SizeOf<T>() * length,
                 UnsafeUtility.AlignOf<T>(),
                 allocator
                 );
