@@ -34,7 +34,7 @@ namespace Point.Collections.IO.Json
 
         public override Transform ReadJson(JsonReader reader, Type objectType, Transform existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            var json = serializer.Deserialize<TransformationJson>(reader);
+            var json = serializer.Deserialize<Transformation>(reader);
 
             existingValue.localPosition = json.localPosition;
             existingValue.localRotation = json.localRotation;
@@ -44,7 +44,7 @@ namespace Point.Collections.IO.Json
         }
         public override void WriteJson(JsonWriter writer, Transform value, JsonSerializer serializer)
         {
-            TransformationJson json = new TransformationJson(value);
+            Transformation json = new Transformation(value);
             serializer.Serialize(writer, json);
         }
     }
@@ -62,7 +62,7 @@ namespace Point.Collections.IO.Json
             public int layer;
             public bool isActive;
 
-            public TransformationJson transform;
+            public Transformation transform;
             public string[] components;
 
             public GameObjectJson(GameObject obj)
@@ -95,7 +95,7 @@ namespace Point.Collections.IO.Json
             existingValue.SetActive(jo["isActive"].ToObject<bool>());
 
             Transform tr = existingValue.transform;
-            TransformationJson trJson = jo["transform"].ToObject<TransformationJson>();
+            Transformation trJson = jo["transform"].ToObject<Transformation>();
             tr.localPosition = trJson.localPosition;
             tr.localRotation = trJson.localRotation;
             tr.localScale = trJson.localScale;

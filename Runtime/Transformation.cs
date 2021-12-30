@@ -13,15 +13,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Unity.Collections;
+using Newtonsoft.Json;
+using Unity.Mathematics;
+using UnityEngine;
 
-namespace Point.Collections.IO
+namespace Point.Collections
 {
-    public static class UnitySerializer
+    public struct Transformation
     {
-        public static void Serialize(UnityEngine.Object obj)
-        {
+        [JsonProperty(Order = 0, PropertyName = "localRotation")]
+        public quaternion localRotation;
+        [JsonProperty(Order = 1, PropertyName = "localPosition")]
+        public float3 localPosition;
+        [JsonProperty(Order = 2, PropertyName = "localScale")]
+        public float3 localScale;
 
+        public Transformation(Transform tr)
+        {
+            localPosition = tr.localPosition;
+            localRotation = tr.localRotation;
+            localScale = tr.localScale;
         }
     }
 }
