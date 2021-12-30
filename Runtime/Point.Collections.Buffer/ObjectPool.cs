@@ -21,7 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace Point.Collections
+namespace Point.Collections.Buffer
 {
     [Guid("03536d37-5801-4900-bc81-0ee1a5c7e296")]
     public sealed class ObjectPool<T> : IDisposable
