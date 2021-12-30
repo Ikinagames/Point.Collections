@@ -17,6 +17,7 @@
 #define DEBUG_MODE
 #endif
 
+using Point.Collections.Buffer.LowLevel;
 using Point.Collections.ResourceControl.LowLevel;
 using System;
 using System.Collections.Generic;
@@ -53,6 +54,7 @@ namespace Point.Collections.ResourceControl
         internal sealed class AssetContainer
         {
             private AssetBundle m_AssetBundle;
+            // 현재 로드된 에셋들의 HashMap 입니다.
             public Dictionary<Hash, UnityEngine.Object> m_Assets;
 
             public AssetBundle AssetBundle
@@ -129,6 +131,11 @@ namespace Point.Collections.ResourceControl
             m_MappedAssets.Dispose();
         }
 
+        /// <summary>
+        /// 버퍼에서 현재 사용중이 아닌 주소의 배열 인덱스를 반환합니다. 
+        /// 만약 찾지 못하였다면 -1 을 반환합니다.
+        /// </summary>
+        /// <returns><see cref="m_AssetBundleInfos"/> 의 Index</returns>
         private int GetUnusedAssetBundleBuffer()
         {
             for (int i = 0; i < Instance.m_AssetBundleInfos.Length; i++)
@@ -140,6 +147,12 @@ namespace Point.Collections.ResourceControl
             }
             return -1;
         }
+        /// <summary>
+        /// 에셋 번들을 uri 주소 값으로 정보를 찾아서 반환합니다.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="assetBundle"></param>
+        /// <returns></returns>
         private bool TryGetAssetBundleWithPath(string path, out AssetBundleInfo assetBundle)
         {
             FixedString4096Bytes temp = path;
@@ -155,6 +168,12 @@ namespace Point.Collections.ResourceControl
             assetBundle = default;
             return false;
         }
+        /// <summary>
+        /// 로드된 에셋 번들로 정보를 찾아서 반환합니다.
+        /// </summary>
+        /// <param name="bundle"></param>
+        /// <param name="assetBundle"></param>
+        /// <returns></returns>
         private bool TryGetAssetBundleWithBundle(AssetBundle bundle, out AssetBundleInfo assetBundle)
         {
             for (int i = 0; i < Instance.m_AssetBundles.Count; i++)
@@ -171,6 +190,14 @@ namespace Point.Collections.ResourceControl
             return false;
         }
 
+        /// <summary>
+        /// 에셋 번들을 상대 경로로 추가하여 정보를 반환합니다. 
+        /// </summary>
+        /// <remarks>
+        /// uri + <see cref="Application.dataPath"/> + <paramref name="path"/> 로 찾습니다.
+        /// </remarks>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public static AssetBundleInfo RegisterAssetBundlePath(string path)
         {
             if (path.StartsWith("Assets"))
@@ -181,6 +208,16 @@ namespace Point.Collections.ResourceControl
             string uri = c_FileUri + Application.dataPath + path;
             return RegisterAssetBundleUri(uri);
         }
+        /// <summary>
+        /// 절대 경로로 에셋 번들을 추가하여 정보를 반환합니다.
+        /// </summary>
+        /// <remarks>
+        /// uri + <paramref name="path"/> 로 찾습니다. 
+        /// <seealso cref="UnityWebRequest"/> 을 통한 Uri 는 <seealso cref="RegisterAssetBundleUri(string, uint)"/>
+        /// 를 참조하세요.
+        /// </remarks>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public static AssetBundleInfo RegisterAssetBundleAbsolutePath(string path)
         {
             string uri = c_FileUri + path;
@@ -220,8 +257,14 @@ namespace Point.Collections.ResourceControl
 
             return GetAssetBundleInfo(in index);
         }
+        /// <summary>
+        /// 사용자가 미리 메모리에 로드한 <see cref="AssetBundle"/> 을 리소스 매니저에 등록합니다.
+        /// </summary>
+        /// <param name="assetBundle"></param>
+        /// <returns></returns>
         public static AssetBundleInfo RegisterAssetBundle(AssetBundle assetBundle)
         {
+            // 만약 등록할 번들이 이미 등록된 번들이라면 즉시 반환합니다.
             if (Instance.TryGetAssetBundleWithBundle(assetBundle, out var bundle)) return bundle;
 
             int index = Instance.GetUnusedAssetBundleBuffer();
@@ -293,6 +336,13 @@ namespace Point.Collections.ResourceControl
 
             return info;
         }
+        internal static unsafe UnsafeReference<UnsafeAssetBundleInfo> GetUnsafeAssetBundleInfo(in int index)
+        {
+            ref UnsafeAssetBundleInfo temp = ref Instance.m_AssetBundleInfos.ElementAt(index);
+            UnsafeAssetBundleInfo* p = (UnsafeAssetBundleInfo*)UnsafeUtility.AddressOf(ref temp);
+
+            return p;
+        }
         internal static unsafe AssetContainer GetAssetBundle(in int index)
         {
             if (Instance.m_AssetBundles[index] == null)
@@ -302,8 +352,6 @@ namespace Point.Collections.ResourceControl
             return Instance.m_AssetBundles[index];
         }
 
-        internal static unsafe AssetBundle LoadAssetBundle(ref UnsafeAssetBundleInfo p)
-            => LoadAssetBundle((UnsafeAssetBundleInfo*)UnsafeUtility.AddressOf(ref p));
         internal static unsafe AssetBundle LoadAssetBundle(UnsafeAssetBundleInfo* p)
         {
             string path = p->uri.ToString().Replace(c_FileUri, string.Empty);
@@ -401,19 +449,23 @@ namespace Point.Collections.ResourceControl
             }
         }
 
-        internal static unsafe AssetInfo LoadAsset(ref UnsafeAssetBundleInfo bundleP, in FixedString4096Bytes key)
-            => LoadAsset((UnsafeAssetBundleInfo*)UnsafeUtility.AddressOf(ref bundleP), key);
-        internal static unsafe AssetInfo LoadAsset(UnsafeAssetBundleInfo* bundleP, in FixedString4096Bytes key)
+        [NotBurstCompatible]
+        internal static unsafe AssetInfo LoadAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in FixedString4096Bytes key)
         {
-            if (!bundleP->loaded)
+            if (!bundleP.Value.loaded)
             {
-                throw new InvalidOperationException();
+                PointCore.LogError(PointCore.LogChannel.Collections,
+                    $"Cound not load asset {key}. Target AssetBundle is not loaded.");
+
+                return AssetInfo.Invalid;
+
+                //throw new InvalidOperationException();
             }
 
             Hash hash = new Hash(key);
             Mapped index = Instance.m_MappedAssets[hash];
 
-            ref UnsafeAssetInfo assetInfo = ref bundleP->assets.ElementAt(index.assetIndex);
+            ref UnsafeAssetInfo assetInfo = ref bundleP.Value.assets.ElementAt(index.assetIndex);
 
             assetInfo.loaded = true;
 
@@ -427,15 +479,15 @@ namespace Point.Collections.ResourceControl
             Instance.m_ReferenceCheckSum ^= hash;
             return asset;
         }
-        internal static unsafe void Reserve(UnsafeAssetBundleInfo* bundleP, in AssetInfo key)
+        internal static unsafe void Reserve(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in AssetInfo key)
         {
-            if (!bundleP->loaded)
+            if (!bundleP.Value.loaded)
             {
                 throw new InvalidOperationException();
             }
 
             Mapped index = Instance.m_MappedAssets[key.key];
-            ref UnsafeAssetInfo assetInfo = ref bundleP->assets.ElementAt(index.assetIndex);
+            ref UnsafeAssetInfo assetInfo = ref bundleP.Value.assets.ElementAt(index.assetIndex);
 
             if (!assetInfo.loaded)
             {
@@ -447,5 +499,44 @@ namespace Point.Collections.ResourceControl
         }
 
         #endregion
+
+        /// <summary>
+        /// 해당 키의 에셋을 로드합니다.
+        /// </summary>
+        /// <remarks>
+        /// 에셋을 로드하기전, 해당 에셋의 에셋 번들이 먼저 로드되어야 합니다. 
+        /// <seealso cref="RegisterAssetBundle(AssetBundle)"/> 메소드를 제외한 나머지 메소드로 등록한 번들
+        /// (<seealso cref="RegisterAssetBundleUri(string, uint)"/>) 와 같은)
+        /// 은 먼저 <seealso cref="AssetBundleInfo.Load"/> 를 수행하세요.
+        /// </remarks>
+        /// <param name="key">이 값은 에디터상 상대 경로입니다 Assets/...</param>
+        /// <returns></returns>
+        public static AssetInfo LoadAsset(in FixedString4096Bytes key)
+        {
+            Instance.m_MapingJobHandle.Complete();
+
+            Hash hash = new Hash(key);
+            if (!Instance.m_MappedAssets.ContainsKey(hash))
+            {
+                PointCore.LogError(PointCore.LogChannel.Collections,
+                    $"Asset({key}) is not registered.");
+
+                return AssetInfo.Invalid;
+            }
+
+            Mapped index = Instance.m_MappedAssets[hash];
+
+            if (!Instance.m_AssetBundleInfos[index.bundleIndex].loaded)
+            {
+                PointCore.LogError(PointCore.LogChannel.Collections,
+                    $"Cound not load asset {key}. Target AssetBundle is not loaded.");
+
+                return AssetInfo.Invalid;
+            }
+
+            UnsafeReference<UnsafeAssetBundleInfo> p = GetUnsafeAssetBundleInfo(in index.bundleIndex);
+            
+            return LoadAsset(p, in key);
+        }
     }
 }

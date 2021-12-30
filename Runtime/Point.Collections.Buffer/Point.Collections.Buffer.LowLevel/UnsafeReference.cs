@@ -45,7 +45,8 @@ namespace Point.Collections.Buffer.LowLevel
         }
     }
     [BurstCompatible]
-    public struct UnsafeReference<T> where T : unmanaged
+    public struct UnsafeReference<T> : IEquatable<UnsafeReference<T>>, IEquatable<UnsafeReference>
+        where T : unmanaged
     {
         private bool m_IsCreated;
         [NativeDisableUnsafePtrRestriction]
@@ -94,6 +95,21 @@ namespace Point.Collections.Buffer.LowLevel
             unsafe
             {
                 *m_Ptr = item;
+            }
+        }
+
+        public bool Equals(UnsafeReference<T> other)
+        {
+            unsafe
+            {
+                return m_Ptr == other.m_Ptr;
+            }
+        }
+        public bool Equals(UnsafeReference other)
+        {
+            unsafe
+            {
+                return m_Ptr == other.Ptr;
             }
         }
 

@@ -17,8 +17,10 @@
 #define DEBUG_MODE
 #endif
 
+using Point.Collections.Buffer.LowLevel;
 using Point.Collections.ResourceControl.LowLevel;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Unity.Collections;
@@ -33,17 +35,16 @@ namespace Point.Collections.ResourceControl
     {
         public static AssetBundleInfo Invalid => default(AssetBundleInfo);
 
-        [NativeDisableUnsafePtrRestriction]
-        internal unsafe readonly UnsafeAssetBundleInfo* pointer;
+        internal readonly UnsafeReference<UnsafeAssetBundleInfo> pointer;
         internal readonly uint generation;
 
         internal unsafe ref UnsafeAssetBundleInfo Ref
         {
             get
             {
-                pointer->m_JobHandle.Complete();
+                pointer.Value.m_JobHandle.Complete();
 
-                return ref *pointer;
+                return ref pointer.Value;
             }
         }
 
@@ -87,6 +88,15 @@ namespace Point.Collections.ResourceControl
         {
             this.ThrowIfIsNotValid();
 
+            if (Ref.loaded)
+            {
+                PointCore.LogError(PointCore.LogChannel.Collections,
+                    $"This Assetbundle({AssetBundle.name}) already loaded but you trying to override. " +
+                    $"This is not allowed.");
+
+                return AssetBundle;
+            }
+
             unsafe
             {
                 return ResourceManager.LoadAssetBundle(pointer);
@@ -97,12 +107,26 @@ namespace Point.Collections.ResourceControl
         {
             this.ThrowIfIsNotValid();
 
+            if (Ref.loaded)
+            {
+                PointCore.LogError(PointCore.LogChannel.Collections,
+                    $"This Assetbundle({AssetBundle.name}) already loaded but you trying to override. " +
+                    $"This is not allowed.");
+
+                return null;
+            }
+
             unsafe
             {
                 return ResourceManager.LoadAssetBundleAsync(pointer);
             }
         }
 
+        /// <summary>
+        /// 에셋 번들을 메모리에서 해제합니다.
+        /// </summary>
+        /// <param name="unloadAllLoadedObjects">이 번들을 통해 로드된 모든 객체도
+        /// 해제할지 설정합니다.</param>
         public void Unload(bool unloadAllLoadedObjects)
         {
             this.ThrowIfIsNotValid();
@@ -126,6 +150,15 @@ namespace Point.Collections.ResourceControl
             ResourceManager.UnloadAssetBundle(ref Ref, unloadAllLoadedObjects);
         }
 
+        /// <summary>
+        /// 이 에셋 번들 내 모든 에셋의 이름을 반환합니다.
+        /// </summary>
+        /// <remarks>
+        /// <seealso cref="ResourceManager"/> 에서는 여기서 반환한 
+        /// 에셋의 이름(에디터상 에셋의 상대 경로를 의미합니다. Assets/.../)을 키 값으로 <seealso cref="LoadAsset(in FixedString4096Bytes)"/> 등에 
+        /// 사용 될 수 있습니다.
+        /// </remarks>
+        /// <returns></returns>
         [NotBurstCompatible]
         public string[] GetAllAssetNames()
         {
@@ -146,40 +179,49 @@ namespace Point.Collections.ResourceControl
             {
                 arr[i] = assets[i].key.ToString();
             }
-            
+
             return arr;
         }
+        /// <inheritdoc cref="GetAllAssetNames"/>
+        [NotBurstCompatible]
+        public IEnumerable<FixedString4096Bytes> GetAllAssetNamesWithoutAllocation()
+        {
+            this.ThrowIfIsNotValid();
+
+            if (!IsLoaded)
+            {
+                PointCore.LogError(PointCore.LogChannel.Collections,
+                    $"You\'re trying to get all asset names that didn\'t loaded AssetBundle. " +
+                    $"This is not allowed.");
+
+                yield break;
+            }
+
+            for (int i = 0; i < Ref.assets.Length; i++)
+            {
+                yield return Ref.assets[i].key;
+            }
+        }
+
         public AssetInfo LoadAsset(in FixedString4096Bytes key)
         {
             this.ThrowIfIsNotValid();
 
-            unsafe
-            {
-                return ResourceManager.LoadAsset(pointer, in key);
-            }
+            return ResourceManager.LoadAsset(pointer, in key);
         }
         public void Reserve(ref AssetInfo asset)
         {
             this.ThrowIfIsNotValid();
 
-            unsafe
+            if (!asset.bundlePointer.Equals(pointer))
             {
-                if (asset.bundlePointer != pointer)
-                {
-                    throw new Exception();
-                }
-
-                ResourceManager.Reserve(pointer, in asset);
+                throw new Exception();
             }
+
+            ResourceManager.Reserve(pointer, in asset);
         }
 
         public bool IsValid() => !Equals(Invalid);
-        public bool Equals(AssetBundleInfo other)
-        {
-            unsafe
-            {
-                return pointer == other.pointer;
-            }
-        }
+        public bool Equals(AssetBundleInfo other) => pointer.Equals(other.pointer);
     }
 }

@@ -17,6 +17,7 @@
 #define DEBUG_MODE
 #endif
 
+using Point.Collections.Buffer.LowLevel;
 using Point.Collections.ResourceControl.LowLevel;
 using System;
 using System.Runtime.InteropServices;
@@ -27,10 +28,12 @@ namespace Point.Collections.ResourceControl
 {
     [BurstCompatible]
     [Guid("b92cc9a9-b577-4759-b623-d794bd86d430")]
-    public struct AssetInfo : IValidation, IEquatable<AssetInfo>
+    public readonly struct AssetInfo : IValidation, IEquatable<AssetInfo>
     {
+        public static AssetInfo Invalid => default(AssetInfo);
+
         [NativeDisableUnsafePtrRestriction, NonSerialized]
-        internal unsafe readonly UnsafeAssetBundleInfo* bundlePointer;
+        internal readonly UnsafeReference<UnsafeAssetBundleInfo> bundlePointer;
         [NonSerialized]
         internal readonly Hash key;
 
@@ -40,15 +43,12 @@ namespace Point.Collections.ResourceControl
             {
                 this.ThrowIfIsNotValid();
 
-                unsafe
-                {
-                    ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(bundlePointer->index);
-                    return bundleInfo.m_Assets[key];
-                }
+                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(bundlePointer.Value.index);
+                return bundleInfo.m_Assets[key];
             }
         }
 
-        internal unsafe AssetInfo(UnsafeAssetBundleInfo* bundle, Hash key)
+        internal unsafe AssetInfo(UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash key)
         {
             bundlePointer = bundle;
             this.key = key;
@@ -58,30 +58,21 @@ namespace Point.Collections.ResourceControl
         {
             this.ThrowIfIsNotValid();
 
-            unsafe
-            {
-                ResourceManager.Reserve(bundlePointer, in this);
-            }
+            ResourceManager.Reserve(bundlePointer, in this);
         }
 
         public bool IsValid()
         {
             ResourceManager.AssetContainer bundle;
-            unsafe
-            {
-                if (bundlePointer == null) return false;
+            if (!bundlePointer.IsCreated) return false;
 
-                bundle = ResourceManager.GetAssetBundle(bundlePointer->index);
-            }
+            bundle = ResourceManager.GetAssetBundle(bundlePointer.Value.index);
 
             return bundle.m_Assets.ContainsKey(key);
         }
         public bool Equals(AssetInfo other)
         {
-            unsafe
-            {
-                return bundlePointer == other.bundlePointer && key.Equals(other.key);
-            }
+            return bundlePointer.Equals(other.bundlePointer) && key.Equals(other.key);
         }
     }
 }
