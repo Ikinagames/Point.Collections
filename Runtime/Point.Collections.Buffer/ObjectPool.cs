@@ -17,6 +17,7 @@
 #define DEBUG_MODE
 #endif
 
+using Point.Collections.Threading;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -32,6 +33,8 @@ namespace Point.Collections.Buffer
             m_OnGet, m_OnReserve, m_OnRelease;
 
         private Stack<T> m_Pool;
+
+        private ThreadInfo m_Owner;
         private int m_CheckSum;
 
         private ObjectPool() { }
@@ -43,11 +46,15 @@ namespace Point.Collections.Buffer
             m_OnRelease = onRelease;
 
             m_Pool = new Stack<T>();
+
+            m_Owner = ThreadInfo.CurrentThread;
             m_CheckSum = 0;
         }
 
         public T Get()
         {
+            m_Owner.Validate();
+
             T t;
             if (m_Pool.Count > 0)
             {
@@ -64,6 +71,8 @@ namespace Point.Collections.Buffer
         }
         public void Reserve(T t)
         {
+            m_Owner.Validate();
+
             m_OnReserve?.Invoke(t);
 
             int hash = t.GetHashCode();
@@ -74,6 +83,8 @@ namespace Point.Collections.Buffer
 
         public void Dispose()
         {
+            m_Owner.Validate();
+
             if (m_CheckSum != 0)
             {
                 throw new Exception();

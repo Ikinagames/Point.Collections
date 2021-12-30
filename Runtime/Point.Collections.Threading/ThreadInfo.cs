@@ -53,14 +53,6 @@ namespace Point.Collections.Threading
             else m_Name = thread.Name;
         }
 
-        [NotBurstCompatible]
-        public bool Validate()
-        {
-            Thread currentThread = Thread.CurrentThread;
-
-            return Equals(currentThread);
-        }
-
         public bool Equals(ThreadInfo other)
         {
             if (m_ManagedThreadID != other.m_ManagedThreadID) return false;

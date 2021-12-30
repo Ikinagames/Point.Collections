@@ -128,9 +128,11 @@ namespace Point.Collections
         #region Threading
 
         [Unity.Collections.NotBurstCompatible]
-        public static bool IsMainThread()
+        public static bool AssertIsMainThread()
         {
-            return PointApplication.Instance.MainThread.Validate();
+            Threading.ThreadInfo currentThread = Threading.ThreadInfo.CurrentThread;
+
+            return PointApplication.Instance.MainThread.Equals(currentThread);
         }
         [Unity.Collections.NotBurstCompatible]
         [System.Diagnostics.Conditional("DEBUG_MODE")]
@@ -148,6 +150,15 @@ namespace Point.Collections
 
             LogError(LogChannel.Default,
                 $"Thread affinity error. Expected thread({expectedAffinity}) but {currentThread}");
+        }
+        /// <summary>
+        /// 이 스레드가 <paramref name="other"/> 의 스레드와 같은 스레드인지 확인합니다. 
+        /// 만약 다르다면 로그 에러를 표시합니다.
+        /// </summary>
+        /// <param name="other"></param>
+        public static void Validate(this in Threading.ThreadInfo other)
+        {
+            AssertThreadAffinity(in other);
         }
 
         #endregion
