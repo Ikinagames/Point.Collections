@@ -30,6 +30,10 @@ namespace Point.Collections
 
         public bool IsCreated => m_Ptr.IsCreated;
 
+        public FixedReference(UnsafeReference<T> ptr)
+        {
+            m_Ptr = ptr;
+        }
         public FixedReference(NativeArray<T> array, int elementIndex)
         {
             unsafe
@@ -39,5 +43,7 @@ namespace Point.Collections
                 m_Ptr = new UnsafeReference<T>(buffer + elementIndex);
             }
         }
+
+        public static implicit operator FixedReference<T>(UnsafeReference<T> t) => new FixedReference<T>(t);
     }
 }
