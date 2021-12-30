@@ -51,6 +51,17 @@ namespace Point.Collections.Buffer.LowLevel
         [NativeDisableUnsafePtrRestriction]
         private unsafe T* m_Ptr;
 
+        public ref T this[int index]
+        {
+            get
+            {
+                unsafe
+                {
+                    return ref *(m_Ptr + index);
+                }
+            }
+        }
+
         public unsafe T* Ptr => m_Ptr;
         public IntPtr IntPtr { get { unsafe { return (IntPtr)m_Ptr; } } }
         public ref T Value { get { unsafe { return ref *m_Ptr; } } }
@@ -70,5 +81,38 @@ namespace Point.Collections.Buffer.LowLevel
             m_Ptr = ptr;
             m_IsCreated = true;
         }
+
+        public ref T GetValue()
+        {
+            unsafe
+            {
+                return ref *m_Ptr;
+            }
+        }
+        public void SetValue(in T item)
+        {
+            unsafe
+            {
+                *m_Ptr = item;
+            }
+        }
+
+        public static UnsafeReference<T> operator +(UnsafeReference<T> a, int b)
+        {
+            unsafe
+            {
+                return new UnsafeReference<T>(a.m_Ptr + b);
+            }
+        }
+        public static UnsafeReference<T> operator -(UnsafeReference<T> a, int b)
+        {
+            unsafe
+            {
+                return new UnsafeReference<T>(a.m_Ptr - b);
+            }
+        }
+
+        public static unsafe implicit operator UnsafeReference<T>(T* p) => new UnsafeReference<T>(p);
+        public static unsafe implicit operator T*(UnsafeReference<T> p) => p.m_Ptr;
     }
 }
