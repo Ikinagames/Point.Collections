@@ -35,7 +35,7 @@ namespace Point.Collections.Buffer.LowLevel
         IEnumerable<KeyValue<TKey, TValue>>
 
         where TKey : unmanaged, IEquatable<TKey>
-        where TValue : unmanaged, IEquatable<TValue>
+        where TValue : unmanaged
     {
         private readonly int m_InitialCount;
         private UnsafeAllocator<KeyValue<TKey, TValue>> m_Buffer;

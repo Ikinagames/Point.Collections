@@ -28,7 +28,7 @@ namespace Point.Collections
     [Serializable]
     [JsonConverter(typeof(IO.Json.HashJsonConverter))]
     [Guid("acdb109b-3a13-4ea2-8835-ef97b416cbb7")]
-    public struct Hash : IEquatable<Hash>, IConvertible
+    public struct Hash : IEquatable<Hash>, IConvertible, IEmpty
     {
         public static Hash Empty => new Hash(0);
         public static Hash NewHash()
@@ -135,6 +135,8 @@ namespace Point.Collections
         {
             throw new NotImplementedException();
         }
+
+        public bool IsEmpty() => m_Value == 0;
 
         public static bool operator ==(Hash x, Hash y) => x.Equals(y);
         public static bool operator !=(Hash x, Hash y) => !x.Equals(y);
