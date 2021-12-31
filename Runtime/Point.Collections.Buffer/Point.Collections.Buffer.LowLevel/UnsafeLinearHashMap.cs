@@ -89,6 +89,24 @@ namespace Point.Collections.Buffer.LowLevel
             index = -1;
             return false;
         }
+        public bool TryGetIndex(TKey key, out int index)
+        {
+            ulong hash = key.Calculate() ^ 0b1011101111;
+            int increment = Capacity / m_InitialCount + 1;
+
+            for (int i = 1; i < increment; i++)
+            {
+                index = Convert.ToInt32(hash % (uint)(m_InitialCount * i));
+
+                if (m_Buffer[index].key.Equals(key))
+                {
+                    return true;
+                }
+            }
+
+            index = -1;
+            return false;
+        }
 
         public bool ContainsKey(TKey key) => TryFindIndexFor(key, out _);
 
