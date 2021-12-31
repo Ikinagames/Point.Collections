@@ -37,7 +37,7 @@ namespace Point.Collections
     /// </remarks>
     /// <typeparam name="THandler"></typeparam>
     [NativeContainer]
-    public struct TransformScene<THandler> : IDisposable, IValidation
+    public struct TransformScene<THandler> : ITransformScene, IUnsafeTransformScene, IDisposable, IValidation
         where THandler : unmanaged, ITransformSceneHandler
     {
         private readonly ThreadInfo m_Owner;
@@ -45,18 +45,20 @@ namespace Point.Collections
         private UnsafeLinearHashMap<SceneID, UnsafeTransform> m_HashMap;
         private UnsafeAllocator<THandler> m_Handler;
 
+        #region IUnsafeTransformScene Implements
+
+        UnsafeLinearHashMap<SceneID, UnsafeTransform> IUnsafeTransformScene.HashMap => m_HashMap;
+        TypeInfo IUnsafeTransformScene.HandlerType => TypeHelper.TypeOf<THandler>.TypeInfo;
+        UnsafeAllocator IUnsafeTransformScene.Handler => m_Handler;
+
+        #endregion
+
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
         private AtomicSafetyHandle m_SafetyHandle;
         [NativeSetClassTypeToNullOnSchedule]
         private DisposeSentinel m_DisposeSentinel;
 #endif
-        /// <summary>
-        /// 목표 씬을 반환합니다.
-        /// </summary>
         public Scene Scene => SceneManager.GetSceneByBuildIndex(m_SceneBuildIndex);
-        /// <summary>
-        /// 이 구조체가 생성되었는지 반환합니다.
-        /// </summary>
         public bool IsCreated => m_HashMap.IsCreated;
 
         /// <summary>
@@ -149,6 +151,26 @@ namespace Point.Collections
         }
 
         public bool IsValid() => m_HashMap.IsCreated && Scene.IsValid();
+    }
+    public interface ITransformScene : IDisposable, IValidation
+    {
+        /// <summary>
+        /// 목표 씬을 반환합니다.
+        /// </summary>
+        Scene Scene { get; }
+        /// <summary>
+        /// 이 구조체가 생성되었는지 반환합니다.
+        /// </summary>
+        bool IsCreated { get; }
+
+        NativeTransform Add(Transformation tr);
+        void Remove(NativeTransform transform);
+    }
+    internal interface IUnsafeTransformScene
+    {
+        UnsafeLinearHashMap<SceneID, UnsafeTransform> HashMap { get; }
+        TypeInfo HandlerType { get; }
+        UnsafeAllocator Handler { get; }
     }
 
     public interface ITransformSceneHandler : IDisposable

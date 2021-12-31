@@ -28,7 +28,7 @@ namespace Point.Collections.Buffer.LowLevel
     {
         private UnsafeReference m_Ptr;
         private long m_Size;
-        private readonly Allocator m_Allocator;
+        internal readonly Allocator m_Allocator;
 
         private bool m_Created;
 
@@ -216,6 +216,11 @@ namespace Point.Collections.Buffer.LowLevel
                 m_Ptr = allocator.Ptr.AsReadOnly();
                 m_Length = allocator.Length;
             }
+        }
+
+        public static implicit operator UnsafeAllocator(UnsafeAllocator<T> t)
+        {
+            return new UnsafeAllocator(t.Ptr, t.Size, t.m_Allocator.m_Allocator);
         }
     }
     public static class UnsafeAllocatorExtensions
