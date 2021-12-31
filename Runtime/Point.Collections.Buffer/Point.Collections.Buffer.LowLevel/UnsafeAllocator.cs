@@ -170,6 +170,16 @@ namespace Point.Collections.Buffer.LowLevel
                 options
                 );
         }
+        public UnsafeReference<T> ElementAt(in int index)
+        {
+#if DEBUG_MODE
+            if (index < 0 || index >= Length)
+            {
+                throw new IndexOutOfRangeException();
+            }
+#endif
+            return Ptr + index;
+        }
         public void Clear() => m_Allocator.Clear();
 
         public void Dispose()
