@@ -80,8 +80,7 @@ namespace Point.Collections.Buffer.LowLevel
             {
                 index = Convert.ToInt32(hash % (uint)(m_InitialCount * i));
 
-                if (m_Buffer[index].key.Equals(default(TKey)) ||
-                    m_Buffer[index].key.Equals(key))
+                if (m_Buffer[index].IsKeyEmptyOrEquals(key))
                 {
                     return true;
                 }
