@@ -27,6 +27,7 @@ namespace Point.Collections.Buffer.LowLevel
     /// <see cref="System.IntPtr"/> 접근을 unsafe 없이 접근을 도와주는 구조체입니다.
     /// </summary>
     [BurstCompatible]
+    [BurstCompatible]
     public struct UnsafeReference : IUnsafeReference, IEquatable<UnsafeReference>
     {
         private bool m_IsCreated;
@@ -43,6 +44,19 @@ namespace Point.Collections.Buffer.LowLevel
                     ptr = (IntPtr)m_Ptr;
                 }
                 return IntPtr.Add(ptr, offset);
+            }
+        }
+        public IntPtr this[long offset]
+        {
+            get
+            {
+                IntPtr ptr;
+                unsafe
+                {
+                    ptr = (IntPtr)m_Ptr;
+                }
+
+                return IntPtr.Add(ptr, (int)offset);
             }
         }
 
@@ -65,8 +79,6 @@ namespace Point.Collections.Buffer.LowLevel
             m_IsCreated = true;
         }
 
-        public static unsafe implicit operator UnsafeReference(void* p) => new UnsafeReference(p);
-
         public bool Equals(UnsafeReference other)
         {
             unsafe
@@ -74,7 +86,12 @@ namespace Point.Collections.Buffer.LowLevel
                 return m_Ptr == other.m_Ptr;
             }
         }
+
+        public static unsafe implicit operator UnsafeReference(void* p) => new UnsafeReference(p);
+        public static unsafe implicit operator void*(UnsafeReference p) => p.m_Ptr;
     }
+    /// <summary><inheritdoc cref="UnsafeReference"/></summary>
+    /// <typeparam name="T"></typeparam>
     [BurstCompatible]
     public struct UnsafeReference<T> : IUnsafeReference,
         IEquatable<UnsafeReference<T>>, IEquatable<UnsafeReference>
@@ -132,6 +149,7 @@ namespace Point.Collections.Buffer.LowLevel
             m_Ptr = ptr;
             m_IsCreated = true;
         }
+        public ReadOnly AsReadOnly() { unsafe { return new ReadOnly(m_Ptr); } }
 
         public ref T GetValue()
         {
@@ -173,6 +191,30 @@ namespace Point.Collections.Buffer.LowLevel
 
         public static unsafe implicit operator UnsafeReference<T>(T* p) => new UnsafeReference<T>(p);
         public static unsafe implicit operator UnsafeReference<T>(UnsafeReference p) => new UnsafeReference<T>(p.IntPtr);
+        public static unsafe implicit operator UnsafeReference(UnsafeReference<T> p) => new UnsafeReference(p.IntPtr);
         public static unsafe implicit operator T*(UnsafeReference<T> p) => p.m_Ptr;
+
+        [BurstCompatible]
+        public struct ReadOnly
+        {
+            private unsafe T* m_Ptr;
+
+            public T this[int index]
+            {
+                get
+                {
+                    unsafe
+                    {
+                        return m_Ptr[index];
+                    }
+                }
+            }
+            public T Value { get { unsafe { return *m_Ptr; } } }
+
+            internal unsafe ReadOnly(T* ptr)
+            {
+                m_Ptr = ptr;
+            }
+        }
     }
 }

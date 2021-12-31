@@ -23,7 +23,7 @@ using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace Point.Collections
+namespace Point.Collections.Buffer
 {
     [BurstCompatible]
     public struct FixedReference<T> : IEquatable<FixedReference<T>>
