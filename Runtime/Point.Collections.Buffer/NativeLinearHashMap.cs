@@ -121,7 +121,7 @@ namespace Point.Collections.Buffer
             {
                 m_Owner = hashMap.m_Owner;
 
-                m_Buffer = hashMap.m_HashMap.Buffer;
+                m_Buffer = hashMap.m_HashMap.ReadOnlyPtr;
                 m_Index = 0;
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS

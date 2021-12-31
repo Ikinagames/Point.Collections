@@ -58,7 +58,8 @@ namespace Point.Collections.Buffer.LowLevel
                 }
             }
         }
-        public UnsafeAllocator<KeyValue<TKey, TValue>>.ReadOnly Buffer => m_Buffer.AsReadOnly();
+        public UnsafeAllocator<KeyValue<TKey, TValue>> Ptr => m_Buffer;
+        public UnsafeAllocator<KeyValue<TKey, TValue>>.ReadOnly ReadOnlyPtr => m_Buffer.AsReadOnly();
         public bool Created => m_Created;
         public int Capacity => m_Buffer.Length;
         public int Count => m_Count;
@@ -106,6 +107,10 @@ namespace Point.Collections.Buffer.LowLevel
 
             index = -1;
             return false;
+        }
+        public TKey GetKeyWithIndex(int index)
+        {
+            return m_Buffer[index].key;
         }
 
         public bool ContainsKey(TKey key) => TryFindIndexFor(key, out _);
@@ -157,7 +162,7 @@ namespace Point.Collections.Buffer.LowLevel
 
             internal Enumerator(UnsafeLinearHashMap<TKey, TValue> hashMap)
             {
-                m_Buffer = hashMap.Buffer;
+                m_Buffer = hashMap.ReadOnlyPtr;
                 m_Index = 0;
             }
 
