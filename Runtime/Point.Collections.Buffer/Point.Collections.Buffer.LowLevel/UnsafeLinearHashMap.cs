@@ -60,7 +60,7 @@ namespace Point.Collections.Buffer.LowLevel
         }
         public UnsafeAllocator<KeyValue<TKey, TValue>> Ptr => m_Buffer;
         public UnsafeAllocator<KeyValue<TKey, TValue>>.ReadOnly ReadOnlyPtr => m_Buffer.AsReadOnly();
-        public bool Created => m_Created;
+        public bool IsCreated => m_Created;
         public int Capacity => m_Buffer.Length;
         public int Count => m_Count;
 

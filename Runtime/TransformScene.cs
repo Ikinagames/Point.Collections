@@ -30,11 +30,13 @@ using UnityEngine.SceneManagement;
 namespace Point.Collections
 {
     [NativeContainer]
-    public struct TransformScene : IDisposable
+    public struct TransformScene<THandler> : IDisposable
+        where THandler : unmanaged, ITransformSceneHandler
     {
         private readonly ThreadInfo m_Owner;
         private readonly int m_SceneBuildIndex;
         private UnsafeLinearHashMap<SceneID, UnsafeTransform> m_HashMap;
+        private UnsafeAllocator<THandler> m_Handler;
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
         private AtomicSafetyHandle m_SafetyHandle;
@@ -43,12 +45,16 @@ namespace Point.Collections
 #endif
 
         public Scene Scene => SceneManager.GetSceneByBuildIndex(m_SceneBuildIndex);
+        public bool IsCreated => m_HashMap.IsCreated;
 
         public TransformScene(Scene scene, int initialCount = 128)
         {
             m_Owner = ThreadInfo.CurrentThread;
             m_SceneBuildIndex = scene.buildIndex;
             m_HashMap = new UnsafeLinearHashMap<SceneID, UnsafeTransform>(initialCount, Allocator.Persistent);
+            m_Handler = new UnsafeAllocator<THandler>(1, Allocator.Persistent, NativeArrayOptions.ClearMemory);
+
+            m_Handler.Ptr.Value.OnInitialize();
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             DisposeSentinel.Create(out m_SafetyHandle, out m_DisposeSentinel, 1, Allocator.Persistent);
@@ -68,11 +74,15 @@ namespace Point.Collections
 
             m_HashMap.Add(id, new UnsafeTransform(tr));
 
-            return new NativeTransform(m_HashMap, id
+            var temp = new NativeTransform(m_HashMap, id
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
                 , m_SafetyHandle
 #endif
                 );
+
+            m_Handler.Ptr.Value.OnTransformAdded(in temp);
+
+            return temp;
         }
         [WriteAccessRequired]
         public void Remove(NativeTransform transform)
@@ -83,11 +93,24 @@ namespace Point.Collections
             AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
+            m_Handler.Ptr.Value.OnTransformRemove(in transform);
+
             m_HashMap.Remove(transform.ID);
         }
 
         public void Dispose()
         {
+            foreach (KeyValue<SceneID, UnsafeTransform> item in m_HashMap)
+            {
+                var temp = new NativeTransform(m_HashMap, item.key
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+                , m_SafetyHandle
+#endif
+                );
+                m_Handler.Ptr.Value.OnTransformRemove(in temp);
+            }
+            m_Handler.Ptr.Value.Dispose();
+
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             PointCore.AssertThreadAffinity(in m_Owner);
 
@@ -95,6 +118,15 @@ namespace Point.Collections
             DisposeSentinel.Dispose(ref m_SafetyHandle, ref m_DisposeSentinel);
 #endif
             m_HashMap.Dispose();
+            m_Handler.Dispose();
         }
+    }
+
+    public interface ITransformSceneHandler : IDisposable
+    {
+        void OnInitialize();
+
+        void OnTransformAdded(in NativeTransform transform);
+        void OnTransformRemove(in NativeTransform transform);
     }
 }
