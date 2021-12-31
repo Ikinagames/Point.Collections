@@ -29,8 +29,15 @@ using UnityEngine.SceneManagement;
 
 namespace Point.Collections
 {
+    /// <summary>
+    /// TRS(Translation, Rotation, Scale) 값으로만으로 이루어진 데이터들을 씬으로서 묶은 구조체입니다.
+    /// </summary>
+    /// <remarks>
+    /// Unity.Jobs 에 대한 모든 Safety 를 지원합니다.
+    /// </remarks>
+    /// <typeparam name="THandler"></typeparam>
     [NativeContainer]
-    public struct TransformScene<THandler> : IDisposable
+    public struct TransformScene<THandler> : IDisposable, IValidation
         where THandler : unmanaged, ITransformSceneHandler
     {
         private readonly ThreadInfo m_Owner;
@@ -43,8 +50,13 @@ namespace Point.Collections
         [NativeSetClassTypeToNullOnSchedule]
         private DisposeSentinel m_DisposeSentinel;
 #endif
-
+        /// <summary>
+        /// 목표 씬을 반환합니다.
+        /// </summary>
         public Scene Scene => SceneManager.GetSceneByBuildIndex(m_SceneBuildIndex);
+        /// <summary>
+        /// 이 구조체가 생성되었는지 반환합니다.
+        /// </summary>
         public bool IsCreated => m_HashMap.IsCreated;
 
         public TransformScene(Scene scene, int initialCount = 128)
@@ -61,6 +73,11 @@ namespace Point.Collections
 #endif
         }
 
+        /// <summary>
+        /// 새로운 <see cref="NativeTransform"/> 을 추가합니다.
+        /// </summary>
+        /// <param name="tr"></param>
+        /// <returns></returns>
         [WriteAccessRequired]
         public NativeTransform Add(Transformation tr)
         {
@@ -84,6 +101,10 @@ namespace Point.Collections
 
             return temp;
         }
+        /// <summary>
+        /// <paramref name="transform"/> 을 이 씬에서 제거합니다.
+        /// </summary>
+        /// <param name="transform"></param>
         [WriteAccessRequired]
         public void Remove(NativeTransform transform)
         {
@@ -98,6 +119,7 @@ namespace Point.Collections
             m_HashMap.Remove(transform.ID);
         }
 
+        [WriteAccessRequired]
         public void Dispose()
         {
             foreach (KeyValue<SceneID, UnsafeTransform> item in m_HashMap)
@@ -120,6 +142,8 @@ namespace Point.Collections
             m_HashMap.Dispose();
             m_Handler.Dispose();
         }
+
+        public bool IsValid() => m_HashMap.IsCreated && Scene.IsValid();
     }
 
     public interface ITransformSceneHandler : IDisposable
