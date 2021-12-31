@@ -17,10 +17,12 @@
 #define DEBUG_MODE
 #endif
 
+using Unity.Collections;
 using Unity.Mathematics;
 
 namespace Point.Collections.LowLevel
 {
+    [BurstCompatible]
     public struct UnsafeTransform
     {
         public static UnsafeTransform Invalid => new UnsafeTransform(default(Transformation), -1);

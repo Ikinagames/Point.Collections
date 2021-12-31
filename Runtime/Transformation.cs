@@ -37,5 +37,15 @@ namespace Point.Collections
             localRotation = tr.localRotation;
             localScale = tr.localScale;
         }
+
+        public static implicit operator Transformation(Transform t)
+        {
+            return new Transformation
+            {
+                localPosition = t.localPosition,
+                localRotation = t.localRotation,
+                localScale = t.localScale
+            };
+        }
     }
 }
