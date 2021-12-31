@@ -59,6 +59,11 @@ namespace Point.Collections
         /// </summary>
         public bool IsCreated => m_HashMap.IsCreated;
 
+        /// <summary>
+        /// 해당 씬(<paramref name="scene"/>)에 새로운 TRS 씬을 생성합니다.
+        /// </summary>
+        /// <param name="scene">목표 씬입니다.</param>
+        /// <param name="initialCount">이 TRS 씬의 초기 크기입니다.</param>
         public TransformScene(Scene scene, int initialCount = 128)
         {
             m_Owner = ThreadInfo.CurrentThread;

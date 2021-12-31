@@ -269,7 +269,8 @@ namespace Point.Collections
             m_Buffer[m_Index].value.parentIndex = -1;
         }
 
-        public bool Equals(NativeTransform other) => m_Index.Equals(other.m_Index);
+        public bool Equals(NativeTransform other) 
+            => m_Index.Equals(other.m_Index) && m_HashCode.Equals(other.m_HashCode) && m_Buffer.Equals(other.m_Buffer);
 
         public bool IsValid()
         {
