@@ -18,6 +18,7 @@ using System;
 using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Point.Collections
 {
@@ -33,6 +34,7 @@ namespace Point.Collections
         private readonly int m_Align;
 
         private readonly int m_HashCode;
+        private readonly bool m_IsUnmanaged;
 
         [NotBurstCompatible]
         public Type Type
@@ -48,7 +50,23 @@ namespace Point.Collections
         }
         public int Size => m_Size;
         public int Align => m_Align;
+        public bool IsUnmanaged => m_IsUnmanaged;
 
+        [NotBurstCompatible]
+        internal TypeInfo(Type type)
+        {
+            if (!UnsafeUtility.IsUnmanaged(type))
+            {
+                this = default(TypeInfo);
+
+                m_TypeHandle = type.TypeHandle;
+
+                m_IsUnmanaged = false;
+                return;
+            }
+
+            this = new TypeInfo(type, UnsafeUtility.SizeOf(type), TypeHelper.AlignOf(type), CollectionUtility.CreateHashCode());
+        }
         [NotBurstCompatible]
         internal TypeInfo(Type type, int size, int align, int hashCode)
         {
@@ -61,6 +79,7 @@ namespace Point.Collections
                 // https://stackoverflow.com/questions/102742/why-is-397-used-for-resharper-gethashcode-override
                 m_HashCode = hashCode * 397;
             }
+            m_IsUnmanaged = true;
         }
 
         public override int GetHashCode() => m_HashCode;

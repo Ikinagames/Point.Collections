@@ -222,10 +222,10 @@ namespace Point.Collections
         {
             if (!UnsafeUtility.IsUnmanaged(type))
             {
-                PointCore.LogError(PointCore.LogChannel.Collections,
-                    $"Could not resolve type of {TypeHelper.ToString(type)} is not ValueType.");
+                //PointCore.LogError(PointCore.LogChannel.Collections,
+                //    $"Could not resolve type of {TypeHelper.ToString(type)} is not ValueType.");
 
-                return new TypeInfo(type, 0, 0, 0);
+                return new TypeInfo(type);
             }
 
             SharedStatic<TypeInfo> typeStatic = TypeStatic.GetValue(type);

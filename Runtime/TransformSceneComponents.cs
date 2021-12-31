@@ -17,12 +17,14 @@
 #define DEBUG_MODE
 #endif
 
-
 namespace Point.Collections
 {
     public struct TransformSceneComponents<TScene>
         where TScene : ITransformScene
     {
+        public TransformSceneComponents(TScene scene)
+        {
 
+        }
     }
 }
