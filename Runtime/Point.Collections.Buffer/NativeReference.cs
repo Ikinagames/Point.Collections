@@ -26,7 +26,7 @@ using Unity.Collections.LowLevel.Unsafe;
 namespace Point.Collections.Buffer
 {
     [BurstCompatible]
-    public struct FixedReference<T> : IEquatable<FixedReference<T>>
+    public struct NativeReference<T> : IEquatable<NativeReference<T>>
         where T : unmanaged
     {
         private UnsafeReference<T> m_Ptr;
@@ -63,14 +63,14 @@ namespace Point.Collections.Buffer
             }
         }
 
-        public FixedReference(UnsafeReference<T> ptr)
+        public NativeReference(UnsafeReference<T> ptr)
         {
             m_Ptr = ptr;
 #if DEBUG_MODE
             m_Owner = ThreadInfo.CurrentThread;
 #endif
         }
-        public FixedReference(NativeArray<T> array, int elementIndex)
+        public NativeReference(NativeArray<T> array, int elementIndex)
         {
             unsafe
             {
@@ -83,12 +83,14 @@ namespace Point.Collections.Buffer
 #endif
         }
 
-        public bool Equals(FixedReference<T> other) => m_Ptr.Equals(other.m_Ptr);
+        public bool Equals(NativeReference<T> other) => m_Ptr.Equals(other.m_Ptr);
 
-        public static FixedReference<T> operator +(FixedReference<T> a, int b) => a.m_Ptr + b;
-        public static FixedReference<T> operator -(FixedReference<T> a, int b) => a.m_Ptr - b;
+        public static NativeReference<T> operator +(NativeReference<T> a, int b) => a.m_Ptr + b;
+        public static NativeReference<T> operator -(NativeReference<T> a, int b) => a.m_Ptr - b;
 
-        public static implicit operator FixedReference<T>(UnsafeReference<T> t) => new FixedReference<T>(t);
-        public static implicit operator FixedReference<T>(IntPtr t) => new FixedReference<T>(new UnsafeReference<T>(t));
+        public static implicit operator NativeReference<T>(UnsafeReference<T> t) => new NativeReference<T>(t);
+        public static implicit operator NativeReference<T>(IntPtr t) => new NativeReference<T>(new UnsafeReference<T>(t));
+
+        public static explicit operator UnsafeReference<T>(NativeReference<T> t) => t.m_Ptr;
     }
 }

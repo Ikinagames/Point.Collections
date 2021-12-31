@@ -27,7 +27,6 @@ namespace Point.Collections.Buffer.LowLevel
     /// <see cref="System.IntPtr"/> 접근을 unsafe 없이 접근을 도와주는 구조체입니다.
     /// </summary>
     [BurstCompatible]
-    [BurstCompatible]
     public struct UnsafeReference : IUnsafeReference, IEquatable<UnsafeReference>
     {
         private bool m_IsCreated;
