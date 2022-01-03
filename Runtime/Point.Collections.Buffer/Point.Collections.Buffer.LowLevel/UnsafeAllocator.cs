@@ -20,91 +20,118 @@
 using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
+using Unity.Mathematics;
 
 namespace Point.Collections.Buffer.LowLevel
 {
     [BurstCompatible]
-    public struct UnsafeAllocator : IDisposable, IEquatable<UnsafeAllocator>
+    [NativeContainerSupportsDeallocateOnJobCompletion]
+    public struct UnsafeAllocator : INativeDisposable, IDisposable, IEquatable<UnsafeAllocator>
     {
-        private UnsafeReference m_Ptr;
-        private long m_Size;
+        [BurstCompatible]
+        internal struct Buffer
+        {
+            internal UnsafeReference Ptr;
+            internal long Size;
+        }
+
+        internal UnsafeReference<Buffer> m_Buffer;
         internal readonly Allocator m_Allocator;
 
-        private bool m_Created;
-
-        public UnsafeReference Ptr => m_Ptr;
-        public long Size => m_Size;
-        public bool Created => m_Created;
+        public UnsafeReference Ptr => m_Buffer.Value.Ptr;
+        public long Size => m_Buffer.Value.Size;
+        public bool IsCreated => m_Buffer.IsCreated;
 
         public UnsafeAllocator(long size, int alignment, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
         {
             unsafe
             {
-                m_Ptr = UnsafeUtility.Malloc(size, alignment, allocator);
+                m_Buffer = (Buffer*)UnsafeUtility.Malloc(
+                    UnsafeUtility.SizeOf<Buffer>(),
+                    UnsafeUtility.AlignOf<Buffer>(),
+                    allocator
+                    );
+
+                m_Buffer.Value = new Buffer
+                {
+                    Ptr = UnsafeUtility.Malloc(size, alignment, allocator),
+                    Size = size
+                };
 
                 if ((options & NativeArrayOptions.ClearMemory) == NativeArrayOptions.ClearMemory)
                 {
-                    UnsafeUtility.MemClear(m_Ptr, size);
+                    UnsafeUtility.MemClear(m_Buffer.Value.Ptr, size);
                 }
             }
-            m_Size = size;
             m_Allocator = allocator;
-
-            m_Created = true;
         }
         public UnsafeAllocator(UnsafeReference ptr, long size, Allocator allocator)
         {
-            m_Ptr = ptr;
-            m_Size = size;
-            m_Allocator = allocator;
+            unsafe
+            {
+                m_Buffer = (Buffer*)UnsafeUtility.Malloc(
+                    UnsafeUtility.SizeOf<Buffer>(),
+                    UnsafeUtility.AlignOf<Buffer>(),
+                    allocator
+                    );
 
-            m_Created = true;
+                m_Buffer.Value = new Buffer
+                {
+                    Ptr = ptr,
+                    Size = size
+                };
+            }
+            m_Allocator = allocator;
         }
         public ReadOnly AsReadOnly() => new ReadOnly(this);
 
-        public void Resize(long size, int alignment, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
-        {
-            if (size < 0) throw new Exception();
-
-            unsafe
-            {
-                void* ptr = UnsafeUtility.Malloc(size, alignment, m_Allocator);
-
-                UnsafeUtility.MemCpy(ptr, m_Ptr, m_Size);
-                UnsafeUtility.Free(m_Ptr, m_Allocator);
-
-                m_Ptr = ptr;
-
-                if (size > m_Size &&
-                    (options & NativeArrayOptions.ClearMemory) == NativeArrayOptions.ClearMemory)
-                {
-                    UnsafeUtility.MemClear(m_Ptr[size].ToPointer(), size - m_Size);
-                }
-
-                m_Size = size;
-            }
-        }
         public void Clear()
         {
             unsafe
             {
-                UnsafeUtility.MemClear(m_Ptr, m_Size);
+                UnsafeUtility.MemClear(m_Buffer.Value.Ptr, m_Buffer.Value.Size);
             }
+        }
+
+        public void Write<T>(T item) where T : unmanaged
+        {
+            unsafe
+            {
+                byte* bytes = UnsafeBufferUtility.AsBytes(ref item, out int length);
+                UnsafeUtility.MemCpy(m_Buffer.Value.Ptr, bytes, length);
+            }
+        }
+        public unsafe void Write(byte* bytes, int length)
+        {
+            UnsafeUtility.MemCpy(m_Buffer.Value.Ptr, bytes, length);
         }
 
         public void Dispose()
         {
             unsafe
             {
-                UnsafeUtility.Free(m_Ptr, m_Allocator);
+                UnsafeUtility.Free(m_Buffer.Value.Ptr, m_Allocator);
+                UnsafeUtility.Free(m_Buffer, m_Allocator);
             }
+            m_Buffer = default(UnsafeReference<Buffer>);
+        }
+        public JobHandle Dispose(JobHandle inputDeps)
+        {
+            DisposeJob disposeJob = new DisposeJob()
+            {
+                Buffer = m_Buffer,
+                Allocator = m_Allocator
+            };
+            JobHandle result = disposeJob.Schedule(inputDeps);
 
-            m_Created = false;
+            m_Buffer = default(UnsafeReference<Buffer>);
+            return result;
         }
 
-        public bool Equals(UnsafeAllocator other) => m_Ptr.Equals(other.m_Ptr);
+        public bool Equals(UnsafeAllocator other) => m_Buffer.Equals(other.m_Buffer);
 
-        [BurstCompatible]
+        [BurstCompatible, NativeContainerIsReadOnly]
         public readonly struct ReadOnly
         {
             private readonly UnsafeReference m_Ptr;
@@ -115,19 +142,35 @@ namespace Point.Collections.Buffer.LowLevel
 
             internal ReadOnly(UnsafeAllocator allocator)
             {
-                m_Ptr = allocator.m_Ptr;
-                m_Size = allocator.m_Size;
+                m_Ptr = allocator.m_Buffer.Value.Ptr;
+                m_Size = allocator.m_Buffer.Value.Size;
+            }
+        }
+        [BurstCompatible]
+        private struct DisposeJob : IJob
+        {
+            public UnsafeReference<Buffer> Buffer;
+            public Allocator Allocator;
+
+            public void Execute()
+            {
+                unsafe
+                {
+                    UnsafeUtility.Free(Buffer.Value.Ptr, Allocator);
+                    UnsafeUtility.Free(Buffer, Allocator);
+                }
             }
         }
     }
     [BurstCompatible]
-    public struct UnsafeAllocator<T> : IDisposable, IEquatable<UnsafeAllocator<T>>
+    [NativeContainerSupportsDeallocateOnJobCompletion]
+    public struct UnsafeAllocator<T> : INativeDisposable, IDisposable, IEquatable<UnsafeAllocator<T>>
         where T : unmanaged
     {
-        private UnsafeAllocator m_Allocator;
+        internal UnsafeAllocator m_Allocator;
 
-        public UnsafeReference<T> Ptr => m_Allocator.Ptr;
-        public bool Created => m_Allocator.Created;
+        public UnsafeReference<T> Ptr => (UnsafeReference<T>)m_Allocator.Ptr;
+        public bool IsCreated => m_Allocator.IsCreated;
 
         public ref T this[int index]
         {
@@ -160,16 +203,8 @@ namespace Point.Collections.Buffer.LowLevel
         }
         public ReadOnly AsReadOnly() => new ReadOnly(this);
 
-        public void Resize(int length, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
-        {
-            if (length < 0) throw new Exception();
+        public void Clear() => m_Allocator.Clear();
 
-            m_Allocator.Resize(
-                UnsafeUtility.SizeOf<T>() * length,
-                UnsafeUtility.AlignOf<T>(),
-                options
-                );
-        }
         public UnsafeReference<T> ElementAt(in int index)
         {
 #if DEBUG_MODE
@@ -180,16 +215,22 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
             return Ptr + index;
         }
-        public void Clear() => m_Allocator.Clear();
 
         public void Dispose()
         {
             m_Allocator.Dispose();
         }
+        public JobHandle Dispose(JobHandle inputDeps)
+        {
+            JobHandle result = m_Allocator.Dispose(inputDeps);
+
+            m_Allocator = default(UnsafeAllocator);
+            return result;
+        }
 
         public bool Equals(UnsafeAllocator<T> other) => m_Allocator.Equals(other.m_Allocator);
 
-        [BurstCompatible]
+        [BurstCompatible, NativeContainerIsReadOnly]
         public readonly struct ReadOnly
         {
             private readonly UnsafeReference<T>.ReadOnly m_Ptr;
@@ -218,13 +259,52 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
-        public static implicit operator UnsafeAllocator(UnsafeAllocator<T> t)
+        public static implicit operator UnsafeAllocator(UnsafeAllocator<T> t) => t.m_Allocator;
+        public static explicit operator UnsafeAllocator<T>(UnsafeAllocator t)
         {
-            return new UnsafeAllocator(t.Ptr, t.Size, t.m_Allocator.m_Allocator);
+            return new UnsafeAllocator<T>
+            {
+                m_Allocator = t
+            };
         }
     }
     public static class UnsafeAllocatorExtensions
     {
+        public static void Resize(this ref UnsafeAllocator t, long size, int alignment, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
+        {
+            if (size < 0) throw new Exception();
+
+            UnityEngine.Debug.Log($"re allocate from {t.m_Buffer.Value.Size} -> {size}");
+            unsafe
+            {
+                void* ptr = UnsafeUtility.Malloc(size, alignment, t.m_Allocator);
+
+                UnsafeUtility.MemCpy(ptr, t.Ptr, math.min(size, t.Size));
+                UnsafeUtility.Free(t.Ptr, t.m_Allocator);
+
+                t.m_Buffer.Value.Ptr = ptr;
+
+                if (size > t.Size &&
+                    (options & NativeArrayOptions.ClearMemory) == NativeArrayOptions.ClearMemory)
+                {
+                    UnsafeUtility.MemClear(t.Ptr[t.Size].ToPointer(), size - t.Size);
+                }
+
+                t.m_Buffer.Value.Size = size;
+            }
+        }
+        public static void Resize<T>(this ref UnsafeAllocator<T> t, int length, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
+            where T : unmanaged
+        {
+            if (length < 0) throw new Exception();
+
+            t.m_Allocator.Resize(
+                UnsafeUtility.SizeOf<T>() * length,
+                UnsafeUtility.AlignOf<T>(),
+                options
+                );
+        }
+
         public static NativeArray<T> ToNativeArray<T>(this in UnsafeAllocator<T> other, Allocator allocator) where T : unmanaged
         {
             var arr = new NativeArray<T>(other.Length, allocator, NativeArrayOptions.UninitializedMemory);

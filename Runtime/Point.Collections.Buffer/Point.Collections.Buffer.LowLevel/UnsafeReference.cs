@@ -86,6 +86,21 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
+        public static UnsafeReference operator +(UnsafeReference a, int b)
+        {
+            unsafe
+            {
+                return new UnsafeReference(IntPtr.Add(a.IntPtr, b));
+            }
+        }
+        public static UnsafeReference operator -(UnsafeReference a, int b)
+        {
+            unsafe
+            {
+                return new UnsafeReference(IntPtr.Subtract(a.IntPtr, b));
+            }
+        }
+
         public static unsafe implicit operator UnsafeReference(void* p) => new UnsafeReference(p);
         public static unsafe implicit operator void*(UnsafeReference p) => p.m_Ptr;
     }
@@ -189,9 +204,10 @@ namespace Point.Collections.Buffer.LowLevel
         }
 
         public static unsafe implicit operator UnsafeReference<T>(T* p) => new UnsafeReference<T>(p);
-        public static unsafe implicit operator UnsafeReference<T>(UnsafeReference p) => new UnsafeReference<T>(p.IntPtr);
         public static unsafe implicit operator UnsafeReference(UnsafeReference<T> p) => new UnsafeReference(p.IntPtr);
         public static unsafe implicit operator T*(UnsafeReference<T> p) => p.m_Ptr;
+
+        public static unsafe explicit operator UnsafeReference<T>(UnsafeReference p) => new UnsafeReference<T>(p.IntPtr);
 
         [BurstCompatible]
         public struct ReadOnly

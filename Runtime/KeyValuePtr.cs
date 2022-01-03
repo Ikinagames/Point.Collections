@@ -44,6 +44,10 @@ namespace Point.Collections
 
             return this.key.Equals(default(TKey));
         }
+        public bool IsKeyEquals(in TKey key)
+        {
+            return this.key.Equals(key);
+        }
         public bool IsKeyEmptyOrEquals(in TKey key)
         {
             return IsEmpty() || this.key.Equals(key);

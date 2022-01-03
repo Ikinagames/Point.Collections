@@ -17,13 +17,16 @@
 #define DEBUG_MODE
 #endif
 
+using System.Collections.Generic;
+using Unity.Burst;
 using Unity.Collections.LowLevel.Unsafe;
 
 namespace Point.Collections.Buffer.LowLevel
 {
-    public static class UnsafeBufferUtility
+    [BurstCompile(CompileSynchronously = true, DisableSafetyChecks = true)]
+    public static unsafe class UnsafeBufferUtility
     {
-        public static unsafe byte* AsBytes<T>(ref T t, out int length)
+        public static byte* AsBytes<T>(ref T t, out int length)
             where T : unmanaged
         {
             length = UnsafeUtility.SizeOf<T>();
@@ -32,7 +35,7 @@ namespace Point.Collections.Buffer.LowLevel
             return (byte*)p;
         }
         /// <summary>
-        /// <see cref="FNV1a32"/> 알고리즘으로 바이너리 해시 연산을 하여 반환합니다.
+        /// <see cref="FNV1a64"/> 알고리즘으로 바이너리 해시 연산을 하여 반환합니다.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="t"></param>
@@ -43,14 +46,12 @@ namespace Point.Collections.Buffer.LowLevel
             unsafe
             {
                 byte* bytes = AsBytes(ref t, out int length);
-                uint temp;
-                Burst.BurstFNV1a.fnv1a32_byte(bytes, &length, &temp);
-                hash = new Hash(temp);
+                hash = new Hash(FNV1a32.Calculate(bytes, length));
             }
             return hash;
         }
 
-        public static unsafe bool BinaryComparer<T>(ref T x, ref T y)
+        public static bool BinaryComparer<T>(ref T x, ref T y)
             where T : unmanaged
         {
             byte*
@@ -65,6 +66,28 @@ namespace Point.Collections.Buffer.LowLevel
 
             if (index != length) return false;
             return true;
+        }
+
+        public static void Sort<T>(T* buffer, in int length, IComparer<T> comparer)
+            where T : unmanaged
+        {
+            for (int i = 0; i + 1 < length; i++)
+            {
+                int compare = comparer.Compare(buffer[i], buffer[i + 1]);
+                if (compare > 0)
+                {
+                    Swap(buffer, i, i + 1);
+                    Sort(buffer, in i, comparer);
+                }
+            }
+        }
+
+        public static void Swap<T>(T* buffer, in int from, in int to)
+            where T : unmanaged
+        {
+            T temp = buffer[from];
+            buffer[from] = buffer[to];
+            buffer[to] = temp;
         }
     }
 }

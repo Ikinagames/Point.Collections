@@ -240,7 +240,7 @@ namespace Point.Collections
 #endif
             )
         {
-            m_Buffer = hashMap.Ptr;
+            m_Buffer = hashMap.GetUnsafeAllocator();
             hashMap.TryGetIndex(id, out m_Index);
             m_HashCode = m_Buffer[m_Index].value.hashCode;
 

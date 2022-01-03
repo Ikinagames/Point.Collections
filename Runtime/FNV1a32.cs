@@ -63,5 +63,15 @@ namespace Point.Collections
             }
             return hash;
         }
+        public static unsafe uint Calculate(byte* bytes, int length)
+        {
+            uint hash;
+#if POINT_COLLECTIONS_NATIVE
+            Native.NativeFNV1a.fnv1a32_byte(temp, &length, &hash);
+#else
+            Burst.BurstFNV1a.fnv1a32_byte(bytes, &length, &hash);
+#endif
+            return hash;
+        }
     }
 }

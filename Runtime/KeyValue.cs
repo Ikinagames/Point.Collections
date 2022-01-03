@@ -48,6 +48,10 @@ namespace Point.Collections
         {
             return IsEmpty() || this.key.Equals(key);
         }
+        public bool IsKeyEquals(in TKey key)
+        {
+            return this.key.Equals(key);
+        }
 
         public bool Equals(KeyValue<TKey, TValue> other)
         {

@@ -21,6 +21,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
 
 namespace Point.Collections.Buffer.LowLevel
 {
@@ -30,23 +32,22 @@ namespace Point.Collections.Buffer.LowLevel
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     [BurstCompatible]
+    [NativeContainerSupportsDeallocateOnJobCompletion]
     public struct UnsafeLinearHashMap<TKey, TValue> :
-        IEquatable<UnsafeLinearHashMap<TKey, TValue>>, IDisposable,
+        IEquatable<UnsafeLinearHashMap<TKey, TValue>>, INativeDisposable, IDisposable,
         IEnumerable<KeyValue<TKey, TValue>>
 
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
         private readonly int m_InitialCount;
-        private UnsafeAllocator<KeyValue<TKey, TValue>> m_Buffer;
-        private int m_Count;
-        private bool m_Created;
+        internal UnsafeAllocator<KeyValue<TKey, TValue>> m_Buffer;
 
         public ref TValue this[TKey key]
         {
             get
             {
-                if (!TryFindIndexFor(key, out int index))
+                if (!TryFindEmptyIndexFor(key, out int index))
                 {
                     throw new ArgumentOutOfRangeException();
                 }
@@ -58,20 +59,55 @@ namespace Point.Collections.Buffer.LowLevel
                 }
             }
         }
-        public UnsafeAllocator<KeyValue<TKey, TValue>> Ptr => m_Buffer;
-        public UnsafeAllocator<KeyValue<TKey, TValue>>.ReadOnly ReadOnlyPtr => m_Buffer.AsReadOnly();
-        public bool IsCreated => m_Created;
+        public UnsafeAllocator<KeyValue<TKey, TValue>>.ReadOnly Buffer => m_Buffer.AsReadOnly();
+        /// <summary>
+        /// 이 해시맵이 생성되었나요?
+        /// </summary>
+        public bool IsCreated => m_Buffer.IsCreated;
+        /// <summary>
+        /// 이 해시맵의 현재 최대 크기를 반환합니다.
+        /// </summary>
         public int Capacity => m_Buffer.Length;
-        public int Count => m_Count;
+        /// <summary>
+        /// 이 해시맵이 가진 아이템의 갯수를 반환합니다.
+        /// </summary>
+        public int Count
+        {
+            get
+            {
+                int count = 0;
+                foreach (var item in this)
+                {
+                    count++;
+                }
+                return count;
+            }
+        }
 
         public UnsafeLinearHashMap(int initialCount, Allocator allocator)
         {
             m_InitialCount = initialCount;
             m_Buffer = new UnsafeAllocator<KeyValue<TKey, TValue>>(initialCount, allocator, NativeArrayOptions.ClearMemory);
-            m_Count = 0;
-            m_Created = true;
         }
 
+        private bool TryFindEmptyIndexFor(TKey key, out int index)
+        {
+            ulong hash = key.Calculate() ^ 0b1011101111;
+            int increment = Capacity / m_InitialCount + 1;
+
+            for (int i = 1; i < increment; i++)
+            {
+                index = Convert.ToInt32(hash % (uint)(m_InitialCount * i));
+
+                if (m_Buffer[index].IsEmpty())
+                {
+                    return true;
+                }
+            }
+
+            index = -1;
+            return false;
+        }
         private bool TryFindIndexFor(TKey key, out int index)
         {
             ulong hash = key.Calculate() ^ 0b1011101111;
@@ -81,7 +117,7 @@ namespace Point.Collections.Buffer.LowLevel
             {
                 index = Convert.ToInt32(hash % (uint)(m_InitialCount * i));
 
-                if (m_Buffer[index].IsKeyEmptyOrEquals(key))
+                if (m_Buffer[index].IsKeyEquals(key))
                 {
                     return true;
                 }
@@ -89,35 +125,13 @@ namespace Point.Collections.Buffer.LowLevel
 
             index = -1;
             return false;
-        }
-        public bool TryGetIndex(TKey key, out int index)
-        {
-            ulong hash = key.Calculate() ^ 0b1011101111;
-            int increment = Capacity / m_InitialCount + 1;
-
-            for (int i = 1; i < increment; i++)
-            {
-                index = Convert.ToInt32(hash % (uint)(m_InitialCount * i));
-
-                if (m_Buffer[index].key.Equals(key))
-                {
-                    return true;
-                }
-            }
-
-            index = -1;
-            return false;
-        }
-        public TKey GetKeyWithIndex(int index)
-        {
-            return m_Buffer[index].key;
         }
 
         public bool ContainsKey(TKey key) => TryFindIndexFor(key, out _);
 
         public void Add(TKey key, TValue value)
         {
-            if (!TryFindIndexFor(key, out int index))
+            if (!TryFindEmptyIndexFor(key, out int index))
             {
                 int targetIncrement = Capacity / m_InitialCount + 1;
 
@@ -128,7 +142,21 @@ namespace Point.Collections.Buffer.LowLevel
             }
 
             m_Buffer[index] = new KeyValue<TKey, TValue>(key, value);
-            m_Count++;
+        }
+        public void AddOrUpdate(TKey key, TValue value)
+        {
+            if (!TryFindIndexFor(key, out int index) &&
+                !TryFindEmptyIndexFor(key, out index))
+            {
+                int targetIncrement = Capacity / m_InitialCount + 1;
+
+                m_Buffer.Resize(m_InitialCount * targetIncrement, NativeArrayOptions.ClearMemory);
+
+                AddOrUpdate(key, value);
+                return;
+            }
+
+            m_Buffer[index] = new KeyValue<TKey, TValue>(key, value);
         }
         public bool Remove(TKey key)
         {
@@ -138,10 +166,10 @@ namespace Point.Collections.Buffer.LowLevel
             }
 
             m_Buffer[index] = default(KeyValue<TKey, TValue>);
-            m_Count--;
-
             return true;
         }
+
+        public bool TryGetIndex(TKey key, out int index) => TryFindIndexFor(key, out index);
 
         public bool Equals(UnsafeLinearHashMap<TKey, TValue> other) => m_Buffer.Equals(other.m_Buffer);
 
@@ -149,8 +177,15 @@ namespace Point.Collections.Buffer.LowLevel
         {
             m_Buffer.Dispose();
         }
+        public JobHandle Dispose(JobHandle inputDeps)
+        {
+            var result = m_Buffer.Dispose(inputDeps);
 
-        [BurstCompatible]
+            m_Buffer = default(UnsafeAllocator<KeyValue<TKey, TValue>>);
+            return result;
+        }
+
+        [BurstCompatible, NativeContainerIsReadOnly]
         public struct Enumerator : IEnumerator<KeyValue<TKey, TValue>>
         {
             private UnsafeAllocator<KeyValue<TKey, TValue>>.ReadOnly m_Buffer;
@@ -162,19 +197,19 @@ namespace Point.Collections.Buffer.LowLevel
 
             internal Enumerator(UnsafeLinearHashMap<TKey, TValue> hashMap)
             {
-                m_Buffer = hashMap.ReadOnlyPtr;
+                m_Buffer = hashMap.Buffer;
                 m_Index = 0;
             }
 
             public bool MoveNext()
             {
                 while (m_Index < m_Buffer.Length &&
-                        Current.Equals(default(TValue)))
+                        Current.IsEmpty())
                 {
                     m_Index++;
                 }
 
-                if (Current.Equals(default(TValue))) return false;
+                if (Current.IsEmpty()) return false;
                 return true;
             }
 
@@ -190,5 +225,14 @@ namespace Point.Collections.Buffer.LowLevel
 
         public IEnumerator<KeyValue<TKey, TValue>> GetEnumerator() => new Enumerator(this);
         IEnumerator IEnumerable.GetEnumerator() => new Enumerator(this);
+    }
+    public static class UnsafeLinearHashMapExtensions
+    {
+        public static UnsafeAllocator<KeyValue<TKey, TValue>> GetUnsafeAllocator<TKey, TValue>(this UnsafeLinearHashMap<TKey, TValue> t)
+            where TKey : unmanaged, IEquatable<TKey>
+            where TValue : unmanaged
+        {
+            return t.m_Buffer;
+        }
     }
 }
