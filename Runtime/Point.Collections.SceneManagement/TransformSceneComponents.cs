@@ -17,17 +17,14 @@
 #define DEBUG_MODE
 #endif
 
-using Point.Collections.Buffer.LowLevel;
-
-namespace Point.Collections.LowLevel
+namespace Point.Collections.SceneManagement
 {
-    public static class UnsafeTransformSceneExtensions
+    public struct TransformSceneComponents<TScene>
+        where TScene : ITransformScene
     {
-        public static UnsafeLinearHashMap<SceneID, UnsafeTransform> GetUnsafePtr(this ITransformScene other)
+        public TransformSceneComponents(TScene scene)
         {
-            IUnsafeTransformScene unsafeScene = other as IUnsafeTransformScene;
 
-            return unsafeScene.HashMap;
         }
     }
 }

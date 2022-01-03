@@ -17,15 +17,14 @@
 #define DEBUG_MODE
 #endif
 
-using Point.Collections;
 using Point.Collections.Buffer.LowLevel;
-using Point.Collections.LowLevel;
+using Point.Collections.SceneManagement.LowLevel;
 using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 
-namespace Point.Collections
+namespace Point.Collections.SceneManagement
 {
     [BurstCompatible]
     public struct NativeTransform : IEquatable<NativeTransform>, IValidation

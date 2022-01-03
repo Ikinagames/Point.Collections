@@ -20,7 +20,7 @@
 using Unity.Collections;
 using Unity.Mathematics;
 
-namespace Point.Collections.LowLevel
+namespace Point.Collections.SceneManagement.LowLevel
 {
     [BurstCompatible]
     public struct UnsafeTransform

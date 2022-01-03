@@ -19,7 +19,7 @@
 
 using Point.Collections;
 using Point.Collections.Buffer.LowLevel;
-using Point.Collections.LowLevel;
+using Point.Collections.SceneManagement.LowLevel;
 using Point.Collections.Threading;
 using System;
 using Unity.Collections;
@@ -27,7 +27,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Jobs;
 using UnityEngine.SceneManagement;
 
-namespace Point.Collections
+namespace Point.Collections.SceneManagement
 {
     /// <summary>
     /// TRS(Translation, Rotation, Scale) 값으로만으로 이루어진 데이터들을 씬으로서 묶은 구조체입니다.
@@ -96,7 +96,7 @@ namespace Point.Collections
 #endif
             SceneID id = new SceneID(Hash.NewHash());
 
-            m_HashMap.Add(id, new UnsafeTransform(tr));
+            m_HashMap.AddOrUpdate(id, new UnsafeTransform(tr));
 
             var temp = new NativeTransform(m_HashMap, id
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
