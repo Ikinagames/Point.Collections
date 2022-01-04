@@ -20,7 +20,7 @@
 using System;
 using UnityEngine;
 
-namespace Point.Collections
+namespace Point.Collections.Buffer
 {
     [Serializable]
     public sealed class FixedList<T> where T : class
