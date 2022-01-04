@@ -29,24 +29,6 @@ namespace Point.Collections
 
         public LogChannel LogChannel { get => m_LogChannel; set => m_LogChannel = value; }
 
-        //public LogChannel GetLogChannel(in string name)
-        //{
-        //    //for (int i = 0; i < m_UserChannelNames.Length; i++)
-        //    //{
-        //    //    if (m_UserChannelNames[i].Equals(name, StringComparison.InvariantCultureIgnoreCase)) 
-        //    //        return TypeHelper.Enum<LogChannel>.Values[i + 1];
-        //    //}
-        //    try
-        //    {
-        //        return TypeHelper.Enum<LogChannel>.ToEnum(name);
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return LogChannel.None;
-        //    }
-            
-        //    //return LogChannel.None;
-        //}
         public string GetUserChannelNames(LogChannel channel)
         {
             string names = string.Empty;
