@@ -71,9 +71,9 @@ namespace Point.Collections
         }
 
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
-        public static void Log(LogChannel channel, in string msg) => Log(channel, in msg, null);
+        public static void Log(Channel channel, in string msg) => Log(channel, in msg, null);
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
-        public static void Log(LogChannel channel, in string msg, UnityEngine.Object context)
+        public static void Log(Channel channel, in string msg, UnityEngine.Object context)
         {
             if ((LogChannel & channel) != channel) return;
 
@@ -81,20 +81,20 @@ namespace Point.Collections
         }
 
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
-        public static void LogWarning(LogChannel channel, in string msg) => LogWarning(channel, in msg, null);
+        public static void LogWarning(Channel channel, in string msg) => LogWarning(channel, in msg, null);
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
-        public static void LogWarning(LogChannel channel, in string msg, UnityEngine.Object context)
+        public static void LogWarning(Channel channel, in string msg, UnityEngine.Object context)
         {
             if ((LogChannel & channel) != channel) return;
 
             UnityEngine.Debug.LogWarning(LogStringFormat(channel, in msg, 1), context);
         }
 
-        public static string LogErrorString(LogChannel channel, in string msg) => LogStringFormat(channel, in msg, 2);
+        public static string LogErrorString(Channel channel, in string msg) => LogStringFormat(channel, in msg, 2);
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
-        public static void LogError(LogChannel channel, in string msg) => LogError(channel, in msg, null);
+        public static void LogError(Channel channel, in string msg) => LogError(channel, in msg, null);
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
-        public static void LogError(LogChannel channel, in string msg, UnityEngine.Object context)
+        public static void LogError(Channel channel, in string msg, UnityEngine.Object context)
         {
             UnityEngine.Debug.LogError(LogStringFormat(channel, in msg, 2), context);
         }

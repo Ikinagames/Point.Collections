@@ -18,6 +18,7 @@
 #endif
 
 using System;
+using Unity.Collections;
 
 namespace Point.Collections
 {
@@ -57,5 +58,39 @@ namespace Point.Collections
         Core        = 0b0100000000000000000000000000000,
         Editor      = 0b1000000000000000000000000000000,
         All         = ~0
+    }
+
+    [BurstCompatible]
+    public struct Channel
+    {
+        public static Channel None => new Channel();
+        public static Channel Audio => new Channel(LogChannel.Audio);
+        public static Channel Collections => new Channel(LogChannel.Collections);
+        public static Channel Core => new Channel(LogChannel.Core);
+        public static Channel Editor => new Channel(LogChannel.Editor);
+
+        private int m_LogChannel;
+        private FixedString512Bytes m_Name;
+
+        [NotBurstCompatible]
+        private Channel(LogChannel channel)
+        {
+            m_LogChannel = (int)channel;
+            m_Name = TypeHelper.Enum<LogChannel>.ToString(channel);
+        }
+
+        public static implicit operator Channel(string t)
+        {
+            if (string.IsNullOrEmpty(t)) return None;
+
+            LogChannel channel = PointSettings.Instance.GetLogChannel(t);
+            return new Channel(channel);
+        }
+        public static implicit operator LogChannel(Channel t) => (LogChannel)t.m_LogChannel;
+        public static implicit operator Channel(LogChannel t) => new Channel(t);
+        public static implicit operator Channel(int t) => new Channel((LogChannel)t);
+
+        [NotBurstCompatible]
+        public override string ToString() => m_Name.ToString();
     }
 }
