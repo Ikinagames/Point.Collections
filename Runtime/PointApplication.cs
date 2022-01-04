@@ -56,7 +56,6 @@ namespace Point.Collections
 
         protected override void OnInitialze()
         {
-            Debug.Log("init");
             const string c_Instance = "Instance";
 
             CollectionUtility.Initialize();
