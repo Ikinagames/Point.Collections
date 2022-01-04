@@ -29,7 +29,7 @@ using System.Reflection;
 
 namespace Point.Collections
 {
-    internal sealed class CollectionUtility : CLSSingleTone<CollectionUtility>
+    internal sealed class CollectionUtility : CLRSingleTone<CollectionUtility>
     {
         private Unity.Mathematics.Random m_Random;
         private JsonSerializerSettings m_JsonSettings;

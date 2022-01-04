@@ -70,12 +70,17 @@ namespace Point.Collections
             }
         }
 
+        /// <summary>
+        /// 싱글톤 객체가 할당되었는지 반환합니다.
+        /// </summary>
         public static bool HasInstance => s_Instance != null;
 
         bool IStaticMonobehaviour.EnableLog => EnableLog;
         bool IStaticMonobehaviour.HideInInspector => HideInInspector;
 
+        /// <inheritdoc cref="IStaticMonobehaviour.EnableLog"/>
         protected virtual bool EnableLog => true;
+        /// <inheritdoc cref="IStaticMonobehaviour.HideInInspector"/>
         protected virtual bool HideInInspector => false;
 
         void IStaticMonobehaviour.OnInitialize()
@@ -99,7 +104,9 @@ namespace Point.Collections
             }
         }
 
+        /// <inheritdoc cref="IStaticMonobehaviour.OnInitialize"/>
         protected virtual void OnInitialze() { }
+        /// <inheritdoc cref="IStaticMonobehaviour.OnShutdown"/>
         protected virtual void OnShutdown() { }
 
         /// <summary>

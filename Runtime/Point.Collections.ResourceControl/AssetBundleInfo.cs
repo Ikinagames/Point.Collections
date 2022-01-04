@@ -29,6 +29,9 @@ using UnityEngine;
 
 namespace Point.Collections.ResourceControl
 {
+    /// <summary>
+    /// <see cref="UnityEngine.AssetBundle"/> 의 정보입니다.
+    /// </summary>
     [BurstCompatible]
     [Guid("42f15dc1-0626-4c38-84f8-641a3740fd0b")]
     public struct AssetBundleInfo : IValidation, IEquatable<AssetBundleInfo>

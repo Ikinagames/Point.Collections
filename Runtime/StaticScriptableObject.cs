@@ -27,6 +27,14 @@ using System.IO;
 
 namespace Point.Collections
 {
+    /// <summary>
+    /// <see cref="ScriptableObject"/> 를 고정된 싱글톤으로 만들 수 있는 <see langword="abstract"/> 입니다.
+    /// </summary>
+    /// <remarks>
+    /// 이 <see langword="abstract"/> 를 상속받은 객체의 Asset 파일은 사용자에 의해 경로가 바뀌어서는 안되며, 
+    /// 경로 설정을 원한다면 <seealso cref="AssetPathAttribute"/> 를 참조하세요.
+    /// </remarks>
+    /// <typeparam name="T"></typeparam>
 #if UNITY_EDITOR
     [InitializeOnLoad]
 #endif
@@ -100,6 +108,9 @@ namespace Point.Collections
             }
         }
 
+        /// <summary>
+        /// 싱글톤 객체가 할당되었는지 반환합니다.
+        /// </summary>
         public static bool HasInstance => s_Instance != null;
 
         /// <summary>

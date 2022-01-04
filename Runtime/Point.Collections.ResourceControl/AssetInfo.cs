@@ -26,6 +26,9 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace Point.Collections.ResourceControl
 {
+    /// <summary>
+    /// <see cref="AssetBundleInfo"/> 가 담고있는 에셋의 정보입니다.
+    /// </summary>
     [BurstCompatible]
     [Guid("b92cc9a9-b577-4759-b623-d794bd86d430")]
     public readonly struct AssetInfo : IValidation, IEquatable<AssetInfo>, IDisposable

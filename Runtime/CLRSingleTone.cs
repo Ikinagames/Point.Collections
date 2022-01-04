@@ -17,7 +17,7 @@ using System;
 
 namespace Point.Collections
 {
-    public abstract class CLSSingleTone<T> : IDisposable where T : class, new()
+    public abstract class CLRSingleTone<T> : IDisposable where T : class, new()
     {
         private static T s_Instance;
         public static T Instance
@@ -28,12 +28,12 @@ namespace Point.Collections
                 {
                     s_Instance = new T();
 
-                    (s_Instance as CLSSingleTone<T>).OnInitialize();
+                    (s_Instance as CLRSingleTone<T>).OnInitialize();
                 }
                 return s_Instance;
             }
         }
-        ~CLSSingleTone()
+        ~CLRSingleTone()
         {
             ((IDisposable)this).Dispose();
         }
