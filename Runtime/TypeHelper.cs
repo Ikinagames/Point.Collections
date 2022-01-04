@@ -14,6 +14,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -113,18 +114,19 @@ namespace Point.Collections
             public static readonly int Length = ((T[])Enum.GetValues(TypeOf<T>.Type)).Select((other) => Convert.ToInt32(other)).Count();
 
             public static readonly string[] Names = Enum.GetNames(TypeOf<T>.Type);
-            public static readonly int[] Values = ((T[])Enum.GetValues(TypeOf<T>.Type)).Select((other) => Convert.ToInt32(other)).ToArray();
+            public static readonly T[] Values = ((T[])Enum.GetValues(TypeOf<T>.Type)).ToArray();
 
             public static string ToString(T enumValue)
             {
-                int target = Convert.ToInt32(enumValue);
+                long target = Convert.ToInt64(enumValue);
                 if (IsFlag)
                 {
                     string temp = string.Empty;
                     for (int i = 0; i < Values.Length; i++)
                     {
-                        if (Values[i] == 0 && !target.Equals(0)) continue;
-                        if ((target & Values[i]) == Values[i])
+                        long val = Convert.ToInt64(Values[i]);
+                        if (val == 0 && !target.Equals(0)) continue;
+                        if ((target & val) == val)
                         {
                             if (!string.IsNullOrEmpty(temp)) temp += ", ";
                             temp += Names[i];
@@ -142,6 +144,44 @@ namespace Point.Collections
                 }
 
                 throw new ArgumentException(nameof(enumValue));
+            }
+            public static IEnumerator<T> GetEnumerator(T value) => new Enumerator(value);
+
+            public sealed class Enumerator : IEnumerator<T>
+            {
+                private int m_Current;
+                private long m_Value;
+
+                public T Current => Enum<T>.Values[m_Current];
+                object IEnumerator.Current => throw new NotImplementedException();
+
+                public Enumerator(T value)
+                {
+                    m_Value = Convert.ToInt64(value);
+                }
+
+                public void Dispose()
+                {
+                    m_Current = -1;
+                }
+
+                public bool MoveNext()
+                {
+                    while (m_Current < Values.Length &&
+                        (m_Value & Convert.ToInt64(Values[m_Current])) != Convert.ToInt64(Values[m_Current]))
+                    {
+                        m_Current++;
+                    }
+                    
+                    if (m_Current < Values.Length) return true;
+
+                    return false;
+                }
+
+                public void Reset()
+                {
+                    m_Current = 0;
+                }
             }
         }
         [StructLayout(LayoutKind.Sequential)]

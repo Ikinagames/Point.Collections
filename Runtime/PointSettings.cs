@@ -28,6 +28,21 @@ namespace Point.Collections
         [SerializeField] private string[] m_UserChannelNames = new string[27];
 
         public LogChannel LogChannel { get => m_LogChannel; set => m_LogChannel = value; }
+        public string GetUserChannelNames(LogChannel channel)
+        {
+            string names = string.Empty;
+            var iter = TypeHelper.Enum<LogChannel>.GetEnumerator(channel);
+            while (iter.MoveNext())
+            {
+                if (!string.IsNullOrEmpty(names)) names += ", ";
+
+                names += TypeHelper.Enum<LogChannel>.ToString(iter.Current);
+            }
+
+            iter.Dispose();
+
+            return name;
+        }
         public string GetUserChannelName(LogChannel channel)
         {
             return channel switch
