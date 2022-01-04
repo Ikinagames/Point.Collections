@@ -145,43 +145,9 @@ namespace Point.Collections
 
                 throw new ArgumentException(nameof(enumValue));
             }
-            public static IEnumerator<T> GetEnumerator(T value) => new Enumerator(value);
-
-            public sealed class Enumerator : IEnumerator<T>
+            public static T ToEnum(in string value)
             {
-                private int m_Current;
-                private long m_Value;
-
-                public T Current => Enum<T>.Values[m_Current];
-                object IEnumerator.Current => throw new NotImplementedException();
-
-                public Enumerator(T value)
-                {
-                    m_Value = Convert.ToInt64(value);
-                }
-
-                public void Dispose()
-                {
-                    m_Current = -1;
-                }
-
-                public bool MoveNext()
-                {
-                    while (m_Current < Values.Length &&
-                        (m_Value & Convert.ToInt64(Values[m_Current])) != Convert.ToInt64(Values[m_Current]))
-                    {
-                        m_Current++;
-                    }
-                    
-                    if (m_Current < Values.Length) return true;
-
-                    return false;
-                }
-
-                public void Reset()
-                {
-                    m_Current = 0;
-                }
+                return (T)Enum.Parse(typeof(T), value, true);
             }
         }
         [StructLayout(LayoutKind.Sequential)]

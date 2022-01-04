@@ -49,6 +49,7 @@ namespace Point.Collections
         private static string LogStringFormat(LogChannel channel, in string msg, int type)
         {
             string chan = PointSettings.Instance.GetUserChannelNames(channel);
+
             string context;
             switch (type)
             {

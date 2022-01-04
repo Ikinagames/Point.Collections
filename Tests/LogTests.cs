@@ -11,11 +11,24 @@ namespace Point.Collections.Tests
         //{
         //    yield return new EnterPlayMode();
         //}
+        [Test]
+        public void ChannelTest()
+        {
+            Channel channel = LogChannel.Core | LogChannel.Collections;
+
+            UnityEngine.Debug.Log($"{(int)(LogChannel)channel} : {channel}");
+
+            Channel temp = channel & LogChannel.Collections;
+
+            UnityEngine.Debug.Log($"{(int)(LogChannel)temp} : {temp} : {temp == LogChannel.Collections}");
+        }
 
         [Test]
         public void NormalTest()
         {
+            PointCore.Log("core", "TEST NORMAL");
             PointCore.Log(LogChannel.Core, "TEST NORMAL");
+            PointCore.Log(Channel.Core, "TEST NORMAL");
         }
         [Test]
         public void WarningTest()

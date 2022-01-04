@@ -60,11 +60,13 @@ namespace Point.Collections.Editor
             using (var change = new EditorGUI.ChangeCheckScope())
             {
                 PointSettings.Instance.LogChannel
-                    = (LogChannel)EditorGUILayout.IntPopup(
+                    = (LogChannel)EditorGUILayout.EnumFlagsField(
                         GUIContentHelper.LogChannel, 
-                        (int)PointSettings.Instance.LogChannel, 
-                        m_LogChannelNames, 
-                        m_LogChannelValues);
+                        PointSettings.Instance.LogChannel
+                        //, 
+                        //m_LogChannelNames, 
+                        //m_LogChannelValues
+                        );
 
                 if (change.changed)
                 {

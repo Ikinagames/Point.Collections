@@ -29,27 +29,38 @@ namespace Point.Collections
 
         public LogChannel LogChannel { get => m_LogChannel; set => m_LogChannel = value; }
 
-        public LogChannel GetLogChannel(in string name)
-        {
-            for (int i = 0; i < m_UserChannelNames.Length; i++)
-            {
-                if (m_UserChannelNames[i].Equals(name, StringComparison.InvariantCultureIgnoreCase)) return TypeHelper.Enum<LogChannel>.Values[i + 1];
-            }
-
-            return LogChannel.None;
-        }
+        //public LogChannel GetLogChannel(in string name)
+        //{
+        //    //for (int i = 0; i < m_UserChannelNames.Length; i++)
+        //    //{
+        //    //    if (m_UserChannelNames[i].Equals(name, StringComparison.InvariantCultureIgnoreCase)) 
+        //    //        return TypeHelper.Enum<LogChannel>.Values[i + 1];
+        //    //}
+        //    try
+        //    {
+        //        return TypeHelper.Enum<LogChannel>.ToEnum(name);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return LogChannel.None;
+        //    }
+            
+        //    //return LogChannel.None;
+        //}
         public string GetUserChannelNames(LogChannel channel)
         {
             string names = string.Empty;
-            var iter = TypeHelper.Enum<LogChannel>.GetEnumerator(channel);
-            while (iter.MoveNext())
+            var values = TypeHelper.Enum<LogChannel>.Values;
+            for (int i = 0; i < values.Length; i++)
             {
-                if (!string.IsNullOrEmpty(names)) names += ", ";
+                if ((channel & values[i]) != values[i])
+                {
+                    continue;
+                }
+                else if (!string.IsNullOrEmpty(names)) names += ", ";
 
-                names += TypeHelper.Enum<LogChannel>.ToString(iter.Current);
+                names += TypeHelper.Enum<LogChannel>.ToString(values[i]);
             }
-
-            iter.Dispose();
 
             return name;
         }

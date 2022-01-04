@@ -61,7 +61,7 @@ namespace Point.Collections
     }
 
     [BurstCompatible]
-    public struct Channel
+    public struct Channel : IEquatable<Channel>
     {
         public static Channel None => new Channel();
         public static Channel Audio => new Channel(LogChannel.Audio);
@@ -78,19 +78,47 @@ namespace Point.Collections
             m_LogChannel = (int)channel;
             m_Name = TypeHelper.Enum<LogChannel>.ToString(channel);
         }
+        [NotBurstCompatible]
+        public override string ToString() => m_Name.ToString();
+        public override int GetHashCode() => m_LogChannel;
+
+        public override bool Equals(object obj) => obj is Channel && Equals((Channel)obj);
+        public bool Equals(Channel other) => m_LogChannel.Equals(other.m_LogChannel);
 
         public static implicit operator Channel(string t)
         {
             if (string.IsNullOrEmpty(t)) return None;
 
-            LogChannel channel = PointSettings.Instance.GetLogChannel(t);
+            LogChannel channel;
+            try
+            {
+                channel = TypeHelper.Enum<LogChannel>.ToEnum(t);
+            }
+            catch (Exception)
+            {
+                channel = LogChannel.None;
+            }
             return new Channel(channel);
         }
         public static implicit operator LogChannel(Channel t) => (LogChannel)t.m_LogChannel;
         public static implicit operator Channel(LogChannel t) => new Channel(t);
-        public static implicit operator Channel(int t) => new Channel((LogChannel)t);
 
-        [NotBurstCompatible]
-        public override string ToString() => m_Name.ToString();
+        //public static Channel operator &(LogChannel a, Channel b)
+        //{
+        //    LogChannel x = a, y = b;
+        //    return new Channel(x & y);
+        //}
+        //public static Channel operator &(Channel a, LogChannel b)
+        //{
+        //    LogChannel x = a, y = b;
+        //    return new Channel(x & y);
+        //}
+        public static Channel operator &(Channel a, Channel b)
+        {
+            LogChannel x = a, y = b;
+            return new Channel(x & y);
+        }
+        public static bool operator ==(Channel a, Channel b) => a.Equals(b);
+        public static bool operator !=(Channel a, Channel b) => !a.Equals(b);
     }
 }
