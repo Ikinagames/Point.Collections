@@ -43,7 +43,7 @@ namespace Point.Collections.SceneManagement
             get
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+                AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
                 AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
                 float3 pos;
@@ -63,7 +63,7 @@ namespace Point.Collections.SceneManagement
             set
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+                AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
                 AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
                 float3 target;
@@ -85,7 +85,7 @@ namespace Point.Collections.SceneManagement
             get
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+                AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
                 AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
                 return m_Buffer[m_Index].Value.localPosition;
@@ -94,7 +94,7 @@ namespace Point.Collections.SceneManagement
             set
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+                AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
                 AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
                 m_Buffer[m_Index].Value.localPosition = value;
@@ -105,7 +105,7 @@ namespace Point.Collections.SceneManagement
             get
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+                AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
                 AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
                 quaternion rot;
@@ -124,7 +124,7 @@ namespace Point.Collections.SceneManagement
             set
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+                AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
                 AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
                 quaternion target;
@@ -145,7 +145,7 @@ namespace Point.Collections.SceneManagement
             get
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+                AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
                 AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
                 return m_Buffer[m_Index].Value.localRotation;
@@ -154,7 +154,7 @@ namespace Point.Collections.SceneManagement
             set
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+                AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
                 AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
                 m_Buffer[m_Index].Value.localRotation = value;
@@ -189,7 +189,7 @@ namespace Point.Collections.SceneManagement
             get
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+                AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
                 AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
                 return m_Buffer[m_Index].Value.localScale;
@@ -198,7 +198,7 @@ namespace Point.Collections.SceneManagement
             set
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+                AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
                 AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
                 m_Buffer[m_Index].Value.localScale = value;
@@ -223,7 +223,7 @@ namespace Point.Collections.SceneManagement
             get
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+                AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
                 AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
                 UnsafeTransform tr = m_Buffer[m_Index].Value;
@@ -253,7 +253,7 @@ namespace Point.Collections.SceneManagement
         public void SetParent(in NativeTransform parent)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+            AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
             m_Buffer[m_Index].Value.parentIndex = parent.m_Index;
@@ -262,7 +262,7 @@ namespace Point.Collections.SceneManagement
         public void RemoveParent()
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+            AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
             m_Buffer[m_Index].Value.parentIndex = -1;

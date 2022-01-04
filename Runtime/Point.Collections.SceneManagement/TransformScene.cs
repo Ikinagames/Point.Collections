@@ -91,7 +91,7 @@ namespace Point.Collections.SceneManagement
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             PointCore.AssertThreadAffinity(in m_Owner);
 
-            AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+            AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
             SceneID id = new SceneID(Hash.NewHash());
@@ -118,7 +118,7 @@ namespace Point.Collections.SceneManagement
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             PointCore.AssertThreadAffinity(in m_Owner);
 
-            AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+            AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
             m_Handler.Ptr.Value.OnTransformRemove(in transform);
@@ -143,7 +143,7 @@ namespace Point.Collections.SceneManagement
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             PointCore.AssertThreadAffinity(in m_Owner);
 
-            AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
+            AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
             DisposeSentinel.Dispose(ref m_SafetyHandle, ref m_DisposeSentinel);
 #endif
             m_HashMap.Dispose();
