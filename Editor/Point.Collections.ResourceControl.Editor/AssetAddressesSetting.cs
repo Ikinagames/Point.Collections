@@ -26,7 +26,7 @@ using UnityEngine.Experimental.AssetBundlePatching;
 namespace Point.Collections.ResourceControl.Editor
 {
     [DisplayName("Asset Addresses")]
-    internal sealed class AssetAddressesSetting : PointStaticSettingBase<AssetAddressesSetting>
+    internal sealed class AssetAddressesSetting : PointStaticSetting<AssetAddressesSetting>
     {
         [Flags]
         public enum AssetImportHandles

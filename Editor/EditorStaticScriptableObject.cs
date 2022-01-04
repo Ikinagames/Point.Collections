@@ -19,6 +19,10 @@ using UnityEngine;
 
 namespace Point.Collections.Editor
 {
+    /// <summary>
+    /// 에디터에서만 사용되는 설정 값을 저장하는 <see cref="ScriptableObject"/> 입니다.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public abstract class EditorStaticScriptableObject<T> : ScriptableObject
         where T : ScriptableObject
     {

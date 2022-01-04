@@ -13,16 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using UnityEngine;
-
 namespace Point.Collections.Editor
 {
-    public abstract class PointStaticSettingBase<T> : EditorStaticScriptableObject<T>, IPointStaticSetting
-        where T : ScriptableObject
+    /// <summary>
+    /// 직접 상속은 허용하지 않습니다. <see cref="PointStaticSetting{T}"/> 를 상속받으세요.
+    /// </summary>
+    public interface IPointStaticSetting
     {
-        void IPointStaticSetting.OnSettingGUI(string searchContext) => OnSettingGUI(searchContext);
-
-        protected virtual void OnSettingGUI(string searchContext) { }
+        /// <summary>
+        /// GUI 상에서 실제 Draw 콜을 하는 메소드입니다.
+        /// </summary>
+        /// <param name="searchContext"></param>
+        void OnSettingGUI(string searchContext);
     }
 }

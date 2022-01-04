@@ -13,10 +13,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using UnityEngine;
+
 namespace Point.Collections.Editor
 {
-    public interface IPointStaticSetting
+    /// <summary>
+    /// Editor 상의 Project Settings 값을 추가 할 수 있는 상속 클래스입니다.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public abstract class PointStaticSetting<T> : EditorStaticScriptableObject<T>, IPointStaticSetting
+        where T : ScriptableObject
     {
-        void OnSettingGUI(string searchContext);
+        void IPointStaticSetting.OnSettingGUI(string searchContext) => OnSettingGUI(searchContext);
+
+        /// <inheritdoc cref="IPointStaticSetting.OnSettingGUI(string)"/>
+        protected virtual void OnSettingGUI(string searchContext) { }
     }
 }

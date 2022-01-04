@@ -111,7 +111,7 @@ namespace Point.Collections
         public sealed class Enum<T> where T : struct, IConvertible
         {
             public static readonly bool IsFlag = TypeOf<T>.Type.GetCustomAttribute<FlagsAttribute>() != null;
-            public static readonly int Length = ((T[])Enum.GetValues(TypeOf<T>.Type)).Select((other) => Convert.ToInt32(other)).Count();
+            public static readonly int Length = ((T[])Enum.GetValues(TypeOf<T>.Type)).Length;
 
             public static readonly string[] Names = Enum.GetNames(TypeOf<T>.Type);
             public static readonly T[] Values = ((T[])Enum.GetValues(TypeOf<T>.Type)).ToArray();
@@ -139,7 +139,7 @@ namespace Point.Collections
                 {
                     for (int i = 0; i < Values.Length; i++)
                     {
-                        if (target.Equals(Values[i])) return Names[i];
+                        if (target.Equals(Convert.ToInt64(Values[i]))) return Names[i];
                     }
                 }
 

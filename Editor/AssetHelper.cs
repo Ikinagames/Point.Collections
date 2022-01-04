@@ -21,7 +21,7 @@ namespace Point.Collections.Editor
     {
         public static T LoadAsset<T>(string name, string label) where T : UnityEngine.Object
         {
-            var assets = AssetDatabase.FindAssets($"{name} l:{label} t:{typeof(T).Name}");
+            var assets = AssetDatabase.FindAssets($"{name} l:{label} t:{TypeHelper.TypeOf<T>.Name}");
             if (assets.Length == 0) return null;
 
             string guid = assets[0];

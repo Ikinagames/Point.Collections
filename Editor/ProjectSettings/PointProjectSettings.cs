@@ -138,9 +138,9 @@ namespace Point.Collections.Editor
                 using (new EditorUtilities.BoxBlock(Color.black))
                 {
                     PointProjectSettings.Instance.OpenStaticSettings[i]
-                        = EditorUtilities.Foldout(PointProjectSettings.Instance.OpenStaticSettings[i], GetSettingDisplayName(setting), 20);
+                        = EditorUtilities.Foldout(PointProjectSettings.Instance.OpenStaticSettings[i], GetSettingDisplayName(setting), 16);
 
-                    GUILayout.Space(8);
+                    GUILayout.Space(6);
 
                     if (!PointProjectSettings.Instance.OpenStaticSettings[i]) return;
 
