@@ -44,6 +44,21 @@ namespace Point.Collections.Buffer.LowLevel
         private UnsafeAllocator<List> m_List;
 
         public bool IsCreated => m_List.IsCreated;
+        public int Count
+        {
+            get
+            {
+                int
+                    start = m_List[0].CurrentIndex,
+                    end = m_List[0].NextIndex;
+
+                if (end < start)
+                {
+                    return m_List[0].Buffer.Length - start + end;
+                }
+                return end - start;
+            }
+        }
 
         public UnsafeFixedQueue(int length, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
         {
@@ -63,7 +78,8 @@ namespace Point.Collections.Buffer.LowLevel
             ref Item temp = ref list.Buffer[list.NextIndex];
             if (temp.Occupied)
             {
-                throw new ArgumentOutOfRangeException();
+                UnityEngine.Debug.LogError("Exceeding max count");
+                return;
             }
 
             temp.Occupied = true;
@@ -76,12 +92,38 @@ namespace Point.Collections.Buffer.LowLevel
         {
             ref List list = ref m_List[0];
             ref Item temp = ref list.Buffer[list.CurrentIndex];
+#if DEBUG_MODE
+            if (!temp.Occupied)
+            {
+                UnityEngine.Debug.LogError(
+                    $"{nameof(UnsafeFixedQueue<T>)} Doesn\'t have items.");
+                return default(T);
+            }
+#endif
 
             list.CurrentIndex++;
             if (list.CurrentIndex >= list.Buffer.Length) list.CurrentIndex = 0;
 
             temp.Occupied = false;
             return temp.Data;
+        }
+        public bool TryDequeue(out T t)
+        {
+            ref List list = ref m_List[0];
+            ref Item temp = ref list.Buffer[list.CurrentIndex];
+            if (!temp.Occupied)
+            {
+                t = default(T);
+                return false;
+            }
+
+            list.CurrentIndex++;
+            if (list.CurrentIndex >= list.Buffer.Length) list.CurrentIndex = 0;
+
+            temp.Occupied = false;
+            t = temp.Data;
+
+            return true;
         }
 
         public void Dispose()

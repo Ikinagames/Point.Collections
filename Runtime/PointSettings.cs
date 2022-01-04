@@ -1,0 +1,70 @@
+﻿// Copyright 2021 Ikina Games
+// Author : Seung Ha Kim (Syadeu)
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
+using UnityEngine;
+using System;
+
+namespace Point.Collections
+{
+    public sealed class PointSettings : StaticScriptableObject<PointSettings>
+    {
+        [SerializeField] private LogChannel m_LogChannel = LogChannel.All;
+        [SerializeField] private string[] m_UserChannelNames = new string[27];
+
+        public LogChannel LogChannel { get => m_LogChannel; set => m_LogChannel = value; }
+        public string GetUserChannelName(LogChannel channel)
+        {
+            return channel switch
+            {
+                LogChannel.User01 => string.IsNullOrEmpty(m_UserChannelNames[0]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User01) : m_UserChannelNames[0],
+                LogChannel.User02 => string.IsNullOrEmpty(m_UserChannelNames[1]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[1],
+                LogChannel.User03 => string.IsNullOrEmpty(m_UserChannelNames[2]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[2],
+                LogChannel.User04 => string.IsNullOrEmpty(m_UserChannelNames[3]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[3],
+                LogChannel.User05 => string.IsNullOrEmpty(m_UserChannelNames[4]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[4],
+                LogChannel.User06 => string.IsNullOrEmpty(m_UserChannelNames[5]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[5],
+                LogChannel.User07 => string.IsNullOrEmpty(m_UserChannelNames[6]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[6],
+                LogChannel.User08 => string.IsNullOrEmpty(m_UserChannelNames[7]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[7],
+                LogChannel.User09 => string.IsNullOrEmpty(m_UserChannelNames[8]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[8],
+                LogChannel.User10 => string.IsNullOrEmpty(m_UserChannelNames[9]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[9],
+                LogChannel.User11 => string.IsNullOrEmpty(m_UserChannelNames[10]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[10],
+                LogChannel.User12 => string.IsNullOrEmpty(m_UserChannelNames[11]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[11],
+                LogChannel.User13 => string.IsNullOrEmpty(m_UserChannelNames[12]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[12],
+                LogChannel.User14 => string.IsNullOrEmpty(m_UserChannelNames[13]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[13],
+                LogChannel.User15 => string.IsNullOrEmpty(m_UserChannelNames[14]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[14],
+                LogChannel.User16 => string.IsNullOrEmpty(m_UserChannelNames[15]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[15],
+                LogChannel.User17 => string.IsNullOrEmpty(m_UserChannelNames[16]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[16],
+                LogChannel.User18 => string.IsNullOrEmpty(m_UserChannelNames[17]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[17],
+                LogChannel.User19 => string.IsNullOrEmpty(m_UserChannelNames[18]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[18],
+                LogChannel.User20 => string.IsNullOrEmpty(m_UserChannelNames[19]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[19],
+                LogChannel.User21 => string.IsNullOrEmpty(m_UserChannelNames[20]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[20],
+                LogChannel.User22 => string.IsNullOrEmpty(m_UserChannelNames[21]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[21],
+                LogChannel.User23 => string.IsNullOrEmpty(m_UserChannelNames[22]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[22],
+                LogChannel.User24 => string.IsNullOrEmpty(m_UserChannelNames[23]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[23],
+                LogChannel.User25 => string.IsNullOrEmpty(m_UserChannelNames[24]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[24],
+                LogChannel.User26 => string.IsNullOrEmpty(m_UserChannelNames[25]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[25],
+                LogChannel.User27 => string.IsNullOrEmpty(m_UserChannelNames[26]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[26],
+                LogChannel.Audio => TypeHelper.Enum<LogChannel>.ToString(LogChannel.Audio),
+                LogChannel.Collections => TypeHelper.Enum<LogChannel>.ToString(LogChannel.Collections),
+                LogChannel.Core => TypeHelper.Enum<LogChannel>.ToString(LogChannel.Core),
+                LogChannel.Editor => TypeHelper.Enum<LogChannel>.ToString(LogChannel.Editor),
+                _ => PointCore.c_InvalidString,
+            };
+        }
+    }
+}

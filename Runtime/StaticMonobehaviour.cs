@@ -41,7 +41,7 @@ namespace Point.Collections
 #if UNITY_EDITOR
                     if (!UnityEditorInternal.InternalEditorUtility.CurrentThreadIsMainThread())
                     {
-                        PointCore.LogError(PointCore.LogChannel.Collections,
+                        PointCore.LogError(LogChannel.Collections,
                             $"{TypeHelper.TypeOf<StaticMonobehaviour<T>>.ToString()} is only can be initialized in main thread but current thread looks like outside of UnityEngine. This is not allowed.");
 
                         throw new System.Exception("Internal error. See error log.");
@@ -84,7 +84,7 @@ namespace Point.Collections
 
             if (EnableLog)
             {
-                PointCore.Log(PointCore.LogChannel.Collections,
+                PointCore.Log(LogChannel.Collections,
                     $"Initialized {TypeHelper.TypeOf<T>.ToString()}");
             }
         }
@@ -94,7 +94,7 @@ namespace Point.Collections
 
             if (EnableLog)
             {
-                PointCore.Log(PointCore.LogChannel.Collections,
+                PointCore.Log(LogChannel.Collections,
                     $"Shutdown {TypeHelper.TypeOf<T>.ToString()}");
             }
         }

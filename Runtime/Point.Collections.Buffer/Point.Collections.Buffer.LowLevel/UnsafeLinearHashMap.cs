@@ -55,7 +55,7 @@ namespace Point.Collections.Buffer.LowLevel
                 UnsafeReference<KeyValue<TKey, TValue>> ptr = m_Buffer.ElementAt(in index);
                 unsafe
                 {
-                    return ref ptr.Ptr->value;
+                    return ref ptr.Ptr->Value;
                 }
             }
         }
@@ -84,6 +84,11 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
+        private UnsafeLinearHashMap(int initialCount, UnsafeAllocator<KeyValue<TKey, TValue>> allocator)
+        {
+            m_InitialCount = initialCount;
+            m_Buffer = allocator;
+        }
         public UnsafeLinearHashMap(int initialCount, Allocator allocator)
         {
             m_InitialCount = initialCount;
@@ -225,7 +230,23 @@ namespace Point.Collections.Buffer.LowLevel
 
         public IEnumerator<KeyValue<TKey, TValue>> GetEnumerator() => new Enumerator(this);
         IEnumerator IEnumerable.GetEnumerator() => new Enumerator(this);
+
+        // https://dotsplayground.com/2020/03/customnativecontainerpt5/
+        public struct ParallelWriter
+        {
+
+        }
+
+        public static implicit operator UntypedUnsafeLinearHashMap(UnsafeLinearHashMap<TKey, TValue> t)
+        {
+            return new UntypedUnsafeLinearHashMap(t.m_InitialCount, t.m_Buffer);
+        }
+        public static explicit operator UnsafeLinearHashMap<TKey, TValue>(UntypedUnsafeLinearHashMap t)
+        {
+            return new UnsafeLinearHashMap<TKey, TValue>(t.m_InitialCount, (UnsafeAllocator<KeyValue<TKey, TValue>>)t.m_Buffer);
+        }
     }
+
     public static class UnsafeLinearHashMapExtensions
     {
         public static UnsafeAllocator<KeyValue<TKey, TValue>> GetUnsafeAllocator<TKey, TValue>(this UnsafeLinearHashMap<TKey, TValue> t)

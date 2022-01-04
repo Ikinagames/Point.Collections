@@ -27,6 +27,7 @@ namespace Point.Collections.Buffer.LowLevel
 {
     [BurstCompatible]
     [NativeContainerSupportsDeallocateOnJobCompletion]
+    [NativeContainerSupportsMinMaxWriteRestriction]
     public struct UnsafeAllocator : INativeDisposable, IDisposable, IEquatable<UnsafeAllocator>
     {
         [BurstCompatible]

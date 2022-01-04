@@ -29,10 +29,11 @@ namespace Point.Collections
 {
     public static class PointCore
     {
-        private const string
+        internal const string
             c_WhiteSpace = " ",
             c_MessagePrefix = "[<color=lime>Point</color>]",
-            c_Context = "[{0}]";
+            c_Context = "[{0}]",
+            c_InvalidString = "Invalid";
 
         public static string StringFormat(string msg)
         {
@@ -43,17 +44,7 @@ namespace Point.Collections
 
 #line hidden
 
-        [System.Flags]
-        public enum LogChannel
-        {
-            Default = 0,
-
-            Collections = 0x0001,
-            Audio = 0x0010,
-
-            Editor = 0x1000
-        }
-        public static LogChannel s_LogChannel = (LogChannel)~0;
+        private static LogChannel LogChannel => PointSettings.Instance.LogChannel;
 
         private static string LogStringFormat(LogChannel channel, in string msg, int type)
         {
@@ -84,7 +75,7 @@ namespace Point.Collections
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void Log(LogChannel channel, in string msg, UnityEngine.Object context)
         {
-            if ((s_LogChannel & channel) != channel) return;
+            if ((LogChannel & channel) != channel) return;
 
             UnityEngine.Debug.Log(LogStringFormat(channel, in msg, 0), context);
         }
@@ -94,7 +85,7 @@ namespace Point.Collections
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void LogWarning(LogChannel channel, in string msg, UnityEngine.Object context)
         {
-            if ((s_LogChannel & channel) != channel) return;
+            if ((LogChannel & channel) != channel) return;
 
             UnityEngine.Debug.LogWarning(LogStringFormat(channel, in msg, 1), context);
         }
@@ -109,14 +100,14 @@ namespace Point.Collections
         }
 
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
-        public static void ToLog(this string msg, LogChannel channel = LogChannel.Default)
+        public static void ToLog(this string msg, LogChannel channel = LogChannel.Core)
         {
-            if ((s_LogChannel & channel) != channel) return;
+            if ((LogChannel & channel) != channel) return;
 
             Log(channel, in msg);
         }
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
-        public static void ToLogError(this string msg, LogChannel channel = LogChannel.Default)
+        public static void ToLogError(this string msg, LogChannel channel = LogChannel.Core)
         {
             LogError(channel, in msg);
         }
@@ -148,7 +139,7 @@ namespace Point.Collections
 
             if (expectedAffinity.Equals(currentThread)) return;
 
-            LogError(LogChannel.Default,
+            LogError(LogChannel.Core,
                 $"Thread affinity error. Expected thread({expectedAffinity}) but {currentThread}");
         }
         /// <summary>

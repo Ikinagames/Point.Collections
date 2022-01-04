@@ -131,7 +131,7 @@ namespace Point.Collections.SceneManagement
         {
             foreach (KeyValue<SceneID, UnsafeTransform> item in m_HashMap)
             {
-                var temp = new NativeTransform(m_HashMap, item.key
+                var temp = new NativeTransform(m_HashMap, item.Key
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
                 , m_SafetyHandle
 #endif

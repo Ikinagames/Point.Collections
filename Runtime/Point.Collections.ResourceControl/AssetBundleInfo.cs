@@ -90,7 +90,7 @@ namespace Point.Collections.ResourceControl
 
             if (Ref.loaded)
             {
-                PointCore.LogError(PointCore.LogChannel.Collections,
+                PointCore.LogError(LogChannel.Collections,
                     $"This Assetbundle({AssetBundle.name}) already loaded but you trying to override. " +
                     $"This is not allowed.");
 
@@ -109,7 +109,7 @@ namespace Point.Collections.ResourceControl
 
             if (Ref.loaded)
             {
-                PointCore.LogError(PointCore.LogChannel.Collections,
+                PointCore.LogError(LogChannel.Collections,
                     $"This Assetbundle({AssetBundle.name}) already loaded but you trying to override. " +
                     $"This is not allowed.");
 
@@ -141,7 +141,7 @@ namespace Point.Collections.ResourceControl
             {
                 if (Ref.assets[i].checkSum != 0)
                 {
-                    PointCore.LogError(PointCore.LogChannel.Collections,
+                    PointCore.LogError(LogChannel.Collections,
                         $"Asset({Ref.assets[i].key}) has references that didn\'t reserved. " +
                         $"This is not allowed.");
                 }
@@ -166,7 +166,7 @@ namespace Point.Collections.ResourceControl
 
             if (!IsLoaded)
             {
-                PointCore.LogError(PointCore.LogChannel.Collections,
+                PointCore.LogError(LogChannel.Collections,
                     $"You\'re trying to get all asset names that didn\'t loaded AssetBundle. " +
                     $"This is not allowed.");
 
@@ -190,7 +190,7 @@ namespace Point.Collections.ResourceControl
 
             if (!IsLoaded)
             {
-                PointCore.LogError(PointCore.LogChannel.Collections,
+                PointCore.LogError(LogChannel.Collections,
                     $"You\'re trying to get all asset names that didn\'t loaded AssetBundle. " +
                     $"This is not allowed.");
 

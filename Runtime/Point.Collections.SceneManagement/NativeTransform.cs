@@ -36,7 +36,7 @@ namespace Point.Collections.SceneManagement
         private AtomicSafetyHandle m_SafetyHandle;
 #endif
 
-        public SceneID ID => m_Buffer[m_Index].key;
+        public SceneID ID => m_Buffer[m_Index].Key;
 
         public float3 position
         {
@@ -47,11 +47,11 @@ namespace Point.Collections.SceneManagement
                 AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
                 float3 pos;
-                ref UnsafeTransform tr = ref m_Buffer[m_Index].value;
+                ref UnsafeTransform tr = ref m_Buffer[m_Index].Value;
                 if (tr.parentIndex < 0) pos = tr.localPosition;
                 else
                 {
-                    UnsafeTransform parent = m_Buffer[tr.parentIndex].value;
+                    UnsafeTransform parent = m_Buffer[tr.parentIndex].Value;
 
                     float4x4 local2World = float4x4.TRS(parent.localPosition, parent.localRotation, parent.localScale);
                     pos = math.mul(local2World, new float4(tr.localPosition, 1)).xyz;
@@ -67,11 +67,11 @@ namespace Point.Collections.SceneManagement
                 AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
                 float3 target;
-                ref UnsafeTransform tr = ref m_Buffer[m_Index].value;
+                ref UnsafeTransform tr = ref m_Buffer[m_Index].Value;
                 if (tr.parentIndex < 0) target = value;
                 else
                 {
-                    UnsafeTransform parent = m_Buffer[tr.parentIndex].value;
+                    UnsafeTransform parent = m_Buffer[tr.parentIndex].Value;
                     float4x4 world2Local = math.inverse(float4x4.TRS(parent.localPosition, parent.localRotation, parent.localScale));
 
                     target = math.mul(world2Local, new float4(value, 1)).xyz;
@@ -88,7 +88,7 @@ namespace Point.Collections.SceneManagement
                 AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
                 AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
-                return m_Buffer[m_Index].value.localPosition;
+                return m_Buffer[m_Index].Value.localPosition;
             }
             [WriteAccessRequired]
             set
@@ -97,7 +97,7 @@ namespace Point.Collections.SceneManagement
                 AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
                 AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
-                m_Buffer[m_Index].value.localPosition = value;
+                m_Buffer[m_Index].Value.localPosition = value;
             }
         }
         public quaternion rotation
@@ -109,11 +109,11 @@ namespace Point.Collections.SceneManagement
                 AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
                 quaternion rot;
-                ref UnsafeTransform tr = ref m_Buffer[m_Index].value;
+                ref UnsafeTransform tr = ref m_Buffer[m_Index].Value;
                 if (tr.parentIndex < 0) rot = tr.localRotation;
                 else
                 {
-                    UnsafeTransform parent = m_Buffer[tr.parentIndex].value;
+                    UnsafeTransform parent = m_Buffer[tr.parentIndex].Value;
 
                     rot = math.mul(tr.localRotation, parent.localRotation);
                 }
@@ -128,11 +128,11 @@ namespace Point.Collections.SceneManagement
                 AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
                 quaternion target;
-                ref UnsafeTransform tr = ref m_Buffer[m_Index].value;
+                ref UnsafeTransform tr = ref m_Buffer[m_Index].Value;
                 if (tr.parentIndex < 0) target = value;
                 else
                 {
-                    UnsafeTransform parent = m_Buffer[tr.parentIndex].value;
+                    UnsafeTransform parent = m_Buffer[tr.parentIndex].Value;
 
                     target = math.mul(parent.localRotation, value);
                 }
@@ -148,7 +148,7 @@ namespace Point.Collections.SceneManagement
                 AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
                 AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
-                return m_Buffer[m_Index].value.localRotation;
+                return m_Buffer[m_Index].Value.localRotation;
             }
             [WriteAccessRequired]
             set
@@ -157,7 +157,7 @@ namespace Point.Collections.SceneManagement
                 AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
                 AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
-                m_Buffer[m_Index].value.localRotation = value;
+                m_Buffer[m_Index].Value.localRotation = value;
             }
         }
         public float3 eulerAngles
@@ -192,7 +192,7 @@ namespace Point.Collections.SceneManagement
                 AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
                 AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
-                return m_Buffer[m_Index].value.localScale;
+                return m_Buffer[m_Index].Value.localScale;
             }
             [WriteAccessRequired]
             set
@@ -201,7 +201,7 @@ namespace Point.Collections.SceneManagement
                 AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
                 AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
-                m_Buffer[m_Index].value.localScale = value;
+                m_Buffer[m_Index].Value.localScale = value;
             }
         }
 
@@ -226,7 +226,7 @@ namespace Point.Collections.SceneManagement
                 AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
                 AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);
 #endif
-                UnsafeTransform tr = m_Buffer[m_Index].value;
+                UnsafeTransform tr = m_Buffer[m_Index].Value;
                 return float4x4.TRS(tr.localPosition, tr.localRotation, tr.localScale);
             }
         }
@@ -241,7 +241,7 @@ namespace Point.Collections.SceneManagement
         {
             m_Buffer = hashMap.GetUnsafeAllocator();
             hashMap.TryGetIndex(id, out m_Index);
-            m_HashCode = m_Buffer[m_Index].value.hashCode;
+            m_HashCode = m_Buffer[m_Index].Value.hashCode;
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             m_SafetyHandle = safetyHandle;
@@ -256,7 +256,7 @@ namespace Point.Collections.SceneManagement
             AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
-            m_Buffer[m_Index].value.parentIndex = parent.m_Index;
+            m_Buffer[m_Index].Value.parentIndex = parent.m_Index;
         }
         [WriteAccessRequired]
         public void RemoveParent()
@@ -265,7 +265,7 @@ namespace Point.Collections.SceneManagement
             AtomicSafetyHandle.CheckExistsAndThrow(in m_SafetyHandle);
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
 #endif
-            m_Buffer[m_Index].value.parentIndex = -1;
+            m_Buffer[m_Index].Value.parentIndex = -1;
         }
 
         public bool Equals(NativeTransform other) 
@@ -273,7 +273,7 @@ namespace Point.Collections.SceneManagement
 
         public bool IsValid()
         {
-            if (m_Index < 0 || m_Buffer[m_Index].value.GetHashCode() != m_HashCode) return false;
+            if (m_Index < 0 || m_Buffer[m_Index].Value.GetHashCode() != m_HashCode) return false;
 
             return true;
         }

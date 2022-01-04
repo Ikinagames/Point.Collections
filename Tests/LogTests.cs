@@ -15,19 +15,19 @@ namespace Point.Collections.Tests
         [Test]
         public void NormalTest()
         {
-            PointCore.Log(PointCore.LogChannel.Default, "TEST NORMAL");
+            PointCore.Log(LogChannel.Core, "TEST NORMAL");
         }
         [Test]
         public void WarningTest()
         {
-            PointCore.LogWarning(PointCore.LogChannel.Default, "TEST WARNING");
+            PointCore.LogWarning(LogChannel.Core, "TEST WARNING");
         }
         [Test]
         public void ErrorTest()
         {
-            PointCore.LogError(PointCore.LogChannel.Default, "TEST ERROR");
+            PointCore.LogError(LogChannel.Core, "TEST ERROR");
 
-            LogAssert.Expect(UnityEngine.LogType.Error, PointCore.LogErrorString(PointCore.LogChannel.Default, "TEST ERROR"));
+            LogAssert.Expect(UnityEngine.LogType.Error, PointCore.LogErrorString(LogChannel.Core, "TEST ERROR"));
         }
 
         //[UnityTearDown]
