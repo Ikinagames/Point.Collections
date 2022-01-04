@@ -17,10 +17,34 @@ namespace Point.Collections
 {
     public interface IStaticMonobehaviour
     {
+        /// <summary>
+        /// 객체 관리에서 발생하는 로그를 출력시킬 것인지 설정합니다.
+        /// </summary>
+        /// <remarks>
+        /// 기본 값은 <see langword="true"/> 입니다.
+        /// </remarks>
         bool EnableLog { get; }
+        /// <summary>
+        /// Hierarchy 에서 숨겨질지 설정합니다.
+        /// </summary>
+        /// <remarks>
+        /// 기본 값은 <see langword="false"/> 입니다.
+        /// </remarks>
         bool HideInInspector { get; }
 
+        /// <summary>
+        /// 객체가 생성되었을 때 수행하는 메소드입니다.
+        /// </summary>
+        /// <remarks>
+        /// Awake -> OnEnable -> OnInitialize -> Start 순 입니다.
+        /// </remarks>
         void OnInitialize();
+        /// <summary>
+        /// 시스템이 종료될 때 (ex. <see cref="UnityEngine.Application.Quit"/>) 수행하는 메소드입니다.
+        /// </summary>
+        /// <remarks>
+        /// OnShutDown -> OnDisable -> OnDestroy 순 입니다.
+        /// </remarks>
         void OnShutdown();
     }
 }

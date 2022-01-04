@@ -56,6 +56,7 @@ namespace Point.Collections
 
         protected override void OnInitialze()
         {
+            Debug.Log("init");
             const string c_Instance = "Instance";
 
             CollectionUtility.Initialize();
@@ -71,6 +72,7 @@ namespace Point.Collections
                 else System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(types[i].TypeHandle);
             }
         }
+
         private void Awake()
         {
             m_MainThread = ThreadInfo.CurrentThread;
