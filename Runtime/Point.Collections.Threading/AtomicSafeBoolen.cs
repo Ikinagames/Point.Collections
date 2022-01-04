@@ -14,10 +14,12 @@
 // limitations under the License.
 
 using System;
-using System.Threading;
 
 namespace Point.Collections.Threading
 {
+    /// <summary>
+    /// Thread-safe <see cref="bool"/> 입니다.
+    /// </summary>
     public struct AtomicSafeBoolen : IEquatable<AtomicSafeBoolen>
     {
         private volatile bool m_Value;

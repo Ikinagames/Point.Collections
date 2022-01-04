@@ -25,6 +25,9 @@ using Unity.IO.LowLevel.Unsafe;
 
 namespace Point.Collections.IO.LowLevel
 {
+    /// <summary>
+    /// <see cref="NativeFileStream"/> 에서 수행한 바이너리 정보를 읽는 리더입니다.
+    /// </summary>
     public struct UnsafeFileReader : INativeReader, IValidation
     {
         private ReadHandle handle;

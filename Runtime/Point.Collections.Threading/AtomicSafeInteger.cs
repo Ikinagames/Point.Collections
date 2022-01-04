@@ -14,10 +14,12 @@
 // limitations under the License.
 
 using System;
-using System.Threading;
 
 namespace Point.Collections.Threading
 {
+    /// <summary>
+    /// Thread-safe <see cref="int"/> 입니다.
+    /// </summary>
     public struct AtomicSafeInteger : IEquatable<AtomicSafeInteger>
     {
         private volatile int m_Value;

@@ -18,6 +18,12 @@ using System.Threading;
 
 namespace Point.Collections.Threading
 {
+    /// <summary>
+    /// Thread-safe ValueType <typeparamref name="T"/> 입니다.
+    /// </summary>
+    /// <remarks>
+    /// <typeparamref name="T"/> 가 ValueType 일 경우 stack 에 할당되며, ReferenceType 일 경우에는 heap 에 할당됩니다.
+    /// </remarks>
     public struct AtomicSafeReference<T> where T : IEquatable<T>
     {
         private T m_Value;

@@ -24,6 +24,13 @@ using Unity.Jobs;
 
 namespace Point.Collections.Buffer.LowLevel
 {
+    /// <summary>
+    /// 미리 버퍼 사이즈를 정하고, 해당 버퍼만으로 FI-FO (First-In-First-Out), 선입 선출을 하는 컬렉션입니다.
+    /// </summary>
+    /// <remarks>
+    /// 버퍼 사이즈를 초과하여 아이템을 넣는 경우, 에러 로그를 보내고 받아들여지지 않습니다.
+    /// </remarks>
+    /// <typeparam name="T"></typeparam>
     [BurstCompatible]
     [NativeContainerSupportsDeallocateOnJobCompletion]
     public struct UnsafeFixedQueue<T> : INativeDisposable, IDisposable,

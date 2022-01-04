@@ -24,6 +24,10 @@ using System.Runtime.InteropServices;
 
 namespace Point.Collections.Buffer
 {
+    /// <summary>
+    /// 재사용을 위한 class 메모리 Pool 입니다.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     [Guid("03536d37-5801-4900-bc81-0ee1a5c7e296")]
     public sealed class ObjectPool<T> : IDisposable
         where T : class

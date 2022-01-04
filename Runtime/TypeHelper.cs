@@ -26,6 +26,10 @@ namespace Point.Collections
 {
     public sealed class TypeHelper
     {
+        /// <summary>
+        /// <seealso cref="System.Type"/>(<typeparamref name="T"/>) 에 관한 각종 유틸 메소드를 담은 Helper 입니다.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         public sealed class TypeOf<T>
         {
             public static readonly Type Type = typeof(T);
@@ -83,15 +87,7 @@ namespace Point.Collections
                 => TypeHelper.GetConstructorInfo(Type, args);
             public static FieldInfo GetFieldInfo(string name, BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) => TypeHelper.GetFieldInfo(Type, name, bindingFlags);
 
-            /// <summary>
-            /// Wrapper struct (아무 ValueType 맴버도 갖지 않은 구조체) 는 C# CLS 에서 무조건 1 byte 를 갖습니다. 
-            /// 해당 컴포넌트 타입이 버퍼에 올라갈 필요가 있는지를 확인하여 메모리 낭비를 줄입니다.
-            /// </summary>
-            /// <remarks>
-            /// https://stackoverflow.com/a/27851610
-            /// </remarks>
-            /// <param name="t"></param>
-            /// <returns></returns>
+            /// <inheritdoc cref="TypeHelper.IsZeroSizeStruct(Type)"/>>
             public static bool IsZeroSizeStruct()
             {
                 return Type.IsValueType && !Type.IsPrimitive &&
@@ -108,6 +104,10 @@ namespace Point.Collections
                 return s_ToString;
             }
         }
+        /// <summary>
+        /// <see cref="System.Enum"/>(<typeparamref name="T"/>) 에 관한 유틸 메소드를 담은 Helper 입니다.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         public sealed class Enum<T> where T : struct, IConvertible
         {
             public static readonly bool IsFlag = TypeOf<T>.Type.GetCustomAttribute<FlagsAttribute>() != null;
@@ -160,6 +160,11 @@ namespace Point.Collections
         private static readonly Assembly[] s_Assemblies = AppDomain.CurrentDomain.GetAssemblies();
         private static readonly Type[] s_AllTypes = s_Assemblies.Where(a => !a.IsDynamic).SelectMany(a => GetLoadableTypes(a)).ToArray();
 
+        /// <summary>
+        /// 현재 프로젝트의 모든 <see cref="System.Type"/> 에서 <paramref name="predictate"/> 조건으로 찾아서 반환합니다.
+        /// </summary>
+        /// <param name="predictate"></param>
+        /// <returns></returns>
         public static Type[] GetTypes(Func<Type, bool> predictate) => s_AllTypes.Where(predictate).ToArray();
         public static IEnumerable<Type> GetTypesIter(Func<Type, bool> predictate) => s_AllTypes.Where(predictate);
         public static ConstructorInfo GetConstructorInfo(Type t, params Type[] args)
@@ -185,18 +190,45 @@ namespace Point.Collections
             }
         }
 
+        /// <summary>
+        /// <paramref name="t"/> 의 Alignment 를 반환합니다.
+        /// </summary>
+        /// <remarks>
+        /// 만약 <paramref name="t"/> 가 ReferenceType 이라면 반환 값은 무조건 0 입니다.
+        /// </remarks>
+        /// <param name="t"></param>
+        /// <returns></returns>
         public static int AlignOf(Type t)
         {
+            if (!UnsafeUtility.IsUnmanaged(t))
+            {
+                return 0;
+            }
+
             Type temp = typeof(AlignOfHelper<>).MakeGenericType(t);
 
             return Marshal.SizeOf(temp) - Marshal.SizeOf(t);
         }
+        /// <summary>
+        /// Wrapper struct (아무 ValueType 맴버도 갖지 않은 구조체) 는 C# CLS 에서 무조건 1 byte 를 갖습니다. 
+        /// 해당 컴포넌트 타입이 버퍼에 올라갈 필요가 있는지를 확인하여 메모리 낭비를 줄입니다.
+        /// </summary>
+        /// <remarks>
+        /// https://stackoverflow.com/a/27851610
+        /// </remarks>
+        /// <param name="t"></param>
+        /// <returns></returns>
         public static bool IsZeroSizeStruct(Type t)
         {
             return t.IsValueType && !t.IsPrimitive &&
                 t.GetFields((BindingFlags)0x34).All(fi => IsZeroSizeStruct(fi.FieldType));
         }
 
+        /// <summary>
+        /// <paramref name="type"/> 의 이름을 알아보기 쉬운 텍스트로 변환하여 반환합니다.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static string ToString(Type type)
         {
             const string c_TStart = "<";
@@ -224,6 +256,11 @@ namespace Point.Collections
             }
             return output;
         }
+        /// <summary>
+        /// stack 에 할당될 수 있는 <see cref="System.Type"/> 의 Wrapper struct 를 반환합니다.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static TypeInfo ToTypeInfo(Type type)
         {
             if (!UnsafeUtility.IsUnmanaged(type))

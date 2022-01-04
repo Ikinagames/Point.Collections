@@ -25,6 +25,9 @@ using Unity.Mathematics;
 
 namespace Point.Collections.Buffer.LowLevel
 {
+    /// <summary>
+    /// Unity native-side 에서 메모리 버퍼를 할당하는 Allocator 입니다.
+    /// </summary>
     [BurstCompatible]
     [NativeContainerSupportsDeallocateOnJobCompletion]
     [NativeContainerSupportsMinMaxWriteRestriction]
@@ -40,8 +43,17 @@ namespace Point.Collections.Buffer.LowLevel
         internal UnsafeReference<Buffer> m_Buffer;
         internal readonly Allocator m_Allocator;
 
+        /// <summary>
+        /// 이 메모리 버퍼의 메모리 주소입니다.
+        /// </summary>
         public UnsafeReference Ptr => m_Buffer.Value.Ptr;
+        /// <summary>
+        /// 이 메모리 버퍼의 총 사이즈입니다.
+        /// </summary>
         public long Size => m_Buffer.Value.Size;
+        /// <summary>
+        /// 이 메모리 버퍼가 생성되어 정상적으로 할당되었는지 반환합니다.
+        /// </summary>
         public bool IsCreated => m_Buffer.IsCreated;
 
         public UnsafeAllocator(long size, int alignment, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
@@ -87,6 +99,9 @@ namespace Point.Collections.Buffer.LowLevel
         }
         public ReadOnly AsReadOnly() => new ReadOnly(this);
 
+        /// <summary>
+        /// 이 메모리 버퍼의 메모리를 전부 초기화합니다.
+        /// </summary>
         public void Clear()
         {
             unsafe
@@ -95,6 +110,14 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
+        /// <summary>
+        /// <paramref name="item"/> 을 이 메모리에 작성합니다.
+        /// </summary>
+        /// <remarks>
+        /// 만약 이 메모리가 버퍼라면, 0 번째 인덱스에 작성합니다.
+        /// </remarks>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item"></param>
         public void Write<T>(T item) where T : unmanaged
         {
             unsafe
@@ -163,6 +186,8 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
     }
+    /// <summary><inheritdoc cref="UnsafeAllocator"/></summary>
+    /// <typeparam name="T"></typeparam>
     [BurstCompatible]
     [NativeContainerSupportsDeallocateOnJobCompletion]
     public struct UnsafeAllocator<T> : INativeDisposable, IDisposable, IEquatable<UnsafeAllocator<T>>
@@ -170,7 +195,9 @@ namespace Point.Collections.Buffer.LowLevel
     {
         internal UnsafeAllocator m_Allocator;
 
+        /// <inheritdoc cref="UnsafeAllocator.Ptr"/>
         public UnsafeReference<T> Ptr => (UnsafeReference<T>)m_Allocator.Ptr;
+        /// <inheritdoc cref="UnsafeAllocator.IsCreated"/>
         public bool IsCreated => m_Allocator.IsCreated;
 
         public ref T this[int index]
@@ -186,7 +213,12 @@ namespace Point.Collections.Buffer.LowLevel
                 return ref Ptr[index];
             }
         }
+        
+        /// <inheritdoc cref="UnsafeAllocator.Size"/>
         public long Size => m_Allocator.Size;
+        /// <summary>
+        /// 이 메모리 버퍼의 사이즈를 <typeparamref name="T"/> 의 크기에 맞춘 최대 길이입니다.
+        /// </summary>
         public int Length => Convert.ToInt32(m_Allocator.Size / UnsafeUtility.SizeOf<T>());
 
         public UnsafeAllocator(int length, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
@@ -206,6 +238,12 @@ namespace Point.Collections.Buffer.LowLevel
 
         public void Clear() => m_Allocator.Clear();
 
+        /// <summary>
+        /// 이 메모리 버퍼의 <paramref name="index"/> 번째 주소를 반환합니다.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        /// <exception cref="IndexOutOfRangeException"></exception>
         public UnsafeReference<T> ElementAt(in int index)
         {
 #if DEBUG_MODE
@@ -271,6 +309,18 @@ namespace Point.Collections.Buffer.LowLevel
     }
     public static class UnsafeAllocatorExtensions
     {
+        /// <summary>
+        /// 이 메모리 버퍼를 <paramref name="size"/> 만큼 다시 재 할당합니다.
+        /// </summary>
+        /// <remarks>
+        /// 이전에 작성된 데이터는 자동으로 복사되어 초기화됩니다. 만약 사이즈가 이전보다 증가하였으면 
+        /// 증가한 메모리 사이즈의 초기화를 <paramref name="options"/> 에서 결정할 수 있습니다.
+        /// </remarks>
+        /// <param name="t"></param>
+        /// <param name="size"></param>
+        /// <param name="alignment"></param>
+        /// <param name="options"></param>
+        /// <exception cref="Exception"></exception>
         public static void Resize(this ref UnsafeAllocator t, long size, int alignment, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
         {
             if (size < 0) throw new Exception();
@@ -294,6 +344,18 @@ namespace Point.Collections.Buffer.LowLevel
                 t.m_Buffer.Value.Size = size;
             }
         }
+        /// <summary>
+        /// 이 메모리 버퍼를 <paramref name="length"/> 길이 만큼 다시 재 할당합니다.
+        /// </summary>
+        /// <remarks>
+        /// 이전에 작성된 데이터는 자동으로 복사되어 초기화됩니다. 만약 사이즈가 이전보다 증가하였으면 
+        /// 증가한 메모리 사이즈의 초기화를 <paramref name="options"/> 에서 결정할 수 있습니다.
+        /// </remarks>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="t"></param>
+        /// <param name="length"></param>
+        /// <param name="options"></param>
+        /// <exception cref="Exception"></exception>
         public static void Resize<T>(this ref UnsafeAllocator<T> t, int length, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
             where T : unmanaged
         {

@@ -21,6 +21,10 @@ using Unity.Collections;
 
 namespace Point.Collections.Buffer.LowLevel
 {
+    /// <summary>
+    /// <seealso cref="UnsafeLinearHashMap{TKey, TValue}"/>, <seealso cref="UnsafeLinearPtrHashMap{TKey, TValue}"/> 
+    /// 등의 미리 할당된 해시맵을 Untyped 로 바꾸는 Wrapper struct 입니다.
+    /// </summary>
     [BurstCompatible]
     public struct UntypedUnsafeLinearHashMap
     {

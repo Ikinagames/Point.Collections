@@ -17,6 +17,9 @@ using System;
 
 namespace Point.Collections.Threading
 {
+    /// <summary>
+    /// Thread-safe <see cref="float"/> 입니다.
+    /// </summary>
     public struct AtomicSafeSingle : IEquatable<AtomicSafeSingle>
     {
         private volatile float m_Value;

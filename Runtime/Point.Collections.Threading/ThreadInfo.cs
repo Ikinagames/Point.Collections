@@ -38,6 +38,10 @@ namespace Point.Collections.Threading
         private readonly int m_HashCode;
         private readonly FixedString512Bytes m_Name;
 
+        /// <summary>
+        /// 현재 스레드의 이름입니다.
+        /// </summary>
+        [NotBurstCompatible]
         public string Name => m_Name.ToString();
 
         [NotBurstCompatible]
