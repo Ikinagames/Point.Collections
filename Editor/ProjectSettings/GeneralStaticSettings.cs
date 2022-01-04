@@ -101,10 +101,5 @@ namespace Point.Collections.Editor
                 EditorGUI.indentLevel--;
             }
         }
-
-        public static void SetUserChannelNames(string[] names)
-        {
-
-        }
     }
 }
