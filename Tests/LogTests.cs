@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using Point.Collections.LowLevel;
 using System.Collections;
 using UnityEngine.TestTools;
 
@@ -41,6 +42,11 @@ namespace Point.Collections.Tests
             PointHelper.LogError(LogChannel.Core, "TEST ERROR");
 
             LogAssert.Expect(UnityEngine.LogType.Error, PointHelper.LogErrorString(LogChannel.Core, "TEST ERROR"));
+        }
+
+        [Test]
+        public void LogTest()
+        {
         }
 
         //[UnityTearDown]

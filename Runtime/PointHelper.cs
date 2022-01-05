@@ -42,6 +42,8 @@ namespace Point.Collections
 
 #line hidden
 
+        private static LowLevel.LogHandler m_LogHandler = new LowLevel.LogHandler();
+
         private static LogChannel LogChannel => PointSettings.Instance.LogChannel;
 
         private static string LogStringFormat(LogChannel channel, in string msg, int type)
