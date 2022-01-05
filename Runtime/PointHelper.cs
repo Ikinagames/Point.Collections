@@ -42,7 +42,7 @@ namespace Point.Collections
 
 #line hidden
 
-        private static LowLevel.LogHandler m_LogHandler = new LowLevel.LogHandler();
+        internal static LowLevel.LogHandler s_LogHandler = new LowLevel.LogHandler();
 
         private static LogChannel LogChannel => PointSettings.Instance.LogChannel;
 

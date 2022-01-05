@@ -82,6 +82,8 @@ namespace Point.Collections
             s_IsShutdown = true;
             
             OnApplicationShutdown?.Invoke();
+
+            PointHelper.s_LogHandler.CloseLogFile();
         }
     }
 }
