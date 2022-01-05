@@ -69,8 +69,17 @@ namespace Point.Collections
             return c_MessagePrefix + string.Format(c_Context, channel.ToString()) + c_WhiteSpace + msg;
         }
 
+        /// <summary>
+        /// 해당 채널(<paramref name="channel"/>) 에 <paramref name="msg"/> 로그를 보냅니다.
+        /// </summary>
+        /// <param name="channel"></param>
+        /// <param name="msg"></param>
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void Log(Channel channel, in string msg) => Log(channel, in msg, null);
+        /// <summary><inheritdoc cref="Log(Channel, in string)"/>></summary>
+        /// <param name="channel"></param>
+        /// <param name="msg"></param>
+        /// <param name="context"></param>
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void Log(Channel channel, in string msg, UnityEngine.Object context)
         {
@@ -79,8 +88,17 @@ namespace Point.Collections
             UnityEngine.Debug.Log(LogStringFormat(channel, in msg, 0), context);
         }
 
+        /// <summary>
+        /// 해당 채널(<paramref name="channel"/>) 에 <paramref name="msg"/> 주의 로그를 보냅니다.
+        /// </summary>
+        /// <param name="channel"></param>
+        /// <param name="msg"></param>
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void LogWarning(Channel channel, in string msg) => LogWarning(channel, in msg, null);
+        /// <summary><inheritdoc cref="LogWarning(Channel, in string)"/></summary>
+        /// <param name="channel"></param>
+        /// <param name="msg"></param>
+        /// <param name="context"></param>
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void LogWarning(Channel channel, in string msg, UnityEngine.Object context)
         {
@@ -90,14 +108,27 @@ namespace Point.Collections
         }
 
         public static string LogErrorString(Channel channel, in string msg) => LogStringFormat(channel, in msg, 2);
+        /// <summary>
+        /// 해당 채널(<paramref name="channel"/>) 에 <paramref name="msg"/> 에러 로그를 보냅니다.
+        /// </summary>
+        /// <param name="channel"></param>
+        /// <param name="msg"></param>
+        /// <returns></returns>
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void LogError(Channel channel, in string msg) => LogError(channel, in msg, null);
+        /// <summary><inheritdoc cref="LogError(Channel, in string)"/></summary>
+        /// <param name="channel"></param>
+        /// <param name="msg"></param>
+        /// <param name="context"></param>
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void LogError(Channel channel, in string msg, UnityEngine.Object context)
         {
             UnityEngine.Debug.LogError(LogStringFormat(channel, in msg, 2), context);
         }
 
+        /// <summary><inheritdoc cref="Log(Channel, in string)"/>></summary>
+        /// <param name="msg"></param>
+        /// <param name="channel"></param>
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void ToLog(this string msg, LogChannel channel = LogChannel.Core)
         {
@@ -105,6 +136,9 @@ namespace Point.Collections
 
             Log(channel, in msg);
         }
+        /// <summary><inheritdoc cref="LogWarning(Channel, in string)"/></summary>
+        /// <param name="msg"></param>
+        /// <param name="channel"></param>
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void ToLogError(this string msg, LogChannel channel = LogChannel.Core)
         {
@@ -117,6 +151,10 @@ namespace Point.Collections
 
         #region Threading
 
+        /// <summary>
+        /// 이 메소드가 실행된 <seealso cref="System.Threading.Thread"/> 가 Unity 의 메인 스크립트 스레드인지 반환합니다.
+        /// </summary>
+        /// <returns></returns>
         [Unity.Collections.NotBurstCompatible]
         public static bool AssertIsMainThread()
         {
@@ -124,12 +162,31 @@ namespace Point.Collections
 
             return PointApplication.Instance.MainThread.Equals(currentThread);
         }
+        /// <summary><inheritdoc cref="AssertIsMainThread"/></summary>
+        /// <remarks>
+        /// 만약 메인 스레드가 아닐 경우 에러 로그를 발생시킵니다.
+        /// </remarks>
         [Unity.Collections.NotBurstCompatible]
         [System.Diagnostics.Conditional("DEBUG_MODE")]
         public static void AssertMainThread()
         {
             AssertThreadAffinity(PointApplication.Instance.MainThread);
         }
+        /// <summary>
+        /// 해당 스레드의 정보를 통해, 이 메소드가 실행된 <seealso cref="System.Threading.Thread"/> 가 일치하는지 반환합니다.
+        /// </summary>
+        /// <remarks>
+        /// 만약 일치하지 않는다면 에러 로그를 발생시킵니다. 
+        /// <br/><br/>
+        /// C# 에서는 스레드의 선호도를 직접적으로 가져올 수 있는 방법이 제한적입니다. 
+        /// <see cref="System.Diagnostics.Process"/> 를 통하여 선호도를 확인 할 수 있지만, 이는 Win32.dll 등 과 같은 
+        /// 현재 프로그램이 실행되는 Operating 시스템에 크게 영향을 받기 때문에 적합하지 않습니다.
+        /// <see cref="System.Threading.Thread.ManagedThreadId"/> 는 <see cref="GC"/> 에서 관리되는 Low-Level 관리 인덱스이며, 
+        /// 이는 스레드 선호도를 의미하지 않습니다. 해당 인덱스를 통해 다른 스레드임을 확인하고, 만약 다른 스레드라면 다른 선호도를 갖고있다고 판단합니다.
+        /// <br/><br/>
+        /// 다른 인덱스이어도 같은 스레드 선호도를 공유하는 예외사항이 있습니다. (ex. id = 1(Affinity 0), id = 8(Affinity 0)) 
+        /// </remarks>
+        /// <param name="expectedAffinity"></param>
         [Unity.Collections.NotBurstCompatible]
         [System.Diagnostics.Conditional("DEBUG_MODE")]
         public static void AssertThreadAffinity(in Threading.ThreadInfo expectedAffinity)
