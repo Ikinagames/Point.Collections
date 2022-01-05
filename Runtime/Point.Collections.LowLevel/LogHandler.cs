@@ -27,7 +27,7 @@ namespace Point.Collections.LowLevel
             m_DefaultHandler = Debug.unityLogger.logHandler;
 
             m_EnableLogFile = false;
-            SetLogFile("logtest.txt");
+            //SetLogFile("logtest.txt");
 
             Debug.unityLogger.logHandler = this;
         }
