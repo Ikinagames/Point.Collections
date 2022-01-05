@@ -9,6 +9,7 @@ namespace Point.Collections.LowLevel
     // https://github.com/scissor/Hotter/blob/master/Hotter/Utilities/Debug.cs
     public sealed class LogHandler : ILogHandler
     {
+#line hidden
         private const string c_Tag = "PointFramework";
 
         private readonly ILogHandler m_DefaultHandler;
@@ -88,5 +89,6 @@ namespace Point.Collections.LowLevel
 
             m_DefaultHandler.LogFormat(logType, context, format, args);
         }
+#line default
     }
 }
