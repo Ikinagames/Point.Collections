@@ -19,6 +19,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.Scripting;
 
+[assembly: System.Runtime.InteropServices.ComVisible(true)]
 namespace Point.Collections
 {
     [AddComponentMenu("")]

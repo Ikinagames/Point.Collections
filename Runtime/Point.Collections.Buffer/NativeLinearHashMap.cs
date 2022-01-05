@@ -72,7 +72,7 @@ namespace Point.Collections.Buffer
         public void Add(TKey key, TValue value)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            PointCore.AssertThreadAffinity(in m_Owner);
+            PointHelper.AssertThreadAffinity(in m_Owner);
 
             AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
@@ -82,7 +82,7 @@ namespace Point.Collections.Buffer
         public bool Remove(TKey key)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            PointCore.AssertThreadAffinity(in m_Owner);
+            PointHelper.AssertThreadAffinity(in m_Owner);
 
             AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
@@ -133,7 +133,7 @@ namespace Point.Collections.Buffer
             public bool MoveNext()
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                PointCore.AssertThreadAffinity(in m_Owner);
+                PointHelper.AssertThreadAffinity(in m_Owner);
 
                 AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
                 AtomicSafetyHandle.CheckReadAndThrow(m_SafetyHandle);

@@ -454,7 +454,7 @@ namespace Point.Collections.ResourceControl
         {
             if (!bundleP.Value.loaded)
             {
-                PointCore.LogError(LogChannel.Collections,
+                PointHelper.LogError(LogChannel.Collections,
                     $"Cound not load asset {key}. Target AssetBundle is not loaded.");
 
                 return AssetInfo.Invalid;
@@ -518,7 +518,7 @@ namespace Point.Collections.ResourceControl
             Hash hash = new Hash(key);
             if (!Instance.m_MappedAssets.ContainsKey(hash))
             {
-                PointCore.LogError(LogChannel.Collections,
+                PointHelper.LogError(LogChannel.Collections,
                     $"Asset({key}) is not registered.");
 
                 return AssetInfo.Invalid;
@@ -528,7 +528,7 @@ namespace Point.Collections.ResourceControl
 
             if (!Instance.m_AssetBundleInfos[index.bundleIndex].loaded)
             {
-                PointCore.LogError(LogChannel.Collections,
+                PointHelper.LogError(LogChannel.Collections,
                     $"Cound not load asset {key}. Target AssetBundle is not loaded.");
 
                 return AssetInfo.Invalid;

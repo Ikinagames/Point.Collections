@@ -23,11 +23,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-[assembly: System.Runtime.InteropServices.ComVisible(true)]
-
 namespace Point.Collections
 {
-    public static class PointCore
+    public static class PointHelper
     {
         internal const string
             c_WhiteSpace = " ",

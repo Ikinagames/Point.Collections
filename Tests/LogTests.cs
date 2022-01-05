@@ -26,21 +26,21 @@ namespace Point.Collections.Tests
         [Test]
         public void NormalTest()
         {
-            PointCore.Log("core", "TEST NORMAL");
-            PointCore.Log(LogChannel.Core, "TEST NORMAL");
-            PointCore.Log(Channel.Core, "TEST NORMAL");
+            PointHelper.Log("core", "TEST NORMAL");
+            PointHelper.Log(LogChannel.Core, "TEST NORMAL");
+            PointHelper.Log(Channel.Core, "TEST NORMAL");
         }
         [Test]
         public void WarningTest()
         {
-            PointCore.LogWarning(LogChannel.Core, "TEST WARNING");
+            PointHelper.LogWarning(LogChannel.Core, "TEST WARNING");
         }
         [Test]
         public void ErrorTest()
         {
-            PointCore.LogError(LogChannel.Core, "TEST ERROR");
+            PointHelper.LogError(LogChannel.Core, "TEST ERROR");
 
-            LogAssert.Expect(UnityEngine.LogType.Error, PointCore.LogErrorString(LogChannel.Core, "TEST ERROR"));
+            LogAssert.Expect(UnityEngine.LogType.Error, PointHelper.LogErrorString(LogChannel.Core, "TEST ERROR"));
         }
 
         //[UnityTearDown]

@@ -89,7 +89,7 @@ namespace Point.Collections.SceneManagement
         public NativeTransform Add(Transformation tr)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            PointCore.AssertThreadAffinity(in m_Owner);
+            PointHelper.AssertThreadAffinity(in m_Owner);
 
             AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
@@ -116,7 +116,7 @@ namespace Point.Collections.SceneManagement
         public void Remove(NativeTransform transform)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            PointCore.AssertThreadAffinity(in m_Owner);
+            PointHelper.AssertThreadAffinity(in m_Owner);
 
             AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
             AtomicSafetyHandle.CheckWriteAndThrow(m_SafetyHandle);
@@ -141,7 +141,7 @@ namespace Point.Collections.SceneManagement
             m_Handler.Ptr.Value.Dispose();
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            PointCore.AssertThreadAffinity(in m_Owner);
+            PointHelper.AssertThreadAffinity(in m_Owner);
 
             AtomicSafetyHandle.CheckExistsAndThrow(m_SafetyHandle);
             DisposeSentinel.Dispose(ref m_SafetyHandle, ref m_DisposeSentinel);

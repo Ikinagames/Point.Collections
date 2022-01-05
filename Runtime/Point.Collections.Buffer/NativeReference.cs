@@ -45,7 +45,7 @@ namespace Point.Collections.Buffer
             get
             {
 #if DEBUG_MODE
-                PointCore.AssertThreadAffinity(in m_Owner);
+                PointHelper.AssertThreadAffinity(in m_Owner);
 #endif
                 return ref m_Ptr[index];
             }
@@ -57,7 +57,7 @@ namespace Point.Collections.Buffer
             get
             {
 #if DEBUG_MODE
-                PointCore.AssertThreadAffinity(in m_Owner);
+                PointHelper.AssertThreadAffinity(in m_Owner);
 #endif
                 return ref m_Ptr.Value;
             }

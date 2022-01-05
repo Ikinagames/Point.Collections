@@ -43,7 +43,7 @@ namespace Point.Collections.Editor
             Guid guid = Guid.NewGuid();
             EditorGUIUtility.systemCopyBuffer = guid.ToString();
 
-            PointCore.Log(LogChannel.Editor, $"{guid} is copied to clipboard.");
+            PointHelper.Log(LogChannel.Editor, $"{guid} is copied to clipboard.");
         }
 
     }
