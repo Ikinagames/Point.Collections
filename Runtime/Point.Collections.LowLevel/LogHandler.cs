@@ -15,13 +15,8 @@ namespace Point.Collections.LowLevel
         private readonly ILogHandler m_DefaultHandler;
 
         private bool m_EnableLogFile;
-        // persisidatapath + "/" + logfilepath
-        //private string m_LogFilePath;
         private FileStream m_FileStream;
         private StreamWriter m_Writer;
-
-        //public bool EnableLogFile { get => m_EnableLogFile; set => m_EnableLogFile = value; }
-        //public string LogFilePath { get => m_LogFilePath; set => m_LogFilePath = value; }
 
         public LogHandler()
         {
@@ -33,6 +28,10 @@ namespace Point.Collections.LowLevel
             Debug.unityLogger.logHandler = this;
         }
 
+        /// <summary>
+        /// 로그 경로를 설정합니다.
+        /// </summary>
+        /// <param name="path">경로는 <see cref="Application.persistentDataPath"/> 다음부터 시작됩니다. (ex. SetLogFile("test.txt") => Application.persistentDataPath/test.txt</param>
         public void SetLogFile(string path)
         {
             if (m_EnableLogFile)
@@ -47,6 +46,9 @@ namespace Point.Collections.LowLevel
                 FileMode.OpenOrCreate, FileAccess.Write);
             m_Writer = new StreamWriter(m_FileStream);
         }
+        /// <summary>
+        /// <see cref="SetLogFile(string)"/> 메소드를 호출한 뒤, 열린 로그 파일을 닫는 메소드입니다.
+        /// </summary>
         public void CloseLogFile()
         {
             if (!m_EnableLogFile) return;
@@ -58,12 +60,11 @@ namespace Point.Collections.LowLevel
             m_EnableLogFile = false;
         }
 
-        public void LogException(Exception exception, UnityEngine.Object context)
+        void ILogHandler.LogException(Exception exception, UnityEngine.Object context)
         {
             m_DefaultHandler.LogException(exception, context);
         }
-
-        public void LogFormat(LogType logType, UnityEngine.Object context, string format, params object[] args)
+        void ILogHandler.LogFormat(LogType logType, UnityEngine.Object context, string format, params object[] args)
         {
             string msg = string.Format(format, args);
             switch (logType)

@@ -25,6 +25,9 @@ using System.Threading.Tasks;
 
 namespace Point.Collections
 {
+    /// <summary>
+    /// 개발에 필요한 각종 유틸과 Point Framework 의 기본 유틸 클래스입니다.
+    /// </summary>
     public static class PointHelper
     {
         internal const string

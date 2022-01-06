@@ -13,6 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
 using Point.Collections.Threading;
 using System;
 using System.Reflection;
@@ -76,6 +80,21 @@ namespace Point.Collections
         private void Awake()
         {
             m_MainThread = ThreadInfo.CurrentThread;
+
+            if (PointSettings.Instance.m_EnableLogFile)
+            {
+#if DEBUG_MODE
+                if (string.IsNullOrEmpty(PointSettings.Instance.m_LogFilePath))
+                {
+                    PointHelper.LogError(Channel.Core,
+                        "You\'re trying to save logs in local without any path. This is not allowed. Please set log path at the PointSettings.");
+                }
+#endif
+                else
+                {
+                    PointHelper.s_LogHandler.SetLogFile(PointSettings.Instance.m_LogFilePath);
+                }
+            }
         }
         protected override void OnShutdown()
         {
