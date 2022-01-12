@@ -17,6 +17,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System;
 
 namespace Point.Collections.Editor
 {
@@ -53,10 +54,12 @@ namespace Point.Collections.Editor
         private GUIStyle titleStyle;
         private GUIStyle iconStyle;
 
+        private SetupWizardMenuItem[] m_MenuItems;
+
         private void OnEnable()
         {
-            m_DisableTexture = AssetHelper.LoadAsset<Texture2D>("CrossYellow", "PointEditor");
-            m_EnableTexture = AssetHelper.LoadAsset<Texture2D>("TickGreen", "PointEditor");
+            m_DisableTexture = AssetHelper.LoadAsset<Texture2D>("CrossYellow", "CoreSystemEditor");
+            m_EnableTexture = AssetHelper.LoadAsset<Texture2D>("TickGreen", "CoreSystemEditor");
 
             titleStyle = new GUIStyle();
             titleStyle.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
@@ -66,79 +69,78 @@ namespace Point.Collections.Editor
 
             iconStyle = new GUIStyle();
             iconStyle.alignment = TextAnchor.MiddleCenter;
+
+            Type[] menuItemTypes = TypeHelper.GetTypes(t => !t.IsAbstract && TypeHelper.TypeOf<SetupWizardMenuItem>.Type.IsAssignableFrom(t));
+            m_MenuItems = new SetupWizardMenuItem[menuItemTypes.Length];
+            for (int i = 0; i < menuItemTypes.Length; i++)
+            {
+                m_MenuItems[i] = (SetupWizardMenuItem)Activator.CreateInstance(menuItemTypes[i]);
+            }
+            Array.Sort(m_MenuItems);
+
+            m_SelectedToolbar = m_MenuItems[0];
+
+            //CoreSystemSettings.Instance.m_HideSetupWizard = true;
+            //EditorUtility.SetDirty(CoreSystemSettings.Instance);
         }
         private void OnGUI()
         {
+            const string c_Copyrights = "Copyright 2021 Syadeu. All rights reserved.";
+
             GUILayout.Space(20);
             EditorUtilities.StringHeader("Setup", 30, true);
             GUILayout.Space(10);
             EditorUtilities.Line();
             GUILayout.Space(10);
 
-            //DrawToolbar();
+            DrawToolbar();
 
             EditorUtilities.Line();
 
-            //using (new EditorUtilities.BoxBlock(Color.black))
-            //{
-            //    switch ((ToolbarNames)m_SelectedToolbar)
-            //    {
-            //        case ToolbarNames.General:
-            //            m_GeneralMenu.OnGUI();
-            //            break;
-            //        case ToolbarNames.Scene:
-            //            m_SceneMenu.OnGUI();
-            //            break;
-            //        case ToolbarNames.Prefab:
-            //            m_PrefabMenu.OnGUI();
-            //            break;
-            //        default:
-            //            break;
-            //    }
-            //}
+            using (new EditorUtilities.BoxBlock(Color.black))
+            {
+                if (m_SelectedToolbar != null)
+                {
+                    m_SelectedToolbar.OnGUI();
+                }
+            }
 
-            EditorGUI.LabelField(m_CopyrightRect, EditorUtilities.String("Copyright 2021 Ikina Games. All rights reserved.", 11), EditorStyleUtilities.CenterStyle);
+            EditorGUI.LabelField(m_CopyrightRect, EditorUtilities.String(c_Copyrights, 11), EditorStyleUtilities.CenterStyle);
         }
 
+        public SetupWizardMenuItem SelectedToolbar => m_SelectedToolbar;
+
+        private SetupWizardMenuItem m_SelectedToolbar;
         #region Toolbar
 
-        //private readonly Dictionary<ToolbarNames, Func<bool>> m_IsSetupDone = new Dictionary<ToolbarNames, Func<bool>>();
-        //private void DrawToolbar()
-        //{
-        //    const float spacing = 50;
+        private void DrawToolbar()
+        {
+            const float spacing = 50;
 
-        //    EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-        //    GUILayout.Space(spacing);
+            EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+            GUILayout.Space(spacing);
 
-        //    string[] toolbarNames = Enum.GetNames(typeof(ToolbarNames));
-        //    for (int i = 0; i < toolbarNames.Length; i++)
-        //    {
-        //        bool done;
-        //        if (m_IsSetupDone.ContainsKey((ToolbarNames)i))
-        //        {
-        //            done = m_IsSetupDone[(ToolbarNames)i].Invoke();
-        //        }
-        //        else done = true;
-        //        DrawToolbarButton(i, toolbarNames[i], done);
-        //    }
+            for (int i = 0; i < m_MenuItems.Length; i++)
+            {
+                DrawToolbarButton(i, m_MenuItems[i].Name, m_MenuItems[i].Predicate());
+            }
 
-        //    GUILayout.Space(spacing);
-        //    EditorGUILayout.EndHorizontal();
-        //}
-        //private void DrawToolbarButton(int i, string name, bool enable)
-        //{
-        //    using (new EditorUtilities.BoxBlock(i.Equals(m_SelectedToolbar) ? Color.black : Color.gray))
-        //    {
-        //        EditorGUILayout.BeginHorizontal(GUILayout.Height(22));
-        //        if (GUILayout.Button(name, titleStyle))
-        //        {
-        //            m_SelectedToolbar = i;
-        //        }
-        //        GUILayout.Label(enable ? m_EnableTexture : m_DisableTexture, iconStyle);
-        //        EditorGUILayout.EndHorizontal();
-        //    }
-        //}
-
+            GUILayout.Space(spacing);
+            EditorGUILayout.EndHorizontal();
+        }
+        private void DrawToolbarButton(int i, string name, bool enable)
+        {
+            using (new EditorUtilities.BoxBlock(i.Equals(m_SelectedToolbar) ? Color.black : Color.gray))
+            {
+                EditorGUILayout.BeginHorizontal(GUILayout.Height(22));
+                if (GUILayout.Button(name, titleStyle))
+                {
+                    m_SelectedToolbar = m_MenuItems[i];
+                }
+                GUILayout.Label(enable ? m_EnableTexture : m_DisableTexture, iconStyle);
+                EditorGUILayout.EndHorizontal();
+            }
+        }
         #endregion
     }
 
