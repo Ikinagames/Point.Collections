@@ -78,17 +78,17 @@ namespace Point.Collections.Editor
             }
             Array.Sort(m_MenuItems);
 
-            m_SelectedToolbar = m_MenuItems[0];
+            if (m_MenuItems.Length > 0) m_SelectedToolbar = m_MenuItems[0];
 
             //CoreSystemSettings.Instance.m_HideSetupWizard = true;
             //EditorUtility.SetDirty(CoreSystemSettings.Instance);
         }
         private void OnGUI()
         {
-            const string c_Copyrights = "Copyright 2021 Syadeu. All rights reserved.";
+            const string c_Copyrights = "Copyright 2021 Ikinagames. All rights reserved.";
 
             GUILayout.Space(20);
-            EditorUtilities.StringHeader("Setup", 30, true);
+            EditorUtilities.StringHeader("Point Framework¢ç", 30, true);
             GUILayout.Space(10);
             EditorUtilities.Line();
             GUILayout.Space(10);
@@ -142,254 +142,276 @@ namespace Point.Collections.Editor
             }
         }
         #endregion
+
+        
     }
 
-    internal sealed class LayerNTagSetups
+    internal sealed class GeneralMenu : SetupWizardMenuItem
     {
-        SerializedObject m_TagManagerObject;
-        SerializedProperty m_TagProperty, m_LayerProperty;
+        public override string Name => "General";
+        public override int Order => -9999;
 
-        static string[] c_RequireTags = new string[] { };
-        static string[] c_RequireLayers = new string[] { "Terrain", "FloorProjection" };
+        LayerNTagSetups layerNTagSetups = new LayerNTagSetups();
+        UnityAudioSetups unityAudioSetups = new UnityAudioSetups();
 
-        List<string> m_MissingTags, m_MissingLayers;
-
-        private bool m_OpenTagManager = false;
-
-        public LayerNTagSetups()
+        public override void OnGUI()
         {
-            UnityEngine.Object tagManagerObject = AssetDatabase.LoadMainAssetAtPath("ProjectSettings/TagManager.asset");
-            m_TagManagerObject = new SerializedObject(tagManagerObject);
-            m_TagProperty = m_TagManagerObject.FindProperty("tags");
-            m_LayerProperty = m_TagManagerObject.FindProperty("layers");
-
-            m_MissingTags = new List<string>(c_RequireTags);
-            for (int i = 0; i < m_TagProperty.arraySize; i++)
-            {
-                string value = m_TagProperty.GetArrayElementAtIndex(i).stringValue;
-                if (string.IsNullOrEmpty(value)) continue;
-
-                m_MissingTags.Remove(value);
-            }
-
-            m_MissingLayers = new List<string>(c_RequireLayers);
-            for (int i = 0; i < m_LayerProperty.arraySize; i++)
-            {
-                string value = m_LayerProperty.GetArrayElementAtIndex(i).stringValue;
-                if (string.IsNullOrEmpty(value)) continue;
-
-                m_MissingLayers.Remove(value);
-            }
-
-            if (m_MissingTags.Count > 0 || m_MissingLayers.Count > 0)
-            {
-                m_OpenTagManager = true;
-            }
-        }
-
-        private bool TagManagerPredicate()
-        {
-            if (m_MissingTags.Count > 0 || m_MissingLayers.Count > 0) return false;
-            return true;
-        }
-        private void DrawTagManager()
-        {
-            m_OpenTagManager = EditorUtilities.Foldout(m_OpenTagManager, "Tag Manager");
-            if (!m_OpenTagManager) return;
-
-            EditorGUI.indentLevel++;
-
-            EditorUtilities.StringRich("Tags", 13);
-            if (m_MissingTags.Count > 0)
-            {
-                EditorGUILayout.HelpBox($"Number({m_MissingTags.Count}) of Tags are missing", MessageType.Error);
-
-                for (int i = m_MissingTags.Count - 1; i >= 0; i--)
-                {
-                    EditorGUILayout.BeginHorizontal();
-
-                    EditorGUILayout.TextField(m_MissingTags[i]);
-                    if (GUILayout.Button("Add", GUILayout.Width(100)))
-                    {
-                        InsertTag(m_MissingTags[i]);
-                        m_MissingTags.RemoveAt(i);
-                    }
-
-                    EditorGUILayout.EndHorizontal();
-                }
-            }
-            else EditorGUILayout.HelpBox("Nominal", MessageType.Info);
+            layerNTagSetups.DrawTagManager();
 
             EditorUtilities.Line();
 
-            EditorUtilities.StringRich("Layers", 13);
-            if (m_MissingLayers.Count > 0)
+            unityAudioSetups.DrawUnityAudio();
+        }
+        public override bool Predicate() 
+            => layerNTagSetups.TagManagerPredicate();
+
+        internal sealed class LayerNTagSetups
+        {
+            SerializedObject m_TagManagerObject;
+            SerializedProperty m_TagProperty, m_LayerProperty;
+
+            static string[] c_RequireTags = new string[] { };
+            static string[] c_RequireLayers = new string[] {  };
+
+            List<string> m_MissingTags, m_MissingLayers;
+
+            private bool m_OpenTagManager = false;
+
+            public LayerNTagSetups()
             {
-                EditorGUILayout.HelpBox($"Number({m_MissingLayers.Count}) of Layers are missing", MessageType.Error);
+                UnityEngine.Object tagManagerObject = AssetDatabase.LoadMainAssetAtPath("ProjectSettings/TagManager.asset");
+                m_TagManagerObject = new SerializedObject(tagManagerObject);
+                m_TagProperty = m_TagManagerObject.FindProperty("tags");
+                m_LayerProperty = m_TagManagerObject.FindProperty("layers");
 
-                for (int i = m_MissingLayers.Count - 1; i >= 0; i--)
+                m_MissingTags = new List<string>(c_RequireTags);
+                for (int i = 0; i < m_TagProperty.arraySize; i++)
                 {
-                    EditorGUILayout.BeginHorizontal();
+                    string value = m_TagProperty.GetArrayElementAtIndex(i).stringValue;
+                    if (string.IsNullOrEmpty(value)) continue;
 
-                    EditorGUILayout.TextField(m_MissingLayers[i]);
-                    if (GUILayout.Button("Add", GUILayout.Width(100)))
+                    m_MissingTags.Remove(value);
+                }
+
+                m_MissingLayers = new List<string>(c_RequireLayers);
+                for (int i = 0; i < m_LayerProperty.arraySize; i++)
+                {
+                    string value = m_LayerProperty.GetArrayElementAtIndex(i).stringValue;
+                    if (string.IsNullOrEmpty(value)) continue;
+
+                    m_MissingLayers.Remove(value);
+                }
+
+                if (m_MissingTags.Count > 0 || m_MissingLayers.Count > 0)
+                {
+                    m_OpenTagManager = true;
+                }
+            }
+
+            public bool TagManagerPredicate()
+            {
+                if (m_MissingTags.Count > 0 || m_MissingLayers.Count > 0) return false;
+                return true;
+            }
+            public void DrawTagManager()
+            {
+                m_OpenTagManager = EditorUtilities.Foldout(m_OpenTagManager, "Tag Manager");
+                if (!m_OpenTagManager) return;
+
+                EditorGUI.indentLevel++;
+
+                EditorUtilities.StringRich("Tags", 13);
+                if (m_MissingTags.Count > 0)
+                {
+                    EditorGUILayout.HelpBox($"Number({m_MissingTags.Count}) of Tags are missing", MessageType.Error);
+
+                    for (int i = m_MissingTags.Count - 1; i >= 0; i--)
                     {
-                        if (!InsertLayer(m_MissingLayers[i]))
+                        EditorGUILayout.BeginHorizontal();
+
+                        EditorGUILayout.TextField(m_MissingTags[i]);
+                        if (GUILayout.Button("Add", GUILayout.Width(100)))
                         {
-                            PointHelper.LogError(LogChannel.Editor,
-                                $"Could not add layer {m_MissingLayers[i]} because layer is full.");
+                            InsertTag(m_MissingTags[i]);
+                            m_MissingTags.RemoveAt(i);
                         }
-                        else
-                        {
-                            m_MissingLayers.RemoveAt(i);
-                        }
-                    }
 
-                    EditorGUILayout.EndHorizontal();
-                }
-            }
-            else EditorGUILayout.HelpBox("Nominal", MessageType.Info);
-
-            EditorGUI.indentLevel--;
-        }
-
-        private void InsertTag(string tag)
-        {
-            for (int i = 0; i < m_TagProperty.arraySize; i++)
-            {
-                string value = m_TagProperty.GetArrayElementAtIndex(i).stringValue;
-                if (string.IsNullOrEmpty(value))
-                {
-                    m_TagProperty.GetArrayElementAtIndex(i).stringValue = tag;
-                    m_TagManagerObject.ApplyModifiedProperties();
-                    return;
-                }
-            }
-
-            m_TagProperty.InsertArrayElementAtIndex(m_TagProperty.arraySize);
-            m_TagProperty.GetArrayElementAtIndex(m_TagProperty.arraySize - 1).stringValue = tag;
-            m_TagManagerObject.ApplyModifiedProperties();
-        }
-        private bool InsertLayer(string layer)
-        {
-            for (int i = 0; i < m_LayerProperty.arraySize; i++)
-            {
-                string value = m_LayerProperty.GetArrayElementAtIndex(i).stringValue;
-                if (string.IsNullOrEmpty(value))
-                {
-                    m_LayerProperty.GetArrayElementAtIndex(i).stringValue = layer;
-                    m_TagManagerObject.ApplyModifiedProperties();
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
-    internal sealed class UnityAudioSetups
-    {
-        SerializedObject m_UnityAudioManager;
-        SerializedProperty
-            m_UnityAudioDisableAudio,
-
-            m_UnityAudioGlobalVolume,
-            m_UnityAudioRolloffScale,
-            m_UnityAudioDopplerFactor,
-
-            m_UnityAudioRealVoiceCount,
-            m_UnityAudioVirtualVoiceCount,
-            m_UnityAudioDefaultSpeakerMode;
-
-        private bool
-                m_OpenUnityAudio = false, m_IsUnityAudioModified = false;
-
-        public UnityAudioSetups()
-        {
-            var audioManager = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/AudioManager.asset")[0];
-            m_UnityAudioManager = new SerializedObject(audioManager);
-
-            m_UnityAudioDisableAudio = m_UnityAudioManager.FindProperty("m_DisableAudio");
-
-            m_UnityAudioGlobalVolume = m_UnityAudioManager.FindProperty("m_Volume");
-            m_UnityAudioRolloffScale = m_UnityAudioManager.FindProperty("Rolloff Scale");
-            m_UnityAudioDopplerFactor = m_UnityAudioManager.FindProperty("Doppler Factor");
-
-            m_UnityAudioRealVoiceCount = m_UnityAudioManager.FindProperty("m_RealVoiceCount");
-            m_UnityAudioVirtualVoiceCount = m_UnityAudioManager.FindProperty("m_VirtualVoiceCount");
-            m_UnityAudioDefaultSpeakerMode = m_UnityAudioManager.FindProperty("Default Speaker Mode");
-        }
-
-        private void DrawUnityAudio()
-        {
-            m_OpenUnityAudio = EditorUtilities.Foldout(m_OpenUnityAudio, "Unity Audio");
-            if (!m_OpenUnityAudio) return;
-
-            EditorGUI.indentLevel++;
-            using (new EditorUtilities.BoxBlock(Color.white))
-            {
-                using (var check = new EditorGUI.ChangeCheckScope())
-                {
-                    EditorGUILayout.PropertyField(m_UnityAudioDisableAudio);
-
-                    if (check.changed)
-                    {
-                        m_UnityAudioManager.ApplyModifiedProperties();
-                        m_UnityAudioManager.Update();
+                        EditorGUILayout.EndHorizontal();
                     }
                 }
+                else EditorGUILayout.HelpBox("Nominal", MessageType.Info);
 
                 EditorUtilities.Line();
 
-                if (m_UnityAudioDisableAudio.boolValue)
+                EditorUtilities.StringRich("Layers", 13);
+                if (m_MissingLayers.Count > 0)
                 {
-                    EditorGUILayout.HelpBox("Unity Audio has been disabled", MessageType.Info);
-                    return;
-                }
+                    EditorGUILayout.HelpBox($"Number({m_MissingLayers.Count}) of Layers are missing", MessageType.Error);
 
-                using (new EditorGUI.DisabledGroupScope(!m_IsUnityAudioModified))
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    if (m_IsUnityAudioModified)
+                    for (int i = m_MissingLayers.Count - 1; i >= 0; i--)
                     {
-                        EditorGUILayout.LabelField("Modified");
-                    }
+                        EditorGUILayout.BeginHorizontal();
 
-                    GUILayout.FlexibleSpace();
-                    if (GUILayout.Button("Apply", GUILayout.Width(100)))
-                    {
-                        m_UnityAudioManager.ApplyModifiedProperties();
-                        m_UnityAudioManager.Update();
+                        EditorGUILayout.TextField(m_MissingLayers[i]);
+                        if (GUILayout.Button("Add", GUILayout.Width(100)))
+                        {
+                            if (!InsertLayer(m_MissingLayers[i]))
+                            {
+                                PointHelper.LogError(LogChannel.Editor,
+                                    $"Could not add layer {m_MissingLayers[i]} because layer is full.");
+                            }
+                            else
+                            {
+                                m_MissingLayers.RemoveAt(i);
+                            }
+                        }
 
-                        m_IsUnityAudioModified = false;
+                        EditorGUILayout.EndHorizontal();
                     }
                 }
+                else EditorGUILayout.HelpBox("Nominal", MessageType.Info);
 
-                EditorGUI.BeginChangeCheck();
-
-                m_UnityAudioGlobalVolume.floatValue
-                    = EditorGUILayout.Slider("Global Volume", m_UnityAudioGlobalVolume.floatValue, 0, 1);
-                m_UnityAudioRolloffScale.floatValue
-                    = EditorGUILayout.Slider("Volume Rolloff Scale", m_UnityAudioRolloffScale.floatValue, 0, 1);
-                m_UnityAudioDopplerFactor.floatValue
-                    = EditorGUILayout.Slider("Doppler Factor", m_UnityAudioDopplerFactor.floatValue, 0, 1);
-
-                EditorUtilities.Line();
-
-                m_UnityAudioRealVoiceCount.intValue
-                    = EditorGUILayout.IntField("Max Real Voices", m_UnityAudioRealVoiceCount.intValue);
-
-                m_UnityAudioVirtualVoiceCount.intValue
-                    = EditorGUILayout.IntField("Max Virtual Voices", m_UnityAudioVirtualVoiceCount.intValue);
-
-                m_UnityAudioDefaultSpeakerMode.intValue =
-                    (int)(AudioSpeakerMode)EditorGUILayout.EnumPopup("Default Speaker Mode", (AudioSpeakerMode)m_UnityAudioDefaultSpeakerMode.intValue);
-
-                if (EditorGUI.EndChangeCheck())
-                {
-                    m_IsUnityAudioModified = true;
-                }
+                EditorGUI.indentLevel--;
             }
-            EditorGUI.indentLevel--;
+
+            private void InsertTag(string tag)
+            {
+                for (int i = 0; i < m_TagProperty.arraySize; i++)
+                {
+                    string value = m_TagProperty.GetArrayElementAtIndex(i).stringValue;
+                    if (string.IsNullOrEmpty(value))
+                    {
+                        m_TagProperty.GetArrayElementAtIndex(i).stringValue = tag;
+                        m_TagManagerObject.ApplyModifiedProperties();
+                        return;
+                    }
+                }
+
+                m_TagProperty.InsertArrayElementAtIndex(m_TagProperty.arraySize);
+                m_TagProperty.GetArrayElementAtIndex(m_TagProperty.arraySize - 1).stringValue = tag;
+                m_TagManagerObject.ApplyModifiedProperties();
+            }
+            private bool InsertLayer(string layer)
+            {
+                for (int i = 0; i < m_LayerProperty.arraySize; i++)
+                {
+                    string value = m_LayerProperty.GetArrayElementAtIndex(i).stringValue;
+                    if (string.IsNullOrEmpty(value))
+                    {
+                        m_LayerProperty.GetArrayElementAtIndex(i).stringValue = layer;
+                        m_TagManagerObject.ApplyModifiedProperties();
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+        internal sealed class UnityAudioSetups
+        {
+            SerializedObject m_UnityAudioManager;
+            SerializedProperty
+                m_UnityAudioDisableAudio,
+
+                m_UnityAudioGlobalVolume,
+                m_UnityAudioRolloffScale,
+                m_UnityAudioDopplerFactor,
+
+                m_UnityAudioRealVoiceCount,
+                m_UnityAudioVirtualVoiceCount,
+                m_UnityAudioDefaultSpeakerMode;
+
+            private bool
+                    m_OpenUnityAudio = false, m_IsUnityAudioModified = false;
+
+            public UnityAudioSetups()
+            {
+                var audioManager = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/AudioManager.asset")[0];
+                m_UnityAudioManager = new SerializedObject(audioManager);
+
+                m_UnityAudioDisableAudio = m_UnityAudioManager.FindProperty("m_DisableAudio");
+
+                m_UnityAudioGlobalVolume = m_UnityAudioManager.FindProperty("m_Volume");
+                m_UnityAudioRolloffScale = m_UnityAudioManager.FindProperty("Rolloff Scale");
+                m_UnityAudioDopplerFactor = m_UnityAudioManager.FindProperty("Doppler Factor");
+
+                m_UnityAudioRealVoiceCount = m_UnityAudioManager.FindProperty("m_RealVoiceCount");
+                m_UnityAudioVirtualVoiceCount = m_UnityAudioManager.FindProperty("m_VirtualVoiceCount");
+                m_UnityAudioDefaultSpeakerMode = m_UnityAudioManager.FindProperty("Default Speaker Mode");
+            }
+
+            public void DrawUnityAudio()
+            {
+                m_OpenUnityAudio = EditorUtilities.Foldout(m_OpenUnityAudio, "Unity Audio");
+                if (!m_OpenUnityAudio) return;
+
+                EditorGUI.indentLevel++;
+                using (new EditorUtilities.BoxBlock(Color.white))
+                {
+                    using (var check = new EditorGUI.ChangeCheckScope())
+                    {
+                        EditorGUILayout.PropertyField(m_UnityAudioDisableAudio);
+
+                        if (check.changed)
+                        {
+                            m_UnityAudioManager.ApplyModifiedProperties();
+                            m_UnityAudioManager.Update();
+                        }
+                    }
+
+                    EditorUtilities.Line();
+
+                    if (m_UnityAudioDisableAudio.boolValue)
+                    {
+                        EditorGUILayout.HelpBox("Unity Audio has been disabled", MessageType.Info);
+                        return;
+                    }
+
+                    using (new EditorGUI.DisabledGroupScope(!m_IsUnityAudioModified))
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        if (m_IsUnityAudioModified)
+                        {
+                            EditorGUILayout.LabelField("Modified");
+                        }
+
+                        GUILayout.FlexibleSpace();
+                        if (GUILayout.Button("Apply", GUILayout.Width(100)))
+                        {
+                            m_UnityAudioManager.ApplyModifiedProperties();
+                            m_UnityAudioManager.Update();
+
+                            m_IsUnityAudioModified = false;
+                        }
+                    }
+
+                    EditorGUI.BeginChangeCheck();
+
+                    m_UnityAudioGlobalVolume.floatValue
+                        = EditorGUILayout.Slider("Global Volume", m_UnityAudioGlobalVolume.floatValue, 0, 1);
+                    m_UnityAudioRolloffScale.floatValue
+                        = EditorGUILayout.Slider("Volume Rolloff Scale", m_UnityAudioRolloffScale.floatValue, 0, 1);
+                    m_UnityAudioDopplerFactor.floatValue
+                        = EditorGUILayout.Slider("Doppler Factor", m_UnityAudioDopplerFactor.floatValue, 0, 1);
+
+                    EditorUtilities.Line();
+
+                    m_UnityAudioRealVoiceCount.intValue
+                        = EditorGUILayout.IntField("Max Real Voices", m_UnityAudioRealVoiceCount.intValue);
+
+                    m_UnityAudioVirtualVoiceCount.intValue
+                        = EditorGUILayout.IntField("Max Virtual Voices", m_UnityAudioVirtualVoiceCount.intValue);
+
+                    m_UnityAudioDefaultSpeakerMode.intValue =
+                        (int)(AudioSpeakerMode)EditorGUILayout.EnumPopup("Default Speaker Mode", (AudioSpeakerMode)m_UnityAudioDefaultSpeakerMode.intValue);
+
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        m_IsUnityAudioModified = true;
+                    }
+                }
+                EditorGUI.indentLevel--;
+            }
         }
     }
 }

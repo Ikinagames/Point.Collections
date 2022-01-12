@@ -60,9 +60,12 @@ namespace Point.Collections.ResourceControl
 
         internal unsafe AssetInfo(UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash key)
         {
+            this = default(AssetInfo);
+
             bundlePointer = bundle;
             this.key = key;
         }
+
         /// <summary>
         /// 에셋의 레퍼런스를 반환합니다.
         /// </summary>

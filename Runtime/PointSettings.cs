@@ -24,6 +24,7 @@ namespace Point.Collections
 {
     public sealed class PointSettings : StaticScriptableObject<PointSettings>
     {
+        [Header("Logger")]
         [SerializeField] private LogChannel m_LogChannel = LogChannel.All;
         [SerializeField] private string[] m_UserChannelNames = new string[27];
         [SerializeField] internal bool m_EnableLogFile = false;
@@ -31,7 +32,6 @@ namespace Point.Collections
         /// 경로는 <see cref="Application.persistentDataPath"/> 다음부터 시작됩니다. (ex. m_LogFilePath = "test.txt" => Application.persistentDataPath/test.txt
         /// </summary>
         [SerializeField] internal string m_LogFilePath = string.Empty;
-
 
         public LogChannel LogChannel { get => m_LogChannel; set => m_LogChannel = value; }
 

@@ -27,7 +27,7 @@ namespace Point.Collections.Editor
         [MenuItem("Point/Setup Wizard")]
         public static void CoreSystemSetupWizard()
         {
-            m_SetupWizard = (PointSetupWizard)GetWindow(TypeHelper.TypeOf<PointSetupWizard>.Type, true, "CoreSystem Setup Wizard");
+            m_SetupWizard = (PointSetupWizard)GetWindow(TypeHelper.TypeOf<PointSetupWizard>.Type, true, "Point Framework Setup Wizard");
             m_SetupWizard.ShowUtility();
             m_SetupWizard.minSize = new Vector2(600, 500);
             m_SetupWizard.maxSize = m_SetupWizard.minSize;
