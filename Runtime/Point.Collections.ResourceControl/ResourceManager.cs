@@ -501,6 +501,23 @@ namespace Point.Collections.ResourceControl
         #endregion
 
         /// <summary>
+        /// 해당 키의 에셋이 로드되었는지 반환합니다.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static bool IsLoadedAsset(in FixedString4096Bytes key)
+        {
+            Instance.m_MapingJobHandle.Complete();
+
+            Hash hash = new Hash(key);
+            if (!Instance.m_MappedAssets.TryGetValue(hash, out Mapped index)) return false;
+
+            UnsafeReference<UnsafeAssetBundleInfo> bundle = GetUnsafeAssetBundleInfo(in index.bundleIndex);
+            UnsafeAssetInfo assetInfo = bundle.Value.assets.ElementAt(index.assetIndex);
+
+            return assetInfo.loaded;
+        }
+        /// <summary>
         /// 해당 키의 에셋을 로드합니다.
         /// </summary>
         /// <remarks>
@@ -518,9 +535,14 @@ namespace Point.Collections.ResourceControl
             Hash hash = new Hash(key);
             if (!Instance.m_MappedAssets.ContainsKey(hash))
             {
-                PointHelper.LogError(LogChannel.Collections,
-                    $"Asset({key}) is not registered.");
+#if UNITY_EDITOR
+                //UnityEngine.Object tempObj = UnityEditor.AssetDatabase.LoadAssetAtPath(key.ToString(), TypeHelper.TypeOf<UnityEngine.Object>.Type);
 
+                string bundleName = UnityEditor.AssetDatabase.GetImplicitAssetBundleName(key.ToString());
+
+                PointHelper.LogError(LogChannel.Collections,
+                    $"Asset({key}) is not registered. This asset is in the AssetBundle({bundleName}) but you didn\'t registered.");
+#endif
                 return AssetInfo.Invalid;
             }
 
