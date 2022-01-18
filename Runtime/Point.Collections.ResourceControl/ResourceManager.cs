@@ -501,6 +501,29 @@ namespace Point.Collections.ResourceControl
         #endregion
 
         /// <summary>
+        /// 해당 키의 에셋의 에셋번들을 반환합니다.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static AssetBundleInfo GetAssetBundleWithAssetPath(in FixedString4096Bytes key)
+        {
+            Instance.m_MapingJobHandle.Complete();
+
+            Hash hash = new Hash(key);
+            if (!Instance.m_MappedAssets.TryGetValue(hash, out Mapped index))
+            {
+#if UNITY_EDITOR
+                string bundleName = UnityEditor.AssetDatabase.GetImplicitAssetBundleName(key.ToString());
+
+                PointHelper.LogError(LogChannel.Collections,
+                    $"Asset({key}) is not registered. This asset is in the AssetBundle({bundleName}) but you didn\'t registered.");
+#endif
+                return AssetBundleInfo.Invalid;
+            }
+
+            return GetAssetBundleInfo(index.bundleIndex);
+        }
+        /// <summary>
         /// 해당 키의 에셋이 로드되었는지 반환합니다.
         /// </summary>
         /// <param name="key"></param>
@@ -510,7 +533,16 @@ namespace Point.Collections.ResourceControl
             Instance.m_MapingJobHandle.Complete();
 
             Hash hash = new Hash(key);
-            if (!Instance.m_MappedAssets.TryGetValue(hash, out Mapped index)) return false;
+            if (!Instance.m_MappedAssets.TryGetValue(hash, out Mapped index))
+            {
+#if UNITY_EDITOR
+                string bundleName = UnityEditor.AssetDatabase.GetImplicitAssetBundleName(key.ToString());
+
+                PointHelper.LogError(LogChannel.Collections,
+                    $"Asset({key}) is not registered. This asset is in the AssetBundle({bundleName}) but you didn\'t registered.");
+#endif
+                return false;
+            }
 
             UnsafeReference<UnsafeAssetBundleInfo> bundle = GetUnsafeAssetBundleInfo(in index.bundleIndex);
             UnsafeAssetInfo assetInfo = bundle.Value.assets.ElementAt(index.assetIndex);
@@ -536,8 +568,6 @@ namespace Point.Collections.ResourceControl
             if (!Instance.m_MappedAssets.ContainsKey(hash))
             {
 #if UNITY_EDITOR
-                //UnityEngine.Object tempObj = UnityEditor.AssetDatabase.LoadAssetAtPath(key.ToString(), TypeHelper.TypeOf<UnityEngine.Object>.Type);
-
                 string bundleName = UnityEditor.AssetDatabase.GetImplicitAssetBundleName(key.ToString());
 
                 PointHelper.LogError(LogChannel.Collections,

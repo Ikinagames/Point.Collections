@@ -29,7 +29,7 @@ using System.Reflection;
 
 namespace Point.Collections
 {
-    internal sealed class CollectionUtility : CLRSingleTone<CollectionUtility>
+    public sealed class CollectionUtility : CLRSingleTone<CollectionUtility>
     {
         private Unity.Mathematics.Random m_Random;
         private JsonSerializerSettings m_JsonSettings;
@@ -73,6 +73,7 @@ namespace Point.Collections
             return JsonSerializerSettings;
         }
 
+        public static short CreateHashCode2() => unchecked((short)Instance.m_Random.NextInt(short.MinValue, short.MaxValue));
         public static int CreateHashCode() => Instance.m_Random.NextInt(int.MinValue, int.MaxValue);
     }
 }

@@ -134,7 +134,7 @@ namespace Point.Collections.Buffer.LowLevel
 
         public bool ContainsKey(TKey key) => TryFindIndexFor(key, out _);
 
-        public void Add(TKey key, TValue value)
+        public int Add(TKey key, TValue value)
         {
             if (!TryFindEmptyIndexFor(key, out int index))
             {
@@ -142,11 +142,11 @@ namespace Point.Collections.Buffer.LowLevel
 
                 m_Buffer.Resize(m_InitialCount * targetIncrement, NativeArrayOptions.ClearMemory);
 
-                Add(key, value);
-                return;
+                return Add(key, value);
             }
 
             m_Buffer[index] = new KeyValue<TKey, TValue>(key, value);
+            return index;
         }
         public void AddOrUpdate(TKey key, TValue value)
         {
@@ -175,6 +175,15 @@ namespace Point.Collections.Buffer.LowLevel
         }
 
         public bool TryGetIndex(TKey key, out int index) => TryFindIndexFor(key, out index);
+        public ref KeyValue<TKey, TValue> ElementAt(int index)
+        {
+            return ref m_Buffer[index];
+        }
+        public UnsafeReference<KeyValue<TKey, TValue>> PointerAt(int index)
+        {
+            UnsafeReference<KeyValue<TKey, TValue>> p = m_Buffer.ElementAt(in index);
+            return p;
+        }
 
         public bool Equals(UnsafeLinearHashMap<TKey, TValue> other) => m_Buffer.Equals(other.m_Buffer);
 
@@ -254,6 +263,30 @@ namespace Point.Collections.Buffer.LowLevel
             where TValue : unmanaged
         {
             return t.m_Buffer;
+        }
+        public static NativeArray<TKey> GetKeyArray<TKey, TValue>(this UnsafeLinearHashMap<TKey, TValue> t, Allocator allocator)
+            where TKey : unmanaged, IEquatable<TKey>
+            where TValue : unmanaged
+        {
+            NativeArray<TKey> temp = new NativeArray<TKey>(t.m_Buffer.Length, allocator, NativeArrayOptions.UninitializedMemory);
+            for (int i = 0; i < temp.Length; i++)
+            {
+                temp[i] = t.m_Buffer[i].Key;
+            }
+
+            return temp;
+        }
+        public static NativeArray<TValue> GetValueArray<TKey, TValue>(this UnsafeLinearHashMap<TKey, TValue> t, Allocator allocator)
+            where TKey : unmanaged, IEquatable<TKey>
+            where TValue : unmanaged
+        {
+            NativeArray<TValue> temp = new NativeArray<TValue>(t.m_Buffer.Length, allocator, NativeArrayOptions.UninitializedMemory);
+            for (int i = 0; i < temp.Length; i++)
+            {
+                temp[i] = t.m_Buffer[i].Value;
+            }
+
+            return temp;
         }
     }
 }
