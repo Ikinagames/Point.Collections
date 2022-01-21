@@ -17,66 +17,89 @@
 #define DEBUG_MODE
 #endif
 
+using Point.Collections.Buffer.LowLevel;
 using System;
-using UnityEngine;
 
 namespace Point.Collections.Buffer
 {
-    [Serializable]
-    public sealed class FixedList<T> where T : class
+    /// <summary>
+    /// 재배열을 최대한 피하고, 고정된 배열로 제네릭 리스트와 같이 사용할 수 있도록 합니다.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public sealed class FixedList<T>
+        where T : IEquatable<T>
     {
-        [SerializeField] private T[] m_Value;
-        private uint m_Length;
+        private T[] m_Buffer;
+        private int m_Count;
 
+        public T[] Buffer => m_Buffer;
         public T this[int index]
         {
-            get => m_Value[index];
-            set => m_Value[index] = value;
-        }
-        public T[] Value => m_Value;
-        public long LongLength => (long)m_Length;
-        public int Length => (int)m_Length;
-
-        public FixedList(int length)
-        {
-            m_Value = new T[length];
-            m_Length = 0;
-        }
-
-        public void Add(T t)
-        {
-            if (m_Length++ > m_Value.Length)
+            get => m_Buffer[index];
+            set
             {
-                Array.Resize(ref m_Value, Length);
-            }
-
-            m_Value[m_Length] = t;
-        }
-        public void Remove(T t)
-        {
-            for (int i = 0; i < m_Length; i++)
-            {
-                if (m_Value[i] == t)
-                {
-                    RemoveAt(i);
-                    break;
-                }
+                m_Buffer[index] = value;
             }
         }
-        public void RemoveAt(int index)
+        /// <summary>
+        /// 현재 배열에 실제 담긴 객체의 개수입니다.
+        /// </summary>
+        public int Count => m_Count;
+        /// <summary>
+        /// 현재 배열의 최대 길이입니다.
+        /// </summary>
+        public int Length => m_Buffer.Length;
+
+        public FixedList()
         {
-            if (index + 1 < m_Length)
+            m_Buffer = Array.Empty<T>();
+            m_Count = 0;
+        }
+        public FixedList(T[] buffer)
+        {
+            m_Buffer = buffer;
+            m_Count = buffer.Length;
+        }
+
+        public ref T ElementAt(int index)
+        {
+            return ref m_Buffer[index];
+        }
+        public void Add(T element)
+        {
+            if (m_Buffer.Length <= m_Count)
             {
-                m_Length--;
-                for (int i = index; i < m_Length; i++)
-                {
-                    m_Value[i] = m_Value[i + 1];
-                }
+                Array.Resize(ref m_Buffer, m_Count + 1);
+            }
+
+            m_Buffer[m_Count] = element;
+            m_Count++;
+        }
+        /// <summary>
+        /// 해당 객체를 이 배열에서 제거하고, 재배열을 피하기 위해 해당 객체 뒤의 객체 배열을 앞으로 당깁니다.
+        /// </summary>
+        /// <param name="element"></param>
+        public void RemoveSwapback(T element)
+        {
+            if (!m_Buffer.RemoveForSwapback(element))
+            {
                 return;
             }
 
-            m_Length--;
-            m_Value[index] = null;
+            m_Count--;
+        }
+        public void RemoveAtSwapback(int index)
+        {
+#if DEBUG_MODE
+            if (index < 0)
+            {
+                throw new IndexOutOfRangeException();
+            }
+#endif
+            for (int i = index + 1; i < m_Buffer.Length; i++)
+            {
+                m_Buffer[i - 1] = m_Buffer[i];
+            }
         }
     }
 }
