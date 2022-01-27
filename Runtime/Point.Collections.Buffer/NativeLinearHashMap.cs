@@ -62,9 +62,8 @@ namespace Point.Collections.Buffer
         public NativeLinearHashMap(int initialCount, Allocator allocator)
         {
             m_HashMap = new UnsafeLinearHashMap<TKey, TValue>(initialCount, allocator);
-
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
             m_Owner = ThreadInfo.CurrentThread;
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
             DisposeSentinel.Create(out m_SafetyHandle, out m_DisposeSentinel, 1, allocator);
 #endif
         }

@@ -57,6 +57,7 @@ namespace Point.Collections
 
         public ThreadInfo MainThread => m_MainThread;
 
+        public event Action OnFrameUpdate;
         public event Action OnApplicationShutdown;
 
         protected override void OnInitialze()
@@ -89,12 +90,17 @@ namespace Point.Collections
                     PointHelper.LogError(Channel.Core,
                         "You\'re trying to save logs in local without any path. This is not allowed. Please set log path at the PointSettings.");
                 }
-#endif
                 else
+#endif
+
                 {
                     PointHelper.s_LogHandler.SetLogFile(PointSettings.Instance.m_LogFilePath);
                 }
             }
+        }
+        private void Update()
+        {
+            OnFrameUpdate?.Invoke();
         }
         protected override void OnShutdown()
         {
