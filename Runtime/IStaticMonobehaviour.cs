@@ -36,7 +36,10 @@ namespace Point.Collections
         /// 객체가 생성되었을 때 수행하는 메소드입니다.
         /// </summary>
         /// <remarks>
-        /// Awake -> OnEnable -> OnInitialize -> Start 순 입니다.
+        /// Awake -> OnEnable -> OnInitialize -> Start 순 입니다. <br/>
+        /// 이 메소드내에서 다른 <see cref="StaticMonobehaviour{T}"/>, 
+        /// 혹은 자기 자신의 인스턴스를 호출하면 stack overflow 가 발생할 수 있습니다. 
+        /// 해당 작업은 Awake, 혹은 Start 에서 수행되어야 합니다.
         /// </remarks>
         void OnInitialize();
         /// <summary>

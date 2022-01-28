@@ -113,7 +113,7 @@ namespace Point.Collections.Events
 
         #endregion
 
-        public static void Broadcast<TEvent>(TEvent ev)
+        public static void PostEvent<TEvent>(TEvent ev)
             where TEvent : SynchronousEvent<TEvent>, new()
         {
             PointHelper.AssertMainThread();
@@ -168,7 +168,7 @@ namespace Point.Collections.Events
 
         private void TestMethod()
         {
-            Broadcast(TestEvent.GetEvent());
+            PostEvent(TestEvent.GetEvent());
             AddEvent<TestEvent>((ev) => { });
             RemoveEvent<TestEvent>((ev) => { });
         }

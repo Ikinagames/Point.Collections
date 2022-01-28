@@ -62,9 +62,9 @@ namespace Point.Collections
 
                     Application.quitting += t.OnShutdown;
 
-                    t.OnInitialize();
-
                     s_Instance = t;
+
+                    t.OnInitialize();
                 }
                 return s_Instance;
             }
