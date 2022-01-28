@@ -28,11 +28,14 @@ namespace Point.Collections.Events
     {
         private ConcurrentQueue<ISynchronousEvent> m_Events;
 
+        private Dictionary<Type, EventDescriptionBase> m_EventActions;
+
         #region Class Instructions
 
         protected override void OnInitialize()
         {
             m_Events = new ConcurrentQueue<ISynchronousEvent>();
+            m_EventActions = new Dictionary<Type, EventDescriptionBase>();
 
 #if DEBUG_MODE
             PointApplication.Instance.OnFrameUpdate -= OnFrameUpdate;
@@ -89,6 +92,18 @@ namespace Point.Collections.Events
                 throw;
             }
 
+            try
+            {
+                if (m_EventActions.TryGetValue(ev.GetType(), out var actions))
+                {
+                    actions.Execute(ev);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
             ReserveEvent(ev);
         }
         private void ReserveEvent(ISynchronousEvent ev)
@@ -99,7 +114,7 @@ namespace Point.Collections.Events
         #endregion
 
         public static void Broadcast<TEvent>(TEvent ev)
-            where TEvent : ISynchronousEvent
+            where TEvent : SynchronousEvent<TEvent>, new()
         {
             PointHelper.AssertMainThread();
 
@@ -111,24 +126,84 @@ namespace Point.Collections.Events
 
             Instance.m_Events.Enqueue(ev);
         }
+        public static void AddEvent<TEvent>(Action<TEvent> action)
+            where TEvent : SynchronousEvent<TEvent>, new()
+        {
+            PointHelper.AssertMainThread();
+
+            if (PointApplication.IsShutdown)
+            {
+                // TODO : 
+                return;
+            }
+
+            if (!Instance.m_EventActions.TryGetValue(TypeHelper.TypeOf<TEvent>.Type, out var desc))
+            {
+                desc = new EventDescription<TEvent>();
+                Instance.m_EventActions.Add(TypeHelper.TypeOf<TEvent>.Type, desc);
+            }
+
+            EventDescription<TEvent> description = (EventDescription<TEvent>)desc;
+            description.action += action;
+        }
+        public static void RemoveEvent<TEvent>(Action<TEvent> action)
+            where TEvent : SynchronousEvent<TEvent>, new()
+        {
+            PointHelper.AssertMainThread();
+
+            if (PointApplication.IsShutdown)
+            {
+                // TODO : 
+                return;
+            }
+
+            if (!Instance.m_EventActions.TryGetValue(TypeHelper.TypeOf<TEvent>.Type, out var desc))
+            {
+                return;
+            }
+
+            EventDescription<TEvent> description = (EventDescription<TEvent>)desc;
+            description.action -= action;
+        }
 
         private void TestMethod()
         {
             Broadcast(TestEvent.GetEvent());
+            AddEvent<TestEvent>((ev) => { });
+            RemoveEvent<TestEvent>((ev) => { });
         }
-    }
 
-    public sealed class TestEvent : SynchronousEvent<TestEvent>
-    {
-        public static TestEvent GetEvent()
+        #region Inner Classes
+
+        private abstract class EventDescriptionBase
         {
-            var ev = Dequeue();
-
-            return ev;
+            public abstract void Execute(ISynchronousEvent ev);
         }
-        protected override void Execute()
+        private sealed class EventDescription<TEvent> : EventDescriptionBase
+            where TEvent : SynchronousEvent<TEvent>, new()
         {
+            public event Action<TEvent> action;
 
+            public override void Execute(ISynchronousEvent ev)
+            {
+                action?.Invoke((TEvent)ev);
+            }
         }
+
+        class TestEvent : SynchronousEvent<TestEvent>
+        {
+            public static TestEvent GetEvent()
+            {
+                var ev = Dequeue();
+
+                return ev;
+            }
+            protected override void Execute()
+            {
+
+            }
+        }
+
+        #endregion
     }
 }

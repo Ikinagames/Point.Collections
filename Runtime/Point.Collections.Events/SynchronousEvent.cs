@@ -104,7 +104,10 @@ namespace Point.Collections.Events
         protected virtual void OnInitialize() { }
         protected virtual void OnDispose() { }
 
-        protected abstract void Execute();
+        /// <summary>
+        /// Broadcast 직전 수행되는 메소드입니다.
+        /// </summary>
+        protected virtual void Execute() { }
         protected virtual void OnReserve() { }
         protected virtual bool IsValid() => true;
     }
