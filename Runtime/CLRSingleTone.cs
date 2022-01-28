@@ -17,6 +17,10 @@ using System;
 
 namespace Point.Collections
 {
+    /// <summary>
+    /// Common language runtime single-tone <see langword="abstract"/> class
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public abstract class CLRSingleTone<T> : IDisposable where T : class, new()
     {
         private static T s_Instance;
