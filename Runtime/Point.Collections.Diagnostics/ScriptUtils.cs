@@ -19,7 +19,7 @@
 
 using System.Diagnostics;
 
-namespace Point.Collections.Dignostics
+namespace Point.Collections.Diagnostics
 {
     public static class ScriptUtils
     {

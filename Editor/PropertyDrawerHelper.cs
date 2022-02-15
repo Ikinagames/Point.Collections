@@ -150,9 +150,9 @@ namespace Point.Collections.Editor
             rect.y += lineHeight;
         }
 
-        public static Rect GetRect(Rect position)
+        public static Rect GetRect(Rect position, int count = 1)
         {
-            Rect rect = GUILayoutUtility.GetRect(position.width, PropertyDrawerHelper.lineHeight);
+            Rect rect = GUILayoutUtility.GetRect(position.width, PropertyDrawerHelper.lineHeight * count);
             return rect;
         }
     }
