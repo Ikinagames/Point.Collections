@@ -29,8 +29,6 @@ namespace Point.Collections.Buffer.LowLevel
     /// Unity native-side 에서 메모리 버퍼를 할당하는 Allocator 입니다.
     /// </summary>
     [BurstCompatible]
-    [NativeContainerSupportsDeallocateOnJobCompletion]
-    [NativeContainerSupportsMinMaxWriteRestriction]
     public struct UnsafeAllocator : INativeDisposable, IDisposable, IEquatable<UnsafeAllocator>
     {
         [BurstCompatible]
@@ -155,7 +153,7 @@ namespace Point.Collections.Buffer.LowLevel
 
         public bool Equals(UnsafeAllocator other) => m_Buffer.Equals(other.m_Buffer);
 
-        [BurstCompatible, NativeContainerIsReadOnly]
+        [BurstCompatible]
         public readonly struct ReadOnly
         {
             private readonly UnsafeReference m_Ptr;
@@ -189,7 +187,6 @@ namespace Point.Collections.Buffer.LowLevel
     /// <summary><inheritdoc cref="UnsafeAllocator"/></summary>
     /// <typeparam name="T"></typeparam>
     [BurstCompatible]
-    [NativeContainerSupportsDeallocateOnJobCompletion]
     public struct UnsafeAllocator<T> : INativeDisposable, IDisposable, IEquatable<UnsafeAllocator<T>>
         where T : unmanaged
     {
@@ -269,7 +266,7 @@ namespace Point.Collections.Buffer.LowLevel
 
         public bool Equals(UnsafeAllocator<T> other) => m_Allocator.Equals(other.m_Allocator);
 
-        [BurstCompatible, NativeContainerIsReadOnly]
+        [BurstCompatible]
         public readonly struct ReadOnly
         {
             private readonly UnsafeReference<T>.ReadOnly m_Ptr;
