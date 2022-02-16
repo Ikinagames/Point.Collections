@@ -23,13 +23,27 @@ using System;
 
 namespace Point.Collections
 {
+    /// <summary>
+    /// CheckSum 알고리즘으로 데이터 무결성 검사를 하는 구조체입니다.
+    /// </summary>
     [BurstCompatible]
     public struct CheckSum : IEquatable<CheckSum>, IEquatable<int>, IEquatable<uint>
     {
+        /// <summary>
+        /// 데이터 <paramref name="data"/> 를 CheckSum 알고리즘으로 연산된 해시를 반환합니다.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public static CheckSum Calculate<T>(T data) where T : unmanaged
         {
             return new CheckSum(CheckSumMathematics.Calculate(data));
         }
+        /// <summary>
+        /// <inheritdoc cref="Calculate{T}(T)"/>
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public static CheckSum Calculate(byte[] data)
         {
             return new CheckSum(CheckSumMathematics.Calculate(data));
@@ -37,6 +51,9 @@ namespace Point.Collections
 
         private readonly uint m_Hash;
 
+        /// <summary>
+        /// 계산된 해시 값입니다.
+        /// </summary>
         public uint Hash => m_Hash;
 
         private CheckSum(uint hash)
@@ -44,6 +61,12 @@ namespace Point.Collections
             m_Hash = hash;
         }
 
+        /// <summary>
+        /// 데이터 <paramref name="data"/> 와 비교하여 무결성 검사를 수행합니다.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public bool Validate<T>(in T data) where T : unmanaged
         {
             uint result = CheckSumMathematics.Validate(data, in m_Hash);
