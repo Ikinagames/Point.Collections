@@ -25,7 +25,7 @@ using Unity.Collections.LowLevel.Unsafe;
 namespace Point.Collections.Buffer.LowLevel
 {
     /// <summary>
-    /// <see cref="System.IntPtr"/> 접근을 unsafe 없이 접근을 도와주는 구조체입니다.
+    /// <inheritdoc cref="IUnsafeReference"/>
     /// </summary>
     [BurstCompatible]
     public struct UnsafeReference : IUnsafeReference, IEquatable<UnsafeReference>
@@ -105,7 +105,9 @@ namespace Point.Collections.Buffer.LowLevel
         public static unsafe implicit operator UnsafeReference(void* p) => new UnsafeReference(p);
         public static unsafe implicit operator void*(UnsafeReference p) => p.m_Ptr;
     }
-    /// <summary><inheritdoc cref="UnsafeReference"/></summary>
+    /// <summary>
+    /// <inheritdoc cref="IUnsafeReference"/>
+    /// </summary>
     /// <typeparam name="T"></typeparam>
     [BurstCompatible]
     public struct UnsafeReference<T> : IUnsafeReference,

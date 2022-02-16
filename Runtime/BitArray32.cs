@@ -81,37 +81,22 @@ namespace Point.Collections
             set
             {
                 byte temp = (byte)(1 << index % 8);
-                if (index < 8)
+                switch (index)
                 {
-                    bool isTrue = ((x01 & temp) == temp);
-                    if (isTrue != value)
-                    {
+                    case < 0:
                         x01 = (byte)(value ? x01 + temp : x01 - temp);
-                    }
-                }
-                else if (index < 16)
-                {
-                    bool isTrue = ((x02 & temp) == temp);
-                    if (isTrue != value)
-                    {
+                        break;
+                    case < 16:
                         x02 = (byte)(value ? x02 + temp : x02 - temp);
-                    }
-                }
-                else if (index < 24)
-                {
-                    bool isTrue = ((y01 & temp) == temp);
-                    if (isTrue != value)
-                    {
+                        break;
+                    case < 24:
                         y01 = (byte)(value ? y01 + temp : y01 - temp);
-                    }
-                }
-                else
-                {
-                    bool isTrue = ((y02 & temp) == temp);
-                    if (isTrue != value)
-                    {
+                        break;
+                    case < 32:
                         y02 = (byte)(value ? y02 + temp : y02 - temp);
-                    }
+                        break;
+                    default:
+                        throw new IndexOutOfRangeException();
                 }
             }
         }
@@ -146,8 +131,8 @@ namespace Point.Collections
         }
         public void SetValue(int index, uint value, int length = 1)
         {
+#if DEBUG_MODE
             if (index < 0 || length + index > 32) throw new IndexOutOfRangeException();
-
             uint maxValue = 0;
             for (int i = 0; i < length; i++)
             {
@@ -157,7 +142,7 @@ namespace Point.Collections
             {
                 throw new ArgumentOutOfRangeException();
             }
-
+#endif
             for (int i = index, j = 0; j < length; i++, j++)
             {
                 this[i] = (value & (1 << j)) == (1 << j);

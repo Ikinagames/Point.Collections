@@ -21,6 +21,12 @@ using System;
 
 namespace Point.Collections.Buffer.LowLevel
 {
+    /// <summary>
+    ///  <see cref="System.IntPtr"/> 접근을 unsafe 없이 접근을 도와주는 구조체입니다.
+    /// </summary>
+    /// <remarks>
+    /// 직접 상속은 허용하지 않습니다. <seealso cref="UnsafeReference"/> 혹은 <seealso cref="UnsafeReference{T}"/> 를 참조하세요.
+    /// </remarks>
     public interface IUnsafeReference
     {
         /// <summary>

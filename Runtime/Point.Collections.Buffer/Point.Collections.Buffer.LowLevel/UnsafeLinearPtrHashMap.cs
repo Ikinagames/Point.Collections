@@ -27,7 +27,6 @@ using Unity.Jobs;
 namespace Point.Collections.Buffer.LowLevel
 {
     [BurstCompatible]
-    [NativeContainerSupportsDeallocateOnJobCompletion]
     public struct UnsafeLinearPtrHashMap<TKey, TValue> :
         IEquatable<UnsafeLinearPtrHashMap<TKey, TValue>>, INativeDisposable, IDisposable,
         IEnumerable<KeyValue<TKey, UnsafeReference<TValue>>>

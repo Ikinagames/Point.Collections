@@ -32,7 +32,6 @@ namespace Point.Collections.Buffer.LowLevel
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     [BurstCompatible]
-    [NativeContainerSupportsDeallocateOnJobCompletion]
     public struct UnsafeLinearHashMap<TKey, TValue> :
         IEquatable<UnsafeLinearHashMap<TKey, TValue>>, INativeDisposable, IDisposable,
         IEnumerable<KeyValue<TKey, TValue>>
@@ -199,7 +198,7 @@ namespace Point.Collections.Buffer.LowLevel
             return result;
         }
 
-        [BurstCompatible, NativeContainerIsReadOnly]
+        [BurstCompatible]
         public struct Enumerator : IEnumerator<KeyValue<TKey, TValue>>
         {
             private UnsafeAllocator<KeyValue<TKey, TValue>>.ReadOnly m_Buffer;

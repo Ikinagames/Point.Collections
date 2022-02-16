@@ -32,7 +32,6 @@ namespace Point.Collections.Buffer.LowLevel
     /// </remarks>
     /// <typeparam name="T"></typeparam>
     [BurstCompatible]
-    [NativeContainerSupportsDeallocateOnJobCompletion]
     public struct UnsafeFixedQueue<T> : INativeDisposable, IDisposable,
         IEquatable<UnsafeFixedQueue<T>>
         where T : unmanaged
