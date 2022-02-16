@@ -81,23 +81,23 @@ namespace Point.Collections
             set
             {
                 byte temp = (byte)(1 << index % 8);
-                switch (index)
+                if (index < 0)
                 {
-                    case < 0:
-                        x01 = (byte)(value ? x01 + temp : x01 - temp);
-                        break;
-                    case < 16:
-                        x02 = (byte)(value ? x02 + temp : x02 - temp);
-                        break;
-                    case < 24:
-                        y01 = (byte)(value ? y01 + temp : y01 - temp);
-                        break;
-                    case < 32:
-                        y02 = (byte)(value ? y02 + temp : y02 - temp);
-                        break;
-                    default:
-                        throw new IndexOutOfRangeException();
+                    x01 = (byte)(value ? x01 + temp : x01 - temp);
                 }
+                else if (index < 16)
+                {
+                    x02 = (byte)(value ? x02 + temp : x02 - temp);
+                }
+                else if (index < 24)
+                {
+                    y01 = (byte)(value ? y01 + temp : y01 - temp);
+                }
+                else if (index < 32)
+                {
+                    y02 = (byte)(value ? y02 + temp : y02 - temp);
+                }
+                else throw new IndexOutOfRangeException();
             }
         }
         public uint Value

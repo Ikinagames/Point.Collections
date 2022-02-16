@@ -218,6 +218,12 @@ namespace Point.Collections.Buffer.LowLevel
         /// </summary>
         public int Length => Convert.ToInt32(m_Allocator.Size / UnsafeUtility.SizeOf<T>());
 
+        /// <summary>
+        /// <paramref name="length"/> 만큼 새로운 <typeparamref name="T"/> 의 버퍼를 할당합니다.
+        /// </summary>
+        /// <param name="length"></param>
+        /// <param name="allocator"></param>
+        /// <param name="options"></param>
         public UnsafeAllocator(int length, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
         {
             m_Allocator = new UnsafeAllocator(
@@ -227,12 +233,23 @@ namespace Point.Collections.Buffer.LowLevel
                 options
                 );
         }
+        /// <summary>
+        /// 이미 메모리가 할당된 포인터 <paramref name="ptr"/> 으로 wrapping 하여 반환합니다.
+        /// </summary>
+        /// <param name="ptr"></param>
+        /// <param name="length"></param>
+        /// <param name="allocator"></param>
         public UnsafeAllocator(UnsafeReference<T> ptr, int length, Allocator allocator)
         {
             m_Allocator = new UnsafeAllocator(ptr, UnsafeUtility.SizeOf<T>() * length, allocator);
         }
+        /// <summary>
+        /// 이 버퍼를 읽기 전용으로 반환합니다.
+        /// </summary>
+        /// <returns></returns>
         public ReadOnly AsReadOnly() => new ReadOnly(this);
 
+        /// <inheritdoc cref="UnsafeAllocator.Clear"/>
         public void Clear() => m_Allocator.Clear();
 
         /// <summary>
@@ -365,6 +382,13 @@ namespace Point.Collections.Buffer.LowLevel
                 );
         }
 
+        /// <summary>
+        /// <paramref name="other"/ 의 데이터들을 모아 새로운 <seealso cref="NativeArray{T}"/> 의 메모리 버퍼를 생성하여 반환합니다.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="other"></param>
+        /// <param name="allocator"></param>
+        /// <returns></returns>
         public static NativeArray<T> ToNativeArray<T>(this in UnsafeAllocator<T> other, Allocator allocator) where T : unmanaged
         {
             var arr = new NativeArray<T>(other.Length, allocator, NativeArrayOptions.UninitializedMemory);

@@ -81,7 +81,7 @@ namespace Point.Collections.Buffer
         /// <param name="element"></param>
         public void RemoveSwapback(T element)
         {
-            if (!m_Buffer.RemoveForSwapback(element))
+            if (!m_Buffer.RemoveForSwapBack(element))
             {
                 return;
             }

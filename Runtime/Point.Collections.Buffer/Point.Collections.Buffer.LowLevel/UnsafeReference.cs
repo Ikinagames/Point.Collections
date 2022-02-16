@@ -60,9 +60,18 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
+        /// <summary>
+        /// 실제 메모리 주소입니다.
+        /// </summary>
         public unsafe void* Ptr => m_Ptr;
+        /// <summary>
+        /// 실제 메모리 주소를 <seealso cref="System.IntPtr"/> 값으로 반환합니다.
+        /// </summary>
         public IntPtr IntPtr { get { unsafe { return (IntPtr)m_Ptr; } } }
 
+        /// <summary>
+        /// 이 포인터가 사용자에 의헤 할당되었는지 반환합니다.
+        /// </summary>
         public bool IsCreated => m_IsCreated;
 
         public unsafe UnsafeReference(void* ptr)
@@ -158,10 +167,14 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
+        /// <inheritdoc cref="UnsafeReference.Ptr"/>
         public unsafe T* Ptr => m_Ptr;
+        /// <inheritdoc cref="UnsafeReference.IntPtr"/>
         public IntPtr IntPtr { get { unsafe { return (IntPtr)m_Ptr; } } }
-        public ref T Value { get { unsafe { return ref *m_Ptr; } } }
+        /// <inheritdoc cref="GetValue"/>
+        public ref T Value => ref GetValue();
 
+        /// <inheritdoc cref="UnsafeReference.IsCreated"/>
         public bool IsCreated => m_IsCreated;
 
         public UnsafeReference(IntPtr ptr)
@@ -179,6 +192,9 @@ namespace Point.Collections.Buffer.LowLevel
         }
         public ReadOnly AsReadOnly() { unsafe { return new ReadOnly(m_Ptr); } }
 
+        /// <summary>
+        /// 포인터의 값을 <typeparamref name="T"/> 로 읽어서 반환합니다.
+        /// </summary>
         public ref T GetValue()
         {
             unsafe
@@ -202,6 +218,12 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
+        /// <summary>
+        /// 포인터를 오른쪽으로 <paramref name="b"/> 만큼 밀어서 반환합니다.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
         public static UnsafeReference<T> operator +(UnsafeReference<T> a, int b)
         {
             unsafe
@@ -209,6 +231,12 @@ namespace Point.Collections.Buffer.LowLevel
                 return new UnsafeReference<T>(a.m_Ptr + b);
             }
         }
+        /// <summary>
+        /// 포인터를 왼쪽으로 <paramref name="b"/> 만큼 밀어서 반환합니다.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
         public static UnsafeReference<T> operator -(UnsafeReference<T> a, int b)
         {
             unsafe
