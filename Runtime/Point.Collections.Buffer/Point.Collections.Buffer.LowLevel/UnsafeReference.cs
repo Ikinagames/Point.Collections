@@ -146,6 +146,17 @@ namespace Point.Collections.Buffer.LowLevel
                 }
             }
         }
+        /// <inheritdoc cref="this[int]"/>
+        public ref T this[uint index]
+        {
+            get
+            {
+                unsafe
+                {
+                    return ref *(m_Ptr + index);
+                }
+            }
+        }
 
         public unsafe T* Ptr => m_Ptr;
         public IntPtr IntPtr { get { unsafe { return (IntPtr)m_Ptr; } } }
