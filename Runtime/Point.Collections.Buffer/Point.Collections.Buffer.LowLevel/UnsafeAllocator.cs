@@ -18,6 +18,7 @@
 #endif
 
 using System;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -414,6 +415,19 @@ namespace Point.Collections.Buffer.LowLevel
                 UnsafeUtility.AlignOf<T>(),
                 options
                 );
+        }
+
+        public static void Sort<T, U>(this ref UnsafeAllocator<T> t, U comparer)
+            where T : unmanaged
+            where U : unmanaged, IComparer<T>
+        {
+            UnsafeBufferUtility.Sort<T, U>(t.Ptr, t.Length, comparer);
+        }
+        public static void Sort<T, U>(this ref UnsafeAllocator<T> t, U comparer, int length)
+            where T : unmanaged
+            where U : unmanaged, IComparer<T>
+        {
+            UnsafeBufferUtility.Sort<T, U>(t.Ptr, length, comparer);
         }
 
         /// <summary>
