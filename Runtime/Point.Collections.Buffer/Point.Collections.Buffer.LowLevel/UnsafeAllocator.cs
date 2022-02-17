@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,6 +41,10 @@ namespace Point.Collections.Buffer.LowLevel
         internal UnsafeReference<Buffer> m_Buffer;
         internal readonly Allocator m_Allocator;
 
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+        internal AtomicSafetyHandle m_SafetyHandle;
+#endif
+
         /// <summary>
         /// 이 메모리 버퍼의 메모리 주소입니다.
         /// </summary>
@@ -76,6 +80,9 @@ namespace Point.Collections.Buffer.LowLevel
                 }
             }
             m_Allocator = allocator;
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            UnsafeBufferUtility.CreateSafety(m_Buffer, allocator, out m_SafetyHandle);
+#endif
         }
         public UnsafeAllocator(UnsafeReference ptr, long size, Allocator allocator)
         {
@@ -94,6 +101,9 @@ namespace Point.Collections.Buffer.LowLevel
                 };
             }
             m_Allocator = allocator;
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            UnsafeBufferUtility.CreateSafety(m_Buffer, allocator, out m_SafetyHandle);
+#endif
         }
         public ReadOnly AsReadOnly() => new ReadOnly(this);
 
@@ -131,15 +141,36 @@ namespace Point.Collections.Buffer.LowLevel
 
         public void Dispose()
         {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            if (!UnsafeUtility.IsValidAllocator(m_Allocator))
+            {
+                PointHelper.LogError(Channel.Collections,
+                    $"{nameof(UnsafeAllocator)} that doesn\'t have valid allocator mark cannot be disposed. " +
+                    $"Most likely this {nameof(UnsafeAllocator)} has been wrapped from NativeArray.");
+                return;
+            }
+#endif
             unsafe
             {
                 UnsafeUtility.Free(m_Buffer.Value.Ptr, m_Allocator);
                 UnsafeUtility.Free(m_Buffer, m_Allocator);
             }
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            UnsafeBufferUtility.RemoveSafety(m_Buffer, ref m_SafetyHandle);
+#endif
             m_Buffer = default(UnsafeReference<Buffer>);
         }
         public JobHandle Dispose(JobHandle inputDeps)
         {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            if (!UnsafeUtility.IsValidAllocator(m_Allocator))
+            {
+                PointHelper.LogError(Channel.Collections,
+                    $"{nameof(UnsafeAllocator)} that doesn\'t have valid allocator mark cannot be disposed. " +
+                    $"Most likely this {nameof(UnsafeAllocator)} has been wrapped from NativeArray.");
+                return default(JobHandle);
+            }
+#endif
             DisposeJob disposeJob = new DisposeJob()
             {
                 Buffer = m_Buffer,
@@ -147,6 +178,9 @@ namespace Point.Collections.Buffer.LowLevel
             };
             JobHandle result = disposeJob.Schedule(inputDeps);
 
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            UnsafeBufferUtility.RemoveSafety(m_Buffer, ref m_SafetyHandle);
+#endif
             m_Buffer = default(UnsafeReference<Buffer>);
             return result;
         }

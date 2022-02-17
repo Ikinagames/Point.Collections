@@ -21,6 +21,9 @@ using System;
 
 namespace Point.Collections
 {
+    /// <summary>
+    /// 로그 채널입니다.
+    /// </summary>
     [Flags]
     public enum LogChannel : int
     {

@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +13,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Point.Collections
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
+namespace Point.Collections.Buffer.LowLevel
 {
-    /// <summary>
-    /// 구조체의 메모리 초기화 여부를 반영하는 구현부입니다.
-    /// </summary>
-    public interface IEmpty
+    public struct MemoryPool
     {
-        bool IsEmpty();
+        private const int c_InitialMemoryPoolSize = 10240;
+
+        private UnsafeAllocator<byte> m_Buffer;
+
+        public MemoryPool(UnsafeAllocator<byte> buffer)
+        {
+            m_Buffer = buffer;
+        }
     }
 }

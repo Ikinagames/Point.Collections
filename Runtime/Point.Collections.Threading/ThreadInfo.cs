@@ -25,10 +25,12 @@ namespace Point.Collections.Threading
     [BurstCompatible]
     public struct ThreadInfo : IEquatable<ThreadInfo>, IEquatable<Thread>
     {
+        [ThreadStatic]
+        private static ThreadInfo s_CurrentThread = new ThreadInfo(Thread.CurrentThread);
         /// <summary>
         /// 현재 스레드 정보를 가져옵니다.
         /// </summary>
-        public static ThreadInfo CurrentThread => new ThreadInfo(Thread.CurrentThread);
+        public static ThreadInfo CurrentThread => s_CurrentThread;
 
         //
         //

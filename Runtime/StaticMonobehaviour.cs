@@ -22,6 +22,11 @@ using UnityEngine;
 
 namespace Point.Collections
 {
+    /// <summary>
+    /// <seealso cref="UnityEngine.MonoBehaviour"/> (<typeparamref name="T"/>) 를 
+    /// Single-tone 으로 wrapping 하는 <see langword="abstract"/> 입니다.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public abstract class StaticMonobehaviour<T> : UnityEngine.MonoBehaviour, IStaticMonobehaviour
         where T : UnityEngine.MonoBehaviour, IStaticMonobehaviour
     {

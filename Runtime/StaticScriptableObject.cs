@@ -28,7 +28,7 @@ using System.IO;
 namespace Point.Collections
 {
     /// <summary>
-    /// <see cref="ScriptableObject"/> 를 고정된 싱글톤으로 만들 수 있는 <see langword="abstract"/> 입니다.
+    /// <see cref="ScriptableObject"/> 를 Single-tone 으로 wrapping 하는 <see langword="abstract"/> 입니다.
     /// </summary>
     /// <remarks>
     /// 이 <see langword="abstract"/> 를 상속받은 객체의 Asset 파일은 사용자에 의해 경로가 바뀌어서는 안되며, 
