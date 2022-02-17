@@ -21,70 +21,20 @@ using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
 
 namespace Point.Collections.Buffer.LowLevel
 {
+    /// <summary>
+    /// 매 Allocation 을 피하기 위한 메모리 공간 재사용 구조체입니다. 
+    /// </summary>
     [BurstCompatible]
-    public struct MemoryPool : IDisposable
+    public struct MemoryPool : INativeDisposable, IDisposable
     {
+        public const int INITBUCKETSIZE = 4;
+
         private readonly Hash m_Hash;
         private UnsafeAllocator<Buffer> m_Buffer;
-
-        [BurstCompatible]
-        private struct Buffer : IDisposable
-        {
-            public UnsafeAllocator<byte> buffer;
-            public UnsafeAllocator<Bucket> bucket;
-            public int bucketCount;
-
-            public void Dispose()
-            {
-                buffer.Dispose();
-                bucket.Dispose();
-            }
-        }
-        [BurstCompatible]
-        private struct Bucket : IEquatable<UnsafeReference<byte>>, IEquatable<Bucket>
-        {
-            private KeyValue<UnsafeReference<byte>, int> m_Block;
-
-            public Bucket(UnsafeReference<byte> p, int length)
-            {
-                m_Block = new KeyValue<UnsafeReference<byte>, int>(p, length);
-            }
-
-            public UnsafeReference<byte> Block => m_Block.Key;
-            public int Length => m_Block.Value;
-
-            public UnsafeReference<byte> GetNext()
-            {
-                return Block + Length;
-            }
-
-            public bool Equals(UnsafeReference<byte> other) => Block.Equals(other);
-            public bool Equals(Bucket other) => Block.Equals(other.Block) && Length == other.Length;
-        }
-        [BurstCompatible]
-        private struct BucketComparer : IComparer<Bucket>
-        {
-            private UnsafeReference<byte> m_Buffer;
-
-            public BucketComparer(UnsafeAllocator<byte> buffer)
-            {
-                m_Buffer = buffer.Ptr;
-            }
-
-            public int Compare(Bucket x, Bucket y)
-            {
-                long
-                    a = x.Block - m_Buffer,
-                    b = y.Block - m_Buffer;
-
-                if (a < b) return -1;
-                else if (a > b) return 1;
-                return 0;
-            }
-        }
 
         /// <summary>
         /// 새로운 Memory Pool 을 생성합니다.
@@ -98,7 +48,7 @@ namespace Point.Collections.Buffer.LowLevel
             m_Buffer = new UnsafeAllocator<Buffer>(1, allocator);
             {
                 m_Buffer[0].buffer = new UnsafeAllocator<byte>(size, allocator);
-                m_Buffer[0].bucket = new UnsafeAllocator<Bucket>(4, m_Buffer.m_Allocator.m_Allocator);
+                m_Buffer[0].bucket = new UnsafeAllocator<Bucket>(INITBUCKETSIZE, m_Buffer.m_Buffer.m_Allocator);
                 m_Buffer[0].bucketCount = 0;
             }
         }
@@ -110,10 +60,10 @@ namespace Point.Collections.Buffer.LowLevel
         {
             m_Hash = Hash.NewHash();
 
-            m_Buffer = new UnsafeAllocator<Buffer>(1, buffer.m_Allocator.m_Allocator);
+            m_Buffer = new UnsafeAllocator<Buffer>(1, buffer.m_Buffer.m_Allocator);
             {
                 m_Buffer[0].buffer = buffer;
-                m_Buffer[0].bucket = new UnsafeAllocator<Bucket>(4, buffer.m_Allocator.m_Allocator);
+                m_Buffer[0].bucket = new UnsafeAllocator<Bucket>(INITBUCKETSIZE, buffer.m_Buffer.m_Allocator);
                 m_Buffer[0].bucketCount = 0;
             }
         }
@@ -208,10 +158,15 @@ namespace Point.Collections.Buffer.LowLevel
             return true;
         }
 
+        /// <summary>
+        /// <paramref name="length"/> bytes 만큼 메모리 주소를 할당받습니다.
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
         public MemoryBlock Get(int length)
         {
             PointHelper.AssertMainThread();
-#if DEBUG_MODE
+
             if (!TryGetBucket(length, out var p))
             {
                 PointHelper.LogError(Channel.Collections,
@@ -220,9 +175,15 @@ namespace Point.Collections.Buffer.LowLevel
 
                 return default(MemoryBlock);
             }
-#endif
+
             return new MemoryBlock(m_Hash, p, length);
         }
+        /// <summary>
+        /// <inheritdoc cref="Get(int)"/>
+        /// </summary>
+        /// <param name="length"></param>
+        /// <param name="block"></param>
+        /// <returns></returns>
         public bool TryGet(int length, out MemoryBlock block)
         {
             PointHelper.AssertMainThread();
@@ -236,6 +197,13 @@ namespace Point.Collections.Buffer.LowLevel
             block = new MemoryBlock(m_Hash, p, length);
             return true;
         }
+        /// <summary>
+        /// 이 풀에서 할당받은 메모리를 반환합니다.
+        /// </summary>
+        /// <remarks>
+        /// 이 메모리 풀이 아닌 곳에서 할당받은 메모리를 반환하려하면 에러가 발생합니다.
+        /// </remarks>
+        /// <param name="block"></param>
         public void Reserve(MemoryBlock block)
         {
             PointHelper.AssertMainThread();
@@ -257,63 +225,69 @@ namespace Point.Collections.Buffer.LowLevel
 
         public void Dispose()
         {
+            PointHelper.AssertMainThread();
             m_Buffer.Dispose();
         }
-    }
-    [BurstCompatible]
-    public readonly struct MemoryBlock : IEquatable<MemoryBlock>
-    {
-        private readonly Hash m_Owner;
+        public JobHandle Dispose(JobHandle inputDeps) => m_Buffer.Dispose(inputDeps);
 
-        internal readonly UnsafeReference<byte> m_Block;
-        private readonly int m_Length;
+        #region Inner Classes
 
-        public ref byte this[int index] => ref m_Block[index];
-        public UnsafeReference<byte> Ptr => m_Block;
-        public int Length => m_Length;
-
-        internal MemoryBlock(Hash owner, UnsafeReference<byte> p, int length)
+        [BurstCompatible]
+        private struct Buffer : IDisposable
         {
-            m_Owner = owner;
-            m_Block = p;
-            m_Length = length;
-        }
+            public UnsafeAllocator<byte> buffer;
+            public UnsafeAllocator<Bucket> bucket;
+            public int bucketCount;
 
-        internal bool ValidateOwnership(in Hash pool)
-        {
-            if (!pool.Equals(m_Owner)) return false;
-            return true;
-        }
-
-        public bool Equals(MemoryBlock other) => m_Block.Equals(other.m_Block) && m_Length == other.m_Length;
-    }
-    [BurstCompatible]
-    public readonly struct MemoryBlock<T> : IEquatable<MemoryBlock<T>>, IEquatable<MemoryBlock>
-        where T : unmanaged
-    {
-        private readonly MemoryBlock m_MemoryBlock;
-
-        public UnsafeReference<T> Ptr
-        {
-            get
+            public void Dispose()
             {
-                UnsafeReference boxed = m_MemoryBlock.Ptr;
-                return (UnsafeReference<T>)boxed;
+                buffer.Dispose();
+                bucket.Dispose();
             }
         }
-        public int Size => m_MemoryBlock.Length;
-        public int Length => m_MemoryBlock.Length / UnsafeUtility.SizeOf<T>();
-
-        internal MemoryBlock(MemoryBlock block)
+        [BurstCompatible]
+        private struct Bucket : IEquatable<UnsafeReference<byte>>, IEquatable<Bucket>
         {
-            m_MemoryBlock = block;
+            private KeyValue<UnsafeReference<byte>, int> m_Block;
+
+            public Bucket(UnsafeReference<byte> p, int length)
+            {
+                m_Block = new KeyValue<UnsafeReference<byte>, int>(p, length);
+            }
+
+            public UnsafeReference<byte> Block => m_Block.Key;
+            public int Length => m_Block.Value;
+
+            public UnsafeReference<byte> GetNext()
+            {
+                return Block + Length;
+            }
+
+            public bool Equals(UnsafeReference<byte> other) => Block.Equals(other);
+            public bool Equals(Bucket other) => Block.Equals(other.Block) && Length == other.Length;
+        }
+        [BurstCompatible]
+        private struct BucketComparer : IComparer<Bucket>
+        {
+            private UnsafeReference<byte> m_Buffer;
+
+            public BucketComparer(UnsafeAllocator<byte> buffer)
+            {
+                m_Buffer = buffer.Ptr;
+            }
+
+            public int Compare(Bucket x, Bucket y)
+            {
+                long
+                    a = x.Block - m_Buffer,
+                    b = y.Block - m_Buffer;
+
+                if (a < b) return -1;
+                else if (a > b) return 1;
+                return 0;
+            }
         }
 
-        public bool Equals(MemoryBlock other) => m_MemoryBlock.Equals(other);
-        public bool Equals(MemoryBlock<T> other) => m_MemoryBlock.Equals(other.m_MemoryBlock);
-
-        public static implicit operator MemoryBlock(MemoryBlock<T> t) => t.m_MemoryBlock;
-
-        public static explicit operator MemoryBlock<T>(MemoryBlock t) => new MemoryBlock<T>(t);
+        #endregion
     }
 }
