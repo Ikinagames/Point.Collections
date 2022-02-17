@@ -18,6 +18,7 @@
 #endif
 
 using System;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -224,12 +225,12 @@ namespace Point.Collections.Buffer.LowLevel
     public struct UnsafeAllocator<T> : INativeDisposable, IDisposable, IEquatable<UnsafeAllocator<T>>
         where T : unmanaged
     {
-        internal UnsafeAllocator m_Allocator;
+        internal UnsafeAllocator m_Buffer;
 
         /// <inheritdoc cref="UnsafeAllocator.Ptr"/>
-        public UnsafeReference<T> Ptr => (UnsafeReference<T>)m_Allocator.Ptr;
+        public UnsafeReference<T> Ptr => (UnsafeReference<T>)m_Buffer.Ptr;
         /// <inheritdoc cref="UnsafeAllocator.IsCreated"/>
-        public bool IsCreated => m_Allocator.IsCreated;
+        public bool IsCreated => m_Buffer.IsCreated;
 
         public ref T this[int index]
         {
@@ -246,11 +247,11 @@ namespace Point.Collections.Buffer.LowLevel
         }
         
         /// <inheritdoc cref="UnsafeAllocator.Size"/>
-        public long Size => m_Allocator.Size;
+        public long Size => m_Buffer.Size;
         /// <summary>
         /// 이 메모리 버퍼의 사이즈를 <typeparamref name="T"/> 의 크기에 맞춘 최대 길이입니다.
         /// </summary>
-        public int Length => Convert.ToInt32(m_Allocator.Size / UnsafeUtility.SizeOf<T>());
+        public int Length => Convert.ToInt32(m_Buffer.Size / UnsafeUtility.SizeOf<T>());
 
         /// <summary>
         /// <paramref name="length"/> 만큼 새로운 <typeparamref name="T"/> 의 버퍼를 할당합니다.
@@ -260,7 +261,7 @@ namespace Point.Collections.Buffer.LowLevel
         /// <param name="options"></param>
         public UnsafeAllocator(int length, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
         {
-            m_Allocator = new UnsafeAllocator(
+            m_Buffer = new UnsafeAllocator(
                 UnsafeUtility.SizeOf<T>() * length,
                 UnsafeUtility.AlignOf<T>(),
                 allocator,
@@ -275,7 +276,7 @@ namespace Point.Collections.Buffer.LowLevel
         /// <param name="allocator"></param>
         public UnsafeAllocator(UnsafeReference<T> ptr, int length, Allocator allocator)
         {
-            m_Allocator = new UnsafeAllocator(ptr, UnsafeUtility.SizeOf<T>() * length, allocator);
+            m_Buffer = new UnsafeAllocator(ptr, UnsafeUtility.SizeOf<T>() * length, allocator);
         }
         /// <summary>
         /// 이 버퍼를 읽기 전용으로 반환합니다.
@@ -284,7 +285,7 @@ namespace Point.Collections.Buffer.LowLevel
         public ReadOnly AsReadOnly() => new ReadOnly(this);
 
         /// <inheritdoc cref="UnsafeAllocator.Clear"/>
-        public void Clear() => m_Allocator.Clear();
+        public void Clear() => m_Buffer.Clear();
 
         /// <summary>
         /// 이 메모리 버퍼의 <paramref name="index"/> 번째 주소를 반환합니다.
@@ -305,17 +306,17 @@ namespace Point.Collections.Buffer.LowLevel
 
         public void Dispose()
         {
-            m_Allocator.Dispose();
+            m_Buffer.Dispose();
         }
         public JobHandle Dispose(JobHandle inputDeps)
         {
-            JobHandle result = m_Allocator.Dispose(inputDeps);
+            JobHandle result = m_Buffer.Dispose(inputDeps);
 
-            m_Allocator = default(UnsafeAllocator);
+            m_Buffer = default(UnsafeAllocator);
             return result;
         }
 
-        public bool Equals(UnsafeAllocator<T> other) => m_Allocator.Equals(other.m_Allocator);
+        public bool Equals(UnsafeAllocator<T> other) => m_Buffer.Equals(other.m_Buffer);
 
         [BurstCompatible]
         public readonly struct ReadOnly
@@ -346,12 +347,12 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
-        public static implicit operator UnsafeAllocator(UnsafeAllocator<T> t) => t.m_Allocator;
+        public static implicit operator UnsafeAllocator(UnsafeAllocator<T> t) => t.m_Buffer;
         public static explicit operator UnsafeAllocator<T>(UnsafeAllocator t)
         {
             return new UnsafeAllocator<T>
             {
-                m_Allocator = t
+                m_Buffer = t
             };
         }
     }
@@ -409,11 +410,24 @@ namespace Point.Collections.Buffer.LowLevel
         {
             if (length < 0) throw new Exception();
 
-            t.m_Allocator.Resize(
+            t.m_Buffer.Resize(
                 UnsafeUtility.SizeOf<T>() * length,
                 UnsafeUtility.AlignOf<T>(),
                 options
                 );
+        }
+
+        public static void Sort<T, U>(this ref UnsafeAllocator<T> t, U comparer)
+            where T : unmanaged
+            where U : unmanaged, IComparer<T>
+        {
+            UnsafeBufferUtility.Sort<T, U>(t.Ptr, t.Length, comparer);
+        }
+        public static void Sort<T, U>(this ref UnsafeAllocator<T> t, U comparer, int length)
+            where T : unmanaged
+            where U : unmanaged, IComparer<T>
+        {
+            UnsafeBufferUtility.Sort<T, U>(t.Ptr, length, comparer);
         }
 
         /// <summary>
