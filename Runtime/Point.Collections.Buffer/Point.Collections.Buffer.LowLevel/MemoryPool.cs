@@ -20,19 +20,30 @@
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Point.Collections.Buffer.LowLevel
 {
+    [BurstCompatible]
     public struct MemoryPool : IDisposable
     {
-        private const int c_InitialMemoryPoolSize = 10240;
+        private readonly Hash m_Hash;
+        private UnsafeAllocator<Buffer> m_Buffer;
 
-        private Hash m_Hash;
-        private UnsafeAllocator<byte> m_Buffer;
-        private UnsafeAllocator<Bucket> m_Bucket;
+        [BurstCompatible]
+        private struct Buffer : IDisposable
+        {
+            public UnsafeAllocator<byte> buffer;
+            public UnsafeAllocator<Bucket> bucket;
+            public int bucketCount;
 
-        private int m_BucketCount;
-
+            public void Dispose()
+            {
+                buffer.Dispose();
+                bucket.Dispose();
+            }
+        }
+        [BurstCompatible]
         private struct Bucket : IEquatable<UnsafeReference<byte>>, IEquatable<Bucket>
         {
             private KeyValue<UnsafeReference<byte>, int> m_Block;
@@ -53,6 +64,7 @@ namespace Point.Collections.Buffer.LowLevel
             public bool Equals(UnsafeReference<byte> other) => Block.Equals(other);
             public bool Equals(Bucket other) => Block.Equals(other.Block) && Length == other.Length;
         }
+        [BurstCompatible]
         private struct BucketComparer : IComparer<Bucket>
         {
             private UnsafeReference<byte> m_Buffer;
@@ -74,23 +86,36 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
+        /// <summary>
+        /// 새로운 Memory Pool 을 생성합니다.
+        /// </summary>
+        /// <param name="size"></param>
+        /// <param name="allocator"></param>
         public MemoryPool(int size, Allocator allocator)
         {
             m_Hash = Hash.NewHash();
 
-            m_Buffer = new UnsafeAllocator<byte>(size, allocator);
-
-            m_Bucket = new UnsafeAllocator<Bucket>(4, m_Buffer.m_Allocator.m_Allocator);
-            m_BucketCount = 0;
+            m_Buffer = new UnsafeAllocator<Buffer>(1, allocator);
+            {
+                m_Buffer[0].buffer = new UnsafeAllocator<byte>(size, allocator);
+                m_Buffer[0].bucket = new UnsafeAllocator<Bucket>(4, m_Buffer.m_Allocator.m_Allocator);
+                m_Buffer[0].bucketCount = 0;
+            }
         }
+        /// <summary>
+        /// 이미 존재하는 버퍼를 Memory Pool 로 Wrapping 합니다.
+        /// </summary>
+        /// <param name="buffer"></param>
         public MemoryPool(UnsafeAllocator<byte> buffer)
         {
             m_Hash = Hash.NewHash();
 
-            m_Buffer = buffer;
-
-            m_Bucket = new UnsafeAllocator<Bucket>(4, m_Buffer.m_Allocator.m_Allocator);
-            m_BucketCount = 0;
+            m_Buffer = new UnsafeAllocator<Buffer>(1, buffer.m_Allocator.m_Allocator);
+            {
+                m_Buffer[0].buffer = buffer;
+                m_Buffer[0].bucket = new UnsafeAllocator<Bucket>(4, buffer.m_Allocator.m_Allocator);
+                m_Buffer[0].bucketCount = 0;
+            }
         }
 
         private static long CalculateFreeSpaceBetween(Bucket a, UnsafeReference<byte> b)
@@ -118,66 +143,66 @@ namespace Point.Collections.Buffer.LowLevel
 
         private void IncrementBucket()
         {
-            int length = m_Bucket.Length;
-            m_Bucket.Resize(length * 2);
+            int length = m_Buffer[0].bucket.Length;
+            m_Buffer[0].bucket.Resize(length * 2);
         }
 
         private bool TryGetBucket(int length, out UnsafeReference<byte> p)
         {
-            if (m_BucketCount == 0)
+            if (m_Buffer[0].bucketCount == 0)
             {
-                m_Bucket[0] = new Bucket(m_Buffer.Ptr, length);
+                m_Buffer[0].bucket[0] = new Bucket(m_Buffer[0].buffer.Ptr, length);
 
-                p = m_Buffer.Ptr;
-                m_BucketCount++;
+                p = m_Buffer[0].buffer.Ptr;
+                m_Buffer[0].bucketCount++;
 
                 //"count 0 true return".ToLog();
                 return true;
             }
 
-            if (m_BucketCount + 1 >= m_Bucket.Length)
+            if (m_Buffer[0].bucketCount + 1 >= m_Buffer[0].bucket.Length)
             {
                 IncrementBucket();
                 //"increse".ToLog();
             }
 
-            BucketComparer comparer = new BucketComparer(m_Buffer);
-            m_Bucket.Sort(comparer, m_BucketCount);
+            BucketComparer comparer = new BucketComparer(m_Buffer[0].buffer);
+            m_Buffer[0].bucket.Sort(comparer, m_Buffer[0].bucketCount);
 
-            if (m_BucketCount > 0)
+            if (m_Buffer[0].bucketCount > 0)
             {
-                if (m_Bucket[0].Block - m_Buffer.Ptr >= length)
+                if (m_Buffer[0].bucket[0].Block - m_Buffer[0].buffer.Ptr >= length)
                 {
-                    p = m_Buffer.Ptr;
-                    m_Bucket[m_BucketCount++] = new Bucket(p, length);
+                    p = m_Buffer[0].buffer.Ptr;
+                    m_Buffer[0].bucket[m_Buffer[0].bucketCount++] = new Bucket(p, length);
 
                     return true;
                 }
 
-                for (int i = 1; i < m_BucketCount; i++)
+                for (int i = 1; i < m_Buffer[0].bucketCount; i++)
                 {
-                    if (!IsAllocatableBetween(m_Bucket[i - 1], m_Bucket[i].Block, length, out _))
+                    if (!IsAllocatableBetween(m_Buffer[0].bucket[i - 1], m_Buffer[0].bucket[i].Block, length, out _))
                     {
                         continue;
                     }
 
-                    p = m_Bucket[i - 1].GetNext();
-                    m_Bucket[m_BucketCount++] = new Bucket(p, length);
+                    p = m_Buffer[0].bucket[i - 1].GetNext();
+                    m_Buffer[0].bucket[m_Buffer[0].bucketCount++] = new Bucket(p, length);
 
                     //"btw return".ToLog();
                     return true;
                 }
             }
 
-            ref Bucket last = ref m_Bucket[m_BucketCount - 1];
+            ref Bucket last = ref m_Buffer[0].bucket[m_Buffer[0].bucketCount - 1];
             p = last.GetNext();
 
-            if (IsExceedingAllocator(m_Buffer, p, length))
+            if (IsExceedingAllocator(m_Buffer[0].buffer, p, length))
             {
                 return false;
             }
 
-            m_Bucket[m_BucketCount++] = new Bucket(p, length);
+            m_Buffer[0].bucket[m_Buffer[0].bucketCount++] = new Bucket(p, length);
             //$"last return count?{m_BucketCount}".ToLog();
 
             return true;
@@ -186,7 +211,7 @@ namespace Point.Collections.Buffer.LowLevel
         public MemoryBlock Get(int length)
         {
             PointHelper.AssertMainThread();
-
+#if DEBUG_MODE
             if (!TryGetBucket(length, out var p))
             {
                 PointHelper.LogError(Channel.Collections,
@@ -195,7 +220,7 @@ namespace Point.Collections.Buffer.LowLevel
 
                 return default(MemoryBlock);
             }
-
+#endif
             return new MemoryBlock(m_Hash, p, length);
         }
         public bool TryGet(int length, out MemoryBlock block)
@@ -214,28 +239,28 @@ namespace Point.Collections.Buffer.LowLevel
         public void Reserve(MemoryBlock block)
         {
             PointHelper.AssertMainThread();
-
+#if DEBUG_MODE
             if (!block.ValidateOwnership(in m_Hash))
             {
                 PointHelper.LogError(Channel.Collections, $"");
                 return;
             }
+#endif
+            BucketComparer comparer = new BucketComparer(m_Buffer[0].buffer);
+            m_Buffer[0].bucket.Sort(comparer, m_Buffer[0].bucketCount);
 
-            BucketComparer comparer = new BucketComparer(m_Buffer);
-            m_Bucket.Sort(comparer, m_BucketCount);
+            int index = UnsafeBufferUtility.IndexOf(m_Buffer[0].bucket.Ptr, m_Buffer[0].bucketCount, block.m_Block);
+            UnsafeBufferUtility.RemoveAtSwapBack(m_Buffer[0].bucket.Ptr, m_Buffer[0].bucketCount, index);
 
-            int index = UnsafeBufferUtility.IndexOf(m_Bucket.Ptr, m_BucketCount, block.m_Block);
-            UnsafeBufferUtility.RemoveAtSwapBack(m_Bucket.Ptr, m_BucketCount, index);
-
-            m_BucketCount--;
+            m_Buffer[0].bucketCount--;
         }
 
         public void Dispose()
         {
             m_Buffer.Dispose();
-            m_Bucket.Dispose();
         }
     }
+    [BurstCompatible]
     public readonly struct MemoryBlock : IEquatable<MemoryBlock>
     {
         private readonly Hash m_Owner;
@@ -261,5 +286,34 @@ namespace Point.Collections.Buffer.LowLevel
         }
 
         public bool Equals(MemoryBlock other) => m_Block.Equals(other.m_Block) && m_Length == other.m_Length;
+    }
+    [BurstCompatible]
+    public readonly struct MemoryBlock<T> : IEquatable<MemoryBlock<T>>, IEquatable<MemoryBlock>
+        where T : unmanaged
+    {
+        private readonly MemoryBlock m_MemoryBlock;
+
+        public UnsafeReference<T> Ptr
+        {
+            get
+            {
+                UnsafeReference boxed = m_MemoryBlock.Ptr;
+                return (UnsafeReference<T>)boxed;
+            }
+        }
+        public int Size => m_MemoryBlock.Length;
+        public int Length => m_MemoryBlock.Length / UnsafeUtility.SizeOf<T>();
+
+        internal MemoryBlock(MemoryBlock block)
+        {
+            m_MemoryBlock = block;
+        }
+
+        public bool Equals(MemoryBlock other) => m_MemoryBlock.Equals(other);
+        public bool Equals(MemoryBlock<T> other) => m_MemoryBlock.Equals(other.m_MemoryBlock);
+
+        public static implicit operator MemoryBlock(MemoryBlock<T> t) => t.m_MemoryBlock;
+
+        public static explicit operator MemoryBlock<T>(MemoryBlock t) => new MemoryBlock<T>(t);
     }
 }
