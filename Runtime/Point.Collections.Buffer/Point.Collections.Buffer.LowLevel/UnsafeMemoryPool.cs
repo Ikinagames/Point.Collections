@@ -40,6 +40,19 @@ namespace Point.Collections.Buffer.LowLevel
         internal ref UnsafeBuffer Buffer => ref m_Buffer[0];
 
         /// <summary>
+        /// 이 풀이 가진 메모리 크기입니다.
+        /// </summary>
+        public int Length => Buffer.buffer.Length;
+        /// <summary>
+        /// 반환 가능한 최대 메모리 포인터 갯수입니다.
+        /// </summary>
+        public int BlockCapacity => m_Buffer[0].blocks.Capacity;
+        /// <summary>
+        /// 현재 사용 중인 메모리 포인터 갯수입니다.
+        /// </summary>
+        public int BlockCount => m_Buffer[0].blocks.Length;
+
+        /// <summary>
         /// 새로운 Memory Pool 을 생성합니다.
         /// </summary>
         /// <param name="size"></param>
@@ -69,31 +82,34 @@ namespace Point.Collections.Buffer.LowLevel
             m_Buffer[0].blocks.Sort(comparer);
         }
 
-        private void IncrementBucket()
-        {
-            int length = m_Buffer[0].blocks.Capacity;
-            m_Buffer[0].ResizeMemoryBlock(length * 2);
-        }
         private UnsafeMemoryBlock GetBucket(in int length)
         {
             UnsafeMemoryBlock block;
             if (m_Buffer[0].blocks.IsEmpty)
             {
-                block = new UnsafeMemoryBlock(m_Hash, m_Buffer[0].buffer.Ptr, length);
+                block = new UnsafeMemoryBlock(m_Hash, m_Buffer[0].buffer.Ptr, 
+                    0, length);
                 m_Buffer[0].blocks.AddNoResize(block);
 
                 return block;
             }
 
-            if (m_Buffer[0].blocks.Length + 1 >= m_Buffer[0].blocks.Capacity)
+#if DEBUG_MODE
+            if (IsMaxCapacity())
             {
-                IncrementBucket();
+                PointHelper.LogError(Channel.Collections,
+                    $"You\'re trying to get memory size({length}) from {nameof(UnsafeMemoryPool)} " +
+                    $"that exceeding max memory block capacity. " +
+                    $"You can increase capacity with {nameof(ResizeBucket)}.");
+                return default(UnsafeMemoryBlock);
             }
+#endif
             SortBucket();
 
             if (m_Buffer[0].blocks[0].Ptr - Buffer.buffer.Ptr >= length)
             {
-                block = new UnsafeMemoryBlock(m_Hash, m_Buffer[0].buffer.Ptr, length);
+                block = new UnsafeMemoryBlock(m_Hash, m_Buffer[0].buffer.Ptr, 
+                    0, length);
                 m_Buffer[0].blocks.AddNoResize(block);
 
                 return block;
@@ -106,7 +122,8 @@ namespace Point.Collections.Buffer.LowLevel
                     continue;
                 }
 
-                block = new UnsafeMemoryBlock(m_Hash, m_Buffer[0].blocks[i - 1].Last(), length);
+                UnsafeReference<byte> temp = m_Buffer[0].blocks[i - 1].Last();
+                block = new UnsafeMemoryBlock(m_Hash, temp, temp - m_Buffer[0].buffer.Ptr, length);
                 m_Buffer[0].blocks.AddNoResize(block);
 
                 return block;
@@ -115,38 +132,45 @@ namespace Point.Collections.Buffer.LowLevel
             var last = m_Buffer[0].blocks.Last;
             var p = last.Last();
 
+#if DEBUG_MODE
             if (IsExceedingAllocator(m_Buffer[0].buffer, p, length))
             {
-#if DEBUG_MODE
                 PointHelper.LogError(Channel.Collections,
                     $"You\'re trying to get memory size({length}) from {nameof(UnsafeMemoryPool)} " +
                     $"that doesn\'t have free memory.");
-#endif
                 return default(UnsafeMemoryBlock);
             }
+#endif
 
-            block = new UnsafeMemoryBlock(m_Hash, p, length);
+            block = new UnsafeMemoryBlock(m_Hash, p, p - m_Buffer[0].buffer.Ptr, length);
             return block;
         }
         private bool TryGetBucket(in int length, out UnsafeMemoryBlock block)
         {
             if (m_Buffer[0].blocks.IsEmpty)
             {
-                block = new UnsafeMemoryBlock(m_Hash, m_Buffer[0].buffer.Ptr, length);
+                block = new UnsafeMemoryBlock(m_Hash, m_Buffer[0].buffer.Ptr, 0, length);
                 m_Buffer[0].blocks.AddNoResize(block);
 
                 return true;
             }
 
-            if (m_Buffer[0].blocks.Length + 1 >= m_Buffer[0].blocks.Capacity)
+#if DEBUG_MODE
+            if (IsMaxCapacity())
             {
-                IncrementBucket();
+                PointHelper.LogError(Channel.Collections,
+                    $"You\'re trying to get memory size({length}) from {nameof(UnsafeMemoryPool)} " +
+                    $"that exceeding max memory block capacity. " +
+                    $"You can increase capacity with {nameof(ResizeBucket)}.");
+                block = default(UnsafeMemoryBlock);
+                return false;
             }
+#endif
             SortBucket();
 
             if (m_Buffer[0].blocks[0].Ptr - Buffer.buffer.Ptr >= length)
             {
-                block = new UnsafeMemoryBlock(m_Hash, m_Buffer[0].buffer.Ptr, length);
+                block = new UnsafeMemoryBlock(m_Hash, m_Buffer[0].buffer.Ptr, 0, length);
                 m_Buffer[0].blocks.AddNoResize(block);
 
                 return true;
@@ -159,7 +183,8 @@ namespace Point.Collections.Buffer.LowLevel
                     continue;
                 }
 
-                block = new UnsafeMemoryBlock(m_Hash, m_Buffer[0].blocks[i - 1].Last(), length);
+                UnsafeReference<byte> temp = m_Buffer[0].blocks[i - 1].Last();
+                block = new UnsafeMemoryBlock(m_Hash, temp, temp - m_Buffer[0].buffer.Ptr, length);
                 m_Buffer[0].blocks.AddNoResize(block);
 
                 return true;
@@ -168,19 +193,29 @@ namespace Point.Collections.Buffer.LowLevel
             var last = m_Buffer[0].blocks.Last;
             var p = last.Last();
 
+#if DEBUG_MODE
             if (IsExceedingAllocator(m_Buffer[0].buffer, p, length))
             {
-#if DEBUG_MODE
                 PointHelper.LogError(Channel.Collections,
                     $"You\'re trying to get memory size({length}) from {nameof(UnsafeMemoryPool)} " +
                     $"that doesn\'t have free memory.");
-#endif
                 block = default(UnsafeMemoryBlock);
                 return false;
             }
+#endif
 
-            block = new UnsafeMemoryBlock(m_Hash, p, length);
+            block = new UnsafeMemoryBlock(m_Hash, p, p - m_Buffer[0].buffer.Ptr, length);
             return true;
+        }
+
+        public bool IsMaxCapacity() => BlockCount >= BlockCapacity;
+        public void ResizeMemoryPool(int length)
+        {
+            Buffer.ResizeBuffer(m_Hash, in length);
+        }
+        public void ResizeBucket(int length)
+        {
+            m_Buffer[0].ResizeMemoryBlock(length);
         }
 
         /// <summary>
@@ -244,6 +279,11 @@ namespace Point.Collections.Buffer.LowLevel
             //m_Buffer[0].bucketCount--;
         }
 
+        public bool TryGetMemoryBlockFromID(in Hash id, out UnsafeMemoryBlock block)
+        {
+            return Buffer.TryGetMemoryBlockFromID(id, out block);
+        }
+
         public void Dispose()
         {
             PointHelper.AssertMainThread();
@@ -269,8 +309,6 @@ namespace Point.Collections.Buffer.LowLevel
             
             public UnsafeFixedListWrapper<UnsafeMemoryBlock> blocks;
 
-            //public UnsafeAllocator<MemoryBlock> buckets;
-
             public UnsafeBuffer(UnsafeAllocator<byte> buffer, UnsafeAllocator<UnsafeMemoryBlock> blocks)
             {
                 this.buffer = buffer;
@@ -278,11 +316,69 @@ namespace Point.Collections.Buffer.LowLevel
                 this.blocks = new UnsafeFixedListWrapper<UnsafeMemoryBlock>(m_MemoryBlockBuffer, 0);
             }
 
+            public void ResizeBuffer(Hash owner, in int length)
+            {
+                PointHelper.AssertMainThread();
+
+                if (length < buffer.Length)
+                {
+                    throw new NotImplementedException();
+                }
+
+                Allocator allocator = buffer.m_Buffer.m_Allocator;
+                buffer.Resize(length);
+
+                UnsafeAllocator<UnsafeMemoryBlock> newBlockBuffer = new UnsafeAllocator<UnsafeMemoryBlock>(blocks.Capacity, allocator);
+                UnsafeFixedListWrapper<UnsafeMemoryBlock> tempBlocks = new UnsafeFixedListWrapper<UnsafeMemoryBlock>(newBlockBuffer, 0);
+
+                if (blocks.Length > 0)
+                {
+                    for (int i = 0; i < blocks.Length; i++)
+                    {
+                        UnsafeMemoryBlock current = blocks[i];
+                        UnsafeMemoryBlock temp = new UnsafeMemoryBlock(
+                            owner, buffer.Ptr + current.Index, 
+                            current.Index, current.Length);
+
+                        tempBlocks.AddNoResize(temp);
+                    }
+                }
+
+                m_MemoryBlockBuffer.Dispose();
+                m_MemoryBlockBuffer = newBlockBuffer;
+                blocks = tempBlocks;
+            }
             public void ResizeMemoryBlock(in int length)
             {
+                PointHelper.AssertMainThread();
+
                 m_MemoryBlockBuffer.Resize(length);
                 var temp = new UnsafeFixedListWrapper<UnsafeMemoryBlock>(m_MemoryBlockBuffer, blocks.Length);
                 blocks = temp;
+            }
+
+            public bool TryGetMemoryBlockFromID(in Hash id, out UnsafeMemoryBlock block)
+            {
+                for (int i = 0; i < blocks.Length; i++)
+                {
+                    if (blocks[i].Identifier.Equals(id))
+                    {
+                        block = blocks[i];
+                        return true;
+                    }
+                }
+
+                block = default(UnsafeMemoryBlock);
+                return false;
+            }
+            public UnsafeMemoryBlock GetMemoryBlockFromID(in Hash id)
+            {
+                for (int i = 0; i < blocks.Length; i++)
+                {
+                    if (blocks[i].Identifier.Equals(id)) return blocks[i];
+                }
+
+                return default(UnsafeMemoryBlock);
             }
 
             public void Dispose()

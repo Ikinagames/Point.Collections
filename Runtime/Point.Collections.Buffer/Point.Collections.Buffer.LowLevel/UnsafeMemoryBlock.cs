@@ -29,12 +29,15 @@ namespace Point.Collections.Buffer.LowLevel
     [BurstCompatible]
     public struct UnsafeMemoryBlock : IEquatable<UnsafeMemoryBlock>, IValidation
     {
+        private readonly Hash m_Identifier;
         private readonly Hash m_Owner;
 
         private UnsafeReference<byte> m_Block;
         private readonly int m_Length;
+        private readonly long m_Index;
 
         public ref byte this[int index] => ref m_Block[index];
+        public Hash Identifier => m_Identifier;
         /// <summary>
         /// 버퍼의 포인터입니다.
         /// </summary>
@@ -43,11 +46,19 @@ namespace Point.Collections.Buffer.LowLevel
         /// 이 메모리의 총 크기입니다.
         /// </summary>
         public int Length => m_Length;
+        /// <summary>
+        /// 버퍼 시작부터 이 포인터까지의 길이입니다.
+        /// </summary>
+        public long Index => m_Index;
 
-        internal UnsafeMemoryBlock(Hash owner, UnsafeReference<byte> p, int length)
+        internal UnsafeMemoryBlock(Hash owner, UnsafeReference<byte> p, long index, int length)
         {
+            m_Identifier = Hash.NewHash();
+
             m_Owner = owner;
             m_Block = p;
+
+            m_Index = index;
             m_Length = length;
         }
 

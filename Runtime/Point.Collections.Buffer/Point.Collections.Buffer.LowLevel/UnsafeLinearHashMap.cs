@@ -257,6 +257,13 @@ namespace Point.Collections.Buffer.LowLevel
 
     public static class UnsafeLinearHashMapExtensions
     {
+        public static void Resize<TKey, TValue>(this UnsafeLinearHashMap<TKey, TValue> t, int length)
+            where TKey : unmanaged, IEquatable<TKey>
+            where TValue : unmanaged
+        {
+            t.m_Buffer.Resize(length);
+        }
+
         public static UnsafeAllocator<KeyValue<TKey, TValue>> GetUnsafeAllocator<TKey, TValue>(this UnsafeLinearHashMap<TKey, TValue> t)
             where TKey : unmanaged, IEquatable<TKey>
             where TValue : unmanaged

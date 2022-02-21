@@ -57,39 +57,76 @@ namespace Point.Collections.Buffer.LowLevel
 
     public struct NativeMemoryPool
     {
-        private UnsafeMemoryPool m_Pool;
-        private UnsafeLinearHashMap<Hash, UnsafeMemoryBlock> m_HashMap;
+        private UnsafeAllocator<UnsafeBuffer> m_Buffer;
 
-        //public NativeMemoryPool(Allocator allocator)
-        //{
+        internal ref UnsafeBuffer Buffer => ref m_Buffer[0];
 
-        //}
+        public NativeMemoryPool(int poolSize, Allocator allocator, int initialBucketSize = UnsafeMemoryPool.INITBUCKETSIZE)
+        {
+            m_Buffer = new UnsafeAllocator<UnsafeBuffer>(1, allocator);
+            m_Buffer[0] = new UnsafeBuffer(poolSize, initialBucketSize, allocator);
+        }
 
         public MemoryBlock GetMemory(in int length)
         {
-            if (!m_Pool.TryGet(length, out UnsafeMemoryBlock unsafeBlock))
-            {
-                throw new System.Exception();
-            }
-
-            Hash hash = Hash.NewHash();
-            m_HashMap.Add(hash, unsafeBlock);
+            UnsafeMemoryBlock unsafeBlock = Buffer.Get(in length);
 
             MemoryBlock block = new MemoryBlock(m_HashMap, m_Pool.m_Hash, hash);
 
             return block;
         }
+
+        internal struct UnsafeBuffer
+        {
+            private UnsafeMemoryPool m_Pool;
+            
+            public UnsafeBuffer(int poolSize, int bucketSize, Allocator allocator)
+            {
+                m_Pool = new UnsafeMemoryPool(poolSize, allocator, bucketSize);
+            }
+
+            private void ValidateBuffer()
+            {
+                if (m_Pool.IsMaxCapacity())
+                {
+                    int length = m_Pool.BlockCapacity * 2;
+                    
+                    m_Pool.ResizeBucket(length);
+                }
+            }
+
+            public UnsafeMemoryBlock GetNoResize(in int length)
+            {
+                ValidateBuffer();
+
+                UnsafeMemoryBlock block = m_Pool.Get(in length);
+                
+                return block;
+            }
+            public UnsafeMemoryBlock Get(in int length)
+            {
+                ValidateBuffer();
+
+                if (!m_Pool.TryGet(in length, out UnsafeMemoryBlock block))
+                {
+                    m_Pool.ResizeMemoryPool(m_Pool.Length * 2);
+                    return Get(in length);
+                }
+
+                return block;
+            }
+        }
     }
 
     public struct MemoryBlock
     {
-        private UnsafeLinearHashMap<Hash, UnsafeMemoryBlock> m_HashMap;
+        private UnsafeMemoryPool m_Pool;
         private Hash m_OwnerHash, m_Hash;
 
-        internal MemoryBlock(UnsafeLinearHashMap<Hash, UnsafeMemoryBlock> hashMap, 
+        internal MemoryBlock(UnsafeMemoryPool pool, 
             Hash ownerHash, Hash hash)
         {
-            m_HashMap = hashMap;
+            m_Pool = pool;
             m_OwnerHash = ownerHash;
             m_Hash = hash;
         }
