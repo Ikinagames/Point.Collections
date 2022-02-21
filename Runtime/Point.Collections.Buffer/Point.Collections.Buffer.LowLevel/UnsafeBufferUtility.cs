@@ -172,7 +172,6 @@ namespace Point.Collections.Buffer.LowLevel
             return true;
         }
 
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveForSwapBack<T>(this T[] array, T element)
             where T : IEquatable<T>
@@ -187,6 +186,18 @@ namespace Point.Collections.Buffer.LowLevel
 
             return true;
         }
+
+        #region Memory
+
+        [BurstCompile]
+        public static long CalculateFreeSpaceBetween(in UnsafeReference from, in int length, in UnsafeReference to)
+        {
+            UnsafeReference<byte> p = (UnsafeReference<byte>)from;
+
+            return to - (p + length);
+        }
+
+        #endregion
 
         #region Native Array
 

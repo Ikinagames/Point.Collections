@@ -303,6 +303,16 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
             return Ptr + index;
         }
+        public UnsafeReference<T> ElementAtWithStride(in int index, in int stride)
+        {
+#if DEBUG_MODE
+            if (index < 0 || index >= Length)
+            {
+                throw new IndexOutOfRangeException();
+            }
+#endif
+            return Ptr + index + stride;
+        }
 
         public void Dispose()
         {

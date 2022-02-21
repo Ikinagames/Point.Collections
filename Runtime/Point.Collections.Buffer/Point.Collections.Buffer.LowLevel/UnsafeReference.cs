@@ -30,6 +30,7 @@ namespace Point.Collections.Buffer.LowLevel
     [BurstCompatible]
     public struct UnsafeReference : IUnsafeReference, IEquatable<UnsafeReference>
     {
+        [MarshalAs(UnmanagedType.U1)]
         private bool m_IsCreated;
         [NativeDisableUnsafePtrRestriction]
         private unsafe void* m_Ptr;
@@ -123,6 +124,7 @@ namespace Point.Collections.Buffer.LowLevel
         IEquatable<UnsafeReference<T>>, IEquatable<UnsafeReference>
         where T : unmanaged
     {
+        [MarshalAs(UnmanagedType.U1)]
         private bool m_IsCreated;
         [NativeDisableUnsafePtrRestriction]
         private unsafe T* m_Ptr;
@@ -255,6 +257,32 @@ namespace Point.Collections.Buffer.LowLevel
             unsafe
             {
                 return a.m_Ptr - b.m_Ptr;
+            }
+        }
+        /// <summary>
+        /// 두 포인터 간의 거리를 반환합니다.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static long operator -(UnsafeReference<T> a, UnsafeReference b)
+        {
+            unsafe
+            {
+                return (byte*)a.Ptr - (byte*)b.Ptr;
+            }
+        }
+        /// <summary>
+        /// 두 포인터 간의 거리를 반환합니다.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static long operator -(UnsafeReference a, UnsafeReference<T> b)
+        {
+            unsafe
+            {
+                return (byte*)a.Ptr - (byte*)b.Ptr;
             }
         }
 

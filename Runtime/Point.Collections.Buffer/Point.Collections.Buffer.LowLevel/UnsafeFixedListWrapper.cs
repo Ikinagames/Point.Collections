@@ -93,7 +93,7 @@ namespace Point.Collections.Buffer.LowLevel
             m_Capacity = capacity;
             m_Count = initialCount;
         }
-        public UnsafeFixedListWrapper(MemoryBlock<T> memoryBlock, int initialCount = 0)
+        public UnsafeFixedListWrapper(UnsafeMemoryBlock<T> memoryBlock, int initialCount = 0)
         {
             m_Buffer = memoryBlock.Ptr;
             m_Capacity = memoryBlock.Length;
@@ -102,7 +102,7 @@ namespace Point.Collections.Buffer.LowLevel
 
         public ref T ElementAt(int index) => ref m_Buffer[index];
         public ref T ElementAt(uint index) => ref m_Buffer[index];
-        public void Add(T element)
+        public void AddNoResize(T element)
         {
             if (m_Count >= Capacity)
             {
