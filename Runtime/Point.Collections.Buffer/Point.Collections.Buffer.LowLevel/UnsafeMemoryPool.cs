@@ -34,11 +34,11 @@ namespace Point.Collections.Buffer.LowLevel
     {
         public const int INITBUCKETSIZE = 8;
 
-        internal readonly Hash m_Hash;
         private UnsafeAllocator<UnsafeBuffer> m_Buffer;
 
         internal ref UnsafeBuffer Buffer => ref m_Buffer[0];
 
+        public Hash Identifier => Buffer.Identifier;
         /// <summary>
         /// 이 풀이 가진 메모리 크기입니다.
         /// </summary>
@@ -59,8 +59,6 @@ namespace Point.Collections.Buffer.LowLevel
         /// <param name="allocator"></param>
         public UnsafeMemoryPool(int size, Allocator allocator, int bucketSize = INITBUCKETSIZE)
         {
-            m_Hash = Hash.NewHash();
-
             m_Buffer = new UnsafeAllocator<UnsafeBuffer>(1, allocator);
             m_Buffer[0] = new UnsafeBuffer(new UnsafeAllocator<byte>(size, allocator), new UnsafeAllocator<UnsafeMemoryBlock>(bucketSize, allocator));
         }
@@ -70,8 +68,6 @@ namespace Point.Collections.Buffer.LowLevel
         /// <param name="buffer"></param>
         public UnsafeMemoryPool(UnsafeAllocator<byte> buffer, int bucketSize = INITBUCKETSIZE)
         {
-            m_Hash = Hash.NewHash();
-
             m_Buffer = new UnsafeAllocator<UnsafeBuffer>(1, buffer.m_Buffer.m_Allocator);
             m_Buffer[0] = new UnsafeBuffer(buffer, new UnsafeAllocator<UnsafeMemoryBlock>(bucketSize, buffer.m_Buffer.m_Allocator));
         }
@@ -85,11 +81,11 @@ namespace Point.Collections.Buffer.LowLevel
         private UnsafeMemoryBlock GetBucket(in int length)
         {
             UnsafeMemoryBlock block;
-            if (m_Buffer[0].blocks.IsEmpty)
+            if (Buffer.blocks.IsEmpty)
             {
-                block = new UnsafeMemoryBlock(m_Hash, m_Buffer[0].buffer.Ptr, 
+                block = new UnsafeMemoryBlock(Buffer.Identifier, Buffer.buffer.Ptr, 
                     0, length);
-                m_Buffer[0].blocks.AddNoResize(block);
+                Buffer.blocks.AddNoResize(block);
 
                 return block;
             }
@@ -106,11 +102,11 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
             SortBucket();
 
-            if (m_Buffer[0].blocks[0].Ptr - Buffer.buffer.Ptr >= length)
+            if (Buffer.blocks[0].Ptr - Buffer.buffer.Ptr >= length)
             {
-                block = new UnsafeMemoryBlock(m_Hash, m_Buffer[0].buffer.Ptr, 
+                block = new UnsafeMemoryBlock(Buffer.Identifier, Buffer.buffer.Ptr, 
                     0, length);
-                m_Buffer[0].blocks.AddNoResize(block);
+                Buffer.blocks.AddNoResize(block);
 
                 return block;
             }
@@ -123,7 +119,7 @@ namespace Point.Collections.Buffer.LowLevel
                 }
 
                 UnsafeReference<byte> temp = m_Buffer[0].blocks[i - 1].Last();
-                block = new UnsafeMemoryBlock(m_Hash, temp, temp - m_Buffer[0].buffer.Ptr, length);
+                block = new UnsafeMemoryBlock(Buffer.Identifier, temp, temp - m_Buffer[0].buffer.Ptr, length);
                 m_Buffer[0].blocks.AddNoResize(block);
 
                 return block;
@@ -142,19 +138,18 @@ namespace Point.Collections.Buffer.LowLevel
             }
 #endif
 
-            block = new UnsafeMemoryBlock(m_Hash, p, p - m_Buffer[0].buffer.Ptr, length);
+            block = new UnsafeMemoryBlock(Buffer.Identifier, p, p - m_Buffer[0].buffer.Ptr, length);
             return block;
         }
         private bool TryGetBucket(in int length, out UnsafeMemoryBlock block)
         {
             if (m_Buffer[0].blocks.IsEmpty)
             {
-                block = new UnsafeMemoryBlock(m_Hash, m_Buffer[0].buffer.Ptr, 0, length);
+                block = new UnsafeMemoryBlock(Buffer.Identifier, m_Buffer[0].buffer.Ptr, 0, length);
                 m_Buffer[0].blocks.AddNoResize(block);
 
                 return true;
             }
-
 #if DEBUG_MODE
             if (IsMaxCapacity())
             {
@@ -170,7 +165,7 @@ namespace Point.Collections.Buffer.LowLevel
 
             if (m_Buffer[0].blocks[0].Ptr - Buffer.buffer.Ptr >= length)
             {
-                block = new UnsafeMemoryBlock(m_Hash, m_Buffer[0].buffer.Ptr, 0, length);
+                block = new UnsafeMemoryBlock(Buffer.Identifier, m_Buffer[0].buffer.Ptr, 0, length);
                 m_Buffer[0].blocks.AddNoResize(block);
 
                 return true;
@@ -184,7 +179,7 @@ namespace Point.Collections.Buffer.LowLevel
                 }
 
                 UnsafeReference<byte> temp = m_Buffer[0].blocks[i - 1].Last();
-                block = new UnsafeMemoryBlock(m_Hash, temp, temp - m_Buffer[0].buffer.Ptr, length);
+                block = new UnsafeMemoryBlock(Buffer.Identifier, temp, temp - m_Buffer[0].buffer.Ptr, length);
                 m_Buffer[0].blocks.AddNoResize(block);
 
                 return true;
@@ -204,14 +199,18 @@ namespace Point.Collections.Buffer.LowLevel
             }
 #endif
 
-            block = new UnsafeMemoryBlock(m_Hash, p, p - m_Buffer[0].buffer.Ptr, length);
+            block = new UnsafeMemoryBlock(Buffer.Identifier, p, p - m_Buffer[0].buffer.Ptr, length);
             return true;
         }
 
+        /// <summary>
+        /// 현재 반환된 메모리 포인터가 최대값인가를 반환합니다.
+        /// </summary>
+        /// <returns></returns>
         public bool IsMaxCapacity() => BlockCount >= BlockCapacity;
         public void ResizeMemoryPool(int length)
         {
-            Buffer.ResizeBuffer(m_Hash, in length);
+            Buffer.ResizeBuffer(in length);
         }
         public void ResizeBucket(int length)
         {
@@ -261,28 +260,22 @@ namespace Point.Collections.Buffer.LowLevel
         {
             PointHelper.AssertMainThread();
 #if DEBUG_MODE
-            if (!block.ValidateOwnership(in m_Hash))
+            if (!block.ValidateOwnership(Buffer.Identifier))
             {
                 PointHelper.LogError(Channel.Collections, $"");
                 return;
             }
 #endif
-            //BucketComparer comparer = new BucketComparer(m_Buffer[0].m_Buffer);
-            //m_Buffer[0].m_Blocks.Sort(comparer);
-            //m_Buffer[0].buckets.Sort(comparer, m_Buffer[0].bucketCount);
             SortBucket();
-            m_Buffer[0].blocks.RemoveSwapback(block);
-
-            //int index = UnsafeBufferUtility.IndexOf(m_Buffer[0].buckets.Ptr, m_Buffer[0].bucketCount, block.m_Block);
-            //UnsafeBufferUtility.RemoveAtSwapBack(m_Buffer[0].buckets.Ptr, m_Buffer[0].bucketCount, index);
-
-            //m_Buffer[0].bucketCount--;
+            Buffer.blocks.RemoveSwapback(block);
         }
 
         public bool TryGetMemoryBlockFromID(in Hash id, out UnsafeMemoryBlock block)
         {
             return Buffer.TryGetMemoryBlockFromID(id, out block);
         }
+
+        #region Disposer
 
         public void Dispose()
         {
@@ -299,24 +292,31 @@ namespace Point.Collections.Buffer.LowLevel
             return job;
         }
 
+        #endregion
+
         #region Inner Classes
 
         [BurstCompatible]
         internal struct UnsafeBuffer : IDisposable, INativeDisposable
         {
-            public UnsafeAllocator<byte> buffer;
+            private Hash m_Hash;
             private UnsafeAllocator<UnsafeMemoryBlock> m_MemoryBlockBuffer;
-            
+
+            public Hash Identifier => m_Hash;
+
+            public UnsafeAllocator<byte> buffer;
             public UnsafeFixedListWrapper<UnsafeMemoryBlock> blocks;
 
             public UnsafeBuffer(UnsafeAllocator<byte> buffer, UnsafeAllocator<UnsafeMemoryBlock> blocks)
             {
-                this.buffer = buffer;
+                m_Hash = Hash.NewHash();
                 m_MemoryBlockBuffer = blocks;
+
+                this.buffer = buffer;
                 this.blocks = new UnsafeFixedListWrapper<UnsafeMemoryBlock>(m_MemoryBlockBuffer, 0);
             }
 
-            public void ResizeBuffer(Hash owner, in int length)
+            public void ResizeBuffer(in int length)
             {
                 PointHelper.AssertMainThread();
 
@@ -325,6 +325,7 @@ namespace Point.Collections.Buffer.LowLevel
                     throw new NotImplementedException();
                 }
 
+                m_Hash = Hash.NewHash();
                 Allocator allocator = buffer.m_Buffer.m_Allocator;
                 buffer.Resize(length);
 
@@ -337,7 +338,7 @@ namespace Point.Collections.Buffer.LowLevel
                     {
                         UnsafeMemoryBlock current = blocks[i];
                         UnsafeMemoryBlock temp = new UnsafeMemoryBlock(
-                            owner, buffer.Ptr + current.Index, 
+                            m_Hash, buffer.Ptr + current.Index, 
                             current.Index, current.Length);
 
                         tempBlocks.AddNoResize(temp);
