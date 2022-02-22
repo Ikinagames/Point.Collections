@@ -27,7 +27,7 @@ namespace Point.Collections.Buffer.LowLevel
     /// <see cref="UnsafeMemoryPool"/> 에서 할당받은 메모리 공간입니다.
     /// </summary>
     [BurstCompatible]
-    public struct UnsafeMemoryBlock : IEquatable<UnsafeMemoryBlock>, IValidation
+    public struct UnsafeMemoryBlock : IValidation, IEquatable<UnsafeMemoryBlock>, IEquatable<Hash>
     {
         private readonly Hash m_Identifier;
         private readonly Hash m_Owner;
@@ -72,6 +72,7 @@ namespace Point.Collections.Buffer.LowLevel
         public bool IsValid() => m_Block.IsCreated && m_Length > 0;
 
         public bool Equals(UnsafeMemoryBlock other) => m_Block.Equals(other.m_Block) && m_Length == other.m_Length;
+        public bool Equals(Hash other) => m_Identifier.Equals(other);
     }
     /// <summary>
     /// <inheritdoc cref="UnsafeMemoryBlock"/>

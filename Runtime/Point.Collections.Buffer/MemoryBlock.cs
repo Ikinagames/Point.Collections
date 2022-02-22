@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,25 +23,38 @@ namespace Point.Collections.Buffer
 {
     public struct MemoryBlock
     {
-        private UnsafeMemoryPool.UnsafeBuffer m_Pool;
-        private Hash m_OwnerHash, m_Identifier;
+        /// <summary>
+        /// <see cref="LowLevel.UnsafeMemoryPool.Identifier"/>
+        /// </summary>
+        internal readonly Hash owner;
+        /// <summary>
+        /// <see cref="Buffer.LowLevel.UnsafeMemoryBlock.Identifier"/>
+        /// </summary>
+        internal readonly Hash identifier;
 
-        public Hash Identifier => m_Identifier;
+        private readonly UnsafeReference<NativeMemoryPool.UnsafeBuffer> m_Buffer;
+
         public UnsafeReference<byte> Ptr
         {
             get
             {
-                var block = m_Pool.GetMemoryBlockFromID(in m_Identifier);
+                if (!m_Buffer.Value.TryGetFromID(in identifier, out UnsafeMemoryBlock block))
+                {
+                    PointHelper.LogError(Channel.Collections,
+                        $"");
+
+                    return default(UnsafeReference<byte>);
+                }
+
                 return block.Ptr;
             }
         }
 
-        internal MemoryBlock(UnsafeMemoryPool pool,
-            Hash ownerHash, Hash hash)
+        internal MemoryBlock(Hash owner, Hash identifier, UnsafeReference<NativeMemoryPool.UnsafeBuffer> buffer)
         {
-            m_Pool = pool.Buffer;
-            m_OwnerHash = ownerHash;
-            m_Identifier = hash;
+            this.owner = owner;
+            this.identifier = identifier;
+            m_Buffer = buffer;
         }
     }
 }

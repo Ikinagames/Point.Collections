@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,16 +34,28 @@ namespace Point.Collections.Buffer
             m_Buffer[0] = new UnsafeBuffer(poolSize, initialBucketSize, allocator);
         }
 
+        //public bool Validate(in MemoryBlock memory)
+        //{
+            
+        //}
         public MemoryBlock Get(in int length)
         {
             UnsafeMemoryBlock unsafeBlock = Buffer.Get(in length);
-            MemoryBlock block = new MemoryBlock(Buffer.Pool, Buffer.Pool.Identifier, unsafeBlock.Identifier);
+            MemoryBlock block = new MemoryBlock(Buffer.Pool.Identifier, unsafeBlock.Identifier, m_Buffer.Ptr);
 
             return block;
         }
         public void Reserve(in MemoryBlock block)
         {
-            if (!Buffer.TryGetFromID(block.Identifier, out var unsafeBlock))
+#if DEBUG_MODE
+            // MemoryPool 이 Resizing 되었을 경우, 이전 레퍼런스는 경고를 뱉는다.
+            if (!Buffer.Pool.Identifier.Equals(block.owner))
+            {
+                PointHelper.LogWarning(Channel.Collections,
+                    $"You\'re trying to access memory block with old reference.");
+            }
+#endif
+            if (!Buffer.TryGetFromID(block.identifier, out var unsafeBlock))
             {
                 PointHelper.LogError(Channel.Collections, $"");
                 return;
@@ -69,10 +81,14 @@ namespace Point.Collections.Buffer
                 {
                     int length = m_Pool.BlockCapacity * 2;
 
-                    m_Pool.ResizeBucket(length);
+                    m_Pool.ResizeMemoryBlock(length);
                 }
             }
 
+            //public bool Validate()
+            //{
+
+            //}
             public UnsafeMemoryBlock GetNoResize(in int length)
             {
                 UnsafeMemoryBlock block = m_Pool.Get(in length);

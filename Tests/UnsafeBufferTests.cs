@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using Point.Collections.Buffer;
 using Point.Collections.Buffer.LowLevel;
 using System;
 
@@ -103,6 +104,26 @@ namespace Point.Collections.Tests
             //UnityEngine.Debug.Log($"block5: {sucess5}, {block5.Length}");
             Assert.IsTrue(sucess5);
             Assert.IsTrue(block5.Ptr.Equals(block2.Ptr));
+        }
+    }
+
+    public sealed class NativeBufferTests
+    {
+        [Test]
+        public void a0_NativeMemoryPoolTest()
+        {
+            NativeMemoryPool pool = new NativeMemoryPool(1024, Unity.Collections.Allocator.Temp);
+
+            MemoryBlock temp1 = pool.Get(512);
+            MemoryBlock temp2 = pool.Get(512);
+
+            pool.Reserve(temp2);
+
+            MemoryBlock temp3 = pool.Get(512);
+
+            Assert.IsTrue(temp2.Ptr.Equals(temp3.Ptr));
+
+            MemoryBlock temp4 = pool.Get(512);
         }
     }
 }

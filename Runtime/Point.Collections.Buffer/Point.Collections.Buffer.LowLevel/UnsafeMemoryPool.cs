@@ -72,13 +72,13 @@ namespace Point.Collections.Buffer.LowLevel
             m_Buffer[0] = new UnsafeBuffer(buffer, new UnsafeAllocator<UnsafeMemoryBlock>(bucketSize, buffer.m_Buffer.m_Allocator));
         }
 
-        private void SortBucket()
+        private void SortMemoryBlock()
         {
             BucketComparer comparer = new BucketComparer(m_Buffer[0].buffer);
             m_Buffer[0].blocks.Sort(comparer);
         }
 
-        private UnsafeMemoryBlock GetBucket(in int length)
+        private UnsafeMemoryBlock GetMemoryBlock(in int length)
         {
             UnsafeMemoryBlock block;
             if (Buffer.blocks.IsEmpty)
@@ -96,11 +96,11 @@ namespace Point.Collections.Buffer.LowLevel
                 PointHelper.LogError(Channel.Collections,
                     $"You\'re trying to get memory size({length}) from {nameof(UnsafeMemoryPool)} " +
                     $"that exceeding max memory block capacity. " +
-                    $"You can increase capacity with {nameof(ResizeBucket)}.");
+                    $"You can increase capacity with {nameof(ResizeMemoryBlock)}.");
                 return default(UnsafeMemoryBlock);
             }
 #endif
-            SortBucket();
+            SortMemoryBlock();
 
             if (Buffer.blocks[0].Ptr - Buffer.buffer.Ptr >= length)
             {
@@ -141,7 +141,7 @@ namespace Point.Collections.Buffer.LowLevel
             block = new UnsafeMemoryBlock(Buffer.Identifier, p, p - m_Buffer[0].buffer.Ptr, length);
             return block;
         }
-        private bool TryGetBucket(in int length, out UnsafeMemoryBlock block)
+        private bool TryGetMemoryBlock(in int length, out UnsafeMemoryBlock block)
         {
             if (m_Buffer[0].blocks.IsEmpty)
             {
@@ -156,12 +156,12 @@ namespace Point.Collections.Buffer.LowLevel
                 PointHelper.LogError(Channel.Collections,
                     $"You\'re trying to get memory size({length}) from {nameof(UnsafeMemoryPool)} " +
                     $"that exceeding max memory block capacity. " +
-                    $"You can increase capacity with {nameof(ResizeBucket)}.");
+                    $"You can increase capacity with {nameof(ResizeMemoryBlock)}.");
                 block = default(UnsafeMemoryBlock);
                 return false;
             }
 #endif
-            SortBucket();
+            SortMemoryBlock();
 
             if (m_Buffer[0].blocks[0].Ptr - Buffer.buffer.Ptr >= length)
             {
@@ -208,14 +208,10 @@ namespace Point.Collections.Buffer.LowLevel
         /// </summary>
         /// <returns></returns>
         public bool IsMaxCapacity() => BlockCount >= BlockCapacity;
-        public void ResizeMemoryPool(int length)
-        {
-            Buffer.ResizeBuffer(in length);
-        }
-        public void ResizeBucket(int length)
-        {
-            m_Buffer[0].ResizeMemoryBlock(length);
-        }
+        /// <inheritdoc cref="UnsafeBuffer.ResizeBuffer(in int)"/>
+        public void ResizeMemoryPool(int length) => Buffer.ResizeBuffer(in length);
+        /// <inheritdoc cref="UnsafeBuffer.ResizeMemoryBlock(in int)"/>
+        public void ResizeMemoryBlock(int length) => Buffer.ResizeMemoryBlock(length);
 
         /// <summary>
         /// <paramref name="length"/> bytes 만큼 메모리 주소를 할당받습니다.
@@ -226,7 +222,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             PointHelper.AssertMainThread();
 
-            UnsafeMemoryBlock p = GetBucket(in length);
+            UnsafeMemoryBlock p = GetMemoryBlock(in length);
             return p;
         }
         /// <summary>
@@ -239,7 +235,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             PointHelper.AssertMainThread();
 
-            if (!TryGetBucket(length, out var p))
+            if (!TryGetMemoryBlock(length, out var p))
             {
                 block = default(UnsafeMemoryBlock);
                 return false;
@@ -266,10 +262,18 @@ namespace Point.Collections.Buffer.LowLevel
                 return;
             }
 #endif
-            SortBucket();
+            SortMemoryBlock();
             Buffer.blocks.RemoveSwapback(block);
         }
 
+        /// <inheritdoc cref="UnsafeBuffer.ContainsMemoryBlock(in Hash)"/>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public bool ContainsMemoryBlock(in Hash id) => Buffer.ContainsMemoryBlock(in id);
+        /// <inheritdoc cref="UnsafeBuffer.TryGetMemoryBlockFromID(in Hash, out UnsafeMemoryBlock)"/>
+        /// <param name="id"></param>
+        /// <param name="block"></param>
+        /// <returns></returns>
         public bool TryGetMemoryBlockFromID(in Hash id, out UnsafeMemoryBlock block)
         {
             return Buffer.TryGetMemoryBlockFromID(id, out block);
@@ -299,46 +303,52 @@ namespace Point.Collections.Buffer.LowLevel
         [BurstCompatible]
         internal struct UnsafeBuffer : IDisposable, INativeDisposable
         {
-            private Hash m_Hash;
+            private Hash m_Identifier;
             private UnsafeAllocator<UnsafeMemoryBlock> m_MemoryBlockBuffer;
 
-            public Hash Identifier => m_Hash;
+            public Hash Identifier => m_Identifier;
 
             public UnsafeAllocator<byte> buffer;
             public UnsafeFixedListWrapper<UnsafeMemoryBlock> blocks;
 
             public UnsafeBuffer(UnsafeAllocator<byte> buffer, UnsafeAllocator<UnsafeMemoryBlock> blocks)
             {
-                m_Hash = Hash.NewHash();
+                m_Identifier = Hash.NewHash();
                 m_MemoryBlockBuffer = blocks;
 
                 this.buffer = buffer;
                 this.blocks = new UnsafeFixedListWrapper<UnsafeMemoryBlock>(m_MemoryBlockBuffer, 0);
             }
 
+            /// <summary>
+            /// 메모리 버퍼를 새로운 사이즈(<paramref name="length"/>)의 버퍼로 할당합니다.
+            /// </summary>
+            /// <param name="length"></param>
+            /// <exception cref="NotImplementedException"></exception>
             public void ResizeBuffer(in int length)
             {
                 PointHelper.AssertMainThread();
-
+#if DEBUG_MODE
                 if (length < buffer.Length)
                 {
                     throw new NotImplementedException();
                 }
-
-                m_Hash = Hash.NewHash();
+#endif
+                m_Identifier = Hash.NewHash();
                 Allocator allocator = buffer.m_Buffer.m_Allocator;
                 buffer.Resize(length);
 
                 UnsafeAllocator<UnsafeMemoryBlock> newBlockBuffer = new UnsafeAllocator<UnsafeMemoryBlock>(blocks.Capacity, allocator);
                 UnsafeFixedListWrapper<UnsafeMemoryBlock> tempBlocks = new UnsafeFixedListWrapper<UnsafeMemoryBlock>(newBlockBuffer, 0);
 
+                // 메모리 주소를 재배열합니다.
                 if (blocks.Length > 0)
                 {
                     for (int i = 0; i < blocks.Length; i++)
                     {
                         UnsafeMemoryBlock current = blocks[i];
                         UnsafeMemoryBlock temp = new UnsafeMemoryBlock(
-                            m_Hash, buffer.Ptr + current.Index, 
+                            m_Identifier, buffer.Ptr + current.Index, 
                             current.Index, current.Length);
 
                         tempBlocks.AddNoResize(temp);
@@ -349,6 +359,10 @@ namespace Point.Collections.Buffer.LowLevel
                 m_MemoryBlockBuffer = newBlockBuffer;
                 blocks = tempBlocks;
             }
+            /// <summary>
+            /// 메모리 포인터 버퍼를 새로운 사이즈(<paramref name="length"/>)의 버퍼로 재할당합니다.
+            /// </summary>
+            /// <param name="length"></param>
             public void ResizeMemoryBlock(in int length)
             {
                 PointHelper.AssertMainThread();
@@ -358,6 +372,21 @@ namespace Point.Collections.Buffer.LowLevel
                 blocks = temp;
             }
 
+            /// <summary>
+            /// <see cref="UnsafeMemoryBlock.Identifier"/>(<paramref name="id"/>) ID 값을 가진 레퍼런스가 있는지 반환합니다.
+            /// </summary>
+            /// <param name="id"></param>
+            /// <returns></returns>
+            public bool ContainsMemoryBlock(in Hash id)
+            {
+                return blocks.Contains(id);
+            }
+            /// <summary>
+            /// <see cref="UnsafeMemoryBlock.Identifier"/>(<paramref name="id"/>) 값으로 레퍼런스를 찾아서 반환합니다.
+            /// </summary>
+            /// <param name="id"></param>
+            /// <param name="block"></param>
+            /// <returns></returns>
             public bool TryGetMemoryBlockFromID(in Hash id, out UnsafeMemoryBlock block)
             {
                 for (int i = 0; i < blocks.Length; i++)
