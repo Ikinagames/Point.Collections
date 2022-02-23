@@ -67,7 +67,7 @@ namespace Point.Collections.Buffer.LowLevel
         /// <summary>
         /// 배열의 아이템이 하나도 없는지 반환합니다.
         /// </summary>
-        public bool IsEmpty => !m_Buffer.IsCreated;
+        public bool IsEmpty => !m_Buffer.IsCreated || m_Count == 0;
 
         public T this[int index]
         {

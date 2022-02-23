@@ -42,15 +42,15 @@ namespace Point.Collections.Buffer.LowLevel
         /// <summary>
         /// 이 풀이 가진 메모리 크기입니다.
         /// </summary>
-        public int Length => Buffer.buffer.Length;
+        public int Length => Buffer.Length;
         /// <summary>
         /// 반환 가능한 최대 메모리 포인터 갯수입니다.
         /// </summary>
-        public int BlockCapacity => m_Buffer[0].blocks.Capacity;
+        public int BlockCapacity => Buffer.BlockCapacity;
         /// <summary>
         /// 현재 사용 중인 메모리 포인터 갯수입니다.
         /// </summary>
-        public int BlockCount => m_Buffer[0].blocks.Length;
+        public int BlockCount => Buffer.BlockCount;
 
         /// <summary>
         /// 새로운 Memory Pool 을 생성합니다.
@@ -72,142 +72,8 @@ namespace Point.Collections.Buffer.LowLevel
             m_Buffer[0] = new UnsafeBuffer(buffer, new UnsafeAllocator<UnsafeMemoryBlock>(bucketSize, buffer.m_Buffer.m_Allocator));
         }
 
-        private void SortMemoryBlock()
-        {
-            BucketComparer comparer = new BucketComparer(m_Buffer[0].buffer);
-            m_Buffer[0].blocks.Sort(comparer);
-        }
-
-        private UnsafeMemoryBlock GetMemoryBlock(in int length)
-        {
-            UnsafeMemoryBlock block;
-            if (Buffer.blocks.IsEmpty)
-            {
-                block = new UnsafeMemoryBlock(Buffer.Identifier, Buffer.buffer.Ptr, 
-                    0, length);
-                Buffer.blocks.AddNoResize(block);
-
-                return block;
-            }
-
-#if DEBUG_MODE
-            if (IsMaxCapacity())
-            {
-                PointHelper.LogError(Channel.Collections,
-                    $"You\'re trying to get memory size({length}) from {nameof(UnsafeMemoryPool)} " +
-                    $"that exceeding max memory block capacity. " +
-                    $"You can increase capacity with {nameof(ResizeMemoryBlock)}.");
-                return default(UnsafeMemoryBlock);
-            }
-#endif
-            SortMemoryBlock();
-
-            if (Buffer.blocks[0].Ptr - Buffer.buffer.Ptr >= length)
-            {
-                block = new UnsafeMemoryBlock(Buffer.Identifier, Buffer.buffer.Ptr, 
-                    0, length);
-                Buffer.blocks.AddNoResize(block);
-
-                return block;
-            }
-
-            for (int i = 1; i < m_Buffer[0].blocks.Length; i++)
-            {
-                if (!IsAllocatableBetween(m_Buffer[0].blocks[i - 1], m_Buffer[0].blocks[i].Ptr, length, out _))
-                {
-                    continue;
-                }
-
-                UnsafeReference<byte> temp = m_Buffer[0].blocks[i - 1].Last();
-                block = new UnsafeMemoryBlock(Buffer.Identifier, temp, temp - m_Buffer[0].buffer.Ptr, length);
-                m_Buffer[0].blocks.AddNoResize(block);
-
-                return block;
-            }
-
-            var last = m_Buffer[0].blocks.Last;
-            var p = last.Last();
-
-#if DEBUG_MODE
-            if (IsExceedingAllocator(m_Buffer[0].buffer, p, length))
-            {
-                PointHelper.LogError(Channel.Collections,
-                    $"You\'re trying to get memory size({length}) from {nameof(UnsafeMemoryPool)} " +
-                    $"that doesn\'t have free memory.");
-                return default(UnsafeMemoryBlock);
-            }
-#endif
-
-            block = new UnsafeMemoryBlock(Buffer.Identifier, p, p - m_Buffer[0].buffer.Ptr, length);
-            return block;
-        }
-        private bool TryGetMemoryBlock(in int length, out UnsafeMemoryBlock block)
-        {
-            if (m_Buffer[0].blocks.IsEmpty)
-            {
-                block = new UnsafeMemoryBlock(Buffer.Identifier, m_Buffer[0].buffer.Ptr, 0, length);
-                m_Buffer[0].blocks.AddNoResize(block);
-
-                return true;
-            }
-#if DEBUG_MODE
-            if (IsMaxCapacity())
-            {
-                PointHelper.LogError(Channel.Collections,
-                    $"You\'re trying to get memory size({length}) from {nameof(UnsafeMemoryPool)} " +
-                    $"that exceeding max memory block capacity. " +
-                    $"You can increase capacity with {nameof(ResizeMemoryBlock)}.");
-                block = default(UnsafeMemoryBlock);
-                return false;
-            }
-#endif
-            SortMemoryBlock();
-
-            if (m_Buffer[0].blocks[0].Ptr - Buffer.buffer.Ptr >= length)
-            {
-                block = new UnsafeMemoryBlock(Buffer.Identifier, m_Buffer[0].buffer.Ptr, 0, length);
-                m_Buffer[0].blocks.AddNoResize(block);
-
-                return true;
-            }
-
-            for (int i = 1; i < m_Buffer[0].blocks.Length; i++)
-            {
-                if (!IsAllocatableBetween(m_Buffer[0].blocks[i - 1], m_Buffer[0].blocks[i].Ptr, length, out _))
-                {
-                    continue;
-                }
-
-                UnsafeReference<byte> temp = m_Buffer[0].blocks[i - 1].Last();
-                block = new UnsafeMemoryBlock(Buffer.Identifier, temp, temp - m_Buffer[0].buffer.Ptr, length);
-                m_Buffer[0].blocks.AddNoResize(block);
-
-                return true;
-            }
-
-            var last = m_Buffer[0].blocks.Last;
-            var p = last.Last();
-
-#if DEBUG_MODE
-            if (IsExceedingAllocator(m_Buffer[0].buffer, p, length))
-            {
-                PointHelper.LogError(Channel.Collections,
-                    $"You\'re trying to get memory size({length}) from {nameof(UnsafeMemoryPool)} " +
-                    $"that doesn\'t have free memory.");
-                block = default(UnsafeMemoryBlock);
-                return false;
-            }
-#endif
-
-            block = new UnsafeMemoryBlock(Buffer.Identifier, p, p - m_Buffer[0].buffer.Ptr, length);
-            return true;
-        }
-
-        /// <summary>
-        /// 현재 반환된 메모리 포인터가 최대값인가를 반환합니다.
-        /// </summary>
-        /// <returns></returns>
-        public bool IsMaxCapacity() => BlockCount >= BlockCapacity;
+        /// <inheritdoc cref="UnsafeBuffer.IsMaxCapacity"/>
+        public bool IsMaxCapacity() => Buffer.IsMaxCapacity();
         /// <inheritdoc cref="UnsafeBuffer.ResizeBuffer(in int)"/>
         public void ResizeMemoryPool(int length) => Buffer.ResizeBuffer(in length);
         /// <inheritdoc cref="UnsafeBuffer.ResizeMemoryBlock(in int)"/>
@@ -222,7 +88,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             PointHelper.AssertMainThread();
 
-            UnsafeMemoryBlock p = GetMemoryBlock(in length);
+            UnsafeMemoryBlock p = Buffer.GetMemoryBlock(in length);
             return p;
         }
         /// <summary>
@@ -235,7 +101,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             PointHelper.AssertMainThread();
 
-            if (!TryGetMemoryBlock(length, out var p))
+            if (!Buffer.TryGetMemoryBlock(length, out var p))
             {
                 block = default(UnsafeMemoryBlock);
                 return false;
@@ -252,19 +118,7 @@ namespace Point.Collections.Buffer.LowLevel
         /// 이 메모리 풀이 아닌 곳에서 할당받은 메모리를 반환하려하면 에러가 발생합니다.
         /// </remarks>
         /// <param name="block"></param>
-        public void Reserve(UnsafeMemoryBlock block)
-        {
-            PointHelper.AssertMainThread();
-#if DEBUG_MODE
-            if (!block.ValidateOwnership(Buffer.Identifier))
-            {
-                PointHelper.LogError(Channel.Collections, $"");
-                return;
-            }
-#endif
-            SortMemoryBlock();
-            Buffer.blocks.RemoveSwapback(block);
-        }
+        public void Reserve(UnsafeMemoryBlock block) => Buffer.Reserve(in block);
 
         /// <inheritdoc cref="UnsafeBuffer.ContainsMemoryBlock(in Hash)"/>
         /// <param name="id"></param>
@@ -304,20 +158,195 @@ namespace Point.Collections.Buffer.LowLevel
         internal struct UnsafeBuffer : IDisposable, INativeDisposable
         {
             private Hash m_Identifier;
+
             private UnsafeAllocator<UnsafeMemoryBlock> m_MemoryBlockBuffer;
 
             public Hash Identifier => m_Identifier;
+            /// <summary>
+            /// 이 풀이 가진 메모리 크기입니다.
+            /// </summary>
+            public int Length => buffer.Length;
+            /// <summary>
+            /// 반환 가능한 최대 메모리 포인터 갯수입니다.
+            /// </summary>
+            public int BlockCapacity => blocks.Capacity;
+            /// <summary>
+            /// 현재 사용 중인 메모리 포인터 갯수입니다.
+            /// </summary>
+            public int BlockCount => blocks.Length;
 
-            public UnsafeAllocator<byte> buffer;
-            public UnsafeFixedListWrapper<UnsafeMemoryBlock> blocks;
+            private UnsafeAllocator<byte> buffer;
+            private UnsafeFixedListWrapper<UnsafeMemoryBlock> blocks;
 
             public UnsafeBuffer(UnsafeAllocator<byte> buffer, UnsafeAllocator<UnsafeMemoryBlock> blocks)
             {
                 m_Identifier = Hash.NewHash();
-                m_MemoryBlockBuffer = blocks;
 
+                m_MemoryBlockBuffer = blocks;
+                
                 this.buffer = buffer;
                 this.blocks = new UnsafeFixedListWrapper<UnsafeMemoryBlock>(m_MemoryBlockBuffer, 0);
+            }
+
+            /// <summary>
+            /// 현재 반환된 메모리 포인터가 최대값인가를 반환합니다.
+            /// </summary>
+            /// <returns></returns>
+            public bool IsMaxCapacity() => blocks.Length >= blocks.Capacity;
+
+            public void SortMemoryBlock()
+            {
+                BucketComparer comparer = new BucketComparer(buffer);
+                blocks.Sort(comparer);
+            }
+            public UnsafeMemoryBlock GetMemoryBlock(in int length)
+            {
+                UnsafeMemoryBlock block;
+                if (blocks.IsEmpty)
+                {
+                    block = new UnsafeMemoryBlock(Identifier, buffer.Ptr,
+                        0, length);
+                    blocks.AddNoResize(block);
+                    
+                    return block;
+                }
+
+#if DEBUG_MODE
+                if (IsMaxCapacity())
+                {
+                    PointHelper.LogError(Channel.Collections,
+                        $"You\'re trying to get memory size({length}) from {nameof(UnsafeMemoryPool)} " +
+                        $"that exceeding max memory block capacity. " +
+                        $"You can increase capacity with {nameof(ResizeMemoryBlock)}.");
+                    return default(UnsafeMemoryBlock);
+                }
+#endif
+                SortMemoryBlock();
+
+                if (blocks[0].Ptr - buffer.Ptr >= length)
+                {
+                    block = new UnsafeMemoryBlock(Identifier, buffer.Ptr,
+                        0, length);
+                    blocks.AddNoResize(block);
+
+                    return block;
+                }
+
+                for (int i = 1; i < blocks.Length; i++)
+                {
+                    if (!IsAllocatableBetween(blocks[i - 1], blocks[i].Ptr, length, out _))
+                    {
+                        continue;
+                    }
+
+                    UnsafeReference<byte> temp = blocks[i - 1].Last();
+                    block = new UnsafeMemoryBlock(Identifier, temp, temp - buffer.Ptr, length);
+                    blocks.AddNoResize(block);
+
+                    return block;
+                }
+
+                UnsafeMemoryBlock last = blocks.Last;
+                UnsafeReference<byte> p = last.Last();
+
+#if DEBUG_MODE
+                if (IsExceedingAllocator(buffer, p, length))
+                {
+                    PointHelper.LogError(Channel.Collections,
+                        $"You\'re trying to get memory size({length}) from {nameof(UnsafeMemoryPool)} " +
+                        $"that doesn\'t have free memory.");
+                    return default(UnsafeMemoryBlock);
+                }
+#endif
+
+                block = new UnsafeMemoryBlock(Identifier, p, p - buffer.Ptr, length);
+                blocks.AddNoResize(block);
+
+                return block;
+            }
+            public bool TryGetMemoryBlock(in int length, out UnsafeMemoryBlock block)
+            {
+                if (blocks.IsEmpty)
+                {
+                    block = new UnsafeMemoryBlock(Identifier, buffer.Ptr, 0, length);
+                    blocks.AddNoResize(block);
+                    //"empty rtn".ToLog();
+
+                    return true;
+                }
+#if DEBUG_MODE
+                if (IsMaxCapacity())
+                {
+                    PointHelper.LogError(Channel.Collections,
+                        $"You\'re trying to get memory size({length}) from {nameof(UnsafeMemoryPool)} " +
+                        $"that exceeding max memory block capacity. " +
+                        $"You can increase capacity with {nameof(ResizeMemoryBlock)}.");
+                    block = default(UnsafeMemoryBlock);
+                    return false;
+                }
+#endif
+                SortMemoryBlock();
+
+                if (blocks[0].Ptr - buffer.Ptr >= length)
+                {
+                    block = new UnsafeMemoryBlock(Identifier, buffer.Ptr, 0, length);
+                    blocks.AddNoResize(block);
+                    //"1ST rtn".ToLog();
+
+                    return true;
+                }
+
+                for (int i = 1; i < blocks.Length; i++)
+                {
+                    if (!IsAllocatableBetween(blocks[i - 1], blocks[i].Ptr, length, out _))
+                    {
+                        continue;
+                    }
+
+                    UnsafeReference<byte> temp = blocks[i - 1].Last();
+                    block = new UnsafeMemoryBlock(Identifier, temp, temp - buffer.Ptr, length);
+                    blocks.AddNoResize(block);
+                    //"btw rtn".ToLog();
+
+                    return true;
+                }
+
+                UnsafeMemoryBlock last = blocks.Last;
+                UnsafeReference<byte> p = last.Last();
+
+                if (IsExceedingAllocator(buffer, p, length))
+                {
+                    block = default(UnsafeMemoryBlock);
+                    return false;
+                }
+
+                block = new UnsafeMemoryBlock(Identifier, p, p - buffer.Ptr, length);
+                blocks.AddNoResize(block);
+                //"end rtn".ToLog();
+
+                return true;
+            }
+
+            /// <summary>
+            /// 이 풀에서 할당받은 메모리를 반환합니다.
+            /// </summary>
+            /// <remarks>
+            /// 이 메모리 풀이 아닌 곳에서 할당받은 메모리를 반환하려하면 에러가 발생합니다.
+            /// </remarks>
+            /// <param name="block"></param>
+            public void Reserve(in UnsafeMemoryBlock block)
+            {
+                PointHelper.AssertMainThread();
+#if DEBUG_MODE
+                if (!block.ValidateOwnership(Identifier))
+                {
+                    PointHelper.LogError(Channel.Collections, $"");
+                    return;
+                }
+#endif
+                SortMemoryBlock();
+
+                blocks.RemoveSwapback(block);
             }
 
             /// <summary>

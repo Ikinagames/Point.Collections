@@ -92,6 +92,15 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
+        public static int BinarySearch<T, U>(in UnsafeReference<T> buffer, in int length, T value, U comparer)
+            where T : unmanaged 
+            where U : IComparer<T>
+        {
+            int index =NativeSortExtension.BinarySearch<T, U>(buffer, length, value, comparer);
+
+            return index;
+        }
+
         [BurstCompile]
         public static void Swap<T>(in UnsafeReference<T> buffer, in int from, in int to)
             where T : unmanaged

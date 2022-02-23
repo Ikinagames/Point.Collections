@@ -41,7 +41,8 @@ namespace Point.Collections.Buffer
         public MemoryBlock Get(in int length)
         {
             UnsafeMemoryBlock unsafeBlock = Buffer.Get(in length);
-            MemoryBlock block = new MemoryBlock(Buffer.Pool.Identifier, unsafeBlock.Identifier, m_Buffer.Ptr);
+            MemoryBlock block = new MemoryBlock(
+                Buffer.Pool.Identifier, unsafeBlock.Identifier, m_Buffer.Ptr);
 
             return block;
         }
@@ -82,9 +83,10 @@ namespace Point.Collections.Buffer
                     int length = m_Pool.BlockCapacity * 2;
 
                     m_Pool.ResizeMemoryBlock(length);
+                    "resizing block".ToLog();
                 }
             }
-
+              
             //public bool Validate()
             //{
 
@@ -102,10 +104,24 @@ namespace Point.Collections.Buffer
                 if (!m_Pool.TryGet(in length, out UnsafeMemoryBlock block))
                 {
                     m_Pool.ResizeMemoryPool(m_Pool.Length * 2);
+                    "resizing".ToLog(Channel.Collections);
+
                     return Get(in length);
                 }
 
                 return block;
+            }
+            public bool TryGet(in int length, out UnsafeMemoryBlock block)
+            {
+                ValidateBuffer();
+
+                if (!m_Pool.TryGet(in length, out block))
+                {
+                    block = default(UnsafeMemoryBlock);
+                    return false;
+                }
+
+                return true;
             }
 
             public void Reserve(UnsafeMemoryBlock block)
