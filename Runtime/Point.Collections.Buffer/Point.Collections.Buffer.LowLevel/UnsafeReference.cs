@@ -119,7 +119,7 @@ namespace Point.Collections.Buffer.LowLevel
     /// <inheritdoc cref="IUnsafeReference"/>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    [BurstCompatible]
+    [BurstCompatible(GenericTypeArguments = new Type[] { typeof(int) })]
     public struct UnsafeReference<T> : IUnsafeReference,
         IEquatable<UnsafeReference<T>>, IEquatable<UnsafeReference>
         where T : unmanaged
