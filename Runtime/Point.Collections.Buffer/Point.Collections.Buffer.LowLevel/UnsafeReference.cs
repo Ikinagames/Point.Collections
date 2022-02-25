@@ -112,7 +112,15 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
-        public static unsafe implicit operator UnsafeReference(void* p) => new UnsafeReference(p);
+        public static unsafe implicit operator UnsafeReference(void* p)
+        {
+            if (p == null)
+            {
+                return default(UnsafeReference);
+            }
+
+            return new UnsafeReference(p);
+        }
         public static unsafe implicit operator void*(UnsafeReference p) => p.m_Ptr;
     }
     /// <summary>
@@ -286,7 +294,12 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
-        public static unsafe implicit operator UnsafeReference<T>(T* p) => new UnsafeReference<T>(p);
+        public static unsafe implicit operator UnsafeReference<T>(T* p)
+        {
+            if (p == null) return default(UnsafeReference<T>);
+
+            return new UnsafeReference<T>(p);
+        }
         public static unsafe implicit operator UnsafeReference(UnsafeReference<T> p) => new UnsafeReference(p.IntPtr);
         public static unsafe implicit operator T*(UnsafeReference<T> p) => p.m_Ptr;
 
