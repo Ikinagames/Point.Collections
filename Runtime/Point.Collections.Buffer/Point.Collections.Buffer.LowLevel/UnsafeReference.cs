@@ -97,12 +97,6 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
-        /// <summary>
-        /// 포인터를 오른쪽으로 <paramref name="b"/> 만큼 밀어서 반환합니다.
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <returns></returns>
         public static UnsafeReference operator +(UnsafeReference a, int b)
         {
             unsafe
@@ -110,25 +104,6 @@ namespace Point.Collections.Buffer.LowLevel
                 return new UnsafeReference(IntPtr.Add(a.IntPtr, b));
             }
         }
-        /// <summary>
-        /// 포인터를 오른쪽으로 <paramref name="b"/> 만큼 밀어서 반환합니다.
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <returns></returns>
-        public static UnsafeReference operator +(UnsafeReference a, long b)
-        {
-            unsafe
-            {
-                return new UnsafeReference(IntPtr.Add(a.IntPtr, (int)b));
-            }
-        }
-        /// <summary>
-        /// 포인터를 왼쪽으로 <paramref name="b"/> 만큼 밀어서 반환합니다.
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <returns></returns>
         public static UnsafeReference operator -(UnsafeReference a, int b)
         {
             unsafe
@@ -136,28 +111,24 @@ namespace Point.Collections.Buffer.LowLevel
                 return new UnsafeReference(IntPtr.Subtract(a.IntPtr, b));
             }
         }
-        /// <summary>
-        /// 포인터를 왼쪽으로 <paramref name="b"/> 만큼 밀어서 반환합니다.
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <returns></returns>
-        public static UnsafeReference operator -(UnsafeReference a, long b)
-        {
-            unsafe
-            {
-                return new UnsafeReference(IntPtr.Subtract(a.IntPtr, (int)b));
-            }
-        }
 
-        public static unsafe implicit operator UnsafeReference(void* p) => new UnsafeReference(p);
+        public static unsafe implicit operator UnsafeReference(void* p)
+        {
+            if (p == null)
+            {
+                return default(UnsafeReference);
+            }
+
+            return new UnsafeReference(p);
+        }
+        public static implicit operator UnsafeReference(IntPtr p) => new UnsafeReference(p);
         public static unsafe implicit operator void*(UnsafeReference p) => p.m_Ptr;
     }
     /// <summary>
     /// <inheritdoc cref="IUnsafeReference"/>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    [BurstCompatible]
+    [BurstCompatible(GenericTypeArguments = new Type[] { typeof(int) })]
     public struct UnsafeReference<T> : IUnsafeReference,
         IEquatable<UnsafeReference<T>>, IEquatable<UnsafeReference>
         where T : unmanaged
@@ -272,38 +243,12 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
         /// <summary>
-        /// 포인터를 오른쪽으로 <paramref name="b"/> 만큼 밀어서 반환합니다.
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <returns></returns>
-        public static UnsafeReference<T> operator +(UnsafeReference<T> a, long b)
-        {
-            unsafe
-            {
-                return new UnsafeReference<T>(a.m_Ptr + b);
-            }
-        }
-        /// <summary>
         /// 포인터를 왼쪽으로 <paramref name="b"/> 만큼 밀어서 반환합니다.
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
         public static UnsafeReference<T> operator -(UnsafeReference<T> a, int b)
-        {
-            unsafe
-            {
-                return new UnsafeReference<T>(a.m_Ptr - b);
-            }
-        }
-        /// <summary>
-        /// 포인터를 왼쪽으로 <paramref name="b"/> 만큼 밀어서 반환합니다.
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <returns></returns>
-        public static UnsafeReference<T> operator -(UnsafeReference<T> a, long b)
         {
             unsafe
             {
@@ -350,7 +295,12 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
-        public static unsafe implicit operator UnsafeReference<T>(T* p) => new UnsafeReference<T>(p);
+        public static unsafe implicit operator UnsafeReference<T>(T* p)
+        {
+            if (p == null) return default(UnsafeReference<T>);
+
+            return new UnsafeReference<T>(p);
+        }
         public static unsafe implicit operator UnsafeReference(UnsafeReference<T> p) => new UnsafeReference(p.IntPtr);
         public static unsafe implicit operator T*(UnsafeReference<T> p) => p.m_Ptr;
 

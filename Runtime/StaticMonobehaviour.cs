@@ -52,6 +52,14 @@ namespace Point.Collections
                         throw new System.Exception("Internal error. See error log.");
                     }
 #endif
+                    if (PointApplication.IsShutdown)
+                    {
+#if UNITY_EDITOR
+                        PointHelper.LogError(Channel.Collections,
+                            $"You\'re trying to call {TypeHelper.TypeOf<T>.ToString()} while exitting application. This is not allowed.");
+#endif
+                        return s_Instance;
+                    }
 
                     UnityEngine.GameObject obj = new UnityEngine.GameObject();
                     DontDestroyOnLoad(obj);
