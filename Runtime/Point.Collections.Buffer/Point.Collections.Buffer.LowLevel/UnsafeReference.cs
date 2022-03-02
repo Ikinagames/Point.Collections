@@ -121,6 +121,7 @@ namespace Point.Collections.Buffer.LowLevel
 
             return new UnsafeReference(p);
         }
+        public static implicit operator UnsafeReference(IntPtr p) => new UnsafeReference(p);
         public static unsafe implicit operator void*(UnsafeReference p) => p.m_Ptr;
     }
     /// <summary>

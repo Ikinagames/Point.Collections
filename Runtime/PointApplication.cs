@@ -27,7 +27,7 @@ using UnityEngine.Scripting;
 namespace Point.Collections
 {
     [AddComponentMenu("")]
-    internal sealed class PointApplication : StaticMonobehaviour<PointApplication>
+    public sealed class PointApplication : StaticMonobehaviour<PointApplication>
     {
         #region Statics
 

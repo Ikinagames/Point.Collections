@@ -21,6 +21,7 @@ using Point.Collections.Burst;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -38,6 +39,15 @@ namespace Point.Collections.Buffer.LowLevel
             void* p = UnsafeUtility.AddressOf(ref t);
 
             return (byte*)p;
+        }
+        public static byte[] ToBytes(in UnsafeReference ptr, in int length)
+        {
+            if (!ptr.IsCreated || ptr.Ptr == null) return Array.Empty<byte>();
+
+            byte[] arr = new byte[length];
+            Marshal.Copy(ptr.IntPtr, arr, 0, length);
+
+            return arr;
         }
 
         /// <summary>
