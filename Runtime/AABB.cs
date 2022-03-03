@@ -136,7 +136,12 @@ namespace Point.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Encapsulate(float3 point) => SetMinMax(Math.min(min, point), Math.max(max, point));
+        public void Encapsulate(float3 point) =>
+#if !UNITYENGINE
+            SetMinMax(Math.min(min, point), Math.max(max, point));
+#else
+            SetMinMax(math.min(min, point), math.max(max, point));
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Encapsulate(AABB aabb)
         {
@@ -256,6 +261,7 @@ namespace Point.Collections
         /// <returns><c>true</c> when the ray hits the triangle, otherwise <c>false</c></returns>
         private static bool IntersectTriangle(in float3 p1, in float3 p2, in float3 p3, Ray ray, out float distance)
         {
+#if !UNITYENGINE
             distance = 0;
             // Vectors from p1 to p2/p3 (edges)
             float3 e1, e2;
@@ -304,6 +310,56 @@ namespace Point.Collections
 
             // No hit at all
             return false;
+#else
+            distance = 0;
+            // Vectors from p1 to p2/p3 (edges)
+            float3 e1, e2;
+
+            float3 p, q, t;
+            float det, invDet, u, v;
+
+            //Find vectors for two edges sharing vertex/point p1
+            e1 = p2 - p1;
+            e2 = p3 - p1;
+
+            // calculating determinant 
+            p = math.cross(ray.direction, e2);
+
+            //Calculate determinat
+            det = math.dot(e1, p);
+
+            //if determinant is near zero, ray lies in plane of triangle otherwise not
+            if (det > -math.EPSILON && det < math.EPSILON) { return false; }
+            invDet = 1.0f / det;
+
+            //calculate distance from p1 to ray origin
+            t = ((float3)ray.origin) - p1;
+
+            //Calculate u parameter
+            u = math.dot(t, p) * invDet;
+
+            //Check for ray hit
+            if (u < 0 || u > 1) { return false; }
+
+            //Prepare to test v parameter
+            q = math.cross(t, e1);
+
+            //Calculate v parameter
+            v = math.dot(ray.direction, q) * invDet;
+
+            //Check for ray hit
+            if (v < 0 || u + v > 1) { return false; }
+
+            distance = (math.dot(e2, q) * invDet);
+            if (distance > math.EPSILON)
+            {
+                //ray does intersect
+                return true;
+            }
+
+            // No hit at all
+            return false;
+#endif
         }
 
         public bool Equals(AABB other)

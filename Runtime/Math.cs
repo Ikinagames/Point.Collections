@@ -72,6 +72,7 @@ namespace Point.Collections
 #endif
         }
 
+#if !UNITYENGINE
         #region Unity.Mathematics
 
         public const float EPSILON = 1.1920929E-07f;
@@ -619,6 +620,362 @@ namespace Point.Collections
 
         #endregion
 
+        #region mul
+
+
+
+        #endregion
+
+        #region sin cos
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float cos(float x)
+        {
+            return (float)System.Math.Cos(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 cos(float2 x)
+        {
+            return new float2(cos(x.x), cos(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 cos(float3 x)
+        {
+            return new float3(cos(x.x), cos(x.y), cos(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 cos(float4 x)
+        {
+            return new float4(cos(x.x), cos(x.y), cos(x.z), cos(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double cos(double x)
+        {
+            return System.Math.Cos(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 cos(double2 x)
+        {
+            return new double2(cos(x.x), cos(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 cos(double3 x)
+        {
+            return new double3(cos(x.x), cos(x.y), cos(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 cos(double4 x)
+        {
+            return new double4(cos(x.x), cos(x.y), cos(x.z), cos(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float cosh(float x)
+        {
+            return (float)System.Math.Cosh(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 cosh(float2 x)
+        {
+            return new float2(cosh(x.x), cosh(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 cosh(float3 x)
+        {
+            return new float3(cosh(x.x), cosh(x.y), cosh(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 cosh(float4 x)
+        {
+            return new float4(cosh(x.x), cosh(x.y), cosh(x.z), cosh(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double cosh(double x)
+        {
+            return System.Math.Cosh(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 cosh(double2 x)
+        {
+            return new double2(cosh(x.x), cosh(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 cosh(double3 x)
+        {
+            return new double3(cosh(x.x), cosh(x.y), cosh(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 cosh(double4 x)
+        {
+            return new double4(cosh(x.x), cosh(x.y), cosh(x.z), cosh(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float acos(float x)
+        {
+            return (float)System.Math.Acos(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 acos(float2 x)
+        {
+            return new float2(acos(x.x), acos(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 acos(float3 x)
+        {
+            return new float3(acos(x.x), acos(x.y), acos(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 acos(float4 x)
+        {
+            return new float4(acos(x.x), acos(x.y), acos(x.z), acos(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double acos(double x)
+        {
+            return System.Math.Acos(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 acos(double2 x)
+        {
+            return new double2(acos(x.x), acos(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 acos(double3 x)
+        {
+            return new double3(acos(x.x), acos(x.y), acos(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 acos(double4 x)
+        {
+            return new double4(acos(x.x), acos(x.y), acos(x.z), acos(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float sin(float x)
+        {
+            return (float)System.Math.Sin(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 sin(float2 x)
+        {
+            return new float2(sin(x.x), sin(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 sin(float3 x)
+        {
+            return new float3(sin(x.x), sin(x.y), sin(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 sin(float4 x)
+        {
+            return new float4(sin(x.x), sin(x.y), sin(x.z), sin(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double sin(double x)
+        {
+            return System.Math.Sin(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 sin(double2 x)
+        {
+            return new double2(sin(x.x), sin(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 sin(double3 x)
+        {
+            return new double3(sin(x.x), sin(x.y), sin(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 sin(double4 x)
+        {
+            return new double4(sin(x.x), sin(x.y), sin(x.z), sin(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float sinh(float x)
+        {
+            return (float)System.Math.Sinh(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 sinh(float2 x)
+        {
+            return new float2(sinh(x.x), sinh(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 sinh(float3 x)
+        {
+            return new float3(sinh(x.x), sinh(x.y), sinh(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 sinh(float4 x)
+        {
+            return new float4(sinh(x.x), sinh(x.y), sinh(x.z), sinh(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double sinh(double x)
+        {
+            return System.Math.Sinh(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 sinh(double2 x)
+        {
+            return new double2(sinh(x.x), sinh(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 sinh(double3 x)
+        {
+            return new double3(sinh(x.x), sinh(x.y), sinh(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 sinh(double4 x)
+        {
+            return new double4(sinh(x.x), sinh(x.y), sinh(x.z), sinh(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float asin(float x)
+        {
+            return (float)System.Math.Asin(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 asin(float2 x)
+        {
+            return new float2(asin(x.x), asin(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 asin(float3 x)
+        {
+            return new float3(asin(x.x), asin(x.y), asin(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 asin(float4 x)
+        {
+            return new float4(asin(x.x), asin(x.y), asin(x.z), asin(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double asin(double x)
+        {
+            return System.Math.Asin(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 asin(double2 x)
+        {
+            return new double2(asin(x.x), asin(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 asin(double3 x)
+        {
+            return new double3(asin(x.x), asin(x.y), asin(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 asin(double4 x)
+        {
+            return new double4(asin(x.x), asin(x.y), asin(x.z), asin(x.w));
+        }
+
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void sincos(float x, out float s, out float c)
+        {
+            s = sin(x);
+            c = cos(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void sincos(float2 x, out float2 s, out float2 c)
+        {
+            s = sin(x);
+            c = cos(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void sincos(float3 x, out float3 s, out float3 c)
+        {
+            s = sin(x);
+            c = cos(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void sincos(float4 x, out float4 s, out float4 c)
+        {
+            s = sin(x);
+            c = cos(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void sincos(double x, out double s, out double c)
+        {
+            s = sin(x);
+            c = cos(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void sincos(double2 x, out double2 s, out double2 c)
+        {
+            s = sin(x);
+            c = cos(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void sincos(double3 x, out double3 s, out double3 c)
+        {
+            s = sin(x);
+            c = cos(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void sincos(double4 x, out double4 s, out double4 c)
+        {
+            s = sin(x);
+            c = cos(x);
+        }
+
+        #endregion
+
         #region dot
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1021,6 +1378,192 @@ namespace Point.Collections
 
         #endregion
 
+        #region sqrt
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float sqrt(float x)
+        {
+            return (float)System.Math.Sqrt(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 sqrt(float2 x)
+        {
+            return new float2(sqrt(x.x), sqrt(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 sqrt(float3 x)
+        {
+            return new float3(sqrt(x.x), sqrt(x.y), sqrt(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 sqrt(float4 x)
+        {
+            return new float4(sqrt(x.x), sqrt(x.y), sqrt(x.z), sqrt(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double sqrt(double x)
+        {
+            return System.Math.Sqrt(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 sqrt(double2 x)
+        {
+            return new double2(sqrt(x.x), sqrt(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 sqrt(double3 x)
+        {
+            return new double3(sqrt(x.x), sqrt(x.y), sqrt(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 sqrt(double4 x)
+        {
+            return new double4(sqrt(x.x), sqrt(x.y), sqrt(x.z), sqrt(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float rsqrt(float x)
+        {
+            return 1f / sqrt(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 rsqrt(float2 x)
+        {
+            return 1f / sqrt(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 rsqrt(float3 x)
+        {
+            return 1f / sqrt(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 rsqrt(float4 x)
+        {
+            return 1f / sqrt(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double rsqrt(double x)
+        {
+            return 1.0 / sqrt(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 rsqrt(double2 x)
+        {
+            return 1.0 / sqrt(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 rsqrt(double3 x)
+        {
+            return 1.0 / sqrt(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 rsqrt(double4 x)
+        {
+            return 1.0 / sqrt(x);
+        }
+
+
+
+        #endregion
+
+        #region normalize
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 normalize(float2 x)
+        {
+            return rsqrt(dot(x, x)) * x;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 normalize(float3 x)
+        {
+            return rsqrt(dot(x, x)) * x;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 normalize(float4 x)
+        {
+            return rsqrt(dot(x, x)) * x;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 normalize(double2 x)
+        {
+            return rsqrt(dot(x, x)) * x;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 normalize(double3 x)
+        {
+            return rsqrt(dot(x, x)) * x;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 normalize(double4 x)
+        {
+            return rsqrt(dot(x, x)) * x;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 normalizesafe(float2 x, float2 defaultvalue = default(float2))
+        {
+            float num = dot(x, x);
+            return select(defaultvalue, x * rsqrt(num), num > 1.17549435E-38f);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 normalizesafe(float3 x, float3 defaultvalue = default(float3))
+        {
+            float num = dot(x, x);
+            return select(defaultvalue, x * rsqrt(num), num > 1.17549435E-38f);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 normalizesafe(float4 x, float4 defaultvalue = default(float4))
+        {
+            float num = dot(x, x);
+            return select(defaultvalue, x * rsqrt(num), num > 1.17549435E-38f);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 normalizesafe(double2 x, double2 defaultvalue = default(double2))
+        {
+            double num = dot(x, x);
+            return select(defaultvalue, x * rsqrt(num), num > 1.1754943508222875E-38);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 normalizesafe(double3 x, double3 defaultvalue = default(double3))
+        {
+            double num = dot(x, x);
+            return select(defaultvalue, x * rsqrt(num), num > 1.1754943508222875E-38);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 normalizesafe(double4 x, double4 defaultvalue = default(double4))
+        {
+            double num = dot(x, x);
+            return select(defaultvalue, x * rsqrt(num), num > 1.1754943508222875E-38);
+        }
+
+
+
+        #endregion
+
         #region Internal
 
         [StructLayout(LayoutKind.Explicit)]
@@ -1073,5 +1616,6 @@ namespace Point.Collections
         #endregion
 
         #endregion
+#endif
     }
 }
