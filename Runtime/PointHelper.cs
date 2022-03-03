@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,10 @@
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 #define DEBUG_MODE
+#endif
+
+#if UNITY_2020
+#define UNITYENGINE
 #endif
 
 using System;
@@ -41,6 +45,7 @@ namespace Point.Collections
             return c_MessagePrefix + c_WhiteSpace + msg;
         }
 
+#if UNITYENGINE
         #region Log
 
 #line hidden
@@ -153,6 +158,7 @@ namespace Point.Collections
 #line default
 
         #endregion
+#endif
 
         #region Threading
 
@@ -160,7 +166,9 @@ namespace Point.Collections
         /// 이 메소드가 실행된 <seealso cref="System.Threading.Thread"/> 가 Unity 의 메인 스크립트 스레드인지 반환합니다.
         /// </summary>
         /// <returns></returns>
+        #if UNITYENGINE
         [Unity.Collections.NotBurstCompatible]
+        #endif
         public static bool AssertIsMainThread()
         {
             Threading.ThreadInfo currentThread = Threading.ThreadInfo.CurrentThread;
@@ -171,7 +179,9 @@ namespace Point.Collections
         /// <remarks>
         /// 만약 메인 스레드가 아닐 경우 에러 로그를 발생시킵니다.
         /// </remarks>
+#if UNITYENGINE
         [Unity.Collections.NotBurstCompatible]
+#endif
         [System.Diagnostics.Conditional("DEBUG_MODE")]
         public static void AssertMainThread()
         {
@@ -192,7 +202,9 @@ namespace Point.Collections
         /// 다른 인덱스이어도 같은 스레드 선호도를 공유하는 예외사항이 있습니다. (ex. id = 1(Affinity 0), id = 8(Affinity 0)) 
         /// </remarks>
         /// <param name="expectedAffinity"></param>
+#if UNITYENGINE
         [Unity.Collections.NotBurstCompatible]
+#endif
         [System.Diagnostics.Conditional("DEBUG_MODE")]
         public static void AssertThreadAffinity(in Threading.ThreadInfo expectedAffinity)
         {
@@ -200,8 +212,9 @@ namespace Point.Collections
 
             if (expectedAffinity.Equals(currentThread)) return;
 
-            LogError(LogChannel.Core,
-                $"Thread affinity error. Expected thread({expectedAffinity}) but {currentThread}");
+            throw new InvalidOperationException($"Thread affinity error. Expected thread({expectedAffinity}) but {currentThread}");
+            //LogError(LogChannel.Core,
+            //    $"Thread affinity error. Expected thread({expectedAffinity}) but {currentThread}");
         }
         /// <summary>
         /// 이 스레드가 <paramref name="other"/> 의 스레드와 같은 스레드인지 확인합니다. 

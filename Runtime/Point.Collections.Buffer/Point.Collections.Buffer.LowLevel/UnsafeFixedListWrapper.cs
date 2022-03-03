@@ -17,10 +17,16 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
 using System;
 using System.Collections.Generic;
+#if UNITYENGINE
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+#endif
 
 namespace Point.Collections.Buffer.LowLevel
 {
@@ -31,7 +37,9 @@ namespace Point.Collections.Buffer.LowLevel
     /// 추가적인 allocation 이 발생하지 않습니다. stack 에서 사용될때에는 레퍼런스로 넘겨줘야합니다.
     /// </remarks>
     /// <typeparam name="T"></typeparam>
+#if UNITYENGINE
     [BurstCompatible]
+#endif
     public struct UnsafeFixedListWrapper<T> : IFixedList<T>, IEquatable<UnsafeFixedListWrapper<T>>
         where T : unmanaged
     {
@@ -40,7 +48,9 @@ namespace Point.Collections.Buffer.LowLevel
         private int m_Count;
 
         public int Capacity => m_Capacity;
+#if UNITYENGINE
         int INativeList<T>.Capacity { get => m_Capacity; set => throw new NotImplementedException(); }
+#endif
         int IFixedList.Length => Length;
         public int Length
         {
@@ -71,6 +81,7 @@ namespace Point.Collections.Buffer.LowLevel
             m_Capacity = allocator.Length;
             m_Count = initialCount;
         }
+#if UNITYENGINE
         public UnsafeFixedListWrapper(NativeArray<T> array)
         {
             UnsafeReference<T> buffer;
@@ -87,6 +98,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             this = list.ConvertToFixedWrapper();
         }
+#endif
         public UnsafeFixedListWrapper(UnsafeReference<T> buffer, int capacity, int initialCount = 0)
         {
             m_Buffer = buffer;
@@ -117,6 +129,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             m_Count = 0;
         }
+#if UNITYENGINE
         public void Clear(NativeArrayOptions options)
         {
             if ((options & NativeArrayOptions.ClearMemory) == NativeArrayOptions.ClearMemory)
@@ -128,9 +141,10 @@ namespace Point.Collections.Buffer.LowLevel
             }
             m_Count = 0;
         }
-
+#endif
         public bool Equals(UnsafeFixedListWrapper<T> other) => m_Buffer.Equals(other.m_Buffer);
 
+#if UNITYENGINE
         public static implicit operator UnsafeFixedListWrapper<T>(NativeArray<T> t)
         {
             return new UnsafeFixedListWrapper<T>(t);
@@ -139,9 +153,11 @@ namespace Point.Collections.Buffer.LowLevel
         {
             return new UnsafeFixedListWrapper<T>(t);
         }
+#endif
     }
     public static class UnsafeFixedListWrapperExtensions
     {
+#if UNITYENGINE
         public static UnsafeFixedListWrapper<T> ConvertToFixedWrapper<T>(this ref NativeList<T> t)
             where T : unmanaged
         {
@@ -187,6 +203,7 @@ namespace Point.Collections.Buffer.LowLevel
                 (*list.GetUnsafeList()).m_length = t.Length;
             }
         }
+#endif
 
         public static void Sort<T, U>(this ref UnsafeFixedListWrapper<T> t, U comparer)
             where T : unmanaged

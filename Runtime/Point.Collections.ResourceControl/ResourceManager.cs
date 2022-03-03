@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,6 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Networking;
-#endif
 
 namespace Point.Collections.ResourceControl
 {
@@ -598,3 +597,5 @@ namespace Point.Collections.ResourceControl
         }
     }
 }
+
+#endif

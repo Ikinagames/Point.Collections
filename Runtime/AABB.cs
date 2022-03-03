@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,18 +13,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
 using Newtonsoft.Json;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+#if UNITYENGINE
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+#endif
 
 namespace Point.Collections
 {
+#if UNITYENGINE
     [BurstCompile(CompileSynchronously = true, DisableSafetyChecks = true)]
+#endif
     [StructLayout(LayoutKind.Sequential)]
     [JsonConverter(typeof(IO.Json.AABBJsonConverter))]
     [Guid("a4c54f61-12c0-4069-92ca-9d1881952f2d")]
@@ -128,7 +136,7 @@ namespace Point.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Encapsulate(float3 point) => SetMinMax(math.min(min, point), math.max(max, point));
+        public void Encapsulate(float3 point) => SetMinMax(Math.min(min, point), Math.max(max, point));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Encapsulate(AABB aabb)
         {
@@ -147,6 +155,7 @@ namespace Point.Collections
             return result;
         }
 
+#if UNITYENGINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NativeArray<float3> GetVertices(Allocator allocator)
         {
@@ -162,6 +171,7 @@ namespace Point.Collections
             temp[7] = new float3(min.x, min.y, max.z);
             return temp;
         }
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static float3[] GetVertices(in AABB aabb)
         {
@@ -258,35 +268,35 @@ namespace Point.Collections
             e2 = p3 - p1;
 
             // calculating determinant 
-            p = math.cross(ray.direction, e2);
+            p = Math.cross(ray.direction, e2);
 
             //Calculate determinat
-            det = math.dot(e1, p);
+            det = Math.dot(e1, p);
 
             //if determinant is near zero, ray lies in plane of triangle otherwise not
-            if (det > -math.EPSILON && det < math.EPSILON) { return false; }
+            if (det > -Math.EPSILON && det < Math.EPSILON) { return false; }
             invDet = 1.0f / det;
 
             //calculate distance from p1 to ray origin
             t = ((float3)ray.origin) - p1;
 
             //Calculate u parameter
-            u = Vector3.Dot(t, p) * invDet;
+            u = Math.dot(t, p) * invDet;
 
             //Check for ray hit
             if (u < 0 || u > 1) { return false; }
 
             //Prepare to test v parameter
-            q = math.cross(t, e1);
+            q = Math.cross(t, e1);
 
             //Calculate v parameter
-            v = math.dot(ray.direction, q) * invDet;
+            v = Math.dot(ray.direction, q) * invDet;
 
             //Check for ray hit
             if (v < 0 || u + v > 1) { return false; }
 
-            distance = (math.dot(e2, q) * invDet);
-            if (distance > math.EPSILON)
+            distance = (Math.dot(e2, q) * invDet);
+            if (distance > Math.EPSILON)
             {
                 //ray does intersect
                 return true;
@@ -301,7 +311,9 @@ namespace Point.Collections
             return m_Center.Equals(other.m_Center) && m_Extents.Equals(other.m_Extents);
         }
 
+#if UNITYENGINE
         public static implicit operator AABB(Bounds a) => new AABB(a.center, a.size);
         public static implicit operator Bounds(AABB a) => new Bounds(a.center, a.size);
+#endif
     }
 }

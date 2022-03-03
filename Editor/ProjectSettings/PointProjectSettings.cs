@@ -13,6 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_EDITOR || UNITY_2020
+#define UNITYENGINE
+#endif
+
+#if UNITYENGINE
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -169,3 +174,5 @@ namespace Point.Collections.Editor
         }
     }
 }
+
+#endif
