@@ -149,6 +149,7 @@ namespace Point.Collections
             Encapsulate(aabb.center + aabb.extents);
         }
 
+#if UNITYENGINE
         public AABB Rotation(in quaternion rot, in float3 scale)
         {
             AABB result;
@@ -159,7 +160,7 @@ namespace Point.Collections
             
             return result;
         }
-
+#endif
 #if UNITYENGINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NativeArray<float3> GetVertices(Allocator allocator)

@@ -17,7 +17,11 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#endif
 
+#if UNITYENGINE
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -50,3 +54,5 @@ namespace Point.Collections.ResourceControl.LowLevel
         }
     }
 }
+
+#endif

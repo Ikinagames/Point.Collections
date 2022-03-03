@@ -18,6 +18,7 @@
 #endif
 
 using System;
+#if UNITYENGINE
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -36,17 +37,17 @@ namespace Point.Collections.Burst
             if (*linear == 0) *output = kMindB;
             else
             {
-                *output = 20 * math.log10(*linear);
+                *output = 20 * Math.log10(*linear);
             }
         }
         [BurstCompile]
         public static void unity_fromdB(double* dB, double* output)
         {
-            *output = math.pow(10, *dB / 20);
+            *output = Math.pow(10, *dB / 20);
         }
 #endif
 
-        #region AABB
+#region AABB
 
         [BurstCompile]
         public static void aabb_calculateRotation(in AABB aabb, in quaternion quaternion, AABB* result)
@@ -59,23 +60,15 @@ namespace Point.Collections.Burst
             float4x4 trMatrix = float4x4.TRS(originCenter, quaternion, originExtents);
 
             float3
-                minPos = math.mul(trMatrix, new float4(-originExtents * 2, 1)).xyz,
-                maxPos = math.mul(trMatrix, new float4(originExtents * 2, 1)).xyz;
+                minPos = Math.mul(trMatrix, new float4(-originExtents * 2, 1)).xyz,
+                maxPos = Math.mul(trMatrix, new float4(originExtents * 2, 1)).xyz;
 
             AABB temp = new AABB(originCenter, float3.zero);
-
-            //temp.SetMinMax(
-            //    originMin - math.abs(originMin - minPos),
-            //    originMax + math.abs(originMax - maxPos));
 
             // TODO : 최소 width, height 값이 설정되지않아 무한대로 축소함. 수정할 것.
             temp.SetMinMax(
                 originMin + (minPos - originMin),
                 originMax + (maxPos - originMax));
-
-            //temp.SetMinMax(
-            //    math.min(originMin + (minPos - originMin), limitMinf),
-            //    math.max(originMax + (maxPos - originMax), limitMaxf));
 
             *result = temp;
         }
@@ -99,14 +92,14 @@ namespace Point.Collections.Burst
                 b3 = new float3(min.x, max.y, max.z),
                 b4 = new float3(min.x, min.y, max.z);
 
-            temp.Encapsulate(math.mul(trMatrix, new float4((min - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(math.mul(trMatrix, new float4((a1 - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(math.mul(trMatrix, new float4((a2 - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(math.mul(trMatrix, new float4((a3 - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(math.mul(trMatrix, new float4((b1 - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(math.mul(trMatrix, new float4((max - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(math.mul(trMatrix, new float4((b3 - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(math.mul(trMatrix, new float4((b4 - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(Math.mul(trMatrix, new float4((min - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(Math.mul(trMatrix, new float4((a1 - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(Math.mul(trMatrix, new float4((a2 - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(Math.mul(trMatrix, new float4((a3 - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(Math.mul(trMatrix, new float4((b1 - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(Math.mul(trMatrix, new float4((max - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(Math.mul(trMatrix, new float4((b3 - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(Math.mul(trMatrix, new float4((b4 - originCenter) * 2, 1)).xyz);
 
             *result = temp;
         }
@@ -128,6 +121,8 @@ namespace Point.Collections.Burst
             buffer[7] = new float3(min.x, min.y, max.z);
         }
 
-        #endregion
+#endregion
     }
 }
+
+#endif

@@ -588,33 +588,33 @@ namespace Point.Collections
             return EulerZYX(new float3(x, y, z));
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float4x4 Euler(float3 xyz, math.RotationOrder order = math.RotationOrder.ZXY)
-        {
-            switch (order)
-            {
-                case math.RotationOrder.XYZ:
-                    return EulerXYZ(xyz);
-                case math.RotationOrder.XZY:
-                    return EulerXZY(xyz);
-                case math.RotationOrder.YXZ:
-                    return EulerYXZ(xyz);
-                case math.RotationOrder.YZX:
-                    return EulerYZX(xyz);
-                case math.RotationOrder.ZXY:
-                    return EulerZXY(xyz);
-                case math.RotationOrder.ZYX:
-                    return EulerZYX(xyz);
-                default:
-                    return identity;
-            }
-        }
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static float4x4 Euler(float3 xyz, math.RotationOrder order = math.RotationOrder.ZXY)
+        //{
+        //    switch (order)
+        //    {
+        //        case math.RotationOrder.XYZ:
+        //            return EulerXYZ(xyz);
+        //        case math.RotationOrder.XZY:
+        //            return EulerXZY(xyz);
+        //        case math.RotationOrder.YXZ:
+        //            return EulerYXZ(xyz);
+        //        case math.RotationOrder.YZX:
+        //            return EulerYZX(xyz);
+        //        case math.RotationOrder.ZXY:
+        //            return EulerZXY(xyz);
+        //        case math.RotationOrder.ZYX:
+        //            return EulerZYX(xyz);
+        //        default:
+        //            return identity;
+        //    }
+        //}
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float4x4 Euler(float x, float y, float z, math.RotationOrder order = math.RotationOrder.ZXY)
-        {
-            return Euler(new float3(x, y, z), order);
-        }
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static float4x4 Euler(float x, float y, float z, math.RotationOrder order = math.RotationOrder.ZXY)
+        //{
+        //    return Euler(new float3(x, y, z), order);
+        //}
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float4x4 RotateX(float angle)
@@ -711,7 +711,7 @@ namespace Point.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float4x4 TRS(float3 translation, quaternion rotation, float3 scale)
         {
-            float3x3 float3x = math.float3x3(rotation);
+            float3x3 float3x = new float3x3(rotation);
             return new float4x4(new float4(float3x.c0 * scale.x, 0f), new float4(float3x.c1 * scale.y, 0f), new float4(float3x.c2 * scale.z, 0f), new float4(translation, 1f));
         }
     }

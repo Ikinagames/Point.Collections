@@ -477,7 +477,7 @@ namespace Point.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float3x3 AxisAngle(float3 axis, float angle)
         {
-            math.sincos(angle, out float s, out float c);
+            Math.sincos(angle, out float s, out float c);
             float3 lhs = axis;
             _ = lhs.yzx;
             _ = lhs.zxy;
@@ -567,33 +567,33 @@ namespace Point.Collections
             return EulerZYX(new float3(x, y, z));
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float3x3 Euler(float3 xyz, math.RotationOrder order = math.RotationOrder.ZXY)
-        {
-            switch (order)
-            {
-                case math.RotationOrder.XYZ:
-                    return EulerXYZ(xyz);
-                case math.RotationOrder.XZY:
-                    return EulerXZY(xyz);
-                case math.RotationOrder.YXZ:
-                    return EulerYXZ(xyz);
-                case math.RotationOrder.YZX:
-                    return EulerYZX(xyz);
-                case math.RotationOrder.ZXY:
-                    return EulerZXY(xyz);
-                case math.RotationOrder.ZYX:
-                    return EulerZYX(xyz);
-                default:
-                    return identity;
-            }
-        }
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static float3x3 Euler(float3 xyz, math.RotationOrder order = math.RotationOrder.ZXY)
+        //{
+        //    switch (order)
+        //    {
+        //        case math.RotationOrder.XYZ:
+        //            return EulerXYZ(xyz);
+        //        case math.RotationOrder.XZY:
+        //            return EulerXZY(xyz);
+        //        case math.RotationOrder.YXZ:
+        //            return EulerYXZ(xyz);
+        //        case math.RotationOrder.YZX:
+        //            return EulerYZX(xyz);
+        //        case math.RotationOrder.ZXY:
+        //            return EulerZXY(xyz);
+        //        case math.RotationOrder.ZYX:
+        //            return EulerZYX(xyz);
+        //        default:
+        //            return identity;
+        //    }
+        //}
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float3x3 Euler(float x, float y, float z, math.RotationOrder order = math.RotationOrder.ZXY)
-        {
-            return Euler(new float3(x, y, z), order);
-        }
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static float3x3 Euler(float x, float y, float z, math.RotationOrder order = math.RotationOrder.ZXY)
+        //{
+        //    return Euler(new float3(x, y, z), order);
+        //}
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float3x3 RotateX(float angle)
@@ -644,17 +644,17 @@ namespace Point.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float3x3 LookRotationSafe(float3 forward, float3 up)
         {
-            float x = math.dot(forward, forward);
-            float num = math.dot(up, up);
-            forward *= math.rsqrt(x);
-            up *= math.rsqrt(num);
-            float3 @float = math.cross(up, forward);
-            float num2 = math.dot(@float, @float);
-            @float *= math.rsqrt(num2);
-            float num3 = math.min(math.min(x, num), num2);
-            float num4 = math.max(math.max(x, num), num2);
-            bool c = num3 > 1E-35f && num4 < 1E+35f && math.isfinite(x) && math.isfinite(num) && math.isfinite(num2);
-            return math.float3x3(math.select(math.float3(1f, 0f, 0f), @float, c), math.select(math.float3(0f, 1f, 0f), math.cross(forward, @float), c), math.select(math.float3(0f, 0f, 1f), forward, c));
+            float x = Math.dot(forward, forward);
+            float num = Math.dot(up, up);
+            forward *= Math.rsqrt(x);
+            up *= Math.rsqrt(num);
+            float3 @float = Math.cross(up, forward);
+            float num2 = Math.dot(@float, @float);
+            @float *= Math.rsqrt(num2);
+            float num3 = Math.min(Math.min(x, num), num2);
+            float num4 = Math.max(Math.max(x, num), num2);
+            bool c = num3 > 1E-35f && num4 < 1E+35f && Math.isfinite(x) && Math.isfinite(num) && Math.isfinite(num2);
+            return new float3x3(Math.select(new float3(1f, 0f, 0f), @float, c), Math.select(new float3(0f, 1f, 0f), Math.cross(forward, @float), c), Math.select(new float3(0f, 0f, 1f), forward, c));
         }
 
         public static explicit operator float3x3(float4x4 f4x4)

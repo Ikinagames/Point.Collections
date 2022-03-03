@@ -221,7 +221,7 @@ namespace Point.Collections.Buffer.LowLevel
             int index;
             unsafe
             {
-                index = NativeSortExtension.BinarySearch<T, TComparer>(t.m_Buffer, t.Length, value, comparer);
+                index = UnsafeBufferUtility.BinarySearch<T, TComparer>(t.m_Buffer, t.Length, value, comparer);
             }
             return index;
         }

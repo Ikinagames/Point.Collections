@@ -28,6 +28,7 @@ namespace Point.Collections.Buffer.LowLevel
     /// <inheritdoc cref="IUnsafeReference"/>
     /// </summary>
     [BurstCompatible]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct UnsafeReference : IUnsafeReference, IEquatable<UnsafeReference>
     {
         [MarshalAs(UnmanagedType.U1)]
@@ -129,6 +130,7 @@ namespace Point.Collections.Buffer.LowLevel
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [BurstCompatible(GenericTypeArguments = new Type[] { typeof(int) })]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct UnsafeReference<T> : IUnsafeReference,
         IEquatable<UnsafeReference<T>>, IEquatable<UnsafeReference>
         where T : unmanaged

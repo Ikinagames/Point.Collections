@@ -55,7 +55,7 @@ namespace Point.Collections.Buffer.LowLevel
         }
         public static void MemCpy(void* ptr, void* from, in int length)
         {
-            
+            throw new NotImplementedException();
         }
 
 #if UNITYENGINE
@@ -102,6 +102,33 @@ namespace Point.Collections.Buffer.LowLevel
             return hash;
         }
 
+#if UNITYENGINE
+        [BurstCompile]
+#endif
+        public unsafe static int BinarySearch<T, U>(T* ptr, int length, T value, U comp) 
+            where T : unmanaged 
+            where U : IComparer<T>
+        {
+            int num = 0;
+            for (int num2 = length; num2 != 0; num2 >>= 1)
+            {
+                int num3 = num + (num2 >> 1);
+                T y = ptr[num3];
+                int num4 = comp.Compare(value, y);
+                if (num4 == 0)
+                {
+                    return num3;
+                }
+
+                if (num4 > 0)
+                {
+                    num = num3 + 1;
+                    num2--;
+                }
+            }
+
+            return ~num;
+        }
 #if UNITYENGINE
         [BurstCompile]
 #endif

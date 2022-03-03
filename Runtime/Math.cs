@@ -21,6 +21,8 @@
 
 #if UNITY_2020
 #define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
 #endif
 
 using System.ComponentModel;

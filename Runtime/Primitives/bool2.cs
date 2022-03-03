@@ -516,7 +516,7 @@ namespace Point.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
-            return (int)math.hash(this);
+            return (int)Math.hash(this);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
