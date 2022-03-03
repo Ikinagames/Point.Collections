@@ -21,10 +21,13 @@
 #define UNITYENGINE
 #endif
 
+//#undef UNITYENGINE
+
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Point.Collections.Native;
 #if UNITYENGINE
 using Unity.Burst;
 using Point.Collections.Burst;
@@ -39,14 +42,25 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
     public static unsafe class UnsafeBufferUtility
     {
+        public static void* AddressOf<T>(ref T t) where T : unmanaged
+        {
+#if UNITYENGINE
+            return UnsafeUtility.AddressOf(ref t);
+#else
+            fixed (T* ptr = &t)
+            {
+                return ptr;
+            }
+#endif
+        }
 #if UNITYENGINE
         [BurstCompile]
 #endif
         public static byte* AsBytes<T>(ref T t, out int length)
             where T : unmanaged
         {
-            length = UnsafeUtility.SizeOf<T>();
-            void* p = UnsafeUtility.AddressOf(ref t);
+            length = TypeHelper.SizeOf<T>();
+            void* p = AddressOf(ref t);
 
             return (byte*)p;
         }
@@ -73,7 +87,11 @@ namespace Point.Collections.Buffer.LowLevel
         {
             byte* bytes = AsBytes(ref t, out int length);
             uint output;
+#if !POINT_COLLECTIONS_NATIVE
             BurstFNV1a.fnv1a32_byte(bytes, &length, &output);
+#else
+            NativeFNV1a.fnv1a32_byte(bytes, &length, &output);
+#endif
             Hash hash = new Hash(output);
 
             return hash;
@@ -88,8 +106,8 @@ namespace Point.Collections.Buffer.LowLevel
         {
             byte*
                 a = AsBytes(ref x, out int length),
-                b = (byte*)UnsafeUtility.AddressOf(ref y);
-
+                b = (byte*)AddressOf(ref y);
+#if UNITYENGINE
             int index = 0;
             while (index < length && a[index].Equals(b[index]))
             {
@@ -98,6 +116,9 @@ namespace Point.Collections.Buffer.LowLevel
 
             if (index != length) return false;
             return true;
+#else
+            return NativeMath.binaryComparer(a, b, in length);
+#endif
         }
 
 #if UNITYENGINE
@@ -210,7 +231,7 @@ namespace Point.Collections.Buffer.LowLevel
             return true;
         }
 
-        #region Memory
+#region Memory
 
 #if UNITYENGINE
         [BurstCompile]
@@ -222,9 +243,11 @@ namespace Point.Collections.Buffer.LowLevel
             return to - (p + length);
         }
 
-        #endregion
+#endregion
 
-        #region Native Array
+#region Native Array
+
+#if UNITYENGINE
 
         public static ref T ElementAtAsRef<T>(this NativeArray<T> t, in int index)
             where T : unmanaged
@@ -236,11 +259,13 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
-        #endregion
+#endif
 
-        #region Safety Checks
+#endregion
 
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
+#region Safety Checks
+
+#if UNITYENGINE && ENABLE_UNITY_COLLECTIONS_CHECKS
         private static readonly Dictionary<IntPtr, (DisposeSentinel, Allocator)> m_Safety
             = new Dictionary<IntPtr, (DisposeSentinel, Allocator)>();
 
@@ -270,6 +295,6 @@ namespace Point.Collections.Buffer.LowLevel
         }
 #endif
 
-        #endregion
+#endregion
     }
 }

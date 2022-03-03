@@ -22,7 +22,7 @@
 #define UNITYENGINE
 #endif
 
-#undef UNITYENGINE
+//#undef UNITYENGINE
 
 using System;
 using System.Collections.Generic;
@@ -159,7 +159,7 @@ namespace Point.Collections.Buffer.LowLevel
 
         public void Dispose()
         {
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
+#if UNITYENGINE && ENABLE_UNITY_COLLECTIONS_CHECKS
             if (!UnsafeUtility.IsValidAllocator(m_Allocator))
             {
                 PointHelper.LogError(Channel.Collections,
@@ -173,7 +173,7 @@ namespace Point.Collections.Buffer.LowLevel
                 UnsafeUtility.Free(m_Buffer.Value.Ptr, m_Allocator);
                 UnsafeUtility.Free(m_Buffer, m_Allocator);
             }
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
+#if UNITYENGINE && ENABLE_UNITY_COLLECTIONS_CHECKS
             UnsafeBufferUtility.RemoveSafety(m_Buffer, ref m_SafetyHandle);
 #endif
             m_Buffer = default(UnsafeReference<Buffer>);

@@ -13,6 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
+#if UNITY_2020
+#define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
+
+//#undef UNITYENGINE
+
 using System.Runtime.InteropServices;
 
 namespace Point.Collections.Native

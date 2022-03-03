@@ -26,6 +26,9 @@ namespace Point.Collections.Native
         public static extern void unity_todB(double* linear, double* output);
         [DllImport("Ikinagames.Collections.Internal")]
         public static extern void unity_fromdB(double* dB, double* output);
+
+        [DllImport("Ikinagames.Collections.Internal")]
+        public static extern bool binaryComparer(void* x, void* y, in int length);
 #endif
     }
 }

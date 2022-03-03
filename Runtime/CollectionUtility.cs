@@ -48,7 +48,7 @@ namespace Point.Collections
         protected override void OnInitialize()
         {
 #if POINT_COLLECTIONS_NATIVE
-            NativeDebug.Initialize();
+            //NativeDebug.Initialize();
 #endif
             Instance.m_Random = new Unity.Mathematics.Random();
             Instance.m_Random.InitState();

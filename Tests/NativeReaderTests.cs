@@ -1,5 +1,8 @@
-﻿using Point.Collections.IO;
+﻿using NUnit.Framework;
+using Point.Collections.Buffer.LowLevel;
+using Point.Collections.IO;
 using Point.Collections.IO.LowLevel;
+using Point.Collections.Native;
 using System.Collections;
 using System.IO;
 using UnityEngine;
@@ -24,5 +27,35 @@ namespace Point.Collections.Tests
 
             Debug.Log($"rdr: {txt}");
         }
+    }
+
+    public sealed class NativeCodeTests
+    {
+        [Test]
+        public void MathTest()
+        {
+            TestStruct
+                a = new TestStruct(),
+                b = a;
+
+            bool result;
+            unsafe
+            {
+                void*
+                    x = UnsafeBufferUtility.AddressOf(ref a),
+                    y = UnsafeBufferUtility.AddressOf(ref b);
+
+                result = NativeMath.binaryComparer(x, y, TypeHelper.SizeOf<TestStruct>());
+            }
+
+            Assert.IsTrue(result);
+        }
+    }
+
+    public struct TestStruct
+    {
+        public int x;
+        public float y;
+        public bool z;
     }
 }

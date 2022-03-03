@@ -38,7 +38,7 @@ namespace Point.Collections
             unsafe
             {
 #if POINT_COLLECTIONS_NATIVE
-                Native.NativeFNV1a.fnv1a32_str(str, &hash);
+                Native.NativeFNV1a.fnv1a32_str(str.ToString(), &hash);
 #else
                 
                 Burst.BurstFNV1a.fnv1a32_str(in str, &hash);
@@ -67,7 +67,7 @@ namespace Point.Collections
         {
             uint hash;
 #if POINT_COLLECTIONS_NATIVE
-            Native.NativeFNV1a.fnv1a32_byte(temp, &length, &hash);
+            Native.NativeFNV1a.fnv1a32_byte(bytes, &length, &hash);
 #else
             Burst.BurstFNV1a.fnv1a32_byte(bytes, &length, &hash);
 #endif

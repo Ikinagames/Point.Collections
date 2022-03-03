@@ -66,7 +66,7 @@ namespace Point.Collections
 
             CollectionUtility.Initialize();
 
-            Type[] types = TypeHelper.GetTypes((other) => TypeHelper.TypeOf<IStaticInitializer>.Type.IsAssignableFrom(other));
+            Type[] types = TypeHelper.GetTypes(other => TypeHelper.TypeOf<IStaticInitializer>.Type.IsAssignableFrom(other));
             for (int i = 0; i < types.Length; i++)
             {
                 if (TypeHelper.TypeOf<IStaticMonobehaviour>.Type.IsAssignableFrom(types[i]))

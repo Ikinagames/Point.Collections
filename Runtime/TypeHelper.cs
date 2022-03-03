@@ -21,6 +21,8 @@
 #define UNITYENGINE
 #endif
 
+//#undef UNITYENGINE
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -311,6 +313,14 @@ namespace Point.Collections
             return UnsafeUtility.SizeOf(type);
 #else
             return Marshal.SizeOf(type);
+#endif
+        }
+        public static int SizeOf<T>() where T : unmanaged
+        {
+#if UNITYENGINE
+            return UnsafeUtility.SizeOf<T>();
+#else
+            return Marshal.SizeOf(TypeOf<T>.Type);
 #endif
         }
         public static bool IsUnmanaged(Type type)
