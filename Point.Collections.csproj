@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <BaseIntermediateOutputPath>.obj\</BaseIntermediateOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -68,6 +69,10 @@
     <None Remove="Runtime\TypeHelper.cs.meta" />
     <None Remove="Runtime\TypeInfo.cs.meta" />
     <None Remove="Runtime\TypeStatic.cs.meta" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
 </Project>

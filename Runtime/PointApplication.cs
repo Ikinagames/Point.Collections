@@ -17,21 +17,36 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
 using Point.Collections.Threading;
 using System;
 using System.Reflection;
+#if UNITYENGINE
 using UnityEngine;
 using UnityEngine.Scripting;
+#endif
 
 [assembly: System.Runtime.InteropServices.ComVisible(true)]
 namespace Point.Collections
 {
+#if UNITYENGINE
     [AddComponentMenu("")]
-    public sealed class PointApplication : StaticMonobehaviour<PointApplication>
+#endif
+    public sealed class PointApplication :
+#if UNITYENGINE
+        StaticMonobehaviour<PointApplication>
+#else
+        CLRSingleTone<PointApplication>
+#endif
     {
         #region Statics
 
+#if UNITYENGINE
         [Preserve, RuntimeInitializeOnLoadMethod]
+#endif
         public static void Initialize()
         {
             PointApplication app = Instance;
@@ -50,17 +65,21 @@ namespace Point.Collections
 
         #endregion
 
+#if UNITYENGINE
         protected override bool EnableLog => false;
         protected override bool HideInInspector => true;
+#endif
 
         private ThreadInfo m_MainThread;
 
         public ThreadInfo MainThread => m_MainThread;
 
+#if UNITYENGINE
         public event Action OnFrameUpdate;
         public event Action OnApplicationShutdown;
+#endif
 
-        protected override void OnInitialze()
+        protected override void OnInitialize()
         {
             const string c_Instance = "Instance";
 
@@ -76,12 +95,20 @@ namespace Point.Collections
                 }
                 else System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(types[i].TypeHandle);
             }
+
+#if !UNITYENGINE
+            Main();
+#endif
         }
 
+#if UNITYENGINE
         private void Awake()
+#else
+        private void Main()
+#endif
         {
             m_MainThread = ThreadInfo.CurrentThread;
-
+#if UNITYENGINE
             if (PointSettings.Instance.m_EnableLogFile)
             {
 #if DEBUG_MODE
@@ -97,7 +124,9 @@ namespace Point.Collections
                     PointHelper.s_LogHandler.SetLogFile(PointSettings.Instance.m_LogFilePath);
                 }
             }
+#endif
         }
+#if UNITYENGINE
         private void Update()
         {
             OnFrameUpdate?.Invoke();
@@ -110,5 +139,6 @@ namespace Point.Collections
 
             PointHelper.s_LogHandler.CloseLogFile();
         }
+#endif
     }
 }

@@ -17,9 +17,15 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+
+#if UNITYENGINE
 
 using UnityEngine;
 using System.Reflection;
@@ -137,3 +143,5 @@ namespace Point.Collections
         }
     }
 }
+
+#endif

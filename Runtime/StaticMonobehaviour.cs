@@ -17,6 +17,11 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
+#if UNITYENGINE
 using Point.Collections.Native;
 using UnityEngine;
 
@@ -98,7 +103,7 @@ namespace Point.Collections
 
         void IStaticMonobehaviour.OnInitialize()
         {
-            OnInitialze();
+            OnInitialize();
 
             if (EnableLog)
             {
@@ -118,7 +123,7 @@ namespace Point.Collections
         }
 
         /// <inheritdoc cref="IStaticMonobehaviour.OnInitialize"/>
-        protected virtual void OnInitialze() { }
+        protected virtual void OnInitialize() { }
         /// <inheritdoc cref="IStaticMonobehaviour.OnShutdown"/>
         protected virtual void OnShutdown() { }
 
@@ -138,3 +143,5 @@ namespace Point.Collections
         }
     }
 }
+
+#endif

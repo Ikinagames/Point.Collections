@@ -17,12 +17,17 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
 using Point.Collections.Buffer.LowLevel;
 using Point.Collections.ResourceControl.LowLevel;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+#if UNITYENGINE
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -30,6 +35,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Networking;
+#endif
 
 namespace Point.Collections.ResourceControl
 {
@@ -109,7 +115,7 @@ namespace Point.Collections.ResourceControl
             }
         }
 
-        protected override void OnInitialze()
+        protected override void OnInitialize()
         {
             m_AssetBundleInfos = new NativeList<UnsafeAssetBundleInfo>(AllocatorManager.Persistent);
             m_AssetBundles = new List<AssetContainer>();
@@ -325,7 +331,7 @@ namespace Point.Collections.ResourceControl
             Instance.m_AssetBundles[index] = null;
         }
 
-        #region Internal
+#region Internal
 
         internal static unsafe AssetBundleInfo GetAssetBundleInfo(in int index)
         {
@@ -498,7 +504,7 @@ namespace Point.Collections.ResourceControl
             Instance.m_ReferenceCheckSum ^= key.key;
         }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// 해당 키의 에셋의 에셋번들을 반환합니다.
