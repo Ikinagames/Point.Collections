@@ -14,6 +14,7 @@
 // limitations under the License.
 
 using System;
+using System.Threading;
 
 namespace Point.Collections.Threading
 {
@@ -34,6 +35,9 @@ namespace Point.Collections.Threading
         {
             m_Value = value;
         }
+
+        public void Increment() => Interlocked.Increment(ref m_Value);
+        public void Decrement() => Interlocked.Decrement(ref m_Value);
 
         public bool Equals(AtomicSafeInteger other) => m_Value.Equals(other.m_Value);
         public override int GetHashCode() => m_Value.GetHashCode();

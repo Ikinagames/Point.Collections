@@ -17,13 +17,21 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
 using System;
 using System.Runtime.InteropServices;
+#if UNITYENGINE
 using Unity.Collections;
+#endif
 
 namespace Point.Collections
 {
+#if UNITYENGINE
     [BurstCompatible]
+#endif
     [StructLayout(LayoutKind.Sequential)]
     public struct BitArray32 : IEquatable<BitArray32>
     {

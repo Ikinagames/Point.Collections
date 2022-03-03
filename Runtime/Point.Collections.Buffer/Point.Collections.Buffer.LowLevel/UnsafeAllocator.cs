@@ -13,26 +13,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
+#undef UNITYENGINE
+
 using System;
 using System.Collections.Generic;
+#if UNITYENGINE
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
+#endif
 
 namespace Point.Collections.Buffer.LowLevel
 {
     /// <summary>
     /// Unity native-side 에서 메모리 버퍼를 할당하는 Allocator 입니다.
     /// </summary>
+#if UNITYENGINE
     [BurstCompatible]
-    public struct UnsafeAllocator : INativeDisposable, IDisposable, IEquatable<UnsafeAllocator>
+#endif
+    public struct UnsafeAllocator :
+#if UNITYENGINE
+        INativeDisposable, 
+#endif
+        IDisposable, IEquatable<UnsafeAllocator>
     {
+#if UNITYENGINE
         [BurstCompatible]
+#endif
         internal struct Buffer
         {
             internal UnsafeReference Ptr;
@@ -42,7 +59,7 @@ namespace Point.Collections.Buffer.LowLevel
         internal UnsafeReference<Buffer> m_Buffer;
         internal readonly Allocator m_Allocator;
 
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
+#if UNITYENGINE && ENABLE_UNITY_COLLECTIONS_CHECKS
         internal AtomicSafetyHandle m_SafetyHandle;
 #endif
 
@@ -161,6 +178,7 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
             m_Buffer = default(UnsafeReference<Buffer>);
         }
+#if UNITYENGINE
         public JobHandle Dispose(JobHandle inputDeps)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -185,10 +203,13 @@ namespace Point.Collections.Buffer.LowLevel
             m_Buffer = default(UnsafeReference<Buffer>);
             return result;
         }
+#endif
 
         public bool Equals(UnsafeAllocator other) => m_Buffer.Equals(other.m_Buffer);
 
+#if UNITYENGINE
         [BurstCompatible]
+#endif
         public readonly struct ReadOnly
         {
             private readonly UnsafeReference m_Ptr;
@@ -203,6 +224,7 @@ namespace Point.Collections.Buffer.LowLevel
                 m_Size = allocator.m_Buffer.Value.Size;
             }
         }
+#if UNITYENGINE
         [BurstCompatible]
         private struct DisposeJob : IJob
         {
@@ -218,11 +240,18 @@ namespace Point.Collections.Buffer.LowLevel
                 }
             }
         }
+#endif
     }
     /// <summary><inheritdoc cref="UnsafeAllocator"/></summary>
     /// <typeparam name="T"></typeparam>
+#if UNITYENGINE
     [BurstCompatible]
-    public struct UnsafeAllocator<T> : INativeDisposable, IDisposable, IEquatable<UnsafeAllocator<T>>
+#endif
+    public struct UnsafeAllocator<T> :
+#if UNITYENGINE
+        INativeDisposable, 
+#endif
+        IDisposable, IEquatable<UnsafeAllocator<T>>
         where T : unmanaged
     {
         internal UnsafeAllocator m_Buffer;
@@ -318,6 +347,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             m_Buffer.Dispose();
         }
+#if UNITYENGINE
         public JobHandle Dispose(JobHandle inputDeps)
         {
             JobHandle result = m_Buffer.Dispose(inputDeps);
@@ -325,10 +355,13 @@ namespace Point.Collections.Buffer.LowLevel
             m_Buffer = default(UnsafeAllocator);
             return result;
         }
+#endif
 
         public bool Equals(UnsafeAllocator<T> other) => m_Buffer.Equals(other.m_Buffer);
 
+#if UNITYENGINE
         [BurstCompatible]
+#endif
         public readonly struct ReadOnly
         {
             private readonly UnsafeReference<T>.ReadOnly m_Ptr;
@@ -380,7 +413,24 @@ namespace Point.Collections.Buffer.LowLevel
         /// <param name="alignment"></param>
         /// <param name="options"></param>
         /// <exception cref="Exception"></exception>
-        public static void Resize(this ref UnsafeAllocator t, long size, int alignment, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
+        public static void Resize(this ref UnsafeAllocator t, long size, int alignment)
+        {
+            if (size < 0) throw new Exception();
+
+            UnityEngine.Debug.Log($"re allocate from {t.m_Buffer.Value.Size} -> {size}");
+            unsafe
+            {
+                void* ptr = UnsafeUtility.Malloc(size, alignment, t.m_Allocator);
+
+                UnsafeUtility.MemCpy(ptr, t.Ptr, math.min(size, t.Size));
+                UnsafeUtility.Free(t.Ptr, t.m_Allocator);
+
+                t.m_Buffer.Value.Ptr = ptr;
+                t.m_Buffer.Value.Size = size;
+            }
+        }
+#if UNITYENGINE
+        public static void Resize(this ref UnsafeAllocator t, long size, int alignment, NativeArrayOptions options)
         {
             if (size < 0) throw new Exception();
 
@@ -403,6 +453,7 @@ namespace Point.Collections.Buffer.LowLevel
                 t.m_Buffer.Value.Size = size;
             }
         }
+#endif
         /// <summary>
         /// 이 메모리 버퍼를 <paramref name="length"/> 길이 만큼 다시 재 할당합니다.
         /// </summary>
@@ -415,7 +466,17 @@ namespace Point.Collections.Buffer.LowLevel
         /// <param name="length"></param>
         /// <param name="options"></param>
         /// <exception cref="Exception"></exception>
-        public static void Resize<T>(this ref UnsafeAllocator<T> t, int length, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
+        public static void Resize<T>(this ref UnsafeAllocator<T> t, int length)
+            where T : unmanaged
+        {
+            if (length < 0) throw new Exception();
+
+            t.m_Buffer.Resize(
+                UnsafeUtility.SizeOf<T>() * length,
+                UnsafeUtility.AlignOf<T>()
+                );
+        }
+        public static void Resize<T>(this ref UnsafeAllocator<T> t, int length, NativeArrayOptions options)
             where T : unmanaged
         {
             if (length < 0) throw new Exception();
@@ -440,6 +501,7 @@ namespace Point.Collections.Buffer.LowLevel
             UnsafeBufferUtility.Sort<T, U>(t.Ptr, length, comparer);
         }
 
+#if UNITYENGINE
         /// <summary>
         /// <paramref name="other"/ 의 데이터들을 모아 새로운 <seealso cref="NativeArray{T}"/> 의 메모리 버퍼를 생성하여 반환합니다.
         /// </summary>
@@ -469,5 +531,6 @@ namespace Point.Collections.Buffer.LowLevel
                     );
             }
         }
+#endif
     }
 }

@@ -17,21 +17,31 @@
 #define DEBUG_MODE
 #endif
 
-using Point.Collections.Burst;
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+#if UNITYENGINE
 using Unity.Burst;
+using Point.Collections.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+#endif
 
 namespace Point.Collections.Buffer.LowLevel
 {
+#if UNITYENGINE
     [BurstCompile(CompileSynchronously = true, DisableSafetyChecks = true)]
+#endif
     public static unsafe class UnsafeBufferUtility
     {
+#if UNITYENGINE
         [BurstCompile]
+#endif
         public static byte* AsBytes<T>(ref T t, out int length)
             where T : unmanaged
         {
@@ -56,7 +66,9 @@ namespace Point.Collections.Buffer.LowLevel
         /// <typeparam name="T"></typeparam>
         /// <param name="t"></param>
         /// <returns></returns>
+#if UNITYENGINE
         [BurstCompile]
+#endif
         public static Hash Calculate<T>(this ref T t) where T : unmanaged
         {
             byte* bytes = AsBytes(ref t, out int length);
@@ -67,7 +79,9 @@ namespace Point.Collections.Buffer.LowLevel
             return hash;
         }
 
+#if UNITYENGINE
         [BurstCompile]
+#endif
         public static bool BinaryComparer<T, U>(ref T x, ref U y)
             where T : unmanaged
             where U : unmanaged
@@ -86,7 +100,9 @@ namespace Point.Collections.Buffer.LowLevel
             return true;
         }
 
+#if UNITYENGINE
         [BurstCompile]
+#endif
         public static void Sort<T, U>(in UnsafeReference<T> buffer, in int length, U comparer)
             where T : unmanaged
             where U : unmanaged, IComparer<T>
@@ -102,7 +118,9 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
+#if UNITYENGINE
         [BurstCompile]
+#endif
         public static void Swap<T>(in UnsafeReference<T> buffer, in int from, in int to)
             where T : unmanaged
         {
@@ -119,19 +137,10 @@ namespace Point.Collections.Buffer.LowLevel
 
             return index >= 0;
         }
-        //public static bool Contains<T, U, L>(in T iterator, U list)
-        //    where T : unmanaged, IEnumerator<L>
-        //    where U : unmanaged, INativeList<L>
-        //    where L : unmanaged
-        //{
-        //    int count = 0;
-        //    while (iterator.MoveNext())
-        //    {
-        //        count++;
-        //    }
-        //}
-
+        
+#if UNITYENGINE
         [BurstCompile]
+#endif
         public static int IndexOf<T, U>(in UnsafeReference<T> array, in int length, U item)
             where T : unmanaged, IEquatable<U>
             where U : unmanaged
@@ -153,7 +162,9 @@ namespace Point.Collections.Buffer.LowLevel
             return -1;
         }
 
+#if UNITYENGINE
         [BurstCompile]
+#endif
         public static bool RemoveForSwapBack<T, U>(UnsafeReference<T> array, int length, U element)
             where T : unmanaged, IEquatable<U>
             where U : unmanaged
@@ -168,7 +179,9 @@ namespace Point.Collections.Buffer.LowLevel
 
             return true;
         }
+#if UNITYENGINE
         [BurstCompile]
+#endif
         public static bool RemoveAtSwapBack<T>(UnsafeReference<T> array, int length, int index)
            where T : unmanaged
         {
@@ -199,7 +212,9 @@ namespace Point.Collections.Buffer.LowLevel
 
         #region Memory
 
+#if UNITYENGINE
         [BurstCompile]
+#endif
         public static long CalculateFreeSpaceBetween(in UnsafeReference from, in int length, in UnsafeReference to)
         {
             UnsafeReference<byte> p = (UnsafeReference<byte>)from;

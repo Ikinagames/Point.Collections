@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,14 +13,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+#if UNITYENGINE
 using Unity.Burst;
 using Unity.Collections.LowLevel.Unsafe;
+#endif
 
 namespace Point.Collections
 {
@@ -200,7 +210,7 @@ namespace Point.Collections
         /// <returns></returns>
         public static int AlignOf(Type t)
         {
-            if (!UnsafeUtility.IsUnmanaged(t))
+            if (!IsUnmanaged(t))
             {
                 return 0;
             }
@@ -256,6 +266,9 @@ namespace Point.Collections
             }
             return output;
         }
+
+        private static readonly TypedDictionary<TypeInfo> s_TypeInfoDictionary = new TypedDictionary<TypeInfo>();
+
         /// <summary>
         /// stack 에 할당될 수 있는 <see cref="System.Type"/> 의 Wrapper struct 를 반환합니다.
         /// </summary>
@@ -263,7 +276,7 @@ namespace Point.Collections
         /// <returns></returns>
         public static TypeInfo ToTypeInfo(Type type)
         {
-            if (!UnsafeUtility.IsUnmanaged(type))
+            if (!IsUnmanaged(type))
             {
                 //PointCore.LogError(PointCore.LogChannel.Collections,
                 //    $"Could not resolve type of {TypeHelper.ToString(type)} is not ValueType.");
@@ -271,15 +284,53 @@ namespace Point.Collections
                 return new TypeInfo(type);
             }
 
+#if UNITYENGINE
             SharedStatic<TypeInfo> typeStatic = TypeStatic.GetValue(type);
 
             if (typeStatic.Data.Type == null)
             {
                 typeStatic.Data
-                    = new TypeInfo(type, UnsafeUtility.SizeOf(type), TypeHelper.AlignOf(type), CollectionUtility.CreateHashCode());
+                    = new TypeInfo(type, SizeOf(type), AlignOf(type), CollectionUtility.CreateHashCode());
+            }
+            return typeStatic.Data;
+#else
+            if (!s_TypeInfoDictionary.TryGetValue(type, out TypeInfo value))
+            {
+                value = new TypeInfo(type, SizeOf(type), AlignOf(type), CollectionUtility.CreateHashCode());
+
+                s_TypeInfoDictionary.Add(type, value);
             }
 
-            return typeStatic.Data;
+            return value;
+#endif
+        }
+
+        public static int SizeOf(Type type)
+        {
+#if UNITYENGINE
+            return UnsafeUtility.SizeOf(type);
+#else
+            return Marshal.SizeOf(type);
+#endif
+        }
+        public static bool IsUnmanaged(Type type)
+        {
+#if UNITYENGINE
+            return UnsafeUtility.IsUnmanaged(type);
+#else
+            // primitive, pointer or enum -> true
+            if (type.IsPrimitive || type.IsPointer || type.IsEnum)
+                return true;
+
+            // not a struct -> false
+            if (!type.IsValueType)
+                return false;
+
+            // otherwise check recursively
+            return type
+                .GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                .All(f => IsUnmanaged(f.FieldType));
+#endif
         }
     }
 }
