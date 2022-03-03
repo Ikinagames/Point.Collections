@@ -17,17 +17,25 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
 using Point.Collections.Buffer.LowLevel;
 using Point.Collections.Threading;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+#if UNITYENGINE
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+#endif
 
 namespace Point.Collections.Buffer
 {
+#if UNITYENGINE
     [NativeContainer]
+#endif
     public struct NativeLinearHashMap<TKey, TValue> :
         IEquatable<NativeLinearHashMap<TKey, TValue>>, IDisposable,
         IEnumerable<KeyValue<TKey, TValue>>
@@ -59,9 +67,17 @@ namespace Point.Collections.Buffer
         public int Capacity => m_HashMap.Capacity;
         public int Count => m_HashMap.Count;
 
-        public NativeLinearHashMap(int initialCount, Allocator allocator)
+        public NativeLinearHashMap(int initialCount
+#if UNITYENGINE
+            , Allocator allocator
+#endif
+            )
         {
-            m_HashMap = new UnsafeLinearHashMap<TKey, TValue>(initialCount, allocator);
+            m_HashMap = new UnsafeLinearHashMap<TKey, TValue>(initialCount
+#if UNITYENGINE
+                , allocator
+#endif
+                );
             m_Owner = ThreadInfo.CurrentThread;
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             DisposeSentinel.Create(out m_SafetyHandle, out m_DisposeSentinel, 1, allocator);
@@ -100,8 +116,9 @@ namespace Point.Collections.Buffer
 
         public bool Equals(NativeLinearHashMap<TKey, TValue> other) => m_HashMap.Equals(other.m_HashMap);
 
-        [BurstCompatible]
+#if UNITYENGINE
         [NativeContainerIsReadOnly]
+#endif
         public struct Enumerator : IEnumerator<KeyValue<TKey, TValue>>
         {
             private readonly ThreadInfo m_Owner;
@@ -113,7 +130,9 @@ namespace Point.Collections.Buffer
 #endif
 
             public KeyValue<TKey, TValue> Current => m_Buffer[m_Index];
+#if UNITYENGINE
             [NotBurstCompatible]
+#endif
             object IEnumerator.Current => m_Buffer[m_Index];
 
             internal Enumerator(NativeLinearHashMap<TKey, TValue> hashMap)

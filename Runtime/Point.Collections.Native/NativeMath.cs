@@ -22,13 +22,16 @@ namespace Point.Collections.Native
     public static unsafe class NativeMath
     {
 #if POINT_COLLECTIONS_NATIVE
-        [DllImport("Ikinagames.Collections.Internal")]
+        [DllImport("Point.Collections.Native.Internal")]
         public static extern void unity_todB(double* linear, double* output);
-        [DllImport("Ikinagames.Collections.Internal")]
+        [DllImport("Point.Collections.Native.Internal")]
         public static extern void unity_fromdB(double* dB, double* output);
 
-        [DllImport("Ikinagames.Collections.Internal")]
-        public static extern bool binaryComparer(void* x, void* y, in int length);
+        [DllImport("Point.Collections.Native.Internal")]
+        public static extern void min(in long x, in long y, long* output);
+
+        [DllImport("Point.Collections.Native.Internal")]
+        public static extern bool binaryComparer(void* x, void* y, in int length, bool* output);
 #endif
     }
 }

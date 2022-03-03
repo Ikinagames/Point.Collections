@@ -53,6 +53,11 @@ namespace Point.Collections.Buffer.LowLevel
             }
 #endif
         }
+        public static void MemCpy(void* ptr, void* from, in int length)
+        {
+            
+        }
+
 #if UNITYENGINE
         [BurstCompile]
 #endif
@@ -87,7 +92,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             byte* bytes = AsBytes(ref t, out int length);
             uint output;
-#if !POINT_COLLECTIONS_NATIVE
+#if UNITYENGINE
             BurstFNV1a.fnv1a32_byte(bytes, &length, &output);
 #else
             NativeFNV1a.fnv1a32_byte(bytes, &length, &output);
@@ -117,7 +122,9 @@ namespace Point.Collections.Buffer.LowLevel
             if (index != length) return false;
             return true;
 #else
-            return NativeMath.binaryComparer(a, b, in length);
+            bool result;
+            NativeMath.binaryComparer(a, b, in length, &result);
+            return result;
 #endif
         }
 
@@ -231,7 +238,7 @@ namespace Point.Collections.Buffer.LowLevel
             return true;
         }
 
-#region Memory
+        #region Memory
 
 #if UNITYENGINE
         [BurstCompile]
@@ -243,9 +250,9 @@ namespace Point.Collections.Buffer.LowLevel
             return to - (p + length);
         }
 
-#endregion
+        #endregion
 
-#region Native Array
+        #region Native Array
 
 #if UNITYENGINE
 
@@ -261,9 +268,9 @@ namespace Point.Collections.Buffer.LowLevel
 
 #endif
 
-#endregion
+        #endregion
 
-#region Safety Checks
+        #region Safety Checks
 
 #if UNITYENGINE && ENABLE_UNITY_COLLECTIONS_CHECKS
         private static readonly Dictionary<IntPtr, (DisposeSentinel, Allocator)> m_Safety
@@ -295,6 +302,6 @@ namespace Point.Collections.Buffer.LowLevel
         }
 #endif
 
-#endregion
+        #endregion
     }
 }

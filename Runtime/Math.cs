@@ -15,6 +15,14 @@
 
 //#define POINT_COLLECTIONS_NATIVE
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
 namespace Point.Collections
 {
     public static class Math
@@ -48,6 +56,15 @@ namespace Point.Collections
 #endif
             }
             return (float)output;
+        }
+
+        public static long min(in long x, in long y)
+        {
+#if UNITYENGINE
+            return Unity.Mathematics.math.min(x, y);
+#else
+            return x < y ? x : y;
+#endif
         }
     }
 }

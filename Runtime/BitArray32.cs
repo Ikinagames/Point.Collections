@@ -157,12 +157,16 @@ namespace Point.Collections
             }
         }
 
+#if UNITYENGINE
         [NotBurstCompatible]
+#endif
         public override string ToString()
         {
             return Convert.ToString(Value, 2);
         }
+#if UNITYENGINE
         [NotBurstCompatible]
+#endif
         public override bool Equals(object obj)
         {
             if (!(obj is uint)) return false;

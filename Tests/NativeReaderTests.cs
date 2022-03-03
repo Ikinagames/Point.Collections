@@ -45,7 +45,7 @@ namespace Point.Collections.Tests
                     x = UnsafeBufferUtility.AddressOf(ref a),
                     y = UnsafeBufferUtility.AddressOf(ref b);
 
-                result = NativeMath.binaryComparer(x, y, TypeHelper.SizeOf<TestStruct>());
+                NativeMath.binaryComparer(x, y, TypeHelper.SizeOf<TestStruct>(), &result);
             }
 
             Assert.IsTrue(result);

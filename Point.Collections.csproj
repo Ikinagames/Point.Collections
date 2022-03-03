@@ -1,0 +1,73 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Class1.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove=".gitignore" />
+    <None Remove=".gitmodules" />
+    <None Remove="Runtime\AABB.cs.meta" />
+    <None Remove="Runtime\AssetPathAttribute.cs.meta" />
+    <None Remove="Runtime\AssetPathField.cs.meta" />
+    <None Remove="Runtime\BitArray32.cs.meta" />
+    <None Remove="Runtime\BitArray64.cs.meta" />
+    <None Remove="Runtime\Channel.cs.meta" />
+    <None Remove="Runtime\CheckSum.cs.meta" />
+    <None Remove="Runtime\CLRSingleTone.cs.meta" />
+    <None Remove="Runtime\CollectionUtility.cs.meta" />
+    <None Remove="Runtime\Direction.cs.meta" />
+    <None Remove="Runtime\ExtensionMethods.cs.meta" />
+    <None Remove="Runtime\FNV1a32.cs.meta" />
+    <None Remove="Runtime\Hash.cs.meta" />
+    <None Remove="Runtime\HighPrecisionTime.cs.meta" />
+    <None Remove="Runtime\HighPrecisionTimer.cs.meta" />
+    <None Remove="Runtime\HTMLString.cs.meta" />
+    <None Remove="Runtime\IActionWrapper.cs.meta" />
+    <None Remove="Runtime\IEmpty.cs.meta" />
+    <None Remove="Runtime\IFixedList.cs.meta" />
+    <None Remove="Runtime\IStaticInitializer.cs.meta" />
+    <None Remove="Runtime\IStaticMonobehaviour.cs.meta" />
+    <None Remove="Runtime\IValidation.cs.meta" />
+    <None Remove="Runtime\KeyValue.cs.meta" />
+    <None Remove="Runtime\LogChannel.cs.meta" />
+    <None Remove="Runtime\Math.cs.meta" />
+    <None Remove="Runtime\NotEditableAttribute.cs.meta" />
+    <None Remove="Runtime\Plane.cs.meta" />
+    <None Remove="Runtime\Point.Collections.asmdef" />
+    <None Remove="Runtime\Point.Collections.asmdef.meta" />
+    <None Remove="Runtime\Point.Collections.Buffer.meta" />
+    <None Remove="Runtime\Point.Collections.Burst.meta" />
+    <None Remove="Runtime\Point.Collections.Diagnostics.meta" />
+    <None Remove="Runtime\Point.Collections.Dignostics.meta" />
+    <None Remove="Runtime\Point.Collections.Events.meta" />
+    <None Remove="Runtime\Point.Collections.IO.meta" />
+    <None Remove="Runtime\Point.Collections.LowLevel.meta" />
+    <None Remove="Runtime\Point.Collections.Native.meta" />
+    <None Remove="Runtime\Point.Collections.ResourceControl.meta" />
+    <None Remove="Runtime\Point.Collections.SceneManagement.meta" />
+    <None Remove="Runtime\Point.Collections.Threading.meta" />
+    <None Remove="Runtime\PointApplication.cs.meta" />
+    <None Remove="Runtime\PointException.cs.meta" />
+    <None Remove="Runtime\PointHelper.cs.meta" />
+    <None Remove="Runtime\PointSettings.cs.meta" />
+    <None Remove="Runtime\QuaternionExtensions.cs.meta" />
+    <None Remove="Runtime\SceneID.cs.meta" />
+    <None Remove="Runtime\StaticMonobehaviour.cs.meta" />
+    <None Remove="Runtime\StaticScriptableObject.cs.meta" />
+    <None Remove="Runtime\StringColor.cs.meta" />
+    <None Remove="Runtime\TestSerializer.cs.meta" />
+    <None Remove="Runtime\Transformation.cs.meta" />
+    <None Remove="Runtime\TypedDictionary.cs.meta" />
+    <None Remove="Runtime\TypeHelper.cs.meta" />
+    <None Remove="Runtime\TypeInfo.cs.meta" />
+    <None Remove="Runtime\TypeStatic.cs.meta" />
+  </ItemGroup>
+
+</Project>

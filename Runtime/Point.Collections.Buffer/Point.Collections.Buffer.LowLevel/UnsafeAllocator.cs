@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 #define DEBUG_MODE
 #endif
@@ -24,6 +23,7 @@
 
 //#undef UNITYENGINE
 
+using Point.Collections.Native;
 using System;
 using System.Collections.Generic;
 #if UNITYENGINE
@@ -57,7 +57,9 @@ namespace Point.Collections.Buffer.LowLevel
         }
 
         internal UnsafeReference<Buffer> m_Buffer;
+#if UNITYENGINE
         internal readonly Allocator m_Allocator;
+#endif
 
 #if UNITYENGINE && ENABLE_UNITY_COLLECTIONS_CHECKS
         internal AtomicSafetyHandle m_SafetyHandle;
@@ -76,40 +78,61 @@ namespace Point.Collections.Buffer.LowLevel
         /// </summary>
         public bool IsCreated => m_Buffer.IsCreated;
 
-        public UnsafeAllocator(long size, int alignment, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
+        public UnsafeAllocator(long size, int alignment
+#if UNITYENGINE
+            , Allocator allocator, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory
+#endif
+            )
         {
             unsafe
             {
-                m_Buffer = (Buffer*)UnsafeUtility.Malloc(
-                    UnsafeUtility.SizeOf<Buffer>(),
-                    UnsafeUtility.AlignOf<Buffer>(),
-                    allocator
+                m_Buffer = (Buffer*)NativeUtility.Malloc(
+                    TypeHelper.SizeOf<Buffer>(),
+                    TypeHelper.AlignOf<Buffer>()
+#if UNITYENGINE
+                    , allocator
+#endif
                     );
 
                 m_Buffer.Value = new Buffer
                 {
-                    Ptr = UnsafeUtility.Malloc(size, alignment, allocator),
+                    Ptr = NativeUtility.Malloc(size, alignment
+#if UNITYENGINE
+                    , allocator
+#endif
+                    )
+                    ,
                     Size = size
                 };
 
+#if UNITYENGINE
                 if ((options & NativeArrayOptions.ClearMemory) == NativeArrayOptions.ClearMemory)
                 {
                     UnsafeUtility.MemClear(m_Buffer.Value.Ptr, size);
                 }
+#endif
             }
+#if UNITYENGINE
             m_Allocator = allocator;
+#endif
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             UnsafeBufferUtility.CreateSafety(m_Buffer, allocator, out m_SafetyHandle);
 #endif
         }
-        public UnsafeAllocator(UnsafeReference ptr, long size, Allocator allocator)
+        public UnsafeAllocator(UnsafeReference ptr, long size
+#if UNITYENGINE
+            , Allocator allocator
+#endif
+            )
         {
             unsafe
             {
-                m_Buffer = (Buffer*)UnsafeUtility.Malloc(
-                    UnsafeUtility.SizeOf<Buffer>(),
-                    UnsafeUtility.AlignOf<Buffer>(),
-                    allocator
+                m_Buffer = (Buffer*)NativeUtility.Malloc(
+                    TypeHelper.SizeOf<Buffer>(),
+                    TypeHelper.AlignOf<Buffer>()
+#if UNITYENGINE
+                    , allocator
+#endif
                     );
 
                 m_Buffer.Value = new Buffer
@@ -118,7 +141,9 @@ namespace Point.Collections.Buffer.LowLevel
                     Size = size
                 };
             }
+#if UNITYENGINE
             m_Allocator = allocator;
+#endif
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             UnsafeBufferUtility.CreateSafety(m_Buffer, allocator, out m_SafetyHandle);
 #endif
@@ -132,7 +157,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             unsafe
             {
-                UnsafeUtility.MemClear(m_Buffer.Value.Ptr, m_Buffer.Value.Size);
+                NativeUtility.MemClear(m_Buffer.Value.Ptr, m_Buffer.Value.Size);
             }
         }
 
@@ -149,12 +174,12 @@ namespace Point.Collections.Buffer.LowLevel
             unsafe
             {
                 byte* bytes = UnsafeBufferUtility.AsBytes(ref item, out int length);
-                UnsafeUtility.MemCpy(m_Buffer.Value.Ptr, bytes, length);
+                NativeUtility.MemCpy(m_Buffer.Value.Ptr, bytes, length);
             }
         }
         public unsafe void Write(byte* bytes, int length)
         {
-            UnsafeUtility.MemCpy(m_Buffer.Value.Ptr, bytes, length);
+            NativeUtility.MemCpy(m_Buffer.Value.Ptr, bytes, length);
         }
 
         public void Dispose()
@@ -170,8 +195,16 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
             unsafe
             {
-                UnsafeUtility.Free(m_Buffer.Value.Ptr, m_Allocator);
-                UnsafeUtility.Free(m_Buffer, m_Allocator);
+                NativeUtility.Free(m_Buffer.Value.Ptr
+#if UNITYENGINE
+                    , m_Allocator
+#endif
+                    );
+                NativeUtility.Free(m_Buffer
+#if UNITYENGINE
+                    , m_Allocator
+#endif
+                    );
             }
 #if UNITYENGINE && ENABLE_UNITY_COLLECTIONS_CHECKS
             UnsafeBufferUtility.RemoveSafety(m_Buffer, ref m_SafetyHandle);
@@ -280,7 +313,7 @@ namespace Point.Collections.Buffer.LowLevel
         /// <summary>
         /// 이 메모리 버퍼의 사이즈를 <typeparamref name="T"/> 의 크기에 맞춘 최대 길이입니다.
         /// </summary>
-        public int Length => Convert.ToInt32(m_Buffer.Size / UnsafeUtility.SizeOf<T>());
+        public int Length => Convert.ToInt32(m_Buffer.Size / TypeHelper.SizeOf<T>());
 
         /// <summary>
         /// <paramref name="length"/> 만큼 새로운 <typeparamref name="T"/> 의 버퍼를 할당합니다.
@@ -288,13 +321,19 @@ namespace Point.Collections.Buffer.LowLevel
         /// <param name="length"></param>
         /// <param name="allocator"></param>
         /// <param name="options"></param>
-        public UnsafeAllocator(int length, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
+        public UnsafeAllocator(int length
+#if UNITYENGINE
+            , Allocator allocator, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory
+#endif
+            )
         {
             m_Buffer = new UnsafeAllocator(
-                UnsafeUtility.SizeOf<T>() * length,
-                UnsafeUtility.AlignOf<T>(),
-                allocator,
+                TypeHelper.SizeOf<T>() * length,
+                TypeHelper.AlignOf<T>()
+#if UNITYENGINE
+                , allocator,
                 options
+#endif
                 );
         }
         /// <summary>
@@ -303,9 +342,17 @@ namespace Point.Collections.Buffer.LowLevel
         /// <param name="ptr"></param>
         /// <param name="length"></param>
         /// <param name="allocator"></param>
-        public UnsafeAllocator(UnsafeReference<T> ptr, int length, Allocator allocator)
+        public UnsafeAllocator(UnsafeReference<T> ptr, int length
+#if UNITYENGINE
+            , Allocator allocator
+#endif
+            )
         {
-            m_Buffer = new UnsafeAllocator(ptr, UnsafeUtility.SizeOf<T>() * length, allocator);
+            m_Buffer = new UnsafeAllocator(ptr, TypeHelper.SizeOf<T>() * length
+#if UNITYENGINE
+                , allocator
+#endif 
+                );
         }
         /// <summary>
         /// 이 버퍼를 읽기 전용으로 반환합니다.
@@ -420,10 +467,18 @@ namespace Point.Collections.Buffer.LowLevel
             UnityEngine.Debug.Log($"re allocate from {t.m_Buffer.Value.Size} -> {size}");
             unsafe
             {
-                void* ptr = UnsafeUtility.Malloc(size, alignment, t.m_Allocator);
+                void* ptr = NativeUtility.Malloc(size, alignment
+#if UNITYENGINE
+                    , t.m_Allocator
+#endif
+                    );
 
-                UnsafeUtility.MemCpy(ptr, t.Ptr, math.min(size, t.Size));
-                UnsafeUtility.Free(t.Ptr, t.m_Allocator);
+                NativeUtility.MemCpy(ptr, t.Ptr, Math.min(size, t.Size));
+                NativeUtility.Free(t.Ptr
+#if UNITYENGINE
+                    , t.m_Allocator
+#endif
+                    );
 
                 t.m_Buffer.Value.Ptr = ptr;
                 t.m_Buffer.Value.Size = size;
@@ -472,21 +527,25 @@ namespace Point.Collections.Buffer.LowLevel
             if (length < 0) throw new Exception();
 
             t.m_Buffer.Resize(
-                UnsafeUtility.SizeOf<T>() * length,
-                UnsafeUtility.AlignOf<T>()
+                TypeHelper.SizeOf<T>() * length,
+                TypeHelper.AlignOf<T>()
                 );
         }
-        public static void Resize<T>(this ref UnsafeAllocator<T> t, int length, NativeArrayOptions options)
+#if UNITYENGINE
+        public static void Resize<T>(this ref UnsafeAllocator<T> t, int length
+            , NativeArrayOptions options
+            )
             where T : unmanaged
         {
             if (length < 0) throw new Exception();
 
             t.m_Buffer.Resize(
-                UnsafeUtility.SizeOf<T>() * length,
-                UnsafeUtility.AlignOf<T>(),
-                options
+                TypeHelper.SizeOf<T>() * length,
+                TypeHelper.AlignOf<T>()
+                , options
                 );
         }
+#endif
 
         public static void Sort<T, U>(this ref UnsafeAllocator<T> t, U comparer)
             where T : unmanaged

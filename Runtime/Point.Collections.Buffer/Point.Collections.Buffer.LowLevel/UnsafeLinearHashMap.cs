@@ -17,12 +17,18 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
+#if UNITYENGINE
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+#endif
 
 namespace Point.Collections.Buffer.LowLevel
 {
@@ -31,10 +37,15 @@ namespace Point.Collections.Buffer.LowLevel
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
+#if UNITYENGINE
     [BurstCompatible]
+#endif
     public struct UnsafeLinearHashMap<TKey, TValue> :
-        IEquatable<UnsafeLinearHashMap<TKey, TValue>>, INativeDisposable, IDisposable,
-        IEnumerable<KeyValue<TKey, TValue>>
+        IEquatable<UnsafeLinearHashMap<TKey, TValue>>
+#if UNITYENGINE
+        , INativeDisposable 
+#endif
+        , IDisposable, IEnumerable<KeyValue<TKey, TValue>>
 
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
@@ -88,10 +99,18 @@ namespace Point.Collections.Buffer.LowLevel
             m_InitialCount = initialCount;
             m_Buffer = allocator;
         }
-        public UnsafeLinearHashMap(int initialCount, Allocator allocator)
+        public UnsafeLinearHashMap(int initialCount
+#if UNITYENGINE
+            , Allocator allocator
+#endif
+            )
         {
             m_InitialCount = initialCount;
-            m_Buffer = new UnsafeAllocator<KeyValue<TKey, TValue>>(initialCount, allocator, NativeArrayOptions.ClearMemory);
+            m_Buffer = new UnsafeAllocator<KeyValue<TKey, TValue>>(initialCount
+#if UNITYENGINE
+                , allocator, NativeArrayOptions.ClearMemory
+#endif
+                );
         }
 
         private bool TryFindEmptyIndexFor(TKey key, out int index)
@@ -139,7 +158,11 @@ namespace Point.Collections.Buffer.LowLevel
             {
                 int targetIncrement = Capacity / m_InitialCount + 1;
 
-                m_Buffer.Resize(m_InitialCount * targetIncrement, NativeArrayOptions.ClearMemory);
+                m_Buffer.Resize(m_InitialCount * targetIncrement
+#if UNITYENGINE
+                    , NativeArrayOptions.ClearMemory
+#endif
+                    );
 
                 return Add(key, value);
             }
@@ -154,7 +177,11 @@ namespace Point.Collections.Buffer.LowLevel
             {
                 int targetIncrement = Capacity / m_InitialCount + 1;
 
-                m_Buffer.Resize(m_InitialCount * targetIncrement, NativeArrayOptions.ClearMemory);
+                m_Buffer.Resize(m_InitialCount * targetIncrement
+#if UNITYENGINE
+                    , NativeArrayOptions.ClearMemory
+#endif
+                    );
 
                 AddOrUpdate(key, value);
                 return;
@@ -190,6 +217,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             m_Buffer.Dispose();
         }
+#if UNITYENGINE
         public JobHandle Dispose(JobHandle inputDeps)
         {
             var result = m_Buffer.Dispose(inputDeps);
@@ -197,15 +225,17 @@ namespace Point.Collections.Buffer.LowLevel
             m_Buffer = default(UnsafeAllocator<KeyValue<TKey, TValue>>);
             return result;
         }
-
         [BurstCompatible]
+#endif
         public struct Enumerator : IEnumerator<KeyValue<TKey, TValue>>
         {
             private UnsafeAllocator<KeyValue<TKey, TValue>>.ReadOnly m_Buffer;
             private int m_Index;
 
             public KeyValue<TKey, TValue> Current => m_Buffer[m_Index];
+#if UNITYENGINE
             [NotBurstCompatible]
+#endif
             object IEnumerator.Current => m_Buffer[m_Index];
 
             internal Enumerator(UnsafeLinearHashMap<TKey, TValue> hashMap)
@@ -263,6 +293,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             return t.m_Buffer;
         }
+#if UNITYENGINE
         public static NativeArray<TKey> GetKeyArray<TKey, TValue>(this UnsafeLinearHashMap<TKey, TValue> t, Allocator allocator)
             where TKey : unmanaged, IEquatable<TKey>
             where TValue : unmanaged
@@ -287,5 +318,6 @@ namespace Point.Collections.Buffer.LowLevel
 
             return temp;
         }
+#endif
     }
 }

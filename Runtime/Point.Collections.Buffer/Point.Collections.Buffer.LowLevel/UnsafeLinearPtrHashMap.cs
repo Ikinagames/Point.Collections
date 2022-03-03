@@ -17,19 +17,30 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
+#if UNITYENGINE
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+#endif
 
 namespace Point.Collections.Buffer.LowLevel
 {
+#if UNITYENGINE
     [BurstCompatible]
+#endif
     public struct UnsafeLinearPtrHashMap<TKey, TValue> :
-        IEquatable<UnsafeLinearPtrHashMap<TKey, TValue>>, INativeDisposable, IDisposable,
-        IEnumerable<KeyValue<TKey, UnsafeReference<TValue>>>
+        IEquatable<UnsafeLinearPtrHashMap<TKey, TValue>>
+#if UNITYENGINE
+        , INativeDisposable
+#endif
+        , IDisposable, IEnumerable<KeyValue<TKey, UnsafeReference<TValue>>>
 
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
@@ -66,10 +77,18 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
-        public UnsafeLinearPtrHashMap(int initialCount, Allocator allocator)
+        public UnsafeLinearPtrHashMap(int initialCount
+#if UNITYENGINE
+            , Allocator allocator
+#endif
+            )
         {
             m_InitialCount = initialCount;
-            m_Buffer = new UnsafeAllocator<KeyValue<TKey, UnsafeReference<TValue>>>(initialCount, allocator, NativeArrayOptions.ClearMemory);
+            m_Buffer = new UnsafeAllocator<KeyValue<TKey, UnsafeReference<TValue>>>(initialCount
+#if UNITYENGINE
+                , allocator, NativeArrayOptions.ClearMemory
+#endif
+                );
         }
 
         private bool TryFindEmptyIndexFor(TKey key, out int index)
@@ -117,7 +136,11 @@ namespace Point.Collections.Buffer.LowLevel
             {
                 int targetIncrement = Capacity / m_InitialCount + 1;
 
-                m_Buffer.Resize(m_InitialCount * targetIncrement, NativeArrayOptions.ClearMemory);
+                m_Buffer.Resize(m_InitialCount * targetIncrement
+#if UNITYENGINE
+                    , NativeArrayOptions.ClearMemory
+#endif
+                    );
 
                 Add(key, value);
                 return;
@@ -132,7 +155,11 @@ namespace Point.Collections.Buffer.LowLevel
             {
                 int targetIncrement = Capacity / m_InitialCount + 1;
 
-                m_Buffer.Resize(m_InitialCount * targetIncrement, NativeArrayOptions.ClearMemory);
+                m_Buffer.Resize(m_InitialCount * targetIncrement
+#if UNITYENGINE
+                    , NativeArrayOptions.ClearMemory
+#endif
+                    );
 
                 AddOrUpdate(key, value);
                 return;
@@ -157,6 +184,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             m_Buffer.Dispose();
         }
+#if UNITYENGINE
         public JobHandle Dispose(JobHandle inputDeps)
         {
             var result = m_Buffer.Dispose(inputDeps);
@@ -166,13 +194,16 @@ namespace Point.Collections.Buffer.LowLevel
         }
 
         [BurstCompatible]
+#endif
         public struct Enumerator : IEnumerator<KeyValue<TKey, UnsafeReference<TValue>>>
         {
             private UnsafeAllocator<KeyValue<TKey, UnsafeReference<TValue>>>.ReadOnly m_Buffer;
             private int m_Index;
 
             public KeyValue<TKey, UnsafeReference<TValue>> Current => m_Buffer[m_Index];
+#if UNITYENGINE
             [NotBurstCompatible]
+#endif
             object IEnumerator.Current => m_Buffer[m_Index];
 
             internal Enumerator(UnsafeLinearPtrHashMap<TKey, TValue> hashMap)

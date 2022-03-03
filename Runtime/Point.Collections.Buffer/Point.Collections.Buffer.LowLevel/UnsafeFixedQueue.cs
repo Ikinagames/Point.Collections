@@ -17,10 +17,16 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
 using System;
+#if UNITYENGINE
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+#endif
 
 namespace Point.Collections.Buffer.LowLevel
 {
@@ -31,9 +37,14 @@ namespace Point.Collections.Buffer.LowLevel
     /// 버퍼 사이즈를 초과하여 아이템을 넣는 경우, 에러 로그를 보내고 받아들여지지 않습니다.
     /// </remarks>
     /// <typeparam name="T"></typeparam>
+#if UNITYENGINE
     [BurstCompatible]
-    public struct UnsafeFixedQueue<T> : INativeDisposable, IDisposable,
-        IEquatable<UnsafeFixedQueue<T>>
+#endif
+    public struct UnsafeFixedQueue<T> :
+#if UNITYENGINE
+        INativeDisposable, 
+#endif
+        IDisposable, IEquatable<UnsafeFixedQueue<T>>
         where T : unmanaged
     {
         private struct Item
@@ -66,12 +77,24 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
-        public UnsafeFixedQueue(int length, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory)
+        public UnsafeFixedQueue(int length
+#if UNITYENGINE
+            , Allocator allocator, NativeArrayOptions options = NativeArrayOptions.UninitializedMemory
+#endif
+            )
         {
-            m_List = new UnsafeAllocator<List>(1, allocator, options);
+            m_List = new UnsafeAllocator<List>(1
+#if UNITYENGINE
+                , allocator, options
+#endif
+                );
             m_List[0] = new List
             {
-                Buffer = new UnsafeAllocator<Item>(length, allocator, options),
+                Buffer = new UnsafeAllocator<Item>(length
+#if UNITYENGINE
+                , allocator, options
+#endif
+                ),
 
                 NextIndex = 0,
                 CurrentIndex = 0
@@ -139,6 +162,7 @@ namespace Point.Collections.Buffer.LowLevel
 
             m_List = default(UnsafeAllocator<List>);
         }
+#if UNITYENGINE
         public JobHandle Dispose(JobHandle inputDeps)
         {
             //#if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -156,7 +180,7 @@ namespace Point.Collections.Buffer.LowLevel
 
             return result;
         }
-
+#endif
         public bool Equals(UnsafeFixedQueue<T> other) => m_List.Equals(other.m_List);
     }
 }

@@ -221,6 +221,17 @@ namespace Point.Collections
 
             return Marshal.SizeOf(temp) - Marshal.SizeOf(t);
         }
+        public static int AlignOf<T>() where T : unmanaged
+        {
+            if (!IsUnmanaged(TypeOf<T>.Type))
+            {
+                return 0;
+            }
+
+            Type temp = TypeOf<AlignOfHelper<T>>.Type;
+            return Marshal.SizeOf(temp) - Marshal.SizeOf(TypeOf<T>.Type);
+        }
+
         /// <summary>
         /// Wrapper struct (아무 ValueType 맴버도 갖지 않은 구조체) 는 C# CLS 에서 무조건 1 byte 를 갖습니다. 
         /// 해당 컴포넌트 타입이 버퍼에 올라갈 필요가 있는지를 확인하여 메모리 낭비를 줄입니다.

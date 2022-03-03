@@ -17,8 +17,14 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
+#if UNITYENGINE
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+#endif
 
 namespace Point.Collections.Buffer.LowLevel
 {
@@ -32,7 +38,11 @@ namespace Point.Collections.Buffer.LowLevel
 
         protected override void OnInitialize()
         {
-            m_SharedMemoryPool = new UnsafeMemoryPool(SHARED_MEMORY_SIZE, Allocator.Persistent);
+            m_SharedMemoryPool = new UnsafeMemoryPool(SHARED_MEMORY_SIZE
+#if UNITYENGINE
+                , Allocator.Persistent
+#endif
+                );
         }
         protected override void OnDispose()
         {
@@ -48,7 +58,7 @@ namespace Point.Collections.Buffer.LowLevel
         public static UnsafeMemoryBlock<T> GetMemory<T>(int count)
             where T : unmanaged
         {
-            UnsafeMemoryBlock temp = GetMemory(UnsafeUtility.SizeOf<T>() * count);
+            UnsafeMemoryBlock temp = GetMemory(TypeHelper.SizeOf<T>() * count);
 
             return (UnsafeMemoryBlock<T>)temp;
         }

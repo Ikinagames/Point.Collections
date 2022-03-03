@@ -17,20 +17,32 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#endif
+
 using System;
 using System.Collections.Generic;
+#if UNITYENGINE
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Jobs.LowLevel.Unsafe;
+#endif
 
 namespace Point.Collections.Buffer.LowLevel
 {
     /// <summary>
     /// 매 Allocation 을 피하기 위한 메모리 공간 재사용 구조체입니다. 
     /// </summary>
+#if UNITYENGINE
     [BurstCompatible]
-    public struct UnsafeMemoryPool : INativeDisposable, IDisposable
+#endif
+    public struct UnsafeMemoryPool :
+#if UNITYENGINE
+        INativeDisposable,
+#endif
+        IDisposable
     {
         public const int INITBUCKETSIZE = 8;
 
@@ -44,12 +56,28 @@ namespace Point.Collections.Buffer.LowLevel
         /// </summary>
         /// <param name="size"></param>
         /// <param name="allocator"></param>
-        public UnsafeMemoryPool(int size, Allocator allocator, int bucketSize = INITBUCKETSIZE)
+        public UnsafeMemoryPool(int size
+#if UNITYENGINE
+            , Allocator allocator
+#endif
+            , int bucketSize = INITBUCKETSIZE)
         {
             m_Hash = Hash.NewHash();
 
-            m_Buffer = new UnsafeAllocator<UnsafeBuffer>(1, allocator);
-            m_Buffer[0] = new UnsafeBuffer(new UnsafeAllocator<byte>(size, allocator), new UnsafeAllocator<UnsafeMemoryBlock>(bucketSize, allocator));
+            m_Buffer = new UnsafeAllocator<UnsafeBuffer>(1
+#if UNITYENGINE
+                , allocator
+#endif
+                );
+            m_Buffer[0] = new UnsafeBuffer(new UnsafeAllocator<byte>(size
+#if UNITYENGINE
+                , allocator
+#endif
+                ), new UnsafeAllocator<UnsafeMemoryBlock>(bucketSize
+#if UNITYENGINE
+                , allocator
+#endif
+                ));
         }
         /// <summary>
         /// 이미 존재하는 버퍼를 Memory Pool 로 Wrapping 합니다.
@@ -59,8 +87,16 @@ namespace Point.Collections.Buffer.LowLevel
         {
             m_Hash = Hash.NewHash();
 
-            m_Buffer = new UnsafeAllocator<UnsafeBuffer>(1, buffer.m_Buffer.m_Allocator);
-            m_Buffer[0] = new UnsafeBuffer(buffer, new UnsafeAllocator<UnsafeMemoryBlock>(bucketSize, buffer.m_Buffer.m_Allocator));
+            m_Buffer = new UnsafeAllocator<UnsafeBuffer>(1
+#if UNITYENGINE
+                , buffer.m_Buffer.m_Allocator
+#endif
+                );
+            m_Buffer[0] = new UnsafeBuffer(buffer, new UnsafeAllocator<UnsafeMemoryBlock>(bucketSize
+#if UNITYENGINE
+                , buffer.m_Buffer.m_Allocator
+#endif
+                ));
         }
 
         private void SortBucket()
@@ -232,16 +268,8 @@ namespace Point.Collections.Buffer.LowLevel
                 return;
             }
 #endif
-            //BucketComparer comparer = new BucketComparer(m_Buffer[0].m_Buffer);
-            //m_Buffer[0].m_Blocks.Sort(comparer);
-            //m_Buffer[0].buckets.Sort(comparer, m_Buffer[0].bucketCount);
             SortBucket();
             m_Buffer[0].blocks.RemoveSwapback(block);
-
-            //int index = UnsafeBufferUtility.IndexOf(m_Buffer[0].buckets.Ptr, m_Buffer[0].bucketCount, block.m_Block);
-            //UnsafeBufferUtility.RemoveAtSwapBack(m_Buffer[0].buckets.Ptr, m_Buffer[0].bucketCount, index);
-
-            //m_Buffer[0].bucketCount--;
         }
 
         public void Dispose()
@@ -251,6 +279,7 @@ namespace Point.Collections.Buffer.LowLevel
             m_Buffer[0].Dispose();
             m_Buffer.Dispose();
         }
+#if UNITYENGINE
         public JobHandle Dispose(JobHandle inputDeps)
         {
             var job = m_Buffer[0].Dispose(inputDeps);
@@ -258,18 +287,22 @@ namespace Point.Collections.Buffer.LowLevel
 
             return job;
         }
+#endif
 
-        #region Inner Classes
+#region Inner Classes
 
+#if UNITYENGINE
         [BurstCompatible]
-        internal struct UnsafeBuffer : IDisposable, INativeDisposable
+#endif
+        internal struct UnsafeBuffer : IDisposable
+#if UNITYENGINE
+            , INativeDisposable
+#endif
         {
             public UnsafeAllocator<byte> buffer;
             private UnsafeAllocator<UnsafeMemoryBlock> m_MemoryBlockBuffer;
             
             public UnsafeFixedListWrapper<UnsafeMemoryBlock> blocks;
-
-            //public UnsafeAllocator<MemoryBlock> buckets;
 
             public UnsafeBuffer(UnsafeAllocator<byte> buffer, UnsafeAllocator<UnsafeMemoryBlock> blocks)
             {
@@ -289,39 +322,21 @@ namespace Point.Collections.Buffer.LowLevel
             {
                 buffer.Dispose();
                 m_MemoryBlockBuffer.Dispose();
-                //buckets.Dispose();
             }
+#if UNITYENGINE
             public JobHandle Dispose(JobHandle inputDeps)
             {
                 var job = buffer.Dispose(inputDeps);
                 job = m_MemoryBlockBuffer.Dispose(job);
-                //job = buckets.Dispose(job);
 
                 return job;
             }
+#endif
         }
-        //[BurstCompatible]
-        //public struct Bucket : IEquatable<UnsafeReference<byte>>, IEquatable<Bucket>
-        //{
-        //    private KeyValue<UnsafeReference<byte>, int> m_Block;
 
-        //    public Bucket(UnsafeReference<byte> p, int length)
-        //    {
-        //        m_Block = new KeyValue<UnsafeReference<byte>, int>(p, length);
-        //    }
-
-        //    public UnsafeReference<byte> Block => m_Block.Key;
-        //    public int Length => m_Block.Value;
-
-        //    public UnsafeReference<byte> GetNext()
-        //    {
-        //        return Block + Length;
-        //    }
-
-        //    public bool Equals(UnsafeReference<byte> other) => Block.Equals(other);
-        //    public bool Equals(Bucket other) => Block.Equals(other.Block) && Length == other.Length;
-        //}
+#if UNITYENGINE
         [BurstCompatible]
+#endif
         private struct BucketComparer : IComparer<UnsafeMemoryBlock>
         {
             private UnsafeReference<byte> m_Buffer;
@@ -343,9 +358,9 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
-        #endregion
+#endregion
 
-        #region Calculations
+#region Calculations
 
         private static bool IsAllocatableBetween(UnsafeMemoryBlock a, UnsafeReference<byte> b, int length, out long freeSpace)
         {
@@ -360,11 +375,10 @@ namespace Point.Collections.Buffer.LowLevel
                 temp = from + length;
 
             long st = endPtr - temp;
-            //$"ex {st}".ToLog();
             return st < 0;
         }
 
-        #endregion
+#endregion
     }
     public static class MemoryPoolExtensions
     {
