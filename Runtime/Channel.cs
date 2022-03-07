@@ -44,9 +44,9 @@ namespace Point.Collections
         private int m_LogChannel;
         private FixedString512Bytes m_Name;
 
-#if UNITYENGINE
         public LogChannel LogChannel => (LogChannel)m_LogChannel;
 
+#if UNITYENGINE
         [NotBurstCompatible]
 #endif
         private Channel(LogChannel channel)
