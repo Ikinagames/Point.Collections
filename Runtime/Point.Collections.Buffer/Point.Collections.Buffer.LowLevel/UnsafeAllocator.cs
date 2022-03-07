@@ -24,6 +24,7 @@
 //#undef UNITYENGINE
 
 using Point.Collections.Native;
+using Point.Collections.Threading;
 using System;
 using System.Collections.Generic;
 #if UNITYENGINE
@@ -359,6 +360,7 @@ namespace Point.Collections.Buffer.LowLevel
         /// </summary>
         /// <returns></returns>
         public ReadOnly AsReadOnly() => new ReadOnly(this);
+        public ParallelWriter AsParallelWriter() => new ParallelWriter(this);
 
         /// <inheritdoc cref="UnsafeAllocator.Clear"/>
         public void Clear() => m_Buffer.Clear();
@@ -434,6 +436,39 @@ namespace Point.Collections.Buffer.LowLevel
             {
                 m_Ptr = allocator.Ptr.AsReadOnly();
                 m_Length = allocator.Length;
+            }
+        }
+#if UNITYENGINE
+        [BurstCompatible]
+#endif
+        public struct ParallelWriter
+        {
+            private readonly UnsafeReference<T> m_Ptr;
+            private readonly int m_Length;
+
+            private AtomicOperator m_Op;
+
+            public int Length => m_Length;
+
+            public T this[int index]
+            {
+                set => SetValue(in index, in value);
+            }
+
+            internal ParallelWriter(UnsafeAllocator<T> allocator)
+            {
+                m_Ptr = allocator.Ptr;
+                m_Length = allocator.Length;
+
+                m_Op = new AtomicOperator();
+            }
+
+            public void SetValue(in int index, in T value)
+            {
+                m_Op.Enter(index);
+                UnsafeReference<T> p = m_Ptr + index;
+                p.Value = value;
+                m_Op.Exit(index);
             }
         }
 
@@ -558,6 +593,32 @@ namespace Point.Collections.Buffer.LowLevel
             where U : unmanaged, IComparer<T>
         {
             UnsafeBufferUtility.Sort<T, U>(t.Ptr, length, comparer);
+        }
+
+        public static bool Contains<T, U>(this in UnsafeAllocator<T> t, U item)
+            where T : unmanaged, IEquatable<U>
+            where U : unmanaged
+        {
+            int length = t.Length;
+            bool result = false;
+
+            for (int i = 0; i < length && !result; i++)
+            {
+                result |= t[i].Equals(item);
+            }
+            return result;
+        }
+        public static int IndexOf<T, U>(this in UnsafeAllocator<T> t, U item)
+            where T : unmanaged, IEquatable<U>
+            where U : unmanaged
+        {
+            return UnsafeBufferUtility.IndexOf(t.Ptr, t.Length, item);
+        }
+        public static bool RemoveForSwapBack<T, U>(this in UnsafeAllocator<T> t, U element)
+            where T : unmanaged, IEquatable<U>
+            where U : unmanaged
+        {
+            return UnsafeBufferUtility.RemoveForSwapBack(t.Ptr, t.Length, element);
         }
 
 #if UNITYENGINE

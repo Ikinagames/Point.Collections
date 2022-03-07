@@ -17,7 +17,7 @@
 #define DEBUG_MODE
 #endif
 
-#if UNITY_2020
+#if UNITY_2020_1_OR_NEWER
 #define UNITYENGINE
 #else
 #define POINT_COLLECTIONS_NATIVE
@@ -30,11 +30,33 @@ using System.Threading;
 
 namespace Point.Collections.Threading
 {
+#if UNITYENGINE
+    [Unity.Collections.BurstCompatible]
+#endif
     public struct AtomicOperator
     {
         private volatile int m_Value;
+#if DEBUG_MODE
         private ThreadInfo m_Owner;
+#endif
 
+        public void Enter(in int index)
+        {
+            int value = 1 << (index % 32);
+
+            while (true)
+            {
+                int original = Interlocked.Exchange(ref m_Value, m_Value | value);
+
+                if ((original & value) != value)
+                {
+#if DEBUG_MODE
+                    m_Owner = ThreadInfo.CurrentThread;
+#endif
+                    break;
+                }
+            }
+        }
         public void Enter()
         {
             while (true)
@@ -43,18 +65,37 @@ namespace Point.Collections.Threading
 
                 if (original == 0)
                 {
+#if DEBUG_MODE
                     m_Owner = ThreadInfo.CurrentThread;
+#endif
                     break;
                 }
             }
         }
-        public void Exit()
+
+        public void Exit(in int index)
         {
+            int value = 1 << (index % 32);
+#if DEBUG_MODE
             if (!m_Owner.Equals(ThreadInfo.CurrentThread))
             {
                 throw new InvalidOperationException();
             }
-
+            else if ((m_Value & value) != value)
+            {
+                throw new InvalidOperationException();
+            }
+#endif
+            m_Value -= value;
+        }
+        public void Exit()
+        {
+#if DEBUG_MODE
+            if (!m_Owner.Equals(ThreadInfo.CurrentThread))
+            {
+                throw new InvalidOperationException();
+            }
+#endif
             m_Value = 0;
         }
     }
