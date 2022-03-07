@@ -161,6 +161,149 @@ namespace Point.Collections
         {
             return csum(asuint(v) * new uint4(1845824257u, 1963973621u, 2134758553u, 1391111867u)) + 1167706003;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(quaternion q)
+        {
+            return hash(q.value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(bool2x2 v)
+        {
+            return csum(select(new uint2(2062756937u, 2920485769u), new uint2(1562056283u, 2265541847u), v.c0) + select(new uint2(1283419601u, 1210229737u), new uint2(2864955997u, 3525118277u), v.c1));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(bool2x3 v)
+        {
+            return csum(select(new uint2(2078515003u, 4206465343u), new uint2(3025146473u, 3763046909u), v.c0) + select(new uint2(3678265601u, 2070747979u), new uint2(1480171127u, 1588341193u), v.c1) + select(new uint2(4234155257u, 1811310911u), new uint2(2635799963u, 4165137857u), v.c2));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(bool2x4 v)
+        {
+            return csum(select(new uint2(1168253063u, 4228926523u), new uint2(1610574617u, 1584185147u), v.c0) + select(new uint2(3041325733u, 3150930919u), new uint2(3309258581u, 1770373673u), v.c1) + select(new uint2(3778261171u, 3286279097u), new uint2(4264629071u, 1898591447u), v.c2) + select(new uint2(2641864091u, 1229113913u), new uint2(3020867117u, 1449055807u), v.c3));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(bool3x2 v)
+        {
+            return csum(select(new uint3(2627668003u, 1520214331u, 2949502447u), new uint3(2827819133u, 3480140317u, 2642994593u), v.c0) + select(new uint3(3940484981u, 1954192763u, 1091696537u), new uint3(3052428017u, 4253034763u, 2338696631u), v.c1));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(bool3x3 v)
+        {
+            return csum(select(new uint3(3881277847u, 4017968839u, 1727237899u), new uint3(1648514723u, 1385344481u, 3538260197u), v.c0) + select(new uint3(4066109527u, 2613148903u, 3367528529u), new uint3(1678332449u, 2918459647u, 2744611081u), v.c1) + select(new uint3(1952372791u, 2631698677u, 4200781601u), new uint3(2119021007u, 1760485621u, 3157985881u), v.c2));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(bool3x4 v)
+        {
+            return csum(select(new uint3(2209710647u, 2201894441u, 2849577407u), new uint3(3287031191u, 3098675399u, 1564399943u), v.c0) + select(new uint3(1148435377u, 3416333663u, 1750611407u), new uint3(3285396193u, 3110507567u, 4271396531u), v.c1) + select(new uint3(4198118021u, 2908068253u, 3705492289u), new uint3(2497566569u, 2716413241u, 1166264321u), v.c2) + select(new uint3(2503385333u, 2944493077u, 2599999021u), new uint3(3814721321u, 1595355149u, 1728931849u), v.c3));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(float2x2 v)
+        {
+            return csum(asuint(v.c0) * new uint2(2627668003u, 1520214331u) + asuint(v.c1) * new uint2(2949502447u, 2827819133u)) + 3480140317u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(float2x3 v)
+        {
+            return csum(asuint(v.c0) * new uint2(3898072289u, 4129428421u) + asuint(v.c1) * new uint2(2631575897u, 2854656703u) + asuint(v.c2) * new uint2(3578504047u, 4245178297u)) + 2173281923u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(float2x4 v)
+        {
+            return csum(asuint(v.c0) * new uint2(3546061613u, 2702024231u) + asuint(v.c1) * new uint2(1452124841u, 1966089551u) + asuint(v.c2) * new uint2(2668168249u, 1587512777u) + asuint(v.c3) * new uint2(2353831999u, 3101256173u)) + 2891822459u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(float3x2 v)
+        {
+            return csum(asuint(v.c0) * new uint3(3777095341u, 3385463369u, 1773538433u) + asuint(v.c1) * new uint3(3773525029u, 4131962539u, 1809525511u)) + 4016293529u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(float3x3 v)
+        {
+            return csum(asuint(v.c0) * new uint3(1899745391u, 1966790317u, 3516359879u) + asuint(v.c1) * new uint3(3050356579u, 4178586719u, 2558655391u) + asuint(v.c2) * new uint3(1453413133u, 2152428077u, 1938706661u)) + 1338588197;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(float3x4 v)
+        {
+            return csum(asuint(v.c0) * new uint3(4192899797u, 3271228601u, 1634639009u) + asuint(v.c1) * new uint3(3318036811u, 3404170631u, 2048213449u) + asuint(v.c2) * new uint3(4164671783u, 1780759499u, 1352369353u) + asuint(v.c3) * new uint3(2446407751u, 1391928079u, 3475533443u)) + 3777095341u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(float4x2 v)
+        {
+            return csum(asuint(v.c0) * new uint4(2864955997u, 3525118277u, 2298260269u, 1632478733u) + asuint(v.c1) * new uint4(1537393931u, 2353355467u, 3441847433u, 4052036147u)) + 2011389559;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(float4x3 v)
+        {
+            return csum(asuint(v.c0) * new uint4(3309258581u, 1770373673u, 3778261171u, 3286279097u) + asuint(v.c1) * new uint4(4264629071u, 1898591447u, 2641864091u, 1229113913u) + asuint(v.c2) * new uint4(3020867117u, 1449055807u, 2479033387u, 3702457169u)) + 1845824257;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(float4x4 v)
+        {
+            return csum(asuint(v.c0) * new uint4(3299952959u, 3121178323u, 2948522579u, 1531026433u) + asuint(v.c1) * new uint4(1365086453u, 3969870067u, 4192899797u, 3271228601u) + asuint(v.c2) * new uint4(1634639009u, 3318036811u, 3404170631u, 2048213449u) + asuint(v.c3) * new uint4(4164671783u, 1780759499u, 1352369353u, 2446407751u)) + 1391928079;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(double2x2 v)
+        {
+            return csum(fold_to_uint(v.c0) * new uint2(4253034763u, 2338696631u) + fold_to_uint(v.c1) * new uint2(3757372771u, 1885959949u)) + 3508684087u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(double2x3 v)
+        {
+            return csum(fold_to_uint(v.c0) * new uint2(4066109527u, 2613148903u) + fold_to_uint(v.c1) * new uint2(3367528529u, 1678332449u) + fold_to_uint(v.c2) * new uint2(2918459647u, 2744611081u)) + 1952372791;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(double2x4 v)
+        {
+            return csum(fold_to_uint(v.c0) * new uint2(2437373431u, 1441286183u) + fold_to_uint(v.c1) * new uint2(2426570171u, 1561977301u) + fold_to_uint(v.c2) * new uint2(4205774813u, 1650214333u) + fold_to_uint(v.c3) * new uint2(3388112843u, 1831150513u)) + 1848374953;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(int2x2 v)
+        {
+            return csum(asuint(v.c0) * new uint2(3784421429u, 1750626223u) + asuint(v.c1) * new uint2(3571447507u, 3412283213u)) + 2601761069u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(int2x3 v)
+        {
+            return csum(asuint(v.c0) * new uint2(3404170631u, 2048213449u) + asuint(v.c1) * new uint2(4164671783u, 1780759499u) + asuint(v.c2) * new uint2(1352369353u, 2446407751u)) + 1391928079;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(int2x4 v)
+        {
+            return csum(asuint(v.c0) * new uint2(2057338067u, 2942577577u) + asuint(v.c1) * new uint2(2834440507u, 2671762487u) + asuint(v.c2) * new uint2(2892026051u, 2455987759u) + asuint(v.c3) * new uint2(3868600063u, 3170963179u)) + 2632835537u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(int3x2 v)
+        {
+            return csum(asuint(v.c0) * new uint3(3678265601u, 2070747979u, 1480171127u) + asuint(v.c1) * new uint3(1588341193u, 4234155257u, 1811310911u)) + 2635799963u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(int3x3 v)
+        {
+            return csum(asuint(v.c0) * new uint3(2479033387u, 3702457169u, 1845824257u) + asuint(v.c1) * new uint3(1963973621u, 2134758553u, 1391111867u) + asuint(v.c2) * new uint3(1167706003u, 2209736489u, 3261535807u)) + 1740411209;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(int3x4 v)
+        {
+            return csum(asuint(v.c0) * new uint3(1521739981u, 1735296007u, 3010324327u) + asuint(v.c1) * new uint3(1875523709u, 2937008387u, 3835713223u) + asuint(v.c2) * new uint3(2216526373u, 3375971453u, 3559829411u) + asuint(v.c3) * new uint3(3652178029u, 2544260129u, 2013864031u)) + 2627668003u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(int4x2 v)
+        {
+            return csum(asuint(v.c0) * new uint4(4205774813u, 1650214333u, 3388112843u, 1831150513u) + asuint(v.c1) * new uint4(1848374953u, 3430200247u, 2209710647u, 2201894441u)) + 2849577407u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(int4x3 v)
+        {
+            return csum(asuint(v.c0) * new uint4(1773538433u, 3773525029u, 4131962539u, 1809525511u) + asuint(v.c1) * new uint4(4016293529u, 2416021567u, 2828384717u, 2636362241u) + asuint(v.c2) * new uint4(1258410977u, 1952565773u, 2037535609u, 3592785499u)) + 3996716183u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(int4x4 v)
+        {
+            return csum(asuint(v.c0) * new uint4(1562056283u, 2265541847u, 1283419601u, 1210229737u) + asuint(v.c1) * new uint4(2864955997u, 3525118277u, 2298260269u, 1632478733u) + asuint(v.c2) * new uint4(1537393931u, 2353355467u, 3441847433u, 4052036147u) + asuint(v.c3) * new uint4(2011389559u, 2252224297u, 3784421429u, 1750626223u)) + 3571447507u;
+        }
 
         #endregion
 
@@ -515,6 +658,88 @@ namespace Point.Collections
 
         #endregion
 
+        #region abs
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int abs(int x)
+        {
+            return max(-x, x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2 abs(int2 x)
+        {
+            return max(-x, x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 abs(int3 x)
+        {
+            return max(-x, x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4 abs(int4 x)
+        {
+            return max(-x, x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long abs(long x)
+        {
+            return max(-x, x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float abs(float x)
+        {
+            return asfloat(asuint(x) & int.MaxValue);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 abs(float2 x)
+        {
+            return asfloat(asuint(x) & 2147483647u);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 abs(float3 x)
+        {
+            return asfloat(asuint(x) & 2147483647u);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 abs(float4 x)
+        {
+            return asfloat(asuint(x) & 2147483647u);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double abs(double x)
+        {
+            return asdouble(asulong(x) & long.MaxValue);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 abs(double2 x)
+        {
+            return new double2(asdouble(asulong(x.x) & long.MaxValue), asdouble(asulong(x.y) & long.MaxValue));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 abs(double3 x)
+        {
+            return new double3(asdouble(asulong(x.x) & long.MaxValue), asdouble(asulong(x.y) & long.MaxValue), asdouble(asulong(x.z) & long.MaxValue));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 abs(double4 x)
+        {
+            return new double4(asdouble(asulong(x.x) & long.MaxValue), asdouble(asulong(x.y) & long.MaxValue), asdouble(asulong(x.z) & long.MaxValue), asdouble(asulong(x.w) & long.MaxValue));
+        }
+
+        #endregion
+
         #region asint
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -618,6 +843,321 @@ namespace Point.Collections
         public static uint4 asuint(float4 x)
         {
             return new uint4(asuint(x.x), asuint(x.y), asuint(x.z), asuint(x.w));
+        }
+
+        #endregion
+
+        #region asfloat
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float asfloat(int x)
+        {
+            IntFloatUnion intFloatUnion = default(IntFloatUnion);
+            intFloatUnion.floatValue = 0f;
+            intFloatUnion.intValue = x;
+            return intFloatUnion.floatValue;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 asfloat(int2 x)
+        {
+            return new float2(asfloat(x.x), asfloat(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 asfloat(int3 x)
+        {
+            return new float3(asfloat(x.x), asfloat(x.y), asfloat(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 asfloat(int4 x)
+        {
+            return new float4(asfloat(x.x), asfloat(x.y), asfloat(x.z), asfloat(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float asfloat(uint x)
+        {
+            return asfloat((int)x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 asfloat(uint2 x)
+        {
+            return new float2(asfloat(x.x), asfloat(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 asfloat(uint3 x)
+        {
+            return new float3(asfloat(x.x), asfloat(x.y), asfloat(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 asfloat(uint4 x)
+        {
+            return new float4(asfloat(x.x), asfloat(x.y), asfloat(x.z), asfloat(x.w));
+        }
+
+        #endregion
+
+        #region asdouble
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double asdouble(long x)
+        {
+            LongDoubleUnion longDoubleUnion = default(LongDoubleUnion);
+            longDoubleUnion.doubleValue = 0.0;
+            longDoubleUnion.longValue = x;
+            return longDoubleUnion.doubleValue;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double asdouble(ulong x)
+        {
+            return asdouble((long)x);
+        }
+
+        #endregion
+
+        #region aslong
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long aslong(ulong x)
+        {
+            return (long)x;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long aslong(double x)
+        {
+            LongDoubleUnion longDoubleUnion = default(LongDoubleUnion);
+            longDoubleUnion.longValue = 0L;
+            longDoubleUnion.doubleValue = x;
+            return longDoubleUnion.longValue;
+        }
+
+        #endregion
+
+        #region asulong
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong asulong(long x)
+        {
+            return (ulong)x;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong asulong(double x)
+        {
+            return (ulong)aslong(x);
+        }
+
+        #endregion
+
+        #region is
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool isfinite(float x)
+        {
+            return abs(x) < float.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool2 isfinite(float2 x)
+        {
+            return abs(x) < float.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool3 isfinite(float3 x)
+        {
+            return abs(x) < float.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool4 isfinite(float4 x)
+        {
+            return abs(x) < float.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool isfinite(double x)
+        {
+            return abs(x) < double.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool2 isfinite(double2 x)
+        {
+            return abs(x) < double.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool3 isfinite(double3 x)
+        {
+            return abs(x) < double.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool4 isfinite(double4 x)
+        {
+            return abs(x) < double.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool isinf(float x)
+        {
+            return abs(x) == float.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool2 isinf(float2 x)
+        {
+            return abs(x) == float.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool3 isinf(float3 x)
+        {
+            return abs(x) == float.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool4 isinf(float4 x)
+        {
+            return abs(x) == float.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool isinf(double x)
+        {
+            return abs(x) == double.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool2 isinf(double2 x)
+        {
+            return abs(x) == double.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool3 isinf(double3 x)
+        {
+            return abs(x) == double.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool4 isinf(double4 x)
+        {
+            return abs(x) == double.PositiveInfinity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool isnan(float x)
+        {
+            return (asuint(x) & int.MaxValue) > 2139095040;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool2 isnan(float2 x)
+        {
+            return (asuint(x) & 2147483647u) > 2139095040u;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool3 isnan(float3 x)
+        {
+            return (asuint(x) & 2147483647u) > 2139095040u;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool4 isnan(float4 x)
+        {
+            return (asuint(x) & 2147483647u) > 2139095040u;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool isnan(double x)
+        {
+            return (asulong(x) & long.MaxValue) > 9218868437227405312L;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool2 isnan(double2 x)
+        {
+            return new bool2((asulong(x.x) & long.MaxValue) > 9218868437227405312L, (asulong(x.y) & long.MaxValue) > 9218868437227405312L);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool3 isnan(double3 x)
+        {
+            return new bool3((asulong(x.x) & long.MaxValue) > 9218868437227405312L, (asulong(x.y) & long.MaxValue) > 9218868437227405312L, (asulong(x.z) & long.MaxValue) > 9218868437227405312L);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool4 isnan(double4 x)
+        {
+            return new bool4((asulong(x.x) & long.MaxValue) > 9218868437227405312L, (asulong(x.y) & long.MaxValue) > 9218868437227405312L, (asulong(x.z) & long.MaxValue) > 9218868437227405312L, (asulong(x.w) & long.MaxValue) > 9218868437227405312L);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool ispow2(int x)
+        {
+            if (x > 0)
+            {
+                return (x & (x - 1)) == 0;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool2 ispow2(int2 x)
+        {
+            return new bool2(ispow2(x.x), ispow2(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool3 ispow2(int3 x)
+        {
+            return new bool3(ispow2(x.x), ispow2(x.y), ispow2(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool4 ispow2(int4 x)
+        {
+            return new bool4(ispow2(x.x), ispow2(x.y), ispow2(x.z), ispow2(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool ispow2(uint x)
+        {
+            if (x != 0)
+            {
+                return (x & (x - 1)) == 0;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool2 ispow2(uint2 x)
+        {
+            return new bool2(ispow2(x.x), ispow2(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool3 ispow2(uint3 x)
+        {
+            return new bool3(ispow2(x.x), ispow2(x.y), ispow2(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool4 ispow2(uint4 x)
+        {
+            return new bool4(ispow2(x.x), ispow2(x.y), ispow2(x.z), ispow2(x.w));
         }
 
         #endregion
@@ -1586,6 +2126,17 @@ namespace Point.Collections
             [FieldOffset(0)]
             public double doubleValue;
         }
+        public enum ShuffleComponent : byte
+        {
+            LeftX,
+            LeftY,
+            LeftZ,
+            LeftW,
+            RightX,
+            RightY,
+            RightZ,
+            RightW
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static uint fold_to_uint(double x)
@@ -1614,6 +2165,198 @@ namespace Point.Collections
             return new uint4(fold_to_uint(x.x), fold_to_uint(x.y), fold_to_uint(x.z), fold_to_uint(x.w));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static float select_shuffle_component(float4 a, float4 b, ShuffleComponent component)
+        {
+            switch (component)
+            {
+                case ShuffleComponent.LeftX:
+                    return a.x;
+                case ShuffleComponent.LeftY:
+                    return a.y;
+                case ShuffleComponent.LeftZ:
+                    return a.z;
+                case ShuffleComponent.LeftW:
+                    return a.w;
+                case ShuffleComponent.RightX:
+                    return b.x;
+                case ShuffleComponent.RightY:
+                    return b.y;
+                case ShuffleComponent.RightZ:
+                    return b.z;
+                case ShuffleComponent.RightW:
+                    return b.w;
+                default:
+                    throw new ArgumentException("Invalid shuffle component: " + component);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static float4 unpacklo(float4 a, float4 b)
+        {
+            return shuffle(a, b, ShuffleComponent.LeftX, ShuffleComponent.RightX, ShuffleComponent.LeftY, ShuffleComponent.RightY);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static float4 unpackhi(float4 a, float4 b)
+        {
+            return shuffle(a, b, ShuffleComponent.LeftZ, ShuffleComponent.RightZ, ShuffleComponent.LeftW, ShuffleComponent.RightW);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static float4 movelh(float4 a, float4 b)
+        {
+            return shuffle(a, b, ShuffleComponent.LeftX, ShuffleComponent.LeftY, ShuffleComponent.RightX, ShuffleComponent.RightY);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static float4 movehl(float4 a, float4 b)
+        {
+            return shuffle(b, a, ShuffleComponent.LeftZ, ShuffleComponent.LeftW, ShuffleComponent.RightZ, ShuffleComponent.RightW);
+        }
+
+        #endregion
+
+        #region float math
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 up()
+        {
+            return new float3(0f, 1f, 0f);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 down()
+        {
+            return new float3(0f, -1f, 0f);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 forward()
+        {
+            return new float3(0f, 0f, 1f);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 back()
+        {
+            return new float3(0f, 0f, -1f);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 left()
+        {
+            return new float3(-1f, 0f, 0f);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 right()
+        {
+            return new float3(1f, 0f, 0f);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float shuffle(float4 left, float4 right, ShuffleComponent x)
+        {
+            return select_shuffle_component(left, right, x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 shuffle(float4 left, float4 right, ShuffleComponent x, ShuffleComponent y)
+        {
+            return new float2(select_shuffle_component(left, right, x), select_shuffle_component(left, right, y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 shuffle(float4 left, float4 right, ShuffleComponent x, ShuffleComponent y, ShuffleComponent z)
+        {
+            return new float3(select_shuffle_component(left, right, x), select_shuffle_component(left, right, y), select_shuffle_component(left, right, z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 shuffle(float4 left, float4 right, ShuffleComponent x, ShuffleComponent y, ShuffleComponent z, ShuffleComponent w)
+        {
+            return new float4(select_shuffle_component(left, right, x), select_shuffle_component(left, right, y), select_shuffle_component(left, right, z), select_shuffle_component(left, right, w));
+        }
+        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 rotate(float4x4 a, float3 b)
+        {
+            return (a.c0 * b.x + a.c1 * b.y + a.c2 * b.z).xyz;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 transform(float4x4 a, float3 b)
+        {
+            return (a.c0 * b.x + a.c1 * b.y + a.c2 * b.z + a.c3).xyz;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4x4 transpose(float4x4 v)
+        {
+            return new float4x4(v.c0.x, v.c0.y, v.c0.z, v.c0.w, v.c1.x, v.c1.y, v.c1.z, v.c1.w, v.c2.x, v.c2.y, v.c2.z, v.c2.w, v.c3.x, v.c3.y, v.c3.z, v.c3.w);
+        }
+
+        public static float4x4 inverse(float4x4 m)
+        {
+            float4 c = m.c0;
+            float4 c2 = m.c1;
+            float4 c3 = m.c2;
+            float4 c4 = m.c3;
+            float4 @float = movelh(c2, c);
+            float4 float2 = movelh(c3, c4);
+            float4 float3 = movehl(c, c2);
+            float4 float4 = movehl(c4, c3);
+            float4 lhs = shuffle(c2, c, ShuffleComponent.LeftY, ShuffleComponent.LeftZ, ShuffleComponent.RightY, ShuffleComponent.RightZ);
+            float4 lhs2 = shuffle(c3, c4, ShuffleComponent.LeftY, ShuffleComponent.LeftZ, ShuffleComponent.RightY, ShuffleComponent.RightZ);
+            float4 lhs3 = shuffle(c2, c, ShuffleComponent.LeftW, ShuffleComponent.LeftX, ShuffleComponent.RightW, ShuffleComponent.RightX);
+            float4 lhs4 = shuffle(c3, c4, ShuffleComponent.LeftW, ShuffleComponent.LeftX, ShuffleComponent.RightW, ShuffleComponent.RightX);
+            float4 lhs5 = shuffle(float2, @float, ShuffleComponent.LeftZ, ShuffleComponent.LeftX, ShuffleComponent.RightX, ShuffleComponent.RightZ);
+            float4 lhs6 = shuffle(float2, @float, ShuffleComponent.LeftW, ShuffleComponent.LeftY, ShuffleComponent.RightY, ShuffleComponent.RightW);
+            float4 lhs7 = shuffle(float4, float3, ShuffleComponent.LeftZ, ShuffleComponent.LeftX, ShuffleComponent.RightX, ShuffleComponent.RightZ);
+            float4 lhs8 = shuffle(float4, float3, ShuffleComponent.LeftW, ShuffleComponent.LeftY, ShuffleComponent.RightY, ShuffleComponent.RightW);
+            float4 lhs9 = shuffle(@float, float2, ShuffleComponent.LeftZ, ShuffleComponent.LeftX, ShuffleComponent.RightX, ShuffleComponent.RightZ);
+            float4 float5 = lhs * float4 - lhs2 * float3;
+            float4 float6 = @float * float4 - float2 * float3;
+            float4 float7 = lhs4 * @float - lhs3 * float2;
+            float4 rhs = shuffle(float5, float5, ShuffleComponent.LeftX, ShuffleComponent.LeftZ, ShuffleComponent.RightZ, ShuffleComponent.RightX);
+            float4 rhs2 = shuffle(float5, float5, ShuffleComponent.LeftY, ShuffleComponent.LeftW, ShuffleComponent.RightW, ShuffleComponent.RightY);
+            float4 rhs3 = shuffle(float6, float6, ShuffleComponent.LeftX, ShuffleComponent.LeftZ, ShuffleComponent.RightZ, ShuffleComponent.RightX);
+            float4 rhs4 = shuffle(float6, float6, ShuffleComponent.LeftY, ShuffleComponent.LeftW, ShuffleComponent.RightW, ShuffleComponent.RightY);
+            float4 float8 = lhs8 * rhs - lhs7 * rhs4 + lhs6 * rhs2;
+            float4 float9 = lhs9 * float8;
+            float9 += shuffle(float9, float9, ShuffleComponent.LeftY, ShuffleComponent.LeftX, ShuffleComponent.RightW, ShuffleComponent.RightZ);
+            float9 -= shuffle(float9, float9, ShuffleComponent.LeftZ, ShuffleComponent.LeftZ, ShuffleComponent.RightX, ShuffleComponent.RightX);
+            float4 rhs5 = new float4(1f) / float9;
+            float4x4 result = default(float4x4);
+            result.c0 = float8 * rhs5;
+            float4 rhs6 = shuffle(float7, float7, ShuffleComponent.LeftX, ShuffleComponent.LeftZ, ShuffleComponent.RightZ, ShuffleComponent.RightX);
+            float4 rhs7 = shuffle(float7, float7, ShuffleComponent.LeftY, ShuffleComponent.LeftW, ShuffleComponent.RightW, ShuffleComponent.RightY);
+            float4 lhs10 = lhs7 * rhs6 - lhs5 * rhs2 - lhs8 * rhs3;
+            result.c1 = lhs10 * rhs5;
+            float4 lhs11 = lhs5 * rhs4 - lhs6 * rhs6 - lhs8 * rhs7;
+            result.c2 = lhs11 * rhs5;
+            float4 lhs12 = lhs6 * rhs3 - lhs5 * rhs + lhs7 * rhs7;
+            result.c3 = lhs12 * rhs5;
+            return result;
+        }
+
+        public static float4x4 fastinverse(float4x4 m)
+        {
+            float4 c = m.c0;
+            float4 c2 = m.c1;
+            float4 c3 = m.c2;
+            float4 c4 = m.c3;
+            float4 b = new float4(0);
+            float4 a = unpacklo(c, c3);
+            float4 b2 = unpacklo(c2, b);
+            float4 a2 = unpackhi(c, c3);
+            float4 b3 = unpackhi(c2, b);
+            float4 @float = unpacklo(a, b2);
+            float4 float2 = unpackhi(a, b2);
+            float4 float3 = unpacklo(a2, b3);
+            c4 = -(@float * c4.x + float2 * c4.y + float3 * c4.z);
+            c4.w = 1f;
+            return new float4x4(@float, float2, float3, c4);
+        }
 
         #endregion
 
