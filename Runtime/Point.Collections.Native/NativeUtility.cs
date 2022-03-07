@@ -13,8 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
 #if UNITY_2020
 #define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
 #endif
 
 using System;
@@ -27,6 +33,18 @@ namespace Point.Collections.Native
 {
     public unsafe static class NativeUtility
     {
+        public static void* AddressOf<T>(ref T t) where T : unmanaged
+        {
+#if UNITYENGINE
+            return UnsafeUtility.AddressOf(ref t);
+#else
+            fixed (T* ptr = &t)
+            {
+                return ptr;
+            }
+#endif
+        }
+
         public static void* Malloc(in long size, in int align
 #if UNITYENGINE
             , Unity.Collections.Allocator allocator

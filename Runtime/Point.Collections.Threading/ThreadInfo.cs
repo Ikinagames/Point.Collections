@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,16 +13,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
+#if UNITY_2020
+#define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
+
 using System;
 using System.Threading;
+#if UNITYENGINE
 using Unity.Collections;
+#endif
 
 namespace Point.Collections.Threading
 {
     /// <summary>
     /// Thread 관련 각종 작업을 할 수 있는 구조체입니다.
     /// </summary>
+#if UNITYENGINE
     [BurstCompatible]
+#endif
     public struct ThreadInfo : IEquatable<ThreadInfo>, IEquatable<Thread>
     {
         [ThreadStatic]
@@ -38,6 +52,7 @@ namespace Point.Collections.Threading
 
         private readonly int m_ManagedThreadID;
         private readonly int m_HashCode;
+#if UNITYENGINE
         private readonly FixedString512Bytes m_Name;
 
         /// <summary>
@@ -47,16 +62,19 @@ namespace Point.Collections.Threading
         public string Name => m_Name.ToString();
 
         [NotBurstCompatible]
+#endif
         public ThreadInfo(Thread thread)
         {
             m_ManagedThreadID = thread.ManagedThreadId;
             m_HashCode = thread.GetHashCode();
 
+#if UNITYENGINE
             if (string.IsNullOrEmpty(thread.Name))
             {
                 m_Name = "None";
             }
             else m_Name = thread.Name;
+#endif
         }
 
         public bool Equals(ThreadInfo other)
@@ -70,7 +88,9 @@ namespace Point.Collections.Threading
 
             return true;
         }
+#if UNITYENGINE
         [NotBurstCompatible]
+#endif
         public bool Equals(Thread other)
         {
             if (m_ManagedThreadID != other.ManagedThreadId) return false;
@@ -82,11 +102,17 @@ namespace Point.Collections.Threading
 
             return true;
         }
+#if UNITYENGINE
         [NotBurstCompatible]
+#endif
         public override string ToString()
         {
+#if UNITYENGINE
             string name = m_Name.ToString();
             return $"Thread({name}, {m_ManagedThreadID}, {m_HashCode})";
+#else
+            return $"Thread({m_ManagedThreadID}, {m_HashCode})";
+#endif
         }
     }
 }

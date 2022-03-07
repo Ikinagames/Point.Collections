@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,8 @@
 
 #if UNITY_2020
 #define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
 #endif
 
 using System;
@@ -107,8 +109,9 @@ namespace Point.Collections.Buffer.LowLevel
             ref Item temp = ref list.Buffer[list.NextIndex];
             if (temp.Occupied)
             {
-                UnityEngine.Debug.LogError("Exceeding max count");
-                return;
+                throw new Exception("Exceeding max count");
+                //UnityEngine.Debug.LogError("Exceeding max count");
+                //return;
             }
 
             temp.Occupied = true;

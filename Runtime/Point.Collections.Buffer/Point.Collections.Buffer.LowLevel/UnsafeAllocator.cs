@@ -464,7 +464,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             if (size < 0) throw new Exception();
 
-            UnityEngine.Debug.Log($"re allocate from {t.m_Buffer.Value.Size} -> {size}");
+            //UnityEngine.Debug.Log($"re allocate from {t.m_Buffer.Value.Size} -> {size}");
             unsafe
             {
                 void* ptr = NativeUtility.Malloc(size, alignment

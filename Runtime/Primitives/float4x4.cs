@@ -485,14 +485,14 @@ namespace Point.Collections
             c3 = new float4(translation, 1f);
         }
 
-        public float4x4(RigidTransform transform)
-        {
-            float3x3 float3x = new float3x3(transform.rot);
-            c0 = new float4(float3x.c0, 0f);
-            c1 = new float4(float3x.c1, 0f);
-            c2 = new float4(float3x.c2, 0f);
-            c3 = new float4(transform.pos, 1f);
-        }
+        //public float4x4(RigidTransform transform)
+        //{
+        //    float3x3 float3x = new float3x3(transform.rot);
+        //    c0 = new float4(float3x.c0, 0f);
+        //    c1 = new float4(float3x.c1, 0f);
+        //    c2 = new float4(float3x.c2, 0f);
+        //    c3 = new float4(transform.pos, 1f);
+        //}
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float4x4 AxisAngle(float3 axis, float angle)
@@ -507,7 +507,7 @@ namespace Point.Collections
             uint4 rhs3 = new uint4(2147483648u, 0u, 0u, 0u);
             uint4 rhs4 = new uint4(0u, 2147483648u, 0u, 0u);
             uint4 rhs5 = new uint4(uint.MaxValue, uint.MaxValue, uint.MaxValue, 0u);
-            return new float4x4(lhs.x * rhs + Math.asfloat((Math.asuint(@float.wzyx) ^ rhs2) & rhs5), lhs.y * rhs + math.asfloat((math.asuint(@float.zwxx) ^ rhs3) & rhs5), lhs.z * rhs + Math.asfloat((Math.asuint(@float.yxwx) ^ rhs4) & rhs5), new float4(0f, 0f, 0f, 1f));
+            return new float4x4(lhs.x * rhs + Math.asfloat((Math.asuint(@float.wzyx) ^ rhs2) & rhs5), lhs.y * rhs + Math.asfloat((Math.asuint(@float.zwxx) ^ rhs3) & rhs5), lhs.z * rhs + Math.asfloat((Math.asuint(@float.yxwx) ^ rhs4) & rhs5), new float4(0f, 0f, 0f, 1f));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

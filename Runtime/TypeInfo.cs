@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +13,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
+#if UNITY_2020
+#define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
+
 using Point.Collections.Native;
 using System;
 using System.Runtime.InteropServices;
+#if UNITYENGINE
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+#endif
 
 namespace Point.Collections
 {
     /// <summary>
     /// Runtime 중 기본 <see cref="System.Type"/> 의 정보를 저장하고, 해당 타입의 binary 크기, alignment를 저장합니다.
     /// </summary>
+#if UNITYENGINE
     [BurstCompatible]
+#endif
     [Guid("f090b023-0343-4436-811b-7ea2360503d0")]
     public readonly struct TypeInfo : IValidation, IEquatable<TypeInfo>
     {
@@ -36,7 +50,9 @@ namespace Point.Collections
         private readonly int m_HashCode;
         private readonly bool m_IsUnmanaged;
 
+#if UNITYENGINE
         [NotBurstCompatible]
+#endif
         public Type Type
         {
             get
@@ -52,10 +68,12 @@ namespace Point.Collections
         public int Align => m_Align;
         public bool IsUnmanaged => m_IsUnmanaged;
 
+#if UNITYENGINE
         [NotBurstCompatible]
+#endif
         internal TypeInfo(Type type)
         {
-            if (!UnsafeUtility.IsUnmanaged(type))
+            if (!TypeHelper.IsUnmanaged(type))
             {
                 this = default(TypeInfo);
 
@@ -65,9 +83,11 @@ namespace Point.Collections
                 return;
             }
 
-            this = new TypeInfo(type, UnsafeUtility.SizeOf(type), TypeHelper.AlignOf(type), CollectionUtility.CreateHashCode());
+            this = new TypeInfo(type, TypeHelper.SizeOf(type), TypeHelper.AlignOf(type), CollectionUtility.CreateHashCode());
         }
+#if UNITYENGINE
         [NotBurstCompatible]
+#endif
         internal TypeInfo(Type type, int size, int align, int hashCode)
         {
             m_TypeHandle = type.TypeHandle;

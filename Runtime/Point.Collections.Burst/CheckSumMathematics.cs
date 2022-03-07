@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +13,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
+#if UNITY_2020
+#define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
+
+#if UNITYENGINE
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+#endif
 
 namespace Point.Collections.Burst
 {
+#if UNITYENGINE
     [BurstCompile(CompileSynchronously = true, DisableSafetyChecks = true)]
+#endif
     internal static class CheckSumMathematics
     {
         public static uint Calculate(byte[] data)
@@ -47,7 +61,7 @@ namespace Point.Collections.Burst
             uint output;
             unsafe
             {
-                output = GetSum((byte*)&data, UnsafeUtility.SizeOf<T>());
+                output = GetSum((byte*)&data, TypeHelper.SizeOf<T>());
 
                 // https://pretagteam.com/question/converting-c-byte-to-bitarray
                 //if (BitConverter.IsLittleEndian)
@@ -83,7 +97,7 @@ namespace Point.Collections.Burst
             uint output;
             unsafe
             {
-                output = GetSum((byte*)&data, UnsafeUtility.SizeOf<T>());
+                output = GetSum((byte*)&data, TypeHelper.SizeOf<T>());
                 output += checkSum;
 
                 // https://pretagteam.com/question/converting-c-byte-to-bitarray
@@ -94,7 +108,9 @@ namespace Point.Collections.Burst
             return output;
         }
 
+#if UNITYENGINE
         [BurstCompile]
+#endif
         private static unsafe uint GetSum(byte* bytes, int size)
         {
             uint output = 0;
@@ -104,7 +120,9 @@ namespace Point.Collections.Burst
             }
             return output;
         }
+#if UNITYENGINE
         [BurstCompile]
+#endif
         private static unsafe uint RemoveHighNibble(in uint sum)
         {
             uint output = sum;
@@ -127,7 +145,9 @@ namespace Point.Collections.Burst
 
             return output;
         }
+#if UNITYENGINE
         [BurstCompile]
+#endif
         private static uint Complement(in uint value)
         {
             BitField32 bitField32 = new BitField32(value);

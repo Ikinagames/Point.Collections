@@ -19,6 +19,8 @@
 
 #if UNITY_2020
 #define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
 #endif
 
 //#undef UNITYENGINE
@@ -42,22 +44,6 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
     public static unsafe class UnsafeBufferUtility
     {
-        public static void* AddressOf<T>(ref T t) where T : unmanaged
-        {
-#if UNITYENGINE
-            return UnsafeUtility.AddressOf(ref t);
-#else
-            fixed (T* ptr = &t)
-            {
-                return ptr;
-            }
-#endif
-        }
-        public static void MemCpy(void* ptr, void* from, in int length)
-        {
-            throw new NotImplementedException();
-        }
-
 #if UNITYENGINE
         [BurstCompile]
 #endif
@@ -65,7 +51,7 @@ namespace Point.Collections.Buffer.LowLevel
             where T : unmanaged
         {
             length = TypeHelper.SizeOf<T>();
-            void* p = AddressOf(ref t);
+            void* p = NativeUtility.AddressOf(ref t);
 
             return (byte*)p;
         }
@@ -138,7 +124,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             byte*
                 a = AsBytes(ref x, out int length),
-                b = (byte*)AddressOf(ref y);
+                b = (byte*)NativeUtility.AddressOf(ref y);
 #if UNITYENGINE
             int index = 0;
             while (index < length && a[index].Equals(b[index]))

@@ -42,8 +42,8 @@ namespace Point.Collections.Tests
             unsafe
             {
                 void*
-                    x = UnsafeBufferUtility.AddressOf(ref a),
-                    y = UnsafeBufferUtility.AddressOf(ref b);
+                    x = NativeUtility.AddressOf(ref a),
+                    y = NativeUtility.AddressOf(ref b);
 
                 NativeMath.binaryComparer(x, y, TypeHelper.SizeOf<TestStruct>(), &result);
             }

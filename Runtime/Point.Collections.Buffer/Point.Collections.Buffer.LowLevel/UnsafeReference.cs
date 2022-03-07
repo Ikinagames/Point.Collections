@@ -17,23 +17,39 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
+
 using System;
 using System.Runtime.InteropServices;
+#if UNITYENGINE
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+#endif
 
 namespace Point.Collections.Buffer.LowLevel
 {
     /// <summary>
     /// <inheritdoc cref="IUnsafeReference"/>
     /// </summary>
+#if UNITYENGINE
     [BurstCompatible]
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+#endif
+    [StructLayout(LayoutKind.Sequential
+#if POINT_COLLECTIONS_NATIVE
+        , Pack = 1
+#endif
+        )]
     public struct UnsafeReference : IUnsafeReference, IEquatable<UnsafeReference>
     {
         [MarshalAs(UnmanagedType.U1)]
         private bool m_IsCreated;
+#if UNITYENGINE
         [NativeDisableUnsafePtrRestriction]
+#endif
         private unsafe void* m_Ptr;
 
         public IntPtr this[int offset]
@@ -129,15 +145,23 @@ namespace Point.Collections.Buffer.LowLevel
     /// <inheritdoc cref="IUnsafeReference"/>
     /// </summary>
     /// <typeparam name="T"></typeparam>
+#if UNITYENGINE
     [BurstCompatible(GenericTypeArguments = new Type[] { typeof(int) })]
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+#endif
+    [StructLayout(LayoutKind.Sequential
+#if POINT_COLLECTIONS_NATIVE
+        , Pack = 1
+#endif
+        )]
     public struct UnsafeReference<T> : IUnsafeReference,
         IEquatable<UnsafeReference<T>>, IEquatable<UnsafeReference>
         where T : unmanaged
     {
         [MarshalAs(UnmanagedType.U1)]
         private bool m_IsCreated;
+#if UNITYENGINE
         [NativeDisableUnsafePtrRestriction]
+#endif
         private unsafe T* m_Ptr;
 
         IntPtr IUnsafeReference.this[int offset]
@@ -308,7 +332,9 @@ namespace Point.Collections.Buffer.LowLevel
 
         public static unsafe explicit operator UnsafeReference<T>(UnsafeReference p) => new UnsafeReference<T>(p.IntPtr);
 
+#if UNITYENGINE
         [BurstCompatible]
+#endif
         public struct ReadOnly
         {
             private unsafe T* m_Ptr;

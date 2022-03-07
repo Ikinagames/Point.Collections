@@ -17,11 +17,19 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
+
 using Newtonsoft.Json;
 using System;
 using System.Runtime.InteropServices;
+#if UNITYENGINE
 using Unity.Collections;
 using UnityEngine;
+#endif
 
 namespace Point.Collections
 {
@@ -37,7 +45,10 @@ namespace Point.Collections
             return new Hash(FNV1a32.Calculate(guid.ToByteArray()));
         }
 
-        [SerializeField] private uint m_Value;
+#if UNITYENGINE
+        [SerializeField]
+#endif
+        private uint m_Value;
 #if DEBUG_MODE
         private Unity.Collections.FixedString512Bytes m_Key;
 #endif
@@ -65,6 +76,7 @@ namespace Point.Collections
             m_Key = key;
 #endif
         }
+#if UNITYENGINE
         public Hash(FixedString4096Bytes key)
         {
             m_Value = FNV1a32.Calculate(key);
@@ -79,6 +91,7 @@ namespace Point.Collections
             m_Key = key;
 #endif
         }
+#endif
 
         public bool Equals(Hash other) => m_Value.Equals(other.m_Value);
         public override bool Equals(object obj)
@@ -97,7 +110,9 @@ namespace Point.Collections
                 return (int)m_Value;
             }
         }
+#if UNITYENGINE
         [NotBurstCompatible]
+#endif
         public override string ToString()
         {
             string str = string.Empty;

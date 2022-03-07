@@ -197,6 +197,21 @@ namespace Point.Collections
         {
             return csum(select(new uint3(2209710647u, 2201894441u, 2849577407u), new uint3(3287031191u, 3098675399u, 1564399943u), v.c0) + select(new uint3(1148435377u, 3416333663u, 1750611407u), new uint3(3285396193u, 3110507567u, 4271396531u), v.c1) + select(new uint3(4198118021u, 2908068253u, 3705492289u), new uint3(2497566569u, 2716413241u, 1166264321u), v.c2) + select(new uint3(2503385333u, 2944493077u, 2599999021u), new uint3(3814721321u, 1595355149u, 1728931849u), v.c3));
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(bool4x2 v)
+        {
+            return csum(select(new uint4(3516359879u, 3050356579u, 4178586719u, 2558655391u), new uint4(1453413133u, 2152428077u, 1938706661u, 1338588197u), v.c0) + select(new uint4(3439609253u, 3535343003u, 3546061613u, 2702024231u), new uint4(1452124841u, 1966089551u, 2668168249u, 1587512777u), v.c1));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(bool4x3 v)
+        {
+            return csum(select(new uint4(3940484981u, 1954192763u, 1091696537u, 3052428017u), new uint4(4253034763u, 2338696631u, 3757372771u, 1885959949u), v.c0) + select(new uint4(3508684087u, 3919501043u, 1209161033u, 4007793211u), new uint4(3819806693u, 3458005183u, 2078515003u, 4206465343u), v.c1) + select(new uint4(3025146473u, 3763046909u, 3678265601u, 2070747979u), new uint4(1480171127u, 1588341193u, 4234155257u, 1811310911u), v.c2));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(bool4x4 v)
+        {
+            return csum(select(new uint4(3516359879u, 3050356579u, 4178586719u, 2558655391u), new uint4(1453413133u, 2152428077u, 1938706661u, 1338588197u), v.c0) + select(new uint4(3439609253u, 3535343003u, 3546061613u, 2702024231u), new uint4(1452124841u, 1966089551u, 2668168249u, 1587512777u), v.c1) + select(new uint4(2353831999u, 3101256173u, 2891822459u, 2837054189u), new uint4(3016004371u, 4097481403u, 2229788699u, 2382715877u), v.c2) + select(new uint4(1851936439u, 1938025801u, 3712598587u, 3956330501u), new uint4(2437373431u, 1441286183u, 2426570171u, 1561977301u), v.c3));
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint hash(float2x2 v)
@@ -257,6 +272,36 @@ namespace Point.Collections
         public static uint hash(double2x4 v)
         {
             return csum(fold_to_uint(v.c0) * new uint2(2437373431u, 1441286183u) + fold_to_uint(v.c1) * new uint2(2426570171u, 1561977301u) + fold_to_uint(v.c2) * new uint2(4205774813u, 1650214333u) + fold_to_uint(v.c3) * new uint2(3388112843u, 1831150513u)) + 1848374953;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(double3x2 v)
+        {
+            return csum(fold_to_uint(v.c0) * new uint3(3996716183u, 2626301701u, 1306289417u) + fold_to_uint(v.c1) * new uint3(2096137163u, 1548578029u, 4178800919u)) + 3898072289u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(double3x3 v)
+        {
+            return csum(fold_to_uint(v.c0) * new uint3(2891822459u, 2837054189u, 3016004371u) + fold_to_uint(v.c1) * new uint3(4097481403u, 2229788699u, 2382715877u) + fold_to_uint(v.c2) * new uint3(1851936439u, 1938025801u, 3712598587u)) + 3956330501u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(double3x4 v)
+        {
+            return csum(fold_to_uint(v.c0) * new uint3(3996716183u, 2626301701u, 1306289417u) + fold_to_uint(v.c1) * new uint3(2096137163u, 1548578029u, 4178800919u) + fold_to_uint(v.c2) * new uint3(3898072289u, 4129428421u, 2631575897u) + fold_to_uint(v.c3) * new uint3(2854656703u, 3578504047u, 4245178297u)) + 2173281923u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(double4x2 v)
+        {
+            return csum(fold_to_uint(v.c0) * new uint4(1521739981u, 1735296007u, 3010324327u, 1875523709u) + fold_to_uint(v.c1) * new uint4(2937008387u, 3835713223u, 2216526373u, 3375971453u)) + 3559829411u;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(double4x3 v)
+        {
+            return csum(fold_to_uint(v.c0) * new uint4(2057338067u, 2942577577u, 2834440507u, 2671762487u) + fold_to_uint(v.c1) * new uint4(2892026051u, 2455987759u, 3868600063u, 3170963179u) + fold_to_uint(v.c2) * new uint4(2632835537u, 1136528209u, 2944626401u, 2972762423u)) + 1417889653;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint hash(double4x4 v)
+        {
+            return csum(fold_to_uint(v.c0) * new uint4(1306289417u, 2096137163u, 1548578029u, 4178800919u) + fold_to_uint(v.c1) * new uint4(3898072289u, 4129428421u, 2631575897u, 2854656703u) + fold_to_uint(v.c2) * new uint4(3578504047u, 4245178297u, 2173281923u, 2973357649u) + fold_to_uint(v.c3) * new uint4(3881277847u, 4017968839u, 1727237899u, 1648514723u)) + 1385344481;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1164,7 +1209,1390 @@ namespace Point.Collections
 
         #region mul
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float mul(float a, float b)
+        {
+            return a * b;
+        }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float mul(float2 a, float2 b)
+        {
+            return a.x * b.x + a.y * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 mul(float2 a, float2x2 b)
+        {
+            return new float2(a.x * b.c0.x + a.y * b.c0.y, a.x * b.c1.x + a.y * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 mul(float2 a, float2x3 b)
+        {
+            return new float3(a.x * b.c0.x + a.y * b.c0.y, a.x * b.c1.x + a.y * b.c1.y, a.x * b.c2.x + a.y * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 mul(float2 a, float2x4 b)
+        {
+            return new float4(a.x * b.c0.x + a.y * b.c0.y, a.x * b.c1.x + a.y * b.c1.y, a.x * b.c2.x + a.y * b.c2.y, a.x * b.c3.x + a.y * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float mul(float3 a, float3 b)
+        {
+            return a.x * b.x + a.y * b.y + a.z * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 mul(float3 a, float3x2 b)
+        {
+            return new float2(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 mul(float3 a, float3x3 b)
+        {
+            return new float3(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 mul(float3 a, float3x4 b)
+        {
+            return new float4(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z, a.x * b.c3.x + a.y * b.c3.y + a.z * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float mul(float4 a, float4 b)
+        {
+            return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 mul(float4 a, float4x2 b)
+        {
+            return new float2(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z + a.w * b.c0.w, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z + a.w * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 mul(float4 a, float4x3 b)
+        {
+            return new float3(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z + a.w * b.c0.w, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z + a.w * b.c1.w, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z + a.w * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 mul(float4 a, float4x4 b)
+        {
+            return new float4(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z + a.w * b.c0.w, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z + a.w * b.c1.w, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z + a.w * b.c2.w, a.x * b.c3.x + a.y * b.c3.y + a.z * b.c3.z + a.w * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 mul(float2x2 a, float2 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2x2 mul(float2x2 a, float2x2 b)
+        {
+            return new float2x2(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2x3 mul(float2x2 a, float2x3 b)
+        {
+            return new float2x3(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2x4 mul(float2x2 a, float2x4 b)
+        {
+            return new float2x4(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y, a.c0 * b.c3.x + a.c1 * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 mul(float2x3 a, float3 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2x2 mul(float2x3 a, float3x2 b)
+        {
+            return new float2x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2x3 mul(float2x3 a, float3x3 b)
+        {
+            return new float2x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2x4 mul(float2x3 a, float3x4 b)
+        {
+            return new float2x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 mul(float2x4 a, float4 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z + a.c3 * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2x2 mul(float2x4 a, float4x2 b)
+        {
+            return new float2x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2x3 mul(float2x4 a, float4x3 b)
+        {
+            return new float2x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2x4 mul(float2x4 a, float4x4 b)
+        {
+            return new float2x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z + a.c3 * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 mul(float3x2 a, float2 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3x2 mul(float3x2 a, float2x2 b)
+        {
+            return new float3x2(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3x3 mul(float3x2 a, float2x3 b)
+        {
+            return new float3x3(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3x4 mul(float3x2 a, float2x4 b)
+        {
+            return new float3x4(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y, a.c0 * b.c3.x + a.c1 * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 mul(float3x3 a, float3 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3x2 mul(float3x3 a, float3x2 b)
+        {
+            return new float3x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3x3 mul(float3x3 a, float3x3 b)
+        {
+            return new float3x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3x4 mul(float3x3 a, float3x4 b)
+        {
+            return new float3x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 mul(float3x4 a, float4 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z + a.c3 * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3x2 mul(float3x4 a, float4x2 b)
+        {
+            return new float3x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3x3 mul(float3x4 a, float4x3 b)
+        {
+            return new float3x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3x4 mul(float3x4 a, float4x4 b)
+        {
+            return new float3x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z + a.c3 * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 mul(float4x2 a, float2 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4x2 mul(float4x2 a, float2x2 b)
+        {
+            return new float4x2(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4x3 mul(float4x2 a, float2x3 b)
+        {
+            return new float4x3(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4x4 mul(float4x2 a, float2x4 b)
+        {
+            return new float4x4(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y, a.c0 * b.c3.x + a.c1 * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 mul(float4x3 a, float3 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4x2 mul(float4x3 a, float3x2 b)
+        {
+            return new float4x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4x3 mul(float4x3 a, float3x3 b)
+        {
+            return new float4x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4x4 mul(float4x3 a, float3x4 b)
+        {
+            return new float4x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 mul(float4x4 a, float4 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z + a.c3 * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4x2 mul(float4x4 a, float4x2 b)
+        {
+            return new float4x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4x3 mul(float4x4 a, float4x3 b)
+        {
+            return new float4x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4x4 mul(float4x4 a, float4x4 b)
+        {
+            return new float4x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z + a.c3 * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double mul(double a, double b)
+        {
+            return a * b;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double mul(double2 a, double2 b)
+        {
+            return a.x * b.x + a.y * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 mul(double2 a, double2x2 b)
+        {
+            return new double2(a.x * b.c0.x + a.y * b.c0.y, a.x * b.c1.x + a.y * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 mul(double2 a, double2x3 b)
+        {
+            return new double3(a.x * b.c0.x + a.y * b.c0.y, a.x * b.c1.x + a.y * b.c1.y, a.x * b.c2.x + a.y * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 mul(double2 a, double2x4 b)
+        {
+            return new double4(a.x * b.c0.x + a.y * b.c0.y, a.x * b.c1.x + a.y * b.c1.y, a.x * b.c2.x + a.y * b.c2.y, a.x * b.c3.x + a.y * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double mul(double3 a, double3 b)
+        {
+            return a.x * b.x + a.y * b.y + a.z * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 mul(double3 a, double3x2 b)
+        {
+            return new double2(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 mul(double3 a, double3x3 b)
+        {
+            return new double3(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 mul(double3 a, double3x4 b)
+        {
+            return new double4(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z, a.x * b.c3.x + a.y * b.c3.y + a.z * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double mul(double4 a, double4 b)
+        {
+            return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 mul(double4 a, double4x2 b)
+        {
+            return new double2(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z + a.w * b.c0.w, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z + a.w * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 mul(double4 a, double4x3 b)
+        {
+            return new double3(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z + a.w * b.c0.w, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z + a.w * b.c1.w, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z + a.w * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 mul(double4 a, double4x4 b)
+        {
+            return new double4(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z + a.w * b.c0.w, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z + a.w * b.c1.w, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z + a.w * b.c2.w, a.x * b.c3.x + a.y * b.c3.y + a.z * b.c3.z + a.w * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 mul(double2x2 a, double2 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2x2 mul(double2x2 a, double2x2 b)
+        {
+            return new double2x2(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2x3 mul(double2x2 a, double2x3 b)
+        {
+            return new double2x3(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2x4 mul(double2x2 a, double2x4 b)
+        {
+            return new double2x4(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y, a.c0 * b.c3.x + a.c1 * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 mul(double2x3 a, double3 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2x2 mul(double2x3 a, double3x2 b)
+        {
+            return new double2x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2x3 mul(double2x3 a, double3x3 b)
+        {
+            return new double2x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2x4 mul(double2x3 a, double3x4 b)
+        {
+            return new double2x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 mul(double2x4 a, double4 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z + a.c3 * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2x2 mul(double2x4 a, double4x2 b)
+        {
+            return new double2x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2x3 mul(double2x4 a, double4x3 b)
+        {
+            return new double2x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2x4 mul(double2x4 a, double4x4 b)
+        {
+            return new double2x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z + a.c3 * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 mul(double3x2 a, double2 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3x2 mul(double3x2 a, double2x2 b)
+        {
+            return new double3x2(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3x3 mul(double3x2 a, double2x3 b)
+        {
+            return new double3x3(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3x4 mul(double3x2 a, double2x4 b)
+        {
+            return new double3x4(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y, a.c0 * b.c3.x + a.c1 * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 mul(double3x3 a, double3 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3x2 mul(double3x3 a, double3x2 b)
+        {
+            return new double3x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3x3 mul(double3x3 a, double3x3 b)
+        {
+            return new double3x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3x4 mul(double3x3 a, double3x4 b)
+        {
+            return new double3x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 mul(double3x4 a, double4 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z + a.c3 * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3x2 mul(double3x4 a, double4x2 b)
+        {
+            return new double3x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3x3 mul(double3x4 a, double4x3 b)
+        {
+            return new double3x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3x4 mul(double3x4 a, double4x4 b)
+        {
+            return new double3x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z + a.c3 * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 mul(double4x2 a, double2 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4x2 mul(double4x2 a, double2x2 b)
+        {
+            return new double4x2(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4x3 mul(double4x2 a, double2x3 b)
+        {
+            return new double4x3(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4x4 mul(double4x2 a, double2x4 b)
+        {
+            return new double4x4(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y, a.c0 * b.c3.x + a.c1 * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 mul(double4x3 a, double3 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4x2 mul(double4x3 a, double3x2 b)
+        {
+            return new double4x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4x3 mul(double4x3 a, double3x3 b)
+        {
+            return new double4x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4x4 mul(double4x3 a, double3x4 b)
+        {
+            return new double4x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 mul(double4x4 a, double4 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z + a.c3 * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4x2 mul(double4x4 a, double4x2 b)
+        {
+            return new double4x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4x3 mul(double4x4 a, double4x3 b)
+        {
+            return new double4x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4x4 mul(double4x4 a, double4x4 b)
+        {
+            return new double4x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z + a.c3 * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int mul(int a, int b)
+        {
+            return a * b;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int mul(int2 a, int2 b)
+        {
+            return a.x * b.x + a.y * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2 mul(int2 a, int2x2 b)
+        {
+            return new int2(a.x * b.c0.x + a.y * b.c0.y, a.x * b.c1.x + a.y * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 mul(int2 a, int2x3 b)
+        {
+            return new int3(a.x * b.c0.x + a.y * b.c0.y, a.x * b.c1.x + a.y * b.c1.y, a.x * b.c2.x + a.y * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4 mul(int2 a, int2x4 b)
+        {
+            return new int4(a.x * b.c0.x + a.y * b.c0.y, a.x * b.c1.x + a.y * b.c1.y, a.x * b.c2.x + a.y * b.c2.y, a.x * b.c3.x + a.y * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int mul(int3 a, int3 b)
+        {
+            return a.x * b.x + a.y * b.y + a.z * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2 mul(int3 a, int3x2 b)
+        {
+            return new int2(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 mul(int3 a, int3x3 b)
+        {
+            return new int3(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4 mul(int3 a, int3x4 b)
+        {
+            return new int4(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z, a.x * b.c3.x + a.y * b.c3.y + a.z * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int mul(int4 a, int4 b)
+        {
+            return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2 mul(int4 a, int4x2 b)
+        {
+            return new int2(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z + a.w * b.c0.w, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z + a.w * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 mul(int4 a, int4x3 b)
+        {
+            return new int3(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z + a.w * b.c0.w, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z + a.w * b.c1.w, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z + a.w * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4 mul(int4 a, int4x4 b)
+        {
+            return new int4(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z + a.w * b.c0.w, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z + a.w * b.c1.w, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z + a.w * b.c2.w, a.x * b.c3.x + a.y * b.c3.y + a.z * b.c3.z + a.w * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2 mul(int2x2 a, int2 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2x2 mul(int2x2 a, int2x2 b)
+        {
+            return new int2x2(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2x3 mul(int2x2 a, int2x3 b)
+        {
+            return new int2x3(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2x4 mul(int2x2 a, int2x4 b)
+        {
+            return new int2x4(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y, a.c0 * b.c3.x + a.c1 * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2 mul(int2x3 a, int3 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2x2 mul(int2x3 a, int3x2 b)
+        {
+            return new int2x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2x3 mul(int2x3 a, int3x3 b)
+        {
+            return new int2x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2x4 mul(int2x3 a, int3x4 b)
+        {
+            return new int2x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2 mul(int2x4 a, int4 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z + a.c3 * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2x2 mul(int2x4 a, int4x2 b)
+        {
+            return new int2x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2x3 mul(int2x4 a, int4x3 b)
+        {
+            return new int2x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2x4 mul(int2x4 a, int4x4 b)
+        {
+            return new int2x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z + a.c3 * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 mul(int3x2 a, int2 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3x2 mul(int3x2 a, int2x2 b)
+        {
+            return new int3x2(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3x3 mul(int3x2 a, int2x3 b)
+        {
+            return new int3x3(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3x4 mul(int3x2 a, int2x4 b)
+        {
+            return new int3x4(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y, a.c0 * b.c3.x + a.c1 * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 mul(int3x3 a, int3 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3x2 mul(int3x3 a, int3x2 b)
+        {
+            return new int3x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3x3 mul(int3x3 a, int3x3 b)
+        {
+            return new int3x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3x4 mul(int3x3 a, int3x4 b)
+        {
+            return new int3x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 mul(int3x4 a, int4 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z + a.c3 * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3x2 mul(int3x4 a, int4x2 b)
+        {
+            return new int3x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3x3 mul(int3x4 a, int4x3 b)
+        {
+            return new int3x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3x4 mul(int3x4 a, int4x4 b)
+        {
+            return new int3x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z + a.c3 * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4 mul(int4x2 a, int2 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4x2 mul(int4x2 a, int2x2 b)
+        {
+            return new int4x2(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4x3 mul(int4x2 a, int2x3 b)
+        {
+            return new int4x3(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4x4 mul(int4x2 a, int2x4 b)
+        {
+            return new int4x4(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y, a.c0 * b.c3.x + a.c1 * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4 mul(int4x3 a, int3 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4x2 mul(int4x3 a, int3x2 b)
+        {
+            return new int4x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4x3 mul(int4x3 a, int3x3 b)
+        {
+            return new int4x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4x4 mul(int4x3 a, int3x4 b)
+        {
+            return new int4x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4 mul(int4x4 a, int4 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z + a.c3 * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4x2 mul(int4x4 a, int4x2 b)
+        {
+            return new int4x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4x3 mul(int4x4 a, int4x3 b)
+        {
+            return new int4x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4x4 mul(int4x4 a, int4x4 b)
+        {
+            return new int4x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z + a.c3 * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint mul(uint a, uint b)
+        {
+            return a * b;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint mul(uint2 a, uint2 b)
+        {
+            return a.x * b.x + a.y * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2 mul(uint2 a, uint2x2 b)
+        {
+            return new uint2(a.x * b.c0.x + a.y * b.c0.y, a.x * b.c1.x + a.y * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3 mul(uint2 a, uint2x3 b)
+        {
+            return new uint3(a.x * b.c0.x + a.y * b.c0.y, a.x * b.c1.x + a.y * b.c1.y, a.x * b.c2.x + a.y * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4 mul(uint2 a, uint2x4 b)
+        {
+            return new uint4(a.x * b.c0.x + a.y * b.c0.y, a.x * b.c1.x + a.y * b.c1.y, a.x * b.c2.x + a.y * b.c2.y, a.x * b.c3.x + a.y * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint mul(uint3 a, uint3 b)
+        {
+            return a.x * b.x + a.y * b.y + a.z * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2 mul(uint3 a, uint3x2 b)
+        {
+            return new uint2(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3 mul(uint3 a, uint3x3 b)
+        {
+            return new uint3(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4 mul(uint3 a, uint3x4 b)
+        {
+            return new uint4(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z, a.x * b.c3.x + a.y * b.c3.y + a.z * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint mul(uint4 a, uint4 b)
+        {
+            return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2 mul(uint4 a, uint4x2 b)
+        {
+            return new uint2(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z + a.w * b.c0.w, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z + a.w * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3 mul(uint4 a, uint4x3 b)
+        {
+            return new uint3(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z + a.w * b.c0.w, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z + a.w * b.c1.w, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z + a.w * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4 mul(uint4 a, uint4x4 b)
+        {
+            return new uint4(a.x * b.c0.x + a.y * b.c0.y + a.z * b.c0.z + a.w * b.c0.w, a.x * b.c1.x + a.y * b.c1.y + a.z * b.c1.z + a.w * b.c1.w, a.x * b.c2.x + a.y * b.c2.y + a.z * b.c2.z + a.w * b.c2.w, a.x * b.c3.x + a.y * b.c3.y + a.z * b.c3.z + a.w * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2 mul(uint2x2 a, uint2 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2x2 mul(uint2x2 a, uint2x2 b)
+        {
+            return new uint2x2(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2x3 mul(uint2x2 a, uint2x3 b)
+        {
+            return new uint2x3(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2x4 mul(uint2x2 a, uint2x4 b)
+        {
+            return new uint2x4(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y, a.c0 * b.c3.x + a.c1 * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2 mul(uint2x3 a, uint3 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2x2 mul(uint2x3 a, uint3x2 b)
+        {
+            return new uint2x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2x3 mul(uint2x3 a, uint3x3 b)
+        {
+            return new uint2x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2x4 mul(uint2x3 a, uint3x4 b)
+        {
+            return new uint2x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2 mul(uint2x4 a, uint4 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z + a.c3 * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2x2 mul(uint2x4 a, uint4x2 b)
+        {
+            return new uint2x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2x3 mul(uint2x4 a, uint4x3 b)
+        {
+            return new uint2x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2x4 mul(uint2x4 a, uint4x4 b)
+        {
+            return new uint2x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z + a.c3 * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3 mul(uint3x2 a, uint2 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3x2 mul(uint3x2 a, uint2x2 b)
+        {
+            return new uint3x2(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3x3 mul(uint3x2 a, uint2x3 b)
+        {
+            return new uint3x3(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3x4 mul(uint3x2 a, uint2x4 b)
+        {
+            return new uint3x4(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y, a.c0 * b.c3.x + a.c1 * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3 mul(uint3x3 a, uint3 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3x2 mul(uint3x3 a, uint3x2 b)
+        {
+            return new uint3x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3x3 mul(uint3x3 a, uint3x3 b)
+        {
+            return new uint3x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3x4 mul(uint3x3 a, uint3x4 b)
+        {
+            return new uint3x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3 mul(uint3x4 a, uint4 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z + a.c3 * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3x2 mul(uint3x4 a, uint4x2 b)
+        {
+            return new uint3x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3x3 mul(uint3x4 a, uint4x3 b)
+        {
+            return new uint3x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3x4 mul(uint3x4 a, uint4x4 b)
+        {
+            return new uint3x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z + a.c3 * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4 mul(uint4x2 a, uint2 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4x2 mul(uint4x2 a, uint2x2 b)
+        {
+            return new uint4x2(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4x3 mul(uint4x2 a, uint2x3 b)
+        {
+            return new uint4x3(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4x4 mul(uint4x2 a, uint2x4 b)
+        {
+            return new uint4x4(a.c0 * b.c0.x + a.c1 * b.c0.y, a.c0 * b.c1.x + a.c1 * b.c1.y, a.c0 * b.c2.x + a.c1 * b.c2.y, a.c0 * b.c3.x + a.c1 * b.c3.y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4 mul(uint4x3 a, uint3 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4x2 mul(uint4x3 a, uint3x2 b)
+        {
+            return new uint4x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4x3 mul(uint4x3 a, uint3x3 b)
+        {
+            return new uint4x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4x4 mul(uint4x3 a, uint3x4 b)
+        {
+            return new uint4x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4 mul(uint4x4 a, uint4 b)
+        {
+            return a.c0 * b.x + a.c1 * b.y + a.c2 * b.z + a.c3 * b.w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4x2 mul(uint4x4 a, uint4x2 b)
+        {
+            return new uint4x2(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4x3 mul(uint4x4 a, uint4x3 b)
+        {
+            return new uint4x3(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4x4 mul(uint4x4 a, uint4x4 b)
+        {
+            return new uint4x4(a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w, a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w, a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w, a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z + a.c3 * b.c3.w);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static quaternion mul(quaternion a, quaternion b)
+        {
+            return new quaternion(a.value.wwww * b.value + (a.value.xyzx * b.value.wwwx + a.value.yzxy * b.value.zxyy) * new float4(1f, 1f, 1f, -1f) - a.value.zxyz * b.value.yzxz);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 mul(quaternion q, float3 v)
+        {
+            float3 @float = 2f * cross(q.value.xyz, v);
+            return v + q.value.w * @float + cross(q.value.xyz, @float);
+        }
+
+        #endregion
+
+        #region tan
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float tan(float x)
+        {
+            return (float)System.Math.Tan(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 tan(float2 x)
+        {
+            return new float2(tan(x.x), tan(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 tan(float3 x)
+        {
+            return new float3(tan(x.x), tan(x.y), tan(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 tan(float4 x)
+        {
+            return new float4(tan(x.x), tan(x.y), tan(x.z), tan(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double tan(double x)
+        {
+            return System.Math.Tan(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 tan(double2 x)
+        {
+            return new double2(tan(x.x), tan(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 tan(double3 x)
+        {
+            return new double3(tan(x.x), tan(x.y), tan(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 tan(double4 x)
+        {
+            return new double4(tan(x.x), tan(x.y), tan(x.z), tan(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float tanh(float x)
+        {
+            return (float)System.Math.Tanh(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 tanh(float2 x)
+        {
+            return new float2(tanh(x.x), tanh(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 tanh(float3 x)
+        {
+            return new float3(tanh(x.x), tanh(x.y), tanh(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 tanh(float4 x)
+        {
+            return new float4(tanh(x.x), tanh(x.y), tanh(x.z), tanh(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double tanh(double x)
+        {
+            return System.Math.Tanh(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 tanh(double2 x)
+        {
+            return new double2(tanh(x.x), tanh(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 tanh(double3 x)
+        {
+            return new double3(tanh(x.x), tanh(x.y), tanh(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 tanh(double4 x)
+        {
+            return new double4(tanh(x.x), tanh(x.y), tanh(x.z), tanh(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float atan(float x)
+        {
+            return (float)System.Math.Atan(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 atan(float2 x)
+        {
+            return new float2(atan(x.x), atan(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 atan(float3 x)
+        {
+            return new float3(atan(x.x), atan(x.y), atan(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 atan(float4 x)
+        {
+            return new float4(atan(x.x), atan(x.y), atan(x.z), atan(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double atan(double x)
+        {
+            return System.Math.Atan(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 atan(double2 x)
+        {
+            return new double2(atan(x.x), atan(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 atan(double3 x)
+        {
+            return new double3(atan(x.x), atan(x.y), atan(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 atan(double4 x)
+        {
+            return new double4(atan(x.x), atan(x.y), atan(x.z), atan(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float atan2(float y, float x)
+        {
+            return (float)System.Math.Atan2(y, x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 atan2(float2 y, float2 x)
+        {
+            return new float2(atan2(y.x, x.x), atan2(y.y, x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 atan2(float3 y, float3 x)
+        {
+            return new float3(atan2(y.x, x.x), atan2(y.y, x.y), atan2(y.z, x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 atan2(float4 y, float4 x)
+        {
+            return new float4(atan2(y.x, x.x), atan2(y.y, x.y), atan2(y.z, x.z), atan2(y.w, x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double atan2(double y, double x)
+        {
+            return System.Math.Atan2(y, x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 atan2(double2 y, double2 x)
+        {
+            return new double2(atan2(y.x, x.x), atan2(y.y, x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 atan2(double3 y, double3 x)
+        {
+            return new double3(atan2(y.x, x.x), atan2(y.y, x.y), atan2(y.z, x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 atan2(double4 y, double4 x)
+        {
+            return new double4(atan2(y.x, x.x), atan2(y.y, x.y), atan2(y.z, x.z), atan2(y.w, x.w));
+        }
 
         #endregion
 
@@ -2102,7 +3530,28 @@ namespace Point.Collections
             return select(defaultvalue, x * rsqrt(num), num > 1.1754943508222875E-38);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static quaternion normalize(quaternion q)
+        {
+            float4 value = q.value;
+            return new quaternion(rsqrt(dot(value, value)) * value);
+        }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static quaternion normalizesafe(quaternion q)
+        {
+            float4 value = q.value;
+            float num = dot(value, value);
+            return new quaternion(select(quaternion.identity.value, value * rsqrt(num), num > 1.17549435E-38f));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static quaternion normalizesafe(quaternion q, quaternion defaultvalue)
+        {
+            float4 value = q.value;
+            float num = dot(value, value);
+            return new quaternion(select(defaultvalue.value, value * rsqrt(num), num > 1.17549435E-38f));
+        }
 
         #endregion
 

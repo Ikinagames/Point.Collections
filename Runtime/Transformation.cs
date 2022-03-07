@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,14 +13,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
+#if UNITY_2020
+#define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
+
 using Newtonsoft.Json;
+#if UNITYENGINE
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+#endif
 
 namespace Point.Collections
 {
+#if UNITYENGINE
     [BurstCompatible]
+#endif
     public struct Transformation
     {
         [JsonProperty(Order = 0, PropertyName = "localRotation")]
@@ -30,6 +44,7 @@ namespace Point.Collections
         [JsonProperty(Order = 2, PropertyName = "localScale")]
         public float3 localScale;
 
+#if UNITYENGINE
         [NotBurstCompatible]
         public Transformation(Transform tr)
         {
@@ -47,5 +62,6 @@ namespace Point.Collections
                 localScale = t.localScale
             };
         }
+#endif
     }
 }

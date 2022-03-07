@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,13 +17,23 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
+
 using System;
 using System.Runtime.InteropServices;
+#if UNITYENGINE
 using Unity.Collections;
+#endif
 
 namespace Point.Collections
 {
+#if UNITYENGINE
     [BurstCompatible]
+#endif
     [StructLayout(LayoutKind.Sequential)]
     public struct BitArray64 : IEquatable<BitArray64>
     {
@@ -73,7 +83,9 @@ namespace Point.Collections
 
             if (IsExceedingRange(in length, in value, out ulong maxValue))
             {
+#if UNITYENGINE
                 UnityEngine.Debug.LogError($"{value} is exeeding >{maxValue}. length : {length}");
+#endif
                 throw new ArgumentOutOfRangeException();
             }
 
@@ -83,12 +95,16 @@ namespace Point.Collections
             }
         }
 
+#if UNITYENGINE
         [NotBurstCompatible]
+#endif
         public override string ToString()
         {
             return y.ToString() + x.ToString();
         }
+#if UNITYENGINE
         [NotBurstCompatible]
+#endif
         public override bool Equals(object obj)
         {
             if (!(obj is ulong)) return false;

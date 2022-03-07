@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +17,22 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
+
 using System;
+#if UNITYENGINE
 using Unity.Collections;
+#endif
 
 namespace Point.Collections
 {
+#if UNITYENGINE
     [BurstCompatible]
+#endif
     public struct Channel : IEquatable<Channel>
     {
         public static Channel None => new Channel();
@@ -34,13 +44,17 @@ namespace Point.Collections
         private int m_LogChannel;
         private FixedString512Bytes m_Name;
 
+#if UNITYENGINE
         [NotBurstCompatible]
+#endif
         private Channel(LogChannel channel)
         {
             m_LogChannel = (int)channel;
             m_Name = TypeHelper.Enum<LogChannel>.ToString(channel);
         }
+#if UNITYENGINE
         [NotBurstCompatible]
+#endif
         public override string ToString() => m_Name.ToString();
         public override int GetHashCode() => m_LogChannel;
 

@@ -37,13 +37,13 @@ namespace Point.Collections.Burst
             if (*linear == 0) *output = kMindB;
             else
             {
-                *output = 20 * Math.log10(*linear);
+                *output = 20 * math.log10(*linear);
             }
         }
         [BurstCompile]
         public static void unity_fromdB(double* dB, double* output)
         {
-            *output = Math.pow(10, *dB / 20);
+            *output = math.pow(10, *dB / 20);
         }
 #endif
 
@@ -60,8 +60,8 @@ namespace Point.Collections.Burst
             float4x4 trMatrix = float4x4.TRS(originCenter, quaternion, originExtents);
 
             float3
-                minPos = Math.mul(trMatrix, new float4(-originExtents * 2, 1)).xyz,
-                maxPos = Math.mul(trMatrix, new float4(originExtents * 2, 1)).xyz;
+                minPos = math.mul(trMatrix, new float4(-originExtents * 2, 1)).xyz,
+                maxPos = math.mul(trMatrix, new float4(originExtents * 2, 1)).xyz;
 
             AABB temp = new AABB(originCenter, float3.zero);
 
@@ -92,14 +92,14 @@ namespace Point.Collections.Burst
                 b3 = new float3(min.x, max.y, max.z),
                 b4 = new float3(min.x, min.y, max.z);
 
-            temp.Encapsulate(Math.mul(trMatrix, new float4((min - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(Math.mul(trMatrix, new float4((a1 - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(Math.mul(trMatrix, new float4((a2 - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(Math.mul(trMatrix, new float4((a3 - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(Math.mul(trMatrix, new float4((b1 - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(Math.mul(trMatrix, new float4((max - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(Math.mul(trMatrix, new float4((b3 - originCenter) * 2, 1)).xyz);
-            temp.Encapsulate(Math.mul(trMatrix, new float4((b4 - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(math.mul(trMatrix, new float4((min - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(math.mul(trMatrix, new float4((a1 - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(math.mul(trMatrix, new float4((a2 - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(math.mul(trMatrix, new float4((a3 - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(math.mul(trMatrix, new float4((b1 - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(math.mul(trMatrix, new float4((max - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(math.mul(trMatrix, new float4((b3 - originCenter) * 2, 1)).xyz);
+            temp.Encapsulate(math.mul(trMatrix, new float4((b4 - originCenter) * 2, 1)).xyz);
 
             *result = temp;
         }
