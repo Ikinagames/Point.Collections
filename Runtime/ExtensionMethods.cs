@@ -20,5 +20,15 @@ namespace Point.Collections
     public static class ExtensionMethods
     {
         public static TypeInfo ToTypeInfo(this Type type) => TypeHelper.ToTypeInfo(type);
+
+        #region IConvertible
+
+        public static int ToInt32<T>(this T t) where T : struct, IConvertible => t.ToInt32(System.Globalization.CultureInfo.InvariantCulture);
+        public static double ToDouble<T>(this T t) where T : struct, IConvertible => t.ToDouble(System.Globalization.CultureInfo.InvariantCulture);
+        public static float ToSingle<T>(this T t) where T : struct, IConvertible => t.ToSingle(System.Globalization.CultureInfo.InvariantCulture);
+        public static long ToInt64<T>(this T t) where T : struct, IConvertible => t.ToInt64(System.Globalization.CultureInfo.InvariantCulture);
+        public static string ToString<T>(this T t) where T : struct, IConvertible => t.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+        #endregion
     }
 }

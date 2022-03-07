@@ -33,7 +33,7 @@ namespace Point.Collections
 #if UNITYENGINE
     [BurstCompatible]
 #endif
-    public struct Channel : IEquatable<Channel>
+    public struct Channel : IChannel, IEquatable<Channel>
     {
         public static Channel None => new Channel();
         public static Channel Audio => new Channel(LogChannel.Audio);
@@ -45,6 +45,8 @@ namespace Point.Collections
         private FixedString512Bytes m_Name;
 
 #if UNITYENGINE
+        public LogChannel LogChannel => (LogChannel)m_LogChannel;
+
         [NotBurstCompatible]
 #endif
         private Channel(LogChannel channel)
@@ -96,5 +98,10 @@ namespace Point.Collections
         }
         public static bool operator ==(Channel a, Channel b) => a.Equals(b);
         public static bool operator !=(Channel a, Channel b) => !a.Equals(b);
+    }
+
+    public interface IChannel
+    {
+        LogChannel LogChannel { get; }
     }
 }
