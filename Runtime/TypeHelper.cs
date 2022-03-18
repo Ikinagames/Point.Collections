@@ -170,7 +170,15 @@ namespace Point.Collections
         }
 
         private static readonly Assembly[] s_Assemblies = AppDomain.CurrentDomain.GetAssemblies();
-        private static readonly Type[] s_AllTypes = s_Assemblies.Where(a => !a.IsDynamic).SelectMany(a => GetLoadableTypes(a)).ToArray();
+        private static readonly Type[] s_AllTypes 
+            = s_Assemblies
+                .Where(a => !a.IsDynamic)
+#if !UNITY_EDITOR
+                .Where(x => x.GetCustomAttribute<InternalIgnoreTypeAttribute>() == null)
+#else
+#endif
+                .SelectMany(a => GetLoadableTypes(a))
+                .ToArray();
 
         /// <summary>
         /// 현재 프로젝트의 모든 <see cref="System.Type"/> 에서 <paramref name="predictate"/> 조건으로 찾아서 반환합니다.
