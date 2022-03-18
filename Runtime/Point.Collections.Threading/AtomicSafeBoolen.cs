@@ -20,7 +20,8 @@ namespace Point.Collections.Threading
     /// <summary>
     /// Thread-safe <see cref="bool"/> 입니다.
     /// </summary>
-    public struct AtomicSafeBoolen : IEquatable<AtomicSafeBoolen>
+    public struct AtomicSafeBoolen : IEquatable<AtomicSafeBoolen>, 
+        ITypeConvertible<AtomicSafeInteger>, ITypeConvertible<int>
     {
         private AtomicOperator m_AtomicOp;
         private bool m_Value;
@@ -63,6 +64,21 @@ namespace Point.Collections.Threading
 
             return false;
         }
+
+        #region ITypeConvertible
+
+        AtomicSafeInteger ITypeConvertible<AtomicSafeInteger>.Convert()
+        {
+            bool value = Value;
+            return new AtomicSafeInteger(value ? 1 : 0);
+        }
+        int ITypeConvertible<int>.Convert()
+        {
+            bool value = Value;
+            return value ? 1 : 0;
+        }
+
+        #endregion
 
         public static bool operator ==(AtomicSafeBoolen a, bool b) => a.Value == b;
         public static bool operator !=(AtomicSafeBoolen a, bool b) => a.Value != b;
