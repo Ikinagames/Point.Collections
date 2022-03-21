@@ -185,6 +185,14 @@ namespace Point.Collections
         [System.Diagnostics.Conditional("DEBUG_MODE")]
         public static void AssertMainThread()
         {
+#if UNITY_EDITOR
+            if (!UnityEditorInternal.InternalEditorUtility.CurrentThreadIsMainThread())
+            {
+                LogError(LogChannel.Core,
+                    $"Thread affinity error. Expected thread(MAINTHREAD) but {Threading.ThreadInfo.CurrentThread}");
+            }
+            return;
+#endif
             AssertThreadAffinity(PointApplication.Instance.MainThread);
         }
         /// <summary>
@@ -212,9 +220,9 @@ namespace Point.Collections
 
             if (expectedAffinity.Equals(currentThread)) return;
 
-            throw new InvalidOperationException($"Thread affinity error. Expected thread({expectedAffinity}) but {currentThread}");
-            //LogError(LogChannel.Core,
-            //    $"Thread affinity error. Expected thread({expectedAffinity}) but {currentThread}");
+            //throw new InvalidOperationException($"Thread affinity error. Expected thread({expectedAffinity}) but {currentThread}");
+            LogError(LogChannel.Core,
+                $"Thread affinity error. Expected thread({expectedAffinity}) but {currentThread}");
         }
         /// <summary>
         /// 이 스레드가 <paramref name="other"/> 의 스레드와 같은 스레드인지 확인합니다. 

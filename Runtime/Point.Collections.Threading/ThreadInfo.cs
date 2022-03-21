@@ -37,7 +37,7 @@ namespace Point.Collections.Threading
 #if UNITYENGINE
     [BurstCompatible]
 #endif
-    public struct ThreadInfo : IEquatable<ThreadInfo>, IEquatable<Thread>
+    public struct ThreadInfo : IEmpty, IEquatable<ThreadInfo>, IEquatable<Thread>
     {
         /// <summary>
         /// 현재 스레드 정보를 가져옵니다.
@@ -51,6 +51,7 @@ namespace Point.Collections.Threading
 
         private readonly int m_ManagedThreadID;
         private readonly int m_HashCode;
+        private readonly bool m_IsCreated;
 #if UNITYENGINE
         private readonly FixedString512Bytes m_Name;
 
@@ -74,7 +75,10 @@ namespace Point.Collections.Threading
             }
             else m_Name = thread.Name;
 #endif
+            m_IsCreated = true;
         }
+
+        public bool IsEmpty() => !m_IsCreated;
 
         public bool Equals(ThreadInfo other)
         {
@@ -108,9 +112,9 @@ namespace Point.Collections.Threading
         {
 #if UNITYENGINE
             string name = m_Name.ToString();
-            return $"Thread({name}, {m_ManagedThreadID}, {m_HashCode})";
+            return $"Thread({name}, ID:{m_ManagedThreadID}, Hash:{m_HashCode})";
 #else
-            return $"Thread({m_ManagedThreadID}, {m_HashCode})";
+            return $"Thread(ID:{m_ManagedThreadID}, Hash:{m_HashCode})";
 #endif
         }
     }
