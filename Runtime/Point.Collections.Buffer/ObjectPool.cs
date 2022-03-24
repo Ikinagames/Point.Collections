@@ -41,6 +41,8 @@ namespace Point.Collections.Buffer
         private ThreadInfo m_Owner;
         private int m_CheckSum;
 
+        public bool EnableAtomicSafety { get; set; } = false;
+
         private ObjectPool() { }
         public ObjectPool(Func<T> factory, Action<T> onGet, Action<T> onReserve, Action<T> onRelease)
         {
@@ -54,11 +56,26 @@ namespace Point.Collections.Buffer
             m_Owner = ThreadInfo.CurrentThread;
             m_CheckSum = 0;
         }
+        public ObjectPool(bool enableAtomicSafety, Func<T> factory, Action<T> onGet, Action<T> onReserve, Action<T> onRelease)
+        {
+            m_Factory = factory;
+            m_OnGet = onGet;
+            m_OnReserve = onReserve;
+            m_OnRelease = onRelease;
+
+            m_Pool = new Stack<T>();
+
+            m_Owner = ThreadInfo.CurrentThread;
+            m_CheckSum = 0;
+
+            EnableAtomicSafety = enableAtomicSafety;
+        }
 
         public T Get()
         {
-            m_Owner.Validate();
-
+#if DEBUG_MODE
+            if (EnableAtomicSafety) m_Owner.Validate();
+#endif
             T t;
             if (m_Pool.Count > 0)
             {
@@ -75,8 +92,9 @@ namespace Point.Collections.Buffer
         }
         public void Reserve(T t)
         {
-            m_Owner.Validate();
-
+#if DEBUG_MODE
+            if (EnableAtomicSafety) m_Owner.Validate();
+#endif
             m_OnReserve?.Invoke(t);
 
             int hash = t.GetHashCode();
@@ -87,8 +105,9 @@ namespace Point.Collections.Buffer
 
         public void Dispose()
         {
-            m_Owner.Validate();
-
+#if DEBUG_MODE
+            if (EnableAtomicSafety) m_Owner.Validate();
+#endif
             if (m_CheckSum != 0)
             {
                 throw new Exception();
