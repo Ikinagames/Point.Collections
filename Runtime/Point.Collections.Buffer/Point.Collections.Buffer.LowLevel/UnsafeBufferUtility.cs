@@ -13,29 +13,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_2020_1_OR_NEWER
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
-
-#if UNITY_2020
 #define UNITYENGINE
+using Unity.Burst;
+using Point.Collections.Burst;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
-
-//#undef UNITYENGINE
 
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Point.Collections.Native;
-#if UNITYENGINE
-using Unity.Burst;
-using Point.Collections.Burst;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-#endif
 
 namespace Point.Collections.Buffer.LowLevel
 {

@@ -13,12 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020
-#define UNITYENGINE
+#if UNITY_2020_1_OR_NEWER
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
+#define DEBUG_MODE
 #endif
+#define UNITYENGINE
 
-using System;
-#if UNITYENGINE
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -28,7 +28,6 @@ namespace Point.Collections.Burst
     [BurstCompile]
     public static unsafe class BurstMath
     {
-#if !POINT_COLLECTIONS_NATIVE
         [BurstCompile]
         public static void unity_todB(double* linear, double* output)
         {
@@ -45,9 +44,8 @@ namespace Point.Collections.Burst
         {
             *output = math.pow(10, *dB / 20);
         }
-#endif
 
-#region AABB
+        #region AABB
 
         [BurstCompile]
         public static void aabb_calculateRotation(in AABB aabb, in quaternion quaternion, AABB* result)
@@ -121,7 +119,7 @@ namespace Point.Collections.Burst
             buffer[7] = new float3(min.x, min.y, max.z);
         }
 
-#endregion
+        #endregion
     }
 }
 

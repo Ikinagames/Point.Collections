@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020
+#if UNITY_2020_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
@@ -22,9 +22,9 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
+#else
+#define POINT_COLLECTIONS_NATIVE
 #endif
-
-//#undef UNITYENGINE
 
 using Point.Collections.Native;
 using Point.Collections.Threading;

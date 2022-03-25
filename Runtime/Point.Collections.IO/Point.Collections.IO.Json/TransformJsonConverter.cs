@@ -13,14 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020
-#define UNITYENGINE
+#if UNITY_2020_1_OR_NEWER
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
+#define DEBUG_MODE
 #endif
+#define UNITYENGINE
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-#if UNITYENGINE
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Scripting;
@@ -30,10 +31,6 @@ namespace Point.Collections.IO.Json
     [Preserve]
     internal sealed class TransformJsonConverter : JsonConverter<UnityEngine.Transform>
     {
-#if UNITY_EDITOR
-
-#endif
-
         public override bool CanRead => false;
         public override bool CanWrite => false;
 
