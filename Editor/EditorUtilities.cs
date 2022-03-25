@@ -27,6 +27,7 @@
 
 using System;
 using System.IO;
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
@@ -225,6 +226,22 @@ namespace Point.Collections.Editor
             {
                 File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
             }
+        }
+
+        public static float2 MinMaxSlider(Rect position, string label, float minValue, float maxValue, float minLimit, float maxLimit)
+        {
+            position.width -= 50;
+            EditorGUI.MinMaxSlider(position, label, ref minValue, ref maxValue, minLimit, maxLimit);
+
+            var tempRect = position;
+            tempRect.x += position.width + .75f;
+            tempRect.width = 25 - 1.5f;
+
+            minValue = EditorGUI.FloatField(tempRect, minValue);
+            tempRect.x += 1.5f + 25;
+            maxValue = EditorGUI.FloatField(tempRect, maxValue);
+
+            return new float2(minValue, maxValue);
         }
     }
 }

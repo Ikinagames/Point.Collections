@@ -23,17 +23,18 @@
 #endif
 
 #if UNITYENGINE
+using UnityEngine;
 
 namespace Point.Collections
 {
-    public abstract class AnimationEventBinder : UnityEngine.MonoBehaviour
+    public abstract class AnimationEventBinder : MonoBehaviour
     {
         /// <summary>
         /// 이 메소드는 <see cref="AnimationClip"/> 내 <see cref="AnimationEvent"/> 호출용 메소드입니다.
         /// </summary>
         /// <param name="ev"></param>
         [System.Obsolete("Do not use. This method is intended to use only at AnimationClip events.", true)]
-        public abstract void TriggerAction(UnityEngine.AnimationEvent ev);
+        public abstract void TriggerAction(AnimationEvent ev);
     }
 }
 

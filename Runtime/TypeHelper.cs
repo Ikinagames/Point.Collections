@@ -98,6 +98,7 @@ namespace Point.Collections
             public static ConstructorInfo GetConstructorInfo(params Type[] args)
                 => TypeHelper.GetConstructorInfo(Type, args);
             public static FieldInfo GetFieldInfo(string name, BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) => TypeHelper.GetFieldInfo(Type, name, bindingFlags);
+            public static PropertyInfo GetPropertyInfo(string name, BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) => TypeHelper.GetPropertyInfo(Type, name, bindingFlags);
 
             /// <inheritdoc cref="TypeHelper.IsZeroSizeStruct(Type)"/>>
             public static bool IsZeroSizeStruct()
@@ -195,6 +196,10 @@ namespace Point.Collections
         public static FieldInfo GetFieldInfo(Type type, string name, BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
         {
             return type.GetField(name, bindingFlags);
+        }
+        public static PropertyInfo GetPropertyInfo(Type type, string name, BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+        {
+            return type.GetProperty(name, bindingFlags);
         }
 
         private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)

@@ -162,6 +162,32 @@ namespace Point.Collections.Editor
             rect.y += lineHeight;
         }
 
+        public static Rect FixedIndentForList(Rect rect)
+        {
+            rect.x += 8;
+            rect.width -= 8;
+
+            return rect;
+        }
+        public static Rect UseRect(ref Rect current, float height)
+        {
+            Rect temp = current;
+            //temp.y = height;
+            temp.height = height;
+
+            current.y += height;
+            current.height -= height;
+
+            temp = EditorGUI.IndentedRect(temp);
+
+            return temp;
+        }
+        public static void Indent(ref Rect rect, float pixel)
+        {
+            rect.x += pixel;
+            rect.width -= pixel;
+        }
+
         public static Rect GetRect(Rect position, int count = 1)
         {
             Rect rect = GUILayoutUtility.GetRect(position.width, PropertyDrawerHelper.lineHeight * count);
