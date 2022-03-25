@@ -13,12 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_2020
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
-
-#if UNITY_2020
 #define UNITYENGINE
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
+using Unity.Mathematics;
 #endif
 
 //#undef UNITYENGINE
@@ -28,12 +31,6 @@ using Point.Collections.Threading;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-#if UNITYENGINE
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.Jobs;
-using Unity.Mathematics;
-#endif
 
 namespace Point.Collections.Buffer.LowLevel
 {
@@ -202,15 +199,19 @@ namespace Point.Collections.Buffer.LowLevel
                 return;
             }
 #endif
+#if UNITYENGINE
             unsafe
             {
-#if UNITYENGINE
                 NativeUtility.Free(m_Buffer.Value.Ptr, m_Allocator);
                 NativeUtility.Free(m_Buffer, m_Allocator);
-#endif
+                
             }
-#if UNITYENGINE && ENABLE_UNITY_COLLECTIONS_CHECKS
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
             UnsafeBufferUtility.RemoveSafety(m_Buffer, ref m_SafetyHandle);
+#endif
+#else
+            Marshal.FreeHGlobal(m_Buffer.Value.Ptr.IntPtr);
+            Marshal.FreeHGlobal(m_Buffer.IntPtr);
 #endif
             m_Buffer = default(UnsafeReference<Buffer>);
         }

@@ -52,7 +52,8 @@ namespace Point.Collections.Native
             )
         {
 #if !UNITYENGINE
-            return malloc(size, align);
+            return (void*)Marshal.AllocHGlobal((int)size);
+            //return malloc(size, align);
 #else
             return UnsafeUtility.Malloc(size, align, allocator);
 #endif
@@ -66,7 +67,9 @@ namespace Point.Collections.Native
 #if UNITYENGINE
             UnsafeUtility.Free(ptr, allocator);
 #else
-            throw new NotImplementedException();
+            // TODO : 임시
+            Marshal.FreeHGlobal((IntPtr)ptr);
+            //throw new NotImplementedException();
 #endif
         }
         public static void MemCpy(void* ptr, void* from, in long size)
@@ -74,7 +77,10 @@ namespace Point.Collections.Native
 #if UNITYENGINE
             UnsafeUtility.MemCpy(ptr, from, size);
 #else
-            memCpy(ptr, from, size);
+            //Marshal.Copy((IntPtr)from, (IntPtr)ptr, (int)size);
+            // TODO : 임시
+            System.Buffer.MemoryCopy(from, ptr, size, size);
+            //memCpy(ptr, from, size);
 #endif
         }
         public static void MemClear(void* ptr, in long size)
@@ -82,7 +88,13 @@ namespace Point.Collections.Native
 #if UNITYENGINE
             UnsafeUtility.MemClear(ptr, size);
 #else
-            memClear(ptr, size);
+            // TODO : 임시
+            int from = 0;
+            unsafe
+            {
+                System.Buffer.MemoryCopy(&from, ptr, size, TypeHelper.SizeOf<int>());
+            }
+            //memClear(ptr, size);
 #endif
         }
 
