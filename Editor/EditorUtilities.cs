@@ -13,17 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_2020_1_OR_NEWER
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
-
-#if UNITY_2020
 #define UNITYENGINE
-#else
-#define POINT_COLLECTIONS_NATIVE
-#endif
-
-#if UNITYENGINE
 
 using System;
 using System.IO;
@@ -228,7 +222,7 @@ namespace Point.Collections.Editor
             }
         }
 
-        public static float2 MinMaxSlider(Rect position, string label, float minValue, float maxValue, float minLimit, float maxLimit)
+        public static float2 MinMaxSlider(Rect position, string label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
         {
             position.width -= 50;
             EditorGUI.MinMaxSlider(position, label, ref minValue, ref maxValue, minLimit, maxLimit);
@@ -237,11 +231,28 @@ namespace Point.Collections.Editor
             tempRect.x += position.width + .75f;
             tempRect.width = 25 - 1.5f;
 
-            minValue = EditorGUI.FloatField(tempRect, minValue);
+            minValue = EditorGUI.DelayedFloatField(tempRect, minValue);
             tempRect.x += 1.5f + 25;
-            maxValue = EditorGUI.FloatField(tempRect, maxValue);
+            maxValue = EditorGUI.DelayedFloatField(tempRect, maxValue);
 
             return new float2(minValue, maxValue);
+        }
+        public static void MinMaxSlider(Rect position, string label, SerializedProperty minValue, SerializedProperty maxValue, float minLimit, float maxLimit)
+        {
+            position.width -= 50;
+            float tempMin = minValue.floatValue, tempMax = maxValue.floatValue;
+            EditorGUI.MinMaxSlider(position, label, ref tempMin, ref tempMax, minLimit, maxLimit);
+
+            var tempRect = position;
+            tempRect.x += position.width + .75f;
+            tempRect.width = 25 - 1.5f;
+
+            minValue.floatValue = tempMin;
+            maxValue.floatValue = tempMax;
+
+            EditorGUI.PropertyField(tempRect, minValue, GUIContent.none, true);
+            tempRect.x += 1.5f + 25;
+            EditorGUI.PropertyField(tempRect, maxValue, GUIContent.none, true);
         }
     }
 }
