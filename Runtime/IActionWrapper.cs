@@ -35,7 +35,10 @@ namespace Point.Collections
     public sealed class ActionWrapper : IActionWrapper
     {
         private static readonly ObjectPool<ActionWrapper> s_Container;
-        [System.Diagnostics.CodeAnalysis.AllowNull] public Action Action;
+#if !UNITYENGINE
+        [System.Diagnostics.CodeAnalysis.AllowNull]
+#endif
+        public Action Action;
 
 #if UNITYENGINE
         private bool m_MarkerSet = false;
@@ -94,7 +97,10 @@ namespace Point.Collections
     public sealed class ActionWrapper<T> : IActionWrapper
     {
         private static readonly ObjectPool<ActionWrapper<T>> s_Container;
-        [System.Diagnostics.CodeAnalysis.AllowNull] public Action<T> Action;
+#if !UNITYENGINE
+        [System.Diagnostics.CodeAnalysis.AllowNull]
+#endif
+        public Action<T> Action;
 
 #if UNITYENGINE
         private bool m_MarkerSet = false;

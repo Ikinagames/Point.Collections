@@ -69,7 +69,7 @@ namespace Point.Collections
             return (float)output;
         }
 
-        [Obsolete]
+        [System.Obsolete]
         public static long min(in long x, in long y)
         {
 #if UNITYENGINE
