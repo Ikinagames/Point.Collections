@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_2020
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
-
+#define UNITYENGINE
 using Unity.Collections;
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
+
 
 namespace Point.Collections.Buffer.LowLevel
 {
@@ -25,7 +30,9 @@ namespace Point.Collections.Buffer.LowLevel
     /// <seealso cref="UnsafeLinearHashMap{TKey, TValue}"/>, <seealso cref="UnsafeLinearPtrHashMap{TKey, TValue}"/> 
     /// 등의 미리 할당된 해시맵을 Untyped 로 바꾸는 Wrapper struct 입니다.
     /// </summary>
+#if UNITYENGINE
     [BurstCompatible]
+#endif
     public struct UntypedUnsafeLinearHashMap
     {
         internal readonly int m_InitialCount;

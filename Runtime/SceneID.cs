@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,16 +13,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_2020
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
+#define UNITYENGINE
+using Unity.Collections;
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
 
 using System;
-using Unity.Collections;
 
 namespace Point.Collections
 {
+#if UNITYENGINE
     [BurstCompatible]
+#endif
     public readonly struct SceneID : IEquatable<SceneID>, IEmpty
     {
         private readonly Hash m_Hash;

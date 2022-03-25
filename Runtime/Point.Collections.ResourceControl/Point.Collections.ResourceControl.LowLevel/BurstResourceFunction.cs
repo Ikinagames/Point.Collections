@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_2020
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
-
+#define UNITYENGINE
 using Unity.Burst;
 
 namespace Point.Collections.ResourceControl.LowLevel
@@ -40,3 +41,5 @@ namespace Point.Collections.ResourceControl.LowLevel
         //}
     }
 }
+
+#endif

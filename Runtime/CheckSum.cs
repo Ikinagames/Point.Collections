@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_2020
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
-
+#define UNITYENGINE
 using Unity.Collections;
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
+
 using Point.Collections.Burst;
 using System;
 
@@ -26,7 +31,9 @@ namespace Point.Collections
     /// <summary>
     /// CheckSum 알고리즘으로 데이터 무결성 검사를 하는 구조체입니다.
     /// </summary>
+#if UNITYENGINE
     [BurstCompatible]
+#endif
     public struct CheckSum : IEquatable<CheckSum>, IEquatable<int>, IEquatable<uint>
     {
         /// <summary>
@@ -78,11 +85,18 @@ namespace Point.Collections
             return result == 0;
         }
 
+#if UNITYENGINE
         [NotBurstCompatible]
+#endif
         public override string ToString() => m_Hash.ToString();
-
+#if UNITYENGINE
         [NotBurstCompatible]
-        public override bool Equals(object obj)
+#endif
+        public override bool Equals(
+#if !UNITYENGINE
+            [System.Diagnostics.CodeAnalysis.AllowNull]
+#endif
+            object obj)
         {
             if (obj == null || !(obj is CheckSum other)) return false;
 

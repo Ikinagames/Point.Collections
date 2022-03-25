@@ -13,11 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_2020
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
-
-#if UNITY_2020
 #define UNITYENGINE
 #else
 #define POINT_COLLECTIONS_NATIVE
@@ -25,7 +24,6 @@
 
 using Point.Collections.Editor;
 using Point.Collections.ResourceControl;
-using Point.Collections.ResourceControl.LowLevel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;

@@ -3867,6 +3867,83 @@ namespace Point.Collections
 
         #endregion
 
+        #region sign
+
+        /// <summary>Returns the sign of a int value. -1 if it is less than zero, 0 if it is zero and 1 if it greater than zero.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The sign of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int sign(int x) { return (x > 0 ? 1 : 0) - (x < 0 ? 1 : 0); }
+
+        /// <summary>Returns the componentwise sign of a int2 value. 1 for positive components, 0 for zero components and -1 for negative components.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The componentwise sign of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2 sign(int2 x) { return new int2(sign(x.x), sign(x.y)); }
+
+        /// <summary>Returns the componentwise sign of a int3 value. 1 for positive components, 0 for zero components and -1 for negative components.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The componentwise sign of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 sign(int3 x) { return new int3(sign(x.x), sign(x.y), sign(x.z)); }
+
+        /// <summary>Returns the componentwise sign of a int4 value. 1 for positive components, 0 for zero components and -1 for negative components.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The componentwise sign of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4 sign(int4 x) { return new int4(sign(x.x), sign(x.y), sign(x.z), sign(x.w)); }
+
+        /// <summary>Returns the sign of a float value. -1.0f if it is less than zero, 0.0f if it is zero and 1.0f if it greater than zero.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The sign of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float sign(float x) { return (x > 0.0f ? 1.0f : 0.0f) - (x < 0.0f ? 1.0f : 0.0f); }
+
+        /// <summary>Returns the componentwise sign of a float2 value. 1.0f for positive components, 0.0f for zero components and -1.0f for negative components.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The componentwise sign of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 sign(float2 x) { return new float2(sign(x.x), sign(x.y)); }
+
+        /// <summary>Returns the componentwise sign of a float3 value. 1.0f for positive components, 0.0f for zero components and -1.0f for negative components.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The componentwise sign of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 sign(float3 x) { return new float3(sign(x.x), sign(x.y), sign(x.z)); }
+
+        /// <summary>Returns the componentwise sign of a float4 value. 1.0f for positive components, 0.0f for zero components and -1.0f for negative components.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The componentwise sign of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 sign(float4 x) { return new float4(sign(x.x), sign(x.y), sign(x.z), sign(x.w)); }
+
+
+        /// <summary>Returns the sign of a double value. -1.0 if it is less than zero, 0.0 if it is zero and 1.0 if it greater than zero.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The sign of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double sign(double x) { return x == 0 ? 0 : (x > 0.0 ? 1.0 : 0.0) - (x < 0.0 ? 1.0 : 0.0); }
+
+        /// <summary>Returns the componentwise sign of a double2 value. 1.0 for positive components, 0.0 for zero components and -1.0 for negative components.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The componentwise sign of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 sign(double2 x) { return new double2(sign(x.x), sign(x.y)); }
+
+        /// <summary>Returns the componentwise sign of a double3 value. 1.0 for positive components, 0.0 for zero components and -1.0 for negative components.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The componentwise sign of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 sign(double3 x) { return new double3(sign(x.x), sign(x.y), sign(x.z)); }
+
+        /// <summary>Returns the componentwise sign of a double4 value. 1.0 for positive components, 0.0 for zero components and -1.0 for negative components.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The componentwise sign of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 sign(double4 x) { return new double4(sign(x.x), sign(x.y), sign(x.z), sign(x.w)); }
+
+        #endregion
+
         #endregion
 #endif
     }

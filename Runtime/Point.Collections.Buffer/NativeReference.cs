@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +13,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_2020
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
+#endif
+#define UNITYENGINE
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+#else
+#define POINT_COLLECTIONS_NATIVE
 #endif
 
 using Point.Collections.Buffer.LowLevel;
 using Point.Collections.Threading;
 using System;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace Point.Collections.Buffer
 {
+#if UNITYENGINE
     [BurstCompatible]
+#endif
     public struct NativeReference<T> : IEquatable<NativeReference<T>>
         where T : unmanaged
     {
@@ -70,6 +77,7 @@ namespace Point.Collections.Buffer
             m_Owner = ThreadInfo.CurrentThread;
 #endif
         }
+#if UNITYENGINE
         public NativeReference(NativeArray<T> array, int elementIndex)
         {
             unsafe
@@ -82,6 +90,7 @@ namespace Point.Collections.Buffer
             m_Owner = ThreadInfo.CurrentThread;
 #endif
         }
+#endif
 
         public bool Equals(NativeReference<T> other) => m_Ptr.Equals(other.m_Ptr);
 
