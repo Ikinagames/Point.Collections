@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,41 +13,51 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Point.Collections.ResourceControl;
-using System.Collections.Generic;
-using Unity.Collections;
-using UnityEditor;
-using UnityEngine;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
 
-namespace Point.Collections.Editor
-{
-    //[CustomPropertyDrawer(typeof(AssetID))]
-    //public sealed class AssetIDPropertyDrawer : PropertyDrawer
-    //{
-    //    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-    //    {
-    //        return EditorGUIUtility.singleLineHeight * 2;
-    //        //return base.GetPropertyHeight(property, label);
-    //    }
-    //    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-    //    {
-    //        SerializedProperty stringKeyProp = property.FindPropertyRelative("m_StringKey");
-    //        FixedString4096Bytes stringKey = (FixedString4096Bytes)PropertyDrawerHelper.GetTargetObjectOfProperty(stringKeyProp);
+#if UNITY_2020
+#define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
 
-    //        List<string> items = new List<string>()
-    //        {
-    //            "StringKey", "asd"
-    //        };
+//using Point.Collections.ResourceControl;
+//using System.Collections.Generic;
+//using Unity.Collections;
+//using UnityEditor;
+//using UnityEngine;
 
-    //        var rects = EditorGUIUtility.GetFlowLayoutedRects(position, "Box", EditorGUIUtility.singleLineHeight, EditorGUIUtility.standardVerticalSpacing,
-    //            items);
+//namespace Point.Collections.Editor
+//{
+//    //[CustomPropertyDrawer(typeof(AssetID))]
+//    //public sealed class AssetIDPropertyDrawer : PropertyDrawer
+//    //{
+//    //    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+//    //    {
+//    //        return EditorGUIUtility.singleLineHeight * 2;
+//    //        //return base.GetPropertyHeight(property, label);
+//    //    }
+//    //    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+//    //    {
+//    //        SerializedProperty stringKeyProp = property.FindPropertyRelative("m_StringKey");
+//    //        FixedString4096Bytes stringKey = (FixedString4096Bytes)PropertyDrawerHelper.GetTargetObjectOfProperty(stringKeyProp);
 
-    //        using (new EditorGUI.PropertyScope(position, label, property))
-    //        {
-    //            EditorGUI.LabelField(rects[0], stringKey.ToString());
+//    //        List<string> items = new List<string>()
+//    //        {
+//    //            "StringKey", "asd"
+//    //        };
 
-    //            EditorGUI.LabelField(rects[1], "asd");
-    //        }
-    //    }
-    //}
-}
+//    //        var rects = EditorGUIUtility.GetFlowLayoutedRects(position, "Box", EditorGUIUtility.singleLineHeight, EditorGUIUtility.standardVerticalSpacing,
+//    //            items);
+
+//    //        using (new EditorGUI.PropertyScope(position, label, property))
+//    //        {
+//    //            EditorGUI.LabelField(rects[0], stringKey.ToString());
+
+//    //            EditorGUI.LabelField(rects[1], "asd");
+//    //        }
+//    //    }
+//    //}
+//}

@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,33 +17,39 @@
 #define DEBUG_MODE
 #endif
 
-using Newtonsoft.Json;
-using System.Xml.Serialization;
-using UnityEditor;
-using UnityEngine;
+#if UNITY_2020
+#define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
 
-namespace Point.Collections
-{
-    public class TestSerializer : MonoBehaviour
-    {
-        public UnityEngine.GameObject prefab;
+//using Newtonsoft.Json;
+//using System.Xml.Serialization;
+//using UnityEditor;
+//using UnityEngine;
 
-        [TextArea]
-        public string output;
+//namespace Point.Collections
+//{
+//    public class TestSerializer : MonoBehaviour
+//    {
+//        public UnityEngine.GameObject prefab;
 
-        private void Start()
-        {
-//             UnityEngine.Component[] components = prefab.GetComponents(TypeHelper.TypeOf<UnityEngine.Component>.Type);
-//             output = EditorJsonUtility.ToJson(components, true);
+//        [TextArea]
+//        public string output;
 
-            //for (int i = 1; i < components.Length; i++)
-            {
-                //output += ",\n" + EditorJsonUtility.ToJson(components[i], true);
-                //output += JsonConvert.SerializeObject(prefab, Formatting.Indented) + "\n";
-            }
-            //output = JsonUtility.ToJson(prefab, true);
+//        private void Start()
+//        {
+////             UnityEngine.Component[] components = prefab.GetComponents(TypeHelper.TypeOf<UnityEngine.Component>.Type);
+////             output = EditorJsonUtility.ToJson(components, true);
 
-            //AssetDatabase.id
-        }
-    }
-}
+//            //for (int i = 1; i < components.Length; i++)
+//            {
+//                //output += ",\n" + EditorJsonUtility.ToJson(components[i], true);
+//                //output += JsonConvert.SerializeObject(prefab, Formatting.Indented) + "\n";
+//            }
+//            //output = JsonUtility.ToJson(prefab, true);
+
+//            //AssetDatabase.id
+//        }
+//    }
+//}

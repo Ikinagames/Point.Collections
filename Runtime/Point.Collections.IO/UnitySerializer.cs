@@ -13,15 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Unity.Collections;
+//using Unity.Collections;
 
-namespace Point.Collections.IO
-{
-    public static class UnitySerializer
-    {
-        public static void Serialize(UnityEngine.Object obj)
-        {
+//namespace Point.Collections.IO
+//{
+//    public static class UnitySerializer
+//    {
+//        public static void Serialize(UnityEngine.Object obj)
+//        {
 
-        }
-    }
-}
+//        }
+//    }
+//}

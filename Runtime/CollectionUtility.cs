@@ -17,21 +17,32 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
 using UnityEngine;
-using Unity.Collections.LowLevel.Unsafe;
-using System;
 using Unity.Burst;
+using Unity.Collections.LowLevel.Unsafe;
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
+
+
 using Point.Collections.Native;
-using Newtonsoft.Json;
-using System.Collections.Generic;
 using Point.Collections.IO.Json;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace Point.Collections
 {
     public sealed class CollectionUtility : CLRSingleTone<CollectionUtility>
     {
+#if UNITYENGINE
         private Unity.Mathematics.Random m_Random;
+#else
+        private System.Random m_Random;
+#endif
         private JsonSerializerSettings m_JsonSettings;
 
         public struct EngineTypeGuid
@@ -48,10 +59,13 @@ namespace Point.Collections
         protected override void OnInitialize()
         {
 #if POINT_COLLECTIONS_NATIVE
-            //NativeDebug.Initialize();
-#endif
+            NativeDebug.Initialize();
+
+            m_Random = new Random();
+#else
             Instance.m_Random = new Unity.Mathematics.Random();
             Instance.m_Random.InitState();
+#endif
 
             m_JsonSettings = new JsonSerializerSettings();
             m_JsonSettings.Converters = new List<JsonConverter>()
@@ -73,7 +87,21 @@ namespace Point.Collections
             return JsonSerializerSettings;
         }
 
-        public static short CreateHashCode2() => unchecked((short)Instance.m_Random.NextInt(short.MinValue, short.MaxValue));
-        public static int CreateHashCode() => Instance.m_Random.NextInt(int.MinValue, int.MaxValue);
+        public static short CreateHashCode2()
+        {
+#if UNITYENGINE
+            return unchecked((short)Instance.m_Random.NextInt(short.MinValue, short.MaxValue));
+#else
+            return unchecked((short)Instance.m_Random.Next(short.MinValue, short.MaxValue));
+#endif
+        }
+        public static int CreateHashCode() 
+        {
+#if UNITYENGINE
+            return Instance.m_Random.NextInt(int.MinValue, int.MaxValue); 
+#else
+            return Instance.m_Random.Next(int.MinValue, int.MaxValue);
+#endif
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_2020
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
+#endif
+#define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
 #endif
 
 using Point.Collections.Buffer;
@@ -30,10 +35,12 @@ namespace Point.Collections
     public sealed class ActionWrapper : IActionWrapper
     {
         private static readonly ObjectPool<ActionWrapper> s_Container;
-        public Action Action;
+        [System.Diagnostics.CodeAnalysis.AllowNull] public Action Action;
 
+#if UNITYENGINE
         private bool m_MarkerSet = false;
         private Unity.Profiling.ProfilerMarker m_Marker;
+#endif
 
         static ActionWrapper()
         {
@@ -54,14 +61,18 @@ namespace Point.Collections
         public void Reserve()
         {
             Action = null;
+#if UNITYENGINE
             m_MarkerSet = false;
+#endif
             s_Container.Reserve(this);
         }
 
         public void SetProfiler(string name)
         {
+#if UNITYENGINE
             m_MarkerSet = true;
             m_Marker = new Unity.Profiling.ProfilerMarker(name);
+#endif
         }
         public void SetAction(Action action)
         {
@@ -69,9 +80,13 @@ namespace Point.Collections
         }
         public void Invoke()
         {
+#if UNITYENGINE
             if (m_MarkerSet) m_Marker.Begin();
+#endif
             Action?.Invoke();
+#if UNITYENGINE
             if (m_MarkerSet) m_Marker.End();
+#endif
         }
 
         void IActionWrapper.Invoke(params object[] args) => Invoke();
@@ -79,10 +94,12 @@ namespace Point.Collections
     public sealed class ActionWrapper<T> : IActionWrapper
     {
         private static readonly ObjectPool<ActionWrapper<T>> s_Container;
-        public Action<T> Action;
+        [System.Diagnostics.CodeAnalysis.AllowNull] public Action<T> Action;
 
+#if UNITYENGINE
         private bool m_MarkerSet = false;
         private Unity.Profiling.ProfilerMarker m_Marker;
+#endif
 
         static ActionWrapper()
         {
@@ -100,14 +117,18 @@ namespace Point.Collections
         public void Reserve()
         {
             Action = null;
+#if UNITYENGINE
             m_MarkerSet = false;
+#endif
             s_Container.Reserve(this);
         }
 
         public void SetProfiler(string name)
         {
+#if UNITYENGINE
             m_MarkerSet = true;
             m_Marker = new Unity.Profiling.ProfilerMarker(name);
+#endif
         }
         public void SetAction(Action<T> action)
         {
@@ -115,16 +136,24 @@ namespace Point.Collections
         }
         public void Invoke(T t)
         {
+#if UNITYENGINE
             if (m_MarkerSet) m_Marker.Begin();
+#endif
             try
             {
                 Action?.Invoke(t);
             }
             catch (Exception ex)
             {
+#if UNITYENGINE
                 UnityEngine.Debug.LogException(ex);
+#else
+                throw;
+#endif
             }
+#if UNITYENGINE
             if (m_MarkerSet) m_Marker.End();
+#endif
         }
 
         void IActionWrapper.Invoke(params object[] args) => Invoke((T)args[0]);

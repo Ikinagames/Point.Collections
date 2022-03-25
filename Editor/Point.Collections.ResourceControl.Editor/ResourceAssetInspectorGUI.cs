@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,48 +13,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Point.Collections.Editor;
-using UnityEditor;
-using UnityEngine;
-using UEditor = global::UnityEditor.Editor;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
 
-namespace Point.Collections.ResourceControl.Editor
-{
-    public sealed class ResourceAssetInspectorGUI
-    {
-        //[InitializeOnLoadMethod]
-        //static void Intialize()
-        //{
-        //    UEditor.finishedDefaultHeaderGUI -= OnPostHeaderGUI;
-        //    UEditor.finishedDefaultHeaderGUI += OnPostHeaderGUI;
-        //}
+#if UNITY_2020
+#define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
 
-        //private static void OnPostHeaderGUI(UEditor editor)
-        //{
-        //    bool isTrackedAsset = editor.target.IsTrackedAsset();
-        //    string headerString = EditorUtilities.String("Asset", 13);
-        //    if (isTrackedAsset)
-        //    {
-        //        headerString += EditorUtilities.String(": Tracked", 10);
-        //    }
-        //    else
-        //    {
-        //        headerString += EditorUtilities.String(": None", 10);
-        //    }
+//using Point.Collections.Editor;
+//using UnityEditor;
+//using UnityEngine;
+//using UEditor = global::UnityEditor.Editor;
 
-        //    EditorUtilities.Line();
-        //    using (new EditorGUILayout.HorizontalScope())
-        //    {
-        //        EditorUtilities.StringRich(headerString);
+//namespace Point.Collections.ResourceControl.Editor
+//{
+//    public sealed class ResourceAssetInspectorGUI
+//    {
+//        //[InitializeOnLoadMethod]
+//        //static void Intialize()
+//        //{
+//        //    UEditor.finishedDefaultHeaderGUI -= OnPostHeaderGUI;
+//        //    UEditor.finishedDefaultHeaderGUI += OnPostHeaderGUI;
+//        //}
 
-        //        if (GUILayout.Button(isTrackedAsset ? "Remove" : "Add", GUILayout.Width(60)))
-        //        {
-        //            if (isTrackedAsset) editor.target.RemoveAsset();
-        //            else editor.target.RegisterAsset();
-        //        }
-        //    }
+//        //private static void OnPostHeaderGUI(UEditor editor)
+//        //{
+//        //    bool isTrackedAsset = editor.target.IsTrackedAsset();
+//        //    string headerString = EditorUtilities.String("Asset", 13);
+//        //    if (isTrackedAsset)
+//        //    {
+//        //        headerString += EditorUtilities.String(": Tracked", 10);
+//        //    }
+//        //    else
+//        //    {
+//        //        headerString += EditorUtilities.String(": None", 10);
+//        //    }
 
-        //    EditorUtilities.Line();
-        //}
-    }
-}
+//        //    EditorUtilities.Line();
+//        //    using (new EditorGUILayout.HorizontalScope())
+//        //    {
+//        //        EditorUtilities.StringRich(headerString);
+
+//        //        if (GUILayout.Button(isTrackedAsset ? "Remove" : "Add", GUILayout.Width(60)))
+//        //        {
+//        //            if (isTrackedAsset) editor.target.RemoveAsset();
+//        //            else editor.target.RegisterAsset();
+//        //        }
+//        //    }
+
+//        //    EditorUtilities.Line();
+//        //}
+//    }
+//}

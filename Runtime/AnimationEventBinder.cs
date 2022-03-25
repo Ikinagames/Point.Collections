@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
+#if UNITY_2020
+#define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
+
+#if UNITYENGINE
+
 namespace Point.Collections
 {
     public abstract class AnimationEventBinder : UnityEngine.MonoBehaviour
@@ -25,3 +37,5 @@ namespace Point.Collections
         public abstract void TriggerAction(UnityEngine.AnimationEvent ev);
     }
 }
+
+#endif

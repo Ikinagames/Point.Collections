@@ -34,6 +34,10 @@ namespace Point.Collections
 {
     public static class Math
     {
+        public const float PI = (float)System.Math.PI;
+        public const float Deg2Rad = (float)System.Math.PI / 180f;
+        public const float Rad2Deg = 57.29578f;
+
         public static float TodB(float value)
         {
             double
@@ -65,6 +69,7 @@ namespace Point.Collections
             return (float)output;
         }
 
+        [Obsolete]
         public static long min(in long x, in long y)
         {
 #if UNITYENGINE
@@ -3806,6 +3811,59 @@ namespace Point.Collections
             c4.w = 1f;
             return new float4x4(@float, float2, float3, c4);
         }
+
+        #endregion
+
+        #region round
+
+        /// <summary>Returns the result of rounding a float value to the nearest integral value.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The round to nearest integral value of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float round(float x) { return (float)System.Math.Round((float)x); }
+
+        /// <summary>Returns the result of rounding each component of a float2 vector value to the nearest integral value.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The componentwise round to nearest integral value of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 round(float2 x) { return new float2(round(x.x), round(x.y)); }
+
+        /// <summary>Returns the result of rounding each component of a float3 vector value to the nearest integral value.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The componentwise round to nearest integral value of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 round(float3 x) { return new float3(round(x.x), round(x.y), round(x.z)); }
+
+        /// <summary>Returns the result of rounding each component of a float4 vector value to the nearest integral value.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The componentwise round to nearest integral value of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 round(float4 x) { return new float4(round(x.x), round(x.y), round(x.z), round(x.w)); }
+
+
+        /// <summary>Returns the result of rounding a double value to the nearest integral value.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The round to nearest integral value of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double round(double x) { return System.Math.Round(x); }
+
+        /// <summary>Returns the result of rounding each component of a double2 vector value to the nearest integral value.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The componentwise round to nearest integral value of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 round(double2 x) { return new double2(round(x.x), round(x.y)); }
+
+        /// <summary>Returns the result of rounding each component of a double3 vector value to the nearest integral value.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The componentwise round to nearest integral value of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 round(double3 x) { return new double3(round(x.x), round(x.y), round(x.z)); }
+
+        /// <summary>Returns the result of rounding each component of a double4 vector value to the nearest integral value.</summary>
+        /// <param name="x">Input value.</param>
+        /// <returns>The componentwise round to nearest integral value of the input.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 round(double4 x) { return new double4(round(x.x), round(x.y), round(x.z), round(x.w)); }
 
         #endregion
 

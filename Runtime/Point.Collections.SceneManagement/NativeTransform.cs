@@ -13,26 +13,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_2020
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
+#endif
+#define UNITYENGINE
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Mathematics;
+#else
+#define POINT_COLLECTIONS_NATIVE
+using math = Point.Collections.Math;
 #endif
 
 using Point.Collections.Buffer.LowLevel;
 using Point.Collections.SceneManagement.LowLevel;
 using System;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.Mathematics;
 
 namespace Point.Collections.SceneManagement
 {
+#if UNITYENGINE
     [BurstCompatible]
+#endif
     public struct NativeTransform : IEquatable<NativeTransform>, IValidation
     {
         private readonly UnsafeAllocator<KeyValue<SceneID, UnsafeTransform>> m_Buffer;
         private readonly int m_Index;
         private readonly int m_HashCode;
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
+#if ENABLE_UNITY_COLLECTIONS_CHECKS 
         private AtomicSafetyHandle m_SafetyHandle;
 #endif
 
@@ -59,7 +67,9 @@ namespace Point.Collections.SceneManagement
 
                 return pos;
             }
+#if UNITYENGINE
             [WriteAccessRequired]
+#endif
             set
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -90,7 +100,9 @@ namespace Point.Collections.SceneManagement
 #endif
                 return m_Buffer[m_Index].Value.localPosition;
             }
+#if UNITYENGINE
             [WriteAccessRequired]
+#endif
             set
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -120,7 +132,9 @@ namespace Point.Collections.SceneManagement
 
                 return rot;
             }
+#if UNITYENGINE
             [WriteAccessRequired]
+#endif
             set
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -150,7 +164,9 @@ namespace Point.Collections.SceneManagement
 #endif
                 return m_Buffer[m_Index].Value.localRotation;
             }
+#if UNITYENGINE
             [WriteAccessRequired]
+#endif
             set
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -162,11 +178,13 @@ namespace Point.Collections.SceneManagement
         }
         public float3 eulerAngles
         {
-            get => rotation.Euler() * UnityEngine.Mathf.Rad2Deg;
+            get => rotation.Euler() * Math.Rad2Deg;
+#if UNITYENGINE
             [WriteAccessRequired]
+#endif
             set
             {
-                float3 temp = value * UnityEngine.Mathf.Deg2Rad;
+                float3 temp = value * Math.Deg2Rad;
                 temp = math.round(temp * 1000) * .001f;
                 
                 rotation = quaternion.EulerZXY(temp);
@@ -174,11 +192,13 @@ namespace Point.Collections.SceneManagement
         }
         public float3 localEulerAngles
         {
-            get => localRotation.Euler() * UnityEngine.Mathf.Rad2Deg;
+            get => localRotation.Euler() * Math.Rad2Deg;
+#if UNITYENGINE
             [WriteAccessRequired]
+#endif
             set
             {
-                float3 temp = value * UnityEngine.Mathf.Deg2Rad;
+                float3 temp = value * Math.Deg2Rad;
                 temp = math.round(temp * 1000) * .001f;
 
                 localRotation = quaternion.EulerZXY(temp);
@@ -194,7 +214,9 @@ namespace Point.Collections.SceneManagement
 #endif
                 return m_Buffer[m_Index].Value.localScale;
             }
+#if UNITYENGINE
             [WriteAccessRequired]
+#endif
             set
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -249,7 +271,9 @@ namespace Point.Collections.SceneManagement
 #endif
         }
 
+#if UNITYENGINE
         [WriteAccessRequired]
+#endif
         public void SetParent(in NativeTransform parent)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -258,7 +282,9 @@ namespace Point.Collections.SceneManagement
 #endif
             m_Buffer[m_Index].Value.parentIndex = parent.m_Index;
         }
+#if UNITYENGINE
         [WriteAccessRequired]
+#endif
         public void RemoveParent()
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS

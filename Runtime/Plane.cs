@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,14 +13,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Globalization;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
+#if UNITY_2020
+#define UNITYENGINE
 using Unity.Collections;
 using Unity.Mathematics;
+#else
+#define POINT_COLLECTIONS_NATIVE
+using math = Point.Collections.Math;
+#endif
+
+using System;
+using System.Globalization;
 
 namespace Point.Collections
 {
+#if UNITYENGINE
     [BurstCompatible]
+#endif
     public struct Plane
     {
         // sizeof(Plane) is not const in C# and so cannot be used in fixed arrays, so we define it here

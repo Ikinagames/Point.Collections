@@ -17,13 +17,21 @@
 #define DEBUG_MODE
 #endif
 
+#if UNITY_2020
+#define UNITYENGINE
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
+
+#if UNITYENGINE
+
 using Point.Collections.ResourceControl.LowLevel;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using UnityEngine;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine;
 
 namespace Point.Collections.ResourceControl
 {
@@ -35,3 +43,5 @@ namespace Point.Collections.ResourceControl
         public IReadOnlyList<AssetPathField> StreamingAssetBundles => m_StreamingAssetBundles;
     }
 }
+
+#endif
