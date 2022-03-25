@@ -27,6 +27,7 @@ using Point.Collections.Native;
 using Point.Collections.Threading;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 #if UNITYENGINE
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -87,21 +88,25 @@ namespace Point.Collections.Buffer.LowLevel
         {
             unsafe
             {
+#if UNITYENGINE
                 m_Buffer = (Buffer*)NativeUtility.Malloc(
                     TypeHelper.SizeOf<Buffer>(),
                     TypeHelper.AlignOf<Buffer>()
-#if UNITYENGINE
                     , allocator
-#endif
                     );
+#else
+                // TODO : 임시
+                m_Buffer = (Buffer*)Marshal.AllocHGlobal(TypeHelper.SizeOf<Buffer>());
+#endif
 
                 m_Buffer.Value = new Buffer
                 {
-                    Ptr = NativeUtility.Malloc(size, alignment
 #if UNITYENGINE
-                    , allocator
+                    Ptr = NativeUtility.Malloc(size, alignment, allocator)
+#else
+                    // TODO : 임시
+                    Ptr = Marshal.AllocHGlobal((int)size)
 #endif
-                    )
                     ,
                     Size = size
                 };
@@ -128,13 +133,16 @@ namespace Point.Collections.Buffer.LowLevel
         {
             unsafe
             {
+#if UNITYENGINE
                 m_Buffer = (Buffer*)NativeUtility.Malloc(
                     TypeHelper.SizeOf<Buffer>(),
                     TypeHelper.AlignOf<Buffer>()
-#if UNITYENGINE
                     , allocator
-#endif
                     );
+#else
+                // TODO : 임시
+                m_Buffer = (Buffer*)Marshal.AllocHGlobal(TypeHelper.SizeOf<Buffer>());
+#endif
 
                 m_Buffer.Value = new Buffer
                 {
@@ -144,9 +152,9 @@ namespace Point.Collections.Buffer.LowLevel
             }
 #if UNITYENGINE
             m_Allocator = allocator;
-#endif
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             UnsafeBufferUtility.CreateSafety(m_Buffer, allocator, out m_SafetyHandle);
+#endif
 #endif
         }
         public ReadOnly AsReadOnly() => new ReadOnly(this);
@@ -196,16 +204,10 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
             unsafe
             {
-                NativeUtility.Free(m_Buffer.Value.Ptr
 #if UNITYENGINE
-                    , m_Allocator
+                NativeUtility.Free(m_Buffer.Value.Ptr, m_Allocator);
+                NativeUtility.Free(m_Buffer, m_Allocator);
 #endif
-                    );
-                NativeUtility.Free(m_Buffer
-#if UNITYENGINE
-                    , m_Allocator
-#endif
-                    );
             }
 #if UNITYENGINE && ENABLE_UNITY_COLLECTIONS_CHECKS
             UnsafeBufferUtility.RemoveSafety(m_Buffer, ref m_SafetyHandle);
