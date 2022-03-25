@@ -88,11 +88,18 @@ namespace Point.Collections.Native
 
 #if !UNITYENGINE
         [DllImport("Point.Collections.Native.Internal")]
+        private static extern void memorypool_initialize();
+        [DllImport("Point.Collections.Native.Internal")]
+        private static extern void memorypool_uninitialize();
+
+        [DllImport("Point.Collections.Native.Internal")]
         private static extern void* malloc(in long size, in int align);
         [DllImport("Point.Collections.Native.Internal")]
         private static extern void memCpy(void* ptr, void* from, in long size);
         [DllImport("Point.Collections.Native.Internal")]
         private static extern void memClear(void* ptr, in long size);
+        [DllImport("Point.Collections.Native.Internal")]
+        private static extern void free(void* ptr);
 #endif
     }
 }

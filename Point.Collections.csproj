@@ -15,6 +15,21 @@
   <ItemGroup>
     <None Remove=".gitignore" />
     <None Remove=".gitmodules" />
+    <None Remove="Editor\AssetHelper.cs.meta" />
+    <None Remove="Editor\Editor Default Resources.meta" />
+    <None Remove="Editor\EditorStaticScriptableObject.cs.meta" />
+    <None Remove="Editor\EditorStyleUtilities.cs.meta" />
+    <None Remove="Editor\EditorUtilities.cs.meta" />
+    <None Remove="Editor\Point.Collections.Editor.asmdef" />
+    <None Remove="Editor\Point.Collections.Editor.asmdef.meta" />
+    <None Remove="Editor\Point.Collections.ResourceControl.Editor.meta" />
+    <None Remove="Editor\PointAssetPostProcessor.cs.meta" />
+    <None Remove="Editor\PointMenuItems.cs.meta" />
+    <None Remove="Editor\ProjectSettings.meta" />
+    <None Remove="Editor\PropertyDrawerHelper.cs.meta" />
+    <None Remove="Editor\PropertyDrawers.meta" />
+    <None Remove="Editor\ScriptUtilities.cs.meta" />
+    <None Remove="Editor\SetupWizard.meta" />
     <None Remove="Runtime\AABB.cs.meta" />
     <None Remove="Runtime\AssetPathAttribute.cs.meta" />
     <None Remove="Runtime\AssetPathField.cs.meta" />
@@ -158,6 +173,10 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Point.Collections.Native\Point.Collections.Native\Point.Collections.Native.csproj" />
   </ItemGroup>
 
 </Project>
