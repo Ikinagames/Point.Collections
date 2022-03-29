@@ -126,6 +126,7 @@ namespace Point.Collections.Editor
         public static void Line(Rect rect)
         {
             rect.height = 1f;
+            rect = EditorGUI.IndentedRect(rect);
             EditorGUI.DrawRect(rect, new Color(0.5f, 0.5f, 0.5f, 1));
         }
         public static void SectorLine(float width, int lines = 1)

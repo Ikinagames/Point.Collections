@@ -40,21 +40,22 @@ namespace Point.Collections.Editor
             m_Rect = m_OriginalRect;
         }
 
-        public Rect Pop()
+        public Rect Pop(float height)
         {
-            if (m_Rect.height <= 0)
-            {
-                throw new System.Exception($"no space (ori: {m_OriginalRect} cur: {m_Rect})");
-            }
-
             Rect temp = m_Rect;
-            temp.height = PropertyDrawerHelper.GetPropertyHeight(1);
+            temp.height = height;
 
             m_Rect.y += temp.height;
             m_Rect.height -= temp.height;
 
             temp = EditorGUI.IndentedRect(temp);
             return temp;
+        }
+        public Rect Pop() => Pop(PropertyDrawerHelper.GetPropertyHeight(1));
+
+        public void Space()
+        {
+            Pop(EditorGUIUtility.singleLineHeight);
         }
         public void Indent(float pixel)
         {

@@ -149,7 +149,8 @@ namespace Point.Collections.Editor
 
         public static float GetPropertyHeight(int lineCount)
         {
-            return lineHeight * lineCount;
+            float height = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+            return height * lineCount;
         }
         public static float GetPropertyHeight(SerializedObject obj, SerializedProperty serializedProperty)
         {
@@ -221,6 +222,14 @@ namespace Point.Collections.Editor
         {
             Rect rect = GUILayoutUtility.GetRect(position.width, PropertyDrawerHelper.lineHeight * count);
             return rect;
+        }
+
+        public static void DrawBlock(Rect rect, Color color)
+        {
+            color.a = .25f;
+
+            GUI.Box(rect, GUIContent.none, EditorStyles.helpBox);
+            EditorGUI.DrawRect(rect, color);
         }
     }
 }

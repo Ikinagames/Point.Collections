@@ -50,8 +50,10 @@ namespace Point.Collections.Editor
         /// </summary>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            AutoRect rect = new AutoRect(position);
+
             // Move this up
-            EditorGUI.BeginProperty(position, GUIContent.none, property);
+            using (new EditorGUI.PropertyScope(position, GUIContent.none, property))
             {
                 // Here we add the foldout using a single line height, the label and change
                 // the value of property.isExpanded
@@ -60,7 +62,7 @@ namespace Point.Collections.Editor
                 //    property.isExpanded, 
                 //    label);
                 property.isExpanded = true;
-                EditorGUI.LabelField(new Rect(position.x, position.y, position.width, lineHeight), label);
+                //EditorGUI.LabelField(new Rect(position.x, position.y, position.width, lineHeight), label);
                 // Now you want to draw the content only if you unfold this property
                 //if (property.isExpanded)
                 {
@@ -69,8 +71,8 @@ namespace Point.Collections.Editor
                     //{
 
                     // reduce the height by one line and move the content one line below
-                    position.height -= lineHeight;
-                    position.y += lineHeight;
+                    //position.height -= lineHeight;
+                    //position.y += lineHeight;
 
                     var sceneAssetProperty = GetSceneAssetProperty(property);
 
@@ -110,7 +112,6 @@ namespace Point.Collections.Editor
                     //EditorGUI.indentLevel--;
                 }
             }
-            EditorGUI.EndProperty();
         }
 
         /// <summary>
@@ -120,7 +121,7 @@ namespace Point.Collections.Editor
         {
             var sceneAssetProperty = GetSceneAssetProperty(property);
             // Add an additional line and check if property.isExpanded
-            var lines = property.isExpanded ? sceneAssetProperty.objectReferenceValue != null ? 3 : 2 : 1;
+            var lines = property.isExpanded ? sceneAssetProperty.objectReferenceValue != null ? 2 : 2 : 1;
             // If this oneliner is confusing you - it does the same as
             //var line = 3; // Fully expanded and with info
             //if(sceneAssetProperty.objectReferenceValue == null) line = 2;
