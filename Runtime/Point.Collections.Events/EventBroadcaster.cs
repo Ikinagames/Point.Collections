@@ -113,6 +113,11 @@ namespace Point.Collections.Events
 
         #endregion
 
+        /// <summary>
+        /// 이벤트 <typeparamref name="TEvent"/> 를 호출합니다.
+        /// </summary>
+        /// <typeparam name="TEvent"></typeparam>
+        /// <param name="ev"></param>
         public static void PostEvent<TEvent>(TEvent ev)
             where TEvent : SynchronousEvent<TEvent>, new()
         {

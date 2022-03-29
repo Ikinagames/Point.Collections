@@ -55,6 +55,19 @@ namespace Point.Collections.Editor
             return property.FindPropertyRelative(name);
         }
 
+        public virtual string GetHeaderName() => TypeHelper.TypeOf<T>.ToString();
+        public override sealed void OnInspectorGUI()
+        {
+            EditorUtilities.StringHeader(GetHeaderName());
+            EditorUtilities.Line();
+
+            OnInspectorGUIContents();
+        }
+        /// <summary>
+        /// <see cref="UnityEditor.Editor.OnInspectorGUI"/> 와 같습니다.
+        /// </summary>
+        protected virtual void OnInspectorGUIContents() { base.OnInspectorGUI(); }
+
         #region Reflections
 
         private Dictionary<string, MemberInfo> m_ParsedMemberInfos = new Dictionary<string, MemberInfo>();
