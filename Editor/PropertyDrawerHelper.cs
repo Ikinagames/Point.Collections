@@ -151,6 +151,41 @@ namespace Point.Collections.Editor
         {
             return lineHeight * lineCount;
         }
+        public static float GetPropertyHeight(SerializedObject obj, SerializedProperty serializedProperty)
+        {
+            SerializedProperty property = obj.FindProperty(serializedProperty.propertyPath);
+
+            int startDepth = property.depth;
+            int count = 0;
+
+            //count += property.CountInProperty();
+
+            foreach (SerializedProperty item in property)
+            {
+                //if (item.hasVisibleChildren)
+                //{
+                //    count += item.CountInProperty();
+                //}
+                //else count++;
+
+                if (item.depth == startDepth)
+                {
+                    break;
+                }
+
+                if (item.isExpanded)
+                {
+                    count += item.CountInProperty();
+
+                    continue;
+                }
+
+                count++;
+            }
+
+            return GetPropertyHeight(count);
+        }
+
         public static void Space(ref Rect rect)
         {
             rect.y += lineHeight;

@@ -44,7 +44,7 @@ namespace Point.Collections.Editor
         {
             if (m_Rect.height <= 0)
             {
-                throw new System.Exception("no space");
+                throw new System.Exception($"no space (ori: {m_OriginalRect} cur: {m_Rect})");
             }
 
             Rect temp = m_Rect;

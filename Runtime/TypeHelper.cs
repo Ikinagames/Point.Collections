@@ -164,7 +164,7 @@ namespace Point.Collections
             }
         }
         [StructLayout(LayoutKind.Sequential)]
-        private struct AlignOfHelper<T> where T : struct
+        private struct AlignOfHelper<T>
         {
             public byte dummy;
             public T data;
@@ -234,7 +234,7 @@ namespace Point.Collections
 
             return Marshal.SizeOf(temp) - Marshal.SizeOf(t);
         }
-        public static int AlignOf<T>() where T : unmanaged
+        public static int AlignOf<T>()
         {
             if (!IsUnmanaged(TypeOf<T>.Type))
             {

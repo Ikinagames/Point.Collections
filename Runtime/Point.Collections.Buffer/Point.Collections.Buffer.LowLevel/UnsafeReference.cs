@@ -137,6 +137,7 @@ namespace Point.Collections.Buffer.LowLevel
         }
         public static implicit operator UnsafeReference(IntPtr p) => new UnsafeReference(p);
         public static unsafe implicit operator void*(UnsafeReference p) => p.m_Ptr;
+        public static unsafe implicit operator IntPtr(UnsafeReference p) => (IntPtr)p.m_Ptr;
     }
     /// <summary>
     /// <inheritdoc cref="IUnsafeReference"/>
@@ -326,8 +327,10 @@ namespace Point.Collections.Buffer.LowLevel
         }
         public static unsafe implicit operator UnsafeReference(UnsafeReference<T> p) => new UnsafeReference(p.IntPtr);
         public static unsafe implicit operator T*(UnsafeReference<T> p) => p.m_Ptr;
-
         public static unsafe explicit operator UnsafeReference<T>(UnsafeReference p) => new UnsafeReference<T>(p.IntPtr);
+
+        public static unsafe implicit operator IntPtr(UnsafeReference<T> p) => (IntPtr)p.m_Ptr;
+        public static unsafe implicit operator IntPtr<T>(UnsafeReference<T> p) => new IntPtr<T>((IntPtr)p.m_Ptr);
 
 #if UNITYENGINE
         [BurstCompatible]
