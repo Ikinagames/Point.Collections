@@ -194,8 +194,8 @@ namespace Point.Collections.Editor
 
         public static Rect FixedIndentForList(Rect rect)
         {
-            rect.x += 8;
-            rect.width -= 8;
+            rect.x += 15;
+            rect.width -= 15;
 
             return rect;
         }
