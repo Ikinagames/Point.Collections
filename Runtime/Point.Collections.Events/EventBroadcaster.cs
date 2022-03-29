@@ -17,6 +17,7 @@
 #define DEBUG_MODE
 #endif
 
+using Point.Collections.Diagnostics;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -78,6 +79,11 @@ namespace Point.Collections.Events
         private void ExecuteEvent(ISynchronousEvent ev)
         {
 #if DEBUG_MODE
+            const string c_LogFormat = "Event({0}) posted from {1}";
+            PointHelper.Log(Channel.Collections,
+                string.Format(c_LogFormat, TypeHelper.ToString(ev.GetType()), ScriptUtils.ToStringFormat(ev.GetStackFrame()))
+                );
+
             if (ev.Reserved)
             {
                 throw new Exception();
@@ -129,6 +135,9 @@ namespace Point.Collections.Events
                 return;
             }
 
+#if DEBUG_MODE
+            ((IStackDebugger)ev).SetStackFrame(ScriptUtils.GetCallerFrame(1));
+#endif
             Instance.m_Events.Enqueue(ev);
         }
         public static void AddEvent<TEvent>(Action<TEvent> action)

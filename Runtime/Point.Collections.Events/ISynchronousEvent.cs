@@ -22,6 +22,7 @@ using System;
 namespace Point.Collections.Events
 {
     public interface ISynchronousEvent : IValidation, IDisposable
+        , Point.Collections.Diagnostics.IStackDebugger
     {
         bool Reserved { get; }
 

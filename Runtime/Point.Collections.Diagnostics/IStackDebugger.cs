@@ -13,10 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Point.Collections
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEBUG_MODE
+#endif
+
+using System.Diagnostics;
+
+namespace Point.Collections.Diagnostics
 {
-    /// <summary>
-    /// <see langword="static"/> constructor 를 가지고 있으면 런타임 중 호출하지 않아도 즉시 호출합니다.
-    /// </summary>
-    public interface IStaticInitializer { }
+    public interface IStackDebugger
+    {
+        StackFrame GetStackFrame();
+        void SetStackFrame(StackFrame frame);
+    }
 }

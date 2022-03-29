@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +30,21 @@ namespace Point.Collections.Diagnostics
         public static StackFrame GetCallerFrame()
         {
             return new StackTrace(true).GetFrame(1);
+        }
+        public static StackFrame GetCallerFrame(int depth)
+        {
+            return new StackTrace(true).GetFrame(1 + depth);
+        }
+
+        public static string ToStringFormat(StackFrame stackFrame)
+        {
+            var method = stackFrame.GetMethod();
+
+            string methodName = method.Name;
+            string className = method.DeclaringType.Name;
+
+            const string c_Format = "{0}.{1} (at {2}:{3})";
+            return string.Format(c_Format, className, methodName, stackFrame.GetFileName(), stackFrame.GetFileLineNumber());
         }
     }
 }

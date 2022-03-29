@@ -18,11 +18,13 @@
 #endif
 
 using Point.Collections.Buffer;
+using Point.Collections.Diagnostics;
 using System;
 
 namespace Point.Collections.Events
 {
     public abstract class SynchronousEvent<TEvent> : ISynchronousEvent, IValidation, IDisposable
+        , IStackDebugger
         where TEvent : class, ISynchronousEvent, new()
     {
         #region Pool
@@ -58,6 +60,7 @@ namespace Point.Collections.Events
         #endregion
 
         private bool m_Reserved = true;
+        private System.Diagnostics.StackFrame m_Caller;
 
         public bool Reserved => m_Reserved;
 
@@ -89,6 +92,7 @@ namespace Point.Collections.Events
         {
             OnReserve();
 
+            m_Caller = null;
             m_Reserved = true;
         }
         bool IValidation.IsValid() => IsValid();
@@ -99,6 +103,12 @@ namespace Point.Collections.Events
         }
 
         #endregion
+
+        System.Diagnostics.StackFrame IStackDebugger.GetStackFrame() => m_Caller;
+        void IStackDebugger.SetStackFrame(System.Diagnostics.StackFrame frame)
+        {
+            m_Caller = frame;
+        }
 
         protected virtual void OnCreated() { }
         protected virtual void OnInitialize() { }
