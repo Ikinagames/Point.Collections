@@ -185,6 +185,10 @@ namespace Point.Collections
 #endif
 
 #if UNITYENGINE
+        private void OnApplicationFocus(bool focus)
+        {
+            EventBroadcaster.PostEvent(ApplicationOutFocusEvent.GetEvent(focus));
+        }
         private void Update()
         {
             OnFrameUpdate?.Invoke();
