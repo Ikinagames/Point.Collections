@@ -86,16 +86,17 @@ namespace Point.Collections.Events
 
             if (ev.Reserved)
             {
-                throw new Exception();
+                throw new Exception("reserve err");
             }
 #endif
             try
             {
                 ev.Execute();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                UnityEngine.Debug.LogException(ex);
+                //throw ex;
             }
 
             try
@@ -105,9 +106,10 @@ namespace Point.Collections.Events
                     actions.Execute(ev);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                UnityEngine.Debug.LogException(ex);
+                //throw ex;
             }
 
             ReserveEvent(ev);

@@ -30,7 +30,7 @@ namespace Point.Collections.Events
         #region Pool
 
         private static readonly ObjectPool<TEvent> 
-            s_Pool = new ObjectPool<TEvent>(Factory, null, InternalOnReserve, InternalOnDispose);
+            s_Pool = new ObjectPool<TEvent>(Factory, InternalOnInitialize, InternalOnReserve, InternalOnDispose);
         private static TEvent Factory()
         {
             TEvent ev = new TEvent();
@@ -38,6 +38,10 @@ namespace Point.Collections.Events
             ev.OnCreated();
 
             return ev;
+        }
+        private static void InternalOnInitialize(TEvent ev)
+        {
+            ev.OnInitialize();
         }
         private static void InternalOnReserve(TEvent ev)
         {
@@ -59,7 +63,7 @@ namespace Point.Collections.Events
 
         #endregion
 
-        private bool m_Reserved = true;
+        private bool m_Reserved;
         private System.Diagnostics.StackFrame m_Caller;
 
         public bool Reserved => m_Reserved;
@@ -110,7 +114,9 @@ namespace Point.Collections.Events
             m_Caller = frame;
         }
 
+        /// <inheritdoc cref="ISynchronousEvent.OnCreated"/>
         protected virtual void OnCreated() { }
+        /// <inheritdoc cref="ISynchronousEvent.OnInitialize"/>
         protected virtual void OnInitialize() { }
         protected virtual void OnDispose() { }
 

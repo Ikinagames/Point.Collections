@@ -35,7 +35,11 @@ namespace Point.Collections
         /// </summary>
         [SerializeField] internal string m_LogFilePath = string.Empty;
 
+        [Header("Ingame")]
+        [SerializeField] private float m_InActiveTime = 120f;
+
         public LogChannel LogChannel { get => m_LogChannel; set => m_LogChannel = value; }
+        public float InActiveTime { get => m_InActiveTime; set => m_InActiveTime = value; }
 
         public string GetUserChannelNames(LogChannel channel)
         {

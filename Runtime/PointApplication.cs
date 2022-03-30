@@ -27,6 +27,7 @@ using UnityEngine.Scripting;
 using Point.Collections.Threading;
 using System;
 using System.Reflection;
+using Point.Collections.Events;
 
 [assembly: System.Runtime.InteropServices.ComVisible(true)]
 namespace Point.Collections
@@ -70,6 +71,11 @@ namespace Point.Collections
 #endif
 
         private ThreadInfo m_MainThread;
+#if UNITYENGINE && ENABLE_INPUT_SYSTEM
+        private Timer m_InActiveTimer;
+        private bool m_IsInActive = false;
+        public event Action<bool> OnInActive;
+#endif
 
         public ThreadInfo MainThread => m_MainThread;
 
@@ -96,7 +102,7 @@ namespace Point.Collections
             }
 
 #if !UNITYENGINE
-            Main();
+            Main();   
 #endif
         }
 
@@ -108,6 +114,12 @@ namespace Point.Collections
         {
             m_MainThread = ThreadInfo.CurrentThread;
 #if UNITYENGINE
+
+#if ENABLE_INPUT_SYSTEM
+            m_InActiveTimer = Timer.Start();
+            UnityEngine.InputSystem.InputSystem.onActionChange += InputSystem_onActionChange;
+#endif
+
             if (PointSettings.Instance.m_EnableLogFile)
             {
 #if DEBUG_MODE
@@ -125,10 +137,52 @@ namespace Point.Collections
             }
 #endif
         }
+
+#if UNITYENGINE && ENABLE_INPUT_SYSTEM
+
+        private void InputSystem_onActionChange(object arg1, UnityEngine.InputSystem.InputActionChange arg2)
+        {
+            switch (arg2)
+            {
+                case UnityEngine.InputSystem.InputActionChange.ActionEnabled:
+                    break;
+                case UnityEngine.InputSystem.InputActionChange.ActionDisabled:
+                    break;
+                case UnityEngine.InputSystem.InputActionChange.ActionMapEnabled:
+                    break;
+                case UnityEngine.InputSystem.InputActionChange.ActionMapDisabled:
+                    break;
+                case UnityEngine.InputSystem.InputActionChange.ActionStarted:
+                    break;
+                case UnityEngine.InputSystem.InputActionChange.ActionPerformed:
+                    m_InActiveTimer.Reset();
+
+                    if (m_IsInActive)
+                    {
+                        m_IsInActive = false;
+                        OnInActive?.Invoke(false);
+                        EventBroadcaster.PostEvent(ApplicationInActiveEvent.GetEvent(false));
+                    }
+
+                    break;
+                case UnityEngine.InputSystem.InputActionChange.ActionCanceled:
+                    break;
+                case UnityEngine.InputSystem.InputActionChange.BoundControlsAboutToChange:
+                    break;
+                case UnityEngine.InputSystem.InputActionChange.BoundControlsChanged:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+#endif
+
 #if UNITYENGINE
         private void Update()
         {
             OnFrameUpdate?.Invoke();
+            InActiveHandler();
         }
         protected override void OnShutdown()
         {
@@ -138,6 +192,20 @@ namespace Point.Collections
 
             PointHelper.s_LogHandler.CloseLogFile();
         }
+
+        [System.Diagnostics.Conditional("UNITYENGINE")]
+        [System.Diagnostics.Conditional("ENABLE_INPUT_SYSTEM")]
+        private void InActiveHandler()
+        {
+            if (m_IsInActive) return;
+            else if (m_InActiveTimer.ElapsedTime > PointSettings.Instance.InActiveTime)
+            {
+                m_IsInActive = true;
+                OnInActive?.Invoke(true);
+                EventBroadcaster.PostEvent(ApplicationInActiveEvent.GetEvent(true));
+            }
+        }
+
 #endif
     }
 }

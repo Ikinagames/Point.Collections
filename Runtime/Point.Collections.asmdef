@@ -6,7 +6,7 @@
         "Unity.Burst",
         "Unity.Collections",
         "Unity.Addressables",
-        ""
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
