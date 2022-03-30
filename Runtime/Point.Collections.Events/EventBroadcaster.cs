@@ -124,6 +124,9 @@ namespace Point.Collections.Events
         /// <summary>
         /// 이벤트 <typeparamref name="TEvent"/> 를 호출합니다.
         /// </summary>
+        /// <remarks>
+        /// 이벤트가 즉시 발생되는 것이 아닌, 실제로는 다음 프레임에 발생합니다.
+        /// </remarks>
         /// <typeparam name="TEvent"></typeparam>
         /// <param name="ev"></param>
         public static void PostEvent<TEvent>(TEvent ev)
