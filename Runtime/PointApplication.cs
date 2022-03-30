@@ -155,6 +155,12 @@ namespace Point.Collections
                 case UnityEngine.InputSystem.InputActionChange.ActionStarted:
                     break;
                 case UnityEngine.InputSystem.InputActionChange.ActionPerformed:
+                    UnityEngine.InputSystem.InputAction inputAction = (UnityEngine.InputSystem.InputAction)arg1;
+                    if (inputAction.IsMouseMoveAction())
+                    {
+                        break;
+                    }
+
                     m_InActiveTimer.Reset();
 
                     if (m_IsInActive)
