@@ -187,6 +187,8 @@ namespace Point.Collections
 #if UNITYENGINE
         private void OnApplicationFocus(bool focus)
         {
+            if (IsShutdown) return;
+
             EventBroadcaster.PostEvent(ApplicationOutFocusEvent.GetEvent(focus));
         }
         private void Update()

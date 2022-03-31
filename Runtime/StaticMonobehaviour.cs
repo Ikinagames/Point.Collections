@@ -23,6 +23,8 @@
 
 #if UNITYENGINE
 using Point.Collections.Native;
+using System.ComponentModel;
+using System.Reflection;
 using UnityEngine;
 
 namespace Point.Collections
@@ -31,6 +33,9 @@ namespace Point.Collections
     /// <seealso cref="UnityEngine.MonoBehaviour"/> (<typeparamref name="T"/>) 를 
     /// Single-tone 으로 wrapping 하는 <see langword="abstract"/> 입니다.
     /// </summary>
+    /// <remarks>
+    /// <seealso cref="IStaticInitializer"/> 을 상속받아 추가로 사용자의 추가 행동없이 즉시 생성되도록 할 수 있습니다.
+    /// </remarks>
     /// <typeparam name="T"></typeparam>
     public abstract class StaticMonobehaviour<T> : UnityEngine.MonoBehaviour, IStaticMonobehaviour
         where T : UnityEngine.MonoBehaviour, IStaticMonobehaviour
@@ -71,7 +76,13 @@ namespace Point.Collections
                     T t = obj.AddComponent<T>();
 
 #if UNITY_EDITOR
-                    obj.name = $"{nameof(T)}: StaticMonobehaviour";
+                    DisplayNameAttribute nameAttribute = TypeHelper.TypeOf<T>.Type.GetCustomAttribute<DisplayNameAttribute>();
+                    if (nameAttribute != null)
+                    {
+                        obj.name = nameAttribute.DisplayName;
+                    }
+                    else obj.name = $"{TypeHelper.TypeOf<T>.ToString()}: StaticMonobehaviour";
+
                     if (t.HideInInspector)
                     {
                         obj.hideFlags = HideFlags.HideInHierarchy;

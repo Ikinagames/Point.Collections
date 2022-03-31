@@ -79,11 +79,6 @@ namespace Point.Collections.Events
         private void ExecuteEvent(ISynchronousEvent ev)
         {
 #if DEBUG_MODE
-            const string c_LogFormat = "Event({0}) posted from {1}";
-            PointHelper.Log(Channel.Collections,
-                string.Format(c_LogFormat, TypeHelper.ToString(ev.GetType()), ScriptUtils.ToStringFormat(ev.GetStackFrame()))
-                );
-
             if (ev.Reserved)
             {
                 throw new Exception("reserve err");
@@ -111,6 +106,16 @@ namespace Point.Collections.Events
                 UnityEngine.Debug.LogException(ex);
                 //throw ex;
             }
+
+#if DEBUG_MODE
+            const string c_LogFormat = "Event({0}) posted from {1}";
+            if (ev.InternalEnableLog)
+            {
+                PointHelper.Log(Channel.Collections,
+                    string.Format(c_LogFormat, TypeHelper.ToString(ev.GetType()), ScriptUtils.ToStringFormat(ev.GetStackFrame()))
+                    );
+            }
+#endif
 
             ReserveEvent(ev);
         }

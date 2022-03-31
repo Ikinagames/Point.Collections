@@ -67,6 +67,7 @@ namespace Point.Collections.Events
         private System.Diagnostics.StackFrame m_Caller;
 
         public bool Reserved => m_Reserved;
+        bool ISynchronousEvent.InternalEnableLog => EnableLog;
 
         #region Interface Instructions
 
@@ -113,6 +114,8 @@ namespace Point.Collections.Events
         {
             m_Caller = frame;
         }
+
+        protected virtual bool EnableLog => true;
 
         /// <inheritdoc cref="ISynchronousEvent.OnCreated"/>
         protected virtual void OnCreated() { }

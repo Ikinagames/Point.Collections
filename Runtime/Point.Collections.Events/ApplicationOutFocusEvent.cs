@@ -22,6 +22,8 @@ namespace Point.Collections.Events
 {
     public sealed class ApplicationOutFocusEvent : SynchronousEvent<ApplicationOutFocusEvent>
     {
+        protected override bool EnableLog => false;
+
         public bool Focus { get; private set; }
 
         internal static ApplicationOutFocusEvent GetEvent(bool focus)

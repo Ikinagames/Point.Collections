@@ -25,6 +25,7 @@ namespace Point.Collections.Events
         , Point.Collections.Diagnostics.IStackDebugger
     {
         bool Reserved { get; }
+        bool InternalEnableLog { get; }
 
         /// <summary>
         /// 이벤트 객체가 생성될 때 실행되는 메소드입니다.
