@@ -245,6 +245,18 @@ namespace Point.Collections.Buffer.LowLevel
 
             return true;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool RemoveAtSwapBack<T>(this T[] array, int index)
+        {
+            if (index < 0) return false;
+
+            for (int i = index + 1; i < array.Length; i++)
+            {
+                array[i - 1] = array[i];
+            }
+
+            return true;
+        }
 
         #region Memory
 
