@@ -15,6 +15,7 @@
 
 using System;
 using System.Diagnostics;
+#if UNITY_2020_1_OR_NEWER
 using UnityEngine;
 
 namespace Point.Collections
@@ -45,3 +46,5 @@ namespace Point.Collections
         }
     }
 }
+
+#endif
