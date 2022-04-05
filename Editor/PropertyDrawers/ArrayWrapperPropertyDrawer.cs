@@ -129,6 +129,7 @@ namespace Point.Collections.Editor
             if (!DrawHeader(ref rect, arr)) // 15
             {
                 m_ElementAlpha.target = 0;
+                RepaintInspector(property.serializedObject);
                 return;
             }
             m_ElementAlpha.target = 1;
@@ -147,6 +148,8 @@ namespace Point.Collections.Editor
                     CoreGUI.Label(rect.Pop(), new GUIContent("Empty"), m_ElementAlpha, TextAnchor.MiddleCenter);
                 }
             }
+
+            RepaintInspector(property.serializedObject);
         }
 
         private bool DrawHeader(ref AutoRect rect, SerializedProperty property)
@@ -184,7 +187,7 @@ namespace Point.Collections.Editor
                 SerializedProperty element = property.GetArrayElementAtIndex(i);
 
                 AutoRect elementAutoRect = new AutoRect(rect.Pop(GetElementHeight(element)));
-                Rect elementRect = elementAutoRect.Pop(EditorGUI.GetPropertyHeight(element, false));
+                Rect elementRect = elementAutoRect.Pop(EditorStyles.textField.CalcHeight(new GUIContent(element.displayName), rect.Current.width));
 
                 PropertyDrawerHelper.DrawBlock(EditorGUI.IndentedRect(elementRect), Color.gray);
                 AutoRect.DivideWithRatio(elementRect, elementRects, elementRatio);

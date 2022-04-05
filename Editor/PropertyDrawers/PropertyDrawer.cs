@@ -84,6 +84,13 @@ namespace Point.Collections.Editor
 
             return rects;
         }
+
+        public static void RepaintInspector(SerializedObject BaseObject)
+        {
+            foreach (var item in ActiveEditorTracker.sharedTracker.activeEditors)
+                if (item.serializedObject == BaseObject)
+                { item.Repaint(); return; }
+        }
     }
 }
 
