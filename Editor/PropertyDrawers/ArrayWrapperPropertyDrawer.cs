@@ -148,7 +148,6 @@ namespace Point.Collections.Editor
                     CoreGUI.Label(rect.Pop(), new GUIContent("Empty"), m_ElementAlpha, TextAnchor.MiddleCenter);
                 }
             }
-
             RepaintInspector(property.serializedObject);
         }
 
@@ -187,6 +186,7 @@ namespace Point.Collections.Editor
                 SerializedProperty element = property.GetArrayElementAtIndex(i);
 
                 AutoRect elementAutoRect = new AutoRect(rect.Pop(GetElementHeight(element)));
+                //Rect elementRect = elementAutoRect.Pop(EditorGUI.GetPropertyHeight(element, false));
                 Rect elementRect = elementAutoRect.Pop(EditorStyles.textField.CalcHeight(new GUIContent(element.displayName), rect.Current.width));
 
                 PropertyDrawerHelper.DrawBlock(EditorGUI.IndentedRect(elementRect), Color.gray);
@@ -222,7 +222,7 @@ namespace Point.Collections.Editor
 
                 #endregion
 
-                if (!enableExpand)
+                if (elementChildCount == 1)
                 {
                     EditorGUI.PropertyField(elementRects[1], element, GUIContent.none);
                 }
@@ -268,7 +268,7 @@ namespace Point.Collections.Editor
 
                 #endregion
 
-                if (enableExpand && element.isExpanded)
+                if (element.isExpanded)
                 {
                     var child = element.Copy();
                     child.Next(true);
