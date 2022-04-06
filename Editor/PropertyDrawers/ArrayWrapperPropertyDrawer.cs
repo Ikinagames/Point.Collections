@@ -222,7 +222,7 @@ namespace Point.Collections.Editor
 
                 #endregion
 
-                if (elementChildCount == 1)
+                if (!enableExpand)
                 {
                     EditorGUI.PropertyField(elementRects[1], element, GUIContent.none);
                 }
@@ -268,7 +268,7 @@ namespace Point.Collections.Editor
 
                 #endregion
 
-                if (element.isExpanded)
+                if (enableExpand && element.isExpanded)
                 {
                     var child = element.Copy();
                     child.Next(true);

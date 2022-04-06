@@ -409,13 +409,12 @@ namespace Point.Collections.Editor
         {
             var temp = t.Copy();
             temp.Next(true);
-            int depth = temp.depth;
 
             int count = 0;
             do
             {
                 count++;
-            } while (temp.Next(false) && temp.depth == depth);
+            } while (temp.Next(false) && temp.depth > t.depth);
 
             return count;
         }
