@@ -23,7 +23,7 @@ using UnityEngine;
 
 namespace Point.Collections
 {
-    public sealed class Console : StaticMonobehaviour<Console>, IStaticInitializer
+    public sealed class Console : StaticMonobehaviour<Console>
     {
         protected override bool EnableLog => false;
 

@@ -229,10 +229,13 @@ namespace Point.Collections
             {
                 return 0;
             }
-
+            
             Type temp = typeof(AlignOfHelper<>).MakeGenericType(t);
-
+#if UNITYENGINE
+            return UnsafeUtility.SizeOf(temp) - UnsafeUtility.SizeOf(t);
+#else
             return Marshal.SizeOf(temp) - Marshal.SizeOf(t);
+#endif
         }
         public static int AlignOf<T>()
         {
@@ -242,7 +245,11 @@ namespace Point.Collections
             }
 
             Type temp = TypeOf<AlignOfHelper<T>>.Type;
+#if UNITYENGINE
+            return UnsafeUtility.SizeOf(temp) - UnsafeUtility.SizeOf(TypeOf<T>.Type);
+#else
             return Marshal.SizeOf(temp) - Marshal.SizeOf(TypeOf<T>.Type);
+#endif
         }
 
         /// <summary>
@@ -365,6 +372,12 @@ namespace Point.Collections
                 .GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
                 .All(f => IsUnmanaged(f.FieldType));
 #endif
+        }
+
+        public static void AOTCodeGenerator<T>()
+        {
+            var temp = new AlignOfHelper<T>();
+            TypeOf<T>.ToString();
         }
     }
 }
