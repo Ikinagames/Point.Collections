@@ -52,6 +52,9 @@ namespace Point.Collections.Buffer.LowLevel
         internal struct Buffer
         {
             internal UnsafeReference Ptr;
+            /// <summary>
+            /// <see cref="Ptr"/> 에 할당된 총 메모리 크기입니다.
+            /// </summary>
             internal long Size;
         }
 

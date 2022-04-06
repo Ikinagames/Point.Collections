@@ -288,7 +288,7 @@ namespace Point.Collections.Buffer.LowLevel
         }
 #endif
 
-#region Inner Classes
+        #region Inner Classes
 
 #if UNITYENGINE
         [BurstCompatible]
@@ -357,9 +357,9 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
-#endregion
+        #endregion
 
-#region Calculations
+        #region Calculations
 
         private static bool IsAllocatableBetween(UnsafeMemoryBlock a, UnsafeReference<byte> b, int length, out long freeSpace)
         {
@@ -377,7 +377,7 @@ namespace Point.Collections.Buffer.LowLevel
             return st < 0;
         }
 
-#endregion
+        #endregion
     }
     public static class MemoryPoolExtensions
     {
