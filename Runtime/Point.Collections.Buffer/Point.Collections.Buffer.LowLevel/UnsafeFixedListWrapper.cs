@@ -26,6 +26,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 using System;
 using System.Collections.Generic;
+using Point.Collections.Native;
 
 namespace Point.Collections.Buffer.LowLevel
 {
@@ -203,6 +204,19 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 #endif
+        public static void CopyTo<T>(this ref UnsafeFixedListWrapper<T> t, ref UnsafeAllocator<T> allocator)
+            where T : unmanaged
+        {
+            unsafe
+            {
+                if (allocator.Length < t.Length)
+                {
+                    allocator.Resize(t.Length);
+                }
+
+                NativeUtility.MemCpy(allocator.Ptr, t.m_Buffer, t.Length * TypeHelper.SizeOf<T>());
+            }
+        }
 
         public static void Sort<T, U>(this ref UnsafeFixedListWrapper<T> t, U comparer)
             where T : unmanaged
