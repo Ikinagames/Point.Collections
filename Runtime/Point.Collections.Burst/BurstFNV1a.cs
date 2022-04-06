@@ -19,6 +19,7 @@
 #endif
 #define UNITYENGINE
 
+using AOT;
 using System.Text;
 using Unity.Burst;
 using Unity.Collections;
@@ -34,6 +35,8 @@ namespace Point.Collections.Burst
         private const ulong
             kPrime64 = 1099511628211LU,
             kOffsetBasis64 = 14695981039346656037LU;
+
+        public delegate void BurstFNV1aDelegate(byte* buffer, int* length, uint* output);
 
         [BurstDiscard]
         public static void fnv1a32_str(in string str, uint* output)
@@ -53,6 +56,7 @@ namespace Point.Collections.Burst
             }
         }
         [BurstCompile]
+        [MonoPInvokeCallback(typeof(BurstFNV1aDelegate))]
         public static void fnv1a32_byte(byte* buffer, int* length, uint* output)
         {
             if (buffer == null)
