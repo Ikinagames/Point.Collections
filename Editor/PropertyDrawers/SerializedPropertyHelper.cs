@@ -397,9 +397,14 @@ namespace Point.Collections.Editor
         {
             return PropertyDrawerHelper.GetTargetObjectOfProperty(t).GetType();
         }
+
         public static bool IsTypeOf<T>(this SerializedProperty t)
         {
             return TypeHelper.TypeOf<T>.Type.Name.Equals(t.type);
+        }
+        public static bool IsInArray(this SerializedProperty t)
+        {
+            return PropertyDrawerHelper.IsPropertyInArray(t);
         }
 
         public static SerializedProperty GetParent(this SerializedProperty t)
@@ -467,6 +472,20 @@ namespace Point.Collections.Editor
             }
 
             propertyDrawer.OnGUI(rect, t, label);
+        }
+        public static void Draw(this SerializedProperty t, ref AutoRect rect, GUIContent label, bool includeChildren)
+        {
+            PropertyDrawer propertyDrawer = GetPropertyDrawer(t);
+
+            if (propertyDrawer == null)
+            {
+                EditorGUI.PropertyField(
+                    rect.Pop(EditorGUI.GetPropertyHeight(t))
+                    , t, label, includeChildren);
+                return;
+            }
+
+            propertyDrawer.OnGUI(rect.Pop(propertyDrawer.GetPropertyHeight(t, label)), t, label);
         }
         public static bool HasCustomPropertyDrawer(this SerializedProperty t)
         {

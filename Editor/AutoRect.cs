@@ -75,6 +75,10 @@ namespace Point.Collections.Editor
             m_Rect.x += pixel;
             m_Rect.width -= pixel;
         }
+        public void Indent()
+        {
+            m_Rect = EditorGUI.IndentedRect(m_Rect);
+        }
 
         public static Rect Indent(Rect rect, float pixel)
         {

@@ -56,7 +56,7 @@ namespace Point.Collections.Editor
         protected virtual void OnElementGUI(ref AutoRect rect, SerializedProperty element)
         {
             //EditorGUI.PropertyField(rect.Pop(EditorGUI.GetPropertyHeight(element)), element, true);
-            element.Draw(rect.Pop(EditorGUI.GetPropertyHeight(element)), new GUIContent(element.displayName), true);
+            element.Draw(ref rect, new GUIContent(element.displayName), true);
         }
 
         #endregion
@@ -272,23 +272,24 @@ namespace Point.Collections.Editor
                 if (element.isExpanded)
                 {
                     var child = element.Copy();
+                    PropertyDrawerHelper.DrawRect(
+                            EditorGUI.IndentedRect(elementAutoRect.Current),
+                            Color.black);
+
+                    elementAutoRect.Pop(2.5f);
+                    elementAutoRect.Indent(5);
+                    elementAutoRect.Indent();
+
                     if (element.HasCustomPropertyDrawer())
                     {
-                        element.Draw(elementAutoRect.Pop(EditorGUI.GetPropertyHeight(element)),
+                        element.Draw(ref elementAutoRect,
                             new GUIContent(element.displayName), true);
                     }
                     else
                     {
                         child.Next(true);
 
-                        PropertyDrawerHelper.DrawRect(
-                            EditorGUI.IndentedRect(elementAutoRect.Current),
-                            Color.black);
-
-                        elementAutoRect.Pop(5);
-
                         int depth = child.depth;
-                        elementAutoRect.Indent(5);
                         do
                         {
                             OnElementGUI(ref elementAutoRect, child);
@@ -298,7 +299,7 @@ namespace Point.Collections.Editor
                 }
 
                 elementAutoRect.Indent(-5);
-                EditorUtilities.Line(EditorGUI.IndentedRect(rect.Pop(3)));
+                EditorUtilities.Line(rect.Pop(3));
             }
         }
     }
