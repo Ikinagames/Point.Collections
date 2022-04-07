@@ -55,7 +55,8 @@ namespace Point.Collections.Editor
 
         protected virtual void OnElementGUI(ref AutoRect rect, SerializedProperty element)
         {
-            EditorGUI.PropertyField(rect.Pop(EditorGUI.GetPropertyHeight(element)), element, true);
+            //EditorGUI.PropertyField(rect.Pop(EditorGUI.GetPropertyHeight(element)), element, true);
+            element.Draw(rect.Pop(EditorGUI.GetPropertyHeight(element)), new GUIContent(element.displayName), true);
         }
 
         #endregion
@@ -271,23 +272,32 @@ namespace Point.Collections.Editor
                 if (element.isExpanded)
                 {
                     var child = element.Copy();
-                    child.Next(true);
-
-                    PropertyDrawerHelper.DrawRect(
-                        EditorGUI.IndentedRect(elementAutoRect.Current),
-                        Color.black);
-
-                    elementAutoRect.Pop(5);
-
-                    int depth = child.depth;
-                    elementAutoRect.Indent(5);
-                    do
+                    if (element.HasCustomPropertyDrawer())
                     {
-                        OnElementGUI(ref elementAutoRect, child);
+                        element.Draw(elementAutoRect.Pop(EditorGUI.GetPropertyHeight(element)),
+                            new GUIContent(element.displayName), true);
+                    }
+                    else
+                    {
+                        child.Next(true);
 
-                    } while (child.Next(false) && child.depth == depth);
+                        PropertyDrawerHelper.DrawRect(
+                            EditorGUI.IndentedRect(elementAutoRect.Current),
+                            Color.black);
+
+                        elementAutoRect.Pop(5);
+
+                        int depth = child.depth;
+                        elementAutoRect.Indent(5);
+                        do
+                        {
+                            OnElementGUI(ref elementAutoRect, child);
+
+                        } while (child.Next(false) && child.depth == depth);
+                    }
                 }
 
+                elementAutoRect.Indent(-5);
                 EditorUtilities.Line(EditorGUI.IndentedRect(rect.Pop(3)));
             }
         }
