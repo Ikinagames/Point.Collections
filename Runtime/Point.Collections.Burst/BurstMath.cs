@@ -13,18 +13,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER && UNITY_BURST && UNITY_MATHEMATICS
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
 
 using Unity.Burst;
-using Unity.Collections;
+#if UNITY_MATHEMATICS
 using Unity.Mathematics;
+#endif
 
 namespace Point.Collections.Burst
 {
+    /// <summary>
+    /// Unity.Burst 와 Unity.Mathematics 가 필요합니다.
+    /// </summary>
     [BurstCompile]
     public static unsafe class BurstMath
     {
@@ -58,8 +62,9 @@ namespace Point.Collections.Burst
             float4x4 trMatrix = float4x4.TRS(originCenter, quaternion, originExtents);
 
             float3
-                minPos = math.mul(trMatrix, new float4(-originExtents * 2, 1)).xyz,
-                maxPos = math.mul(trMatrix, new float4(originExtents * 2, 1)).xyz;
+                size = originExtents * 2,
+                minPos = math.mul(trMatrix, new float4(-size, 1)).xyz,
+                maxPos = math.mul(trMatrix, new float4(size, 1)).xyz;
 
             AABB temp = new AABB(originCenter, float3.zero);
 

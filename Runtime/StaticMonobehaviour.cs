@@ -17,12 +17,11 @@
 #define DEBUG_MODE
 #endif
 
-#if UNITY_2020
+#if UNITY_2019_1_OR_NEWER
 #define UNITYENGINE
 #endif
 
 #if UNITYENGINE
-using Point.Collections.Native;
 using System.ComponentModel;
 using System.Reflection;
 using UnityEngine;

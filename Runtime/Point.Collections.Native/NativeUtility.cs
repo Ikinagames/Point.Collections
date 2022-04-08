@@ -56,12 +56,12 @@ namespace Point.Collections.Native
 #endif
         }
         public static void Free(void* ptr
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
             , Unity.Collections.Allocator allocator
 #endif
             )
         {
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
             UnsafeUtility.Free(ptr, allocator);
 #else
             // TODO : 임시

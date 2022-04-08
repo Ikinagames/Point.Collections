@@ -17,6 +17,22 @@
     ],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.burst",
+            "expression": "1.5.6",
+            "define": "UNITY_BURST"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "1.0.0-pre.5",
+            "define": "UNITY_COLLECTIONS"
+        },
+        {
+            "name": "com.unity.mathematics",
+            "expression": "1.2.4",
+            "define": "UNITY_MATHEMATICS"
+        }
+    ],
     "noEngineReferences": false
 }

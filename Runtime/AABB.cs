@@ -18,9 +18,22 @@
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_BURST
 using Unity.Burst;
+#endif
+#if UNITY_COLLECTIONS
 using Unity.Collections;
+#endif
+#if UNITY_MATHEMATICS
 using Unity.Mathematics;
+#else
+using float3 = UnityEngine.Vector3;
+using float4 = UnityEngine.Vector4;
+using int3 = UnityEngine.Vector3Int;
+using quaternion = UnityEngine.Quaternion;
+using float3x4 = UnityEngine.Matrix4x4;
+using float4x4 = UnityEngine.Matrix4x4;
+#endif
 using UnityEngine;
 #else
 #define POINT_COLLECTIONS_NATIVE
@@ -33,7 +46,7 @@ using System.Runtime.InteropServices;
 
 namespace Point.Collections
 {
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
     [BurstCompile(CompileSynchronously = true, DisableSafetyChecks = true)]
 #endif
     [StructLayout(LayoutKind.Sequential)]
@@ -53,8 +66,13 @@ namespace Point.Collections
         }
         public AABB(int3 center, int3 size)
         {
-            m_Center = new float3(center);
-            m_Extents = new float3(size) * .5f;
+            m_Center = center;
+
+            float
+                xExtends = size.x * .5f,
+                yExtends = size.y * .5f,
+                zExtends = size.z * .5f;
+            m_Extents = new float3(xExtends, yExtends, zExtends);
         }
 
 #pragma warning disable IDE1006 // Naming Styles
@@ -92,9 +110,21 @@ namespace Point.Collections
         {
             float3x4[] squares = GetSquares(in this);
 
+            float3 x, y, z, w;
             for (int i = 0; i < squares.Length; i++)
             {
-                if (IntersectQuad(squares[i].c0, squares[i].c1, squares[i].c2, squares[i].c3, ray, out _))
+#if UNITY_MATHEMATICS
+                x = squares[i].c0;
+                y = squares[i].c1;
+                z = squares[i].c2;
+                w = squares[i].c3;
+#else
+                x = squares[i].GetColumn(0);
+                y = squares[i].GetColumn(1);
+                z = squares[i].GetColumn(2);
+                w = squares[i].GetColumn(3);
+#endif
+                if (IntersectQuad(x, y, z, w, ray, out _))
                 {
                     return true;
                 }
@@ -107,9 +137,21 @@ namespace Point.Collections
             float3x4[] squares = GetSquares(in this);
 
             bool intersect = false;
+            float3 x, y, z, w;
             for (int i = 0; i < squares.Length; i++)
             {
-                if (IntersectQuad(squares[i].c0, squares[i].c1, squares[i].c2, squares[i].c3, ray, out float tempDistance))
+#if UNITY_MATHEMATICS
+                x = squares[i].c0;
+                y = squares[i].c1;
+                z = squares[i].c2;
+                w = squares[i].c3;
+#else
+                x = squares[i].GetColumn(0);
+                y = squares[i].GetColumn(1);
+                z = squares[i].GetColumn(2);
+                w = squares[i].GetColumn(3);
+#endif
+                if (IntersectQuad(x, y, z, w, ray, out float tempDistance))
                 {
                     if (tempDistance < distance)
                     {
@@ -143,7 +185,11 @@ namespace Point.Collections
 #if !UNITYENGINE
             SetMinMax(Math.min(min, point), Math.max(max, point));
 #else
+#if UNITY_MATHEMATICS
             SetMinMax(math.min(min, point), math.max(max, point));
+#else
+            SetMinMax(Vector3.Min(min, point), Vector3.Max(max, point));
+#endif
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Encapsulate(AABB aabb)
@@ -158,13 +204,36 @@ namespace Point.Collections
             AABB result;
             unsafe
             {
+#if UNITY_BURST && UNITY_MATHEMATICS
                 Burst.BurstMath.aabb_calculateRotationWithVertices(in this, in rot, in scale, &result);
+#else
+                float3
+                    originCenter = center,
+                    originExtents = extents,
+                    originMin = (-originExtents + originCenter),
+                    originMax = (originExtents + originCenter);
+                float4x4 trMatrix = float4x4.TRS(originCenter, rot, originExtents);
+
+                float3
+                    size = originExtents * 2,
+                    minPos = (trMatrix * new float4(-size.x, -size.y, -size.z, 1)),
+                    maxPos = (trMatrix * new float4(size.x, size.y, size.z, 1));
+
+                AABB temp = new AABB(originCenter, float3.zero);
+
+                // TODO : 최소 width, height 값이 설정되지않아 무한대로 축소함. 수정할 것.
+                temp.SetMinMax(
+                    originMin + (minPos - originMin),
+                    originMax + (maxPos - originMax));
+
+                result = temp;
+#endif
             }
             
             return result;
         }
 #endif
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NativeArray<float3> GetVertices(Allocator allocator)
         {
@@ -327,35 +396,64 @@ namespace Point.Collections
             e2 = p3 - p1;
 
             // calculating determinant 
+#if UNITY_MATHEMATICS
             p = math.cross(ray.direction, e2);
+#else
+            p = Vector3.Cross(ray.direction, e2);
+#endif
 
             //Calculate determinat
+#if UNITY_MATHEMATICS
             det = math.dot(e1, p);
+#else
+            det = Vector3.Dot(e1, p);
+#endif
 
             //if determinant is near zero, ray lies in plane of triangle otherwise not
+#if UNITY_MATHEMATICS
             if (det > -math.EPSILON && det < math.EPSILON) { return false; }
+#else
+            if (det > -Mathf.Epsilon && det < Mathf.Epsilon) { return false; }
+#endif
             invDet = 1.0f / det;
 
             //calculate distance from p1 to ray origin
             t = ((float3)ray.origin) - p1;
 
             //Calculate u parameter
+#if UNITY_MATHEMATICS
             u = math.dot(t, p) * invDet;
+#else
+            u = Vector3.Dot(t, p) * invDet;
+#endif
 
             //Check for ray hit
             if (u < 0 || u > 1) { return false; }
 
             //Prepare to test v parameter
+#if UNITY_MATHEMATICS
             q = math.cross(t, e1);
+#else
+            q = Vector3.Cross(t, e1);
+#endif
 
             //Calculate v parameter
+#if UNITY_MATHEMATICS
             v = math.dot(ray.direction, q) * invDet;
+#else
+            v = Vector3.Dot(ray.direction, q) * invDet;
+#endif
 
             //Check for ray hit
             if (v < 0 || u + v > 1) { return false; }
 
+#if UNITY_MATHEMATICS
             distance = (math.dot(e2, q) * invDet);
             if (distance > math.EPSILON)
+#else
+            distance = (Vector3.Dot(e2, q) * invDet);
+            if (distance > Mathf.Epsilon)
+#endif
             {
                 //ray does intersect
                 return true;
