@@ -181,6 +181,9 @@ namespace Point.Collections
                 .SelectMany(a => GetLoadableTypes(a))
                 .ToArray();
 
+        private static readonly Type GenericListInterface = typeof(IList<>);
+        private static readonly Type GenericCollectionInterface = typeof(ICollection<>);
+
         /// <summary>
         /// 현재 프로젝트의 모든 <see cref="System.Type"/> 에서 <paramref name="predictate"/> 조건으로 찾아서 반환합니다.
         /// </summary>
@@ -215,6 +218,22 @@ namespace Point.Collections
             }
         }
 
+        public static int SizeOf(Type type)
+        {
+#if UNITYENGINE
+            return UnsafeUtility.SizeOf(type);
+#else
+            return Marshal.SizeOf(type);
+#endif
+        }
+        public static int SizeOf<T>() where T : unmanaged
+        {
+#if UNITYENGINE
+            return UnsafeUtility.SizeOf<T>();
+#else
+            return Marshal.SizeOf(TypeOf<T>.Type);
+#endif
+        }
         /// <summary>
         /// <paramref name="t"/> 의 Alignment 를 반환합니다.
         /// </summary>
@@ -252,6 +271,25 @@ namespace Point.Collections
 #endif
         }
 
+        public static bool IsUnmanaged(Type type)
+        {
+#if UNITYENGINE
+            return UnsafeUtility.IsUnmanaged(type);
+#else
+            // primitive, pointer or enum -> true
+            if (type.IsPrimitive || type.IsPointer || type.IsEnum)
+                return true;
+
+            // not a struct -> false
+            if (!type.IsValueType)
+                return false;
+
+            // otherwise check recursively
+            return type
+                .GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                .All(f => IsUnmanaged(f.FieldType));
+#endif
+        }
         /// <summary>
         /// Wrapper struct (아무 ValueType 맴버도 갖지 않은 구조체) 는 C# CLS 에서 무조건 1 byte 를 갖습니다. 
         /// 해당 컴포넌트 타입이 버퍼에 올라갈 필요가 있는지를 확인하여 메모리 낭비를 줄입니다.
@@ -338,41 +376,190 @@ namespace Point.Collections
 #endif
         }
 
-        public static int SizeOf(Type type)
+        #region Generics
+
+        /// <summary>
+        /// 타입 <paramref name="candidateType"/>이 상속받는 interface 
+        /// <paramref name="openGenericInterfaceType"/> 의 제네릭 타입 값을 가져옵니다.
+        /// </summary>
+        /// <param name="candidateType"></param>
+        /// <param name="openGenericInterfaceType">
+        /// <code>typeof(IList{})</code>
+        /// </param>
+        /// <returns></returns>
+        public static Type[] GetArgumentsOfInheritedOpenGenericInterface(Type candidateType, Type openGenericInterfaceType)
         {
-#if UNITYENGINE
-            return UnsafeUtility.SizeOf(type);
-#else
-            return Marshal.SizeOf(type);
-#endif
+            if (((object)openGenericInterfaceType == GenericListInterface || (object)openGenericInterfaceType == GenericCollectionInterface) && candidateType.IsArray)
+            {
+                return new Type[1]
+                {
+                    candidateType.GetElementType()
+                };
+            }
+
+            if ((object)candidateType == openGenericInterfaceType)
+            {
+                return candidateType.GetGenericArguments();
+            }
+
+            if (candidateType.IsGenericType && (object)candidateType.GetGenericTypeDefinition() == openGenericInterfaceType)
+            {
+                return candidateType.GetGenericArguments();
+            }
+
+            Type[] interfaces = candidateType.GetInterfaces();
+            foreach (Type type in interfaces)
+            {
+                if (type.IsGenericType)
+                {
+                    Type[] argumentsOfInheritedOpenGenericInterface = GetArgumentsOfInheritedOpenGenericInterface(type, openGenericInterfaceType);
+                    if (argumentsOfInheritedOpenGenericInterface != null)
+                    {
+                        return argumentsOfInheritedOpenGenericInterface;
+                    }
+                }
+            }
+
+            return null;
         }
-        public static int SizeOf<T>() where T : unmanaged
+        /// <summary>
+        /// <paramref name="type"/> 가 상속받는 인터페이스 중 <paramref name="openGenericInterfaceType"/> 을 제네릭 베이스로 갖는 모든 타입을 가져옵니다.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="openGenericInterfaceType"></param>
+        /// <returns></returns>
+        public static Type[] GetInterfacesWithOpenGenericInterface(Type type, Type openGenericInterfaceType)
         {
-#if UNITYENGINE
-            return UnsafeUtility.SizeOf<T>();
-#else
-            return Marshal.SizeOf(TypeOf<T>.Type);
-#endif
+            List<Type> temp = new List<Type>();
+            foreach (var item in type.GetInterfaces())
+            {
+                if (InheritsFrom(item, openGenericInterfaceType))
+                {
+                    temp.Add(item);
+                }
+            }
+            return temp.ToArray();
         }
-        public static bool IsUnmanaged(Type type)
+        public static Type[] GetInterfacesWithOpenGenericInterface<T>(Type type)
         {
-#if UNITYENGINE
-            return UnsafeUtility.IsUnmanaged(type);
-#else
-            // primitive, pointer or enum -> true
-            if (type.IsPrimitive || type.IsPointer || type.IsEnum)
+            return GetInterfacesWithOpenGenericInterface(type, TypeOf<T>.Type);
+        }
+
+        //
+        // Summary:
+        //     Determines whether a type inherits or implements another type. Also include support
+        //     for open generic base types such as List<>.
+        //
+        // Parameters:
+        //   type:
+        public static bool InheritsFrom<TBase>(Type type)
+        {
+            return InheritsFrom(type, typeof(TBase));
+        }
+
+        //
+        // Summary:
+        //     Determines whether a type inherits or implements another type. Also include support
+        //     for open generic base types such as List<>.
+        //
+        // Parameters:
+        //   type:
+        //
+        //   baseType:
+        public static bool InheritsFrom(Type type, Type baseType)
+        {
+            if (baseType.IsAssignableFrom(type))
+            {
                 return true;
+            }
 
-            // not a struct -> false
-            if (!type.IsValueType)
+            if (type.IsInterface && !baseType.IsInterface)
+            {
                 return false;
+            }
 
-            // otherwise check recursively
-            return type
-                .GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                .All(f => IsUnmanaged(f.FieldType));
-#endif
+            if (baseType.IsInterface)
+            {
+                return type.GetInterfaces().Contains(baseType);
+            }
+
+            Type type2 = type;
+            while ((object)type2 != null)
+            {
+                if ((object)type2 == baseType)
+                {
+                    return true;
+                }
+
+                if (baseType.IsGenericTypeDefinition && type2.IsGenericType && (object)type2.GetGenericTypeDefinition() == baseType)
+                {
+                    return true;
+                }
+
+                type2 = type2.BaseType;
+            }
+
+            return false;
         }
+
+        /// <summary>
+        /// Gets the generic type definition of an open generic base type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="baseType"></param>
+        /// <returns></returns>
+        public static Type GetGenericBaseType(Type type, Type baseType)
+        {
+            return GetGenericBaseType(type, baseType, out _);
+        }
+        /// <summary>
+        /// Gets the generic type definition of an open generic base type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="baseType"></param>
+        /// <param name="depthCount"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public static Type GetGenericBaseType(Type type, Type baseType, out int depthCount)
+        {
+            if ((object)type == null)
+            {
+                throw new ArgumentNullException("type");
+            }
+
+            if ((object)baseType == null)
+            {
+                throw new ArgumentNullException("baseType");
+            }
+
+            if (!baseType.IsGenericType)
+            {
+                throw new ArgumentException("Type " + baseType.Name + " is not a generic type.");
+            }
+
+            if (!InheritsFrom(type, baseType))
+            {
+                throw new ArgumentException("Type " + type.Name + " does not inherit from " + baseType.Name + ".");
+            }
+
+            Type type2 = type;
+            depthCount = 0;
+            while ((object)type2 != null && (!type2.IsGenericType || (object)type2.GetGenericTypeDefinition() != baseType))
+            {
+                depthCount++;
+                type2 = type2.BaseType;
+            }
+
+            if ((object)type2 == null)
+            {
+                throw new ArgumentException(type.Name + " is assignable from " + baseType.Name + ", but base type was not found?");
+            }
+
+            return type2;
+        }
+
+        #endregion
 
         public static void AOTCodeGenerator<T>()
         {
