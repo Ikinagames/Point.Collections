@@ -23,7 +23,7 @@
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_2020_1_OR_NEWER
 
 using Point.Collections.Editor;
 using System;

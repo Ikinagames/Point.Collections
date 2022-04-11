@@ -13,16 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_2020_1_OR_NEWER
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 #define DEBUG_MODE
 #endif
-
 
 namespace Point.Collections.ResourceControl
 {
     public enum AssetStrategy
     {
         AssetBundle,
+#if UNITY_ADDRESSABLES
         Addressable
+#endif
     }
 }
+
+#endif
