@@ -13,13 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
 using Unity.Collections;
 using UnityEngine;
+#if !UNITY_COLLECTIONS
+using FixedString512Bytes = Point.Collections.FixedChar512Bytes;
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
@@ -47,7 +50,7 @@ namespace Point.Collections
 #endif
         private uint m_Value;
 #if DEBUG_MODE
-        private Unity.Collections.FixedString512Bytes m_Key;
+        private FixedString512Bytes m_Key;
 #endif
 
         public uint Value => m_Value;
@@ -55,7 +58,9 @@ namespace Point.Collections
         /// <summary>
         /// Editor only
         /// </summary>
+#if UNITY_COLLECTIONS
         [NotBurstCompatible]
+#endif
         public string Key => m_Key.ToString();
 #endif
 
@@ -73,7 +78,7 @@ namespace Point.Collections
             m_Key = key;
 #endif
         }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         public Hash(FixedString4096Bytes key)
         {
             m_Value = FNV1a32.Calculate(key);
@@ -107,7 +112,7 @@ namespace Point.Collections
                 return (int)m_Value;
             }
         }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         [NotBurstCompatible]
 #endif
         public override string ToString()

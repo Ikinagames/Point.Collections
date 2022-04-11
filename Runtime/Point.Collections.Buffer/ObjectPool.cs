@@ -71,6 +71,14 @@ namespace Point.Collections.Buffer
             EnableAtomicSafety = enableAtomicSafety;
         }
 
+        public void AddObjects(int count)
+        {
+            while (0 < count--)
+            {
+                m_Pool.Push(m_Factory.Invoke());
+            }
+        }
+
         public T Get()
         {
 #if DEBUG_MODE

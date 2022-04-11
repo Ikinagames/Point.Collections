@@ -13,14 +13,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_2019 && !UNITY_2020_1_OR_NEWER
+#define UNITYENGINE_OLD
+#else
+using Point.Collections.ResourceControl.LowLevel;
+#if UNITY_MATHEMATICS
+using Unity.Mathematics;
+#endif
+#endif
 
 using Point.Collections.Buffer.LowLevel;
-using Point.Collections.ResourceControl.LowLevel;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,7 +36,6 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -37,6 +43,8 @@ namespace Point.Collections.ResourceControl
 {
     public sealed class ResourceManager : StaticMonobehaviour<ResourceManager>
     {
+        #region For Newer Version
+#if !UNITYENGINE_OLD
         private const string c_FileUri = "file:///";
 
         protected override bool EnableLog => false;
@@ -327,7 +335,7 @@ namespace Point.Collections.ResourceControl
             Instance.m_AssetBundles[index] = null;
         }
 
-#region Internal
+        #region Internal
 
         internal static unsafe AssetBundleInfo GetAssetBundleInfo(in int index)
         {
@@ -500,7 +508,7 @@ namespace Point.Collections.ResourceControl
             Instance.m_ReferenceCheckSum ^= key.key;
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// 해당 키의 에셋의 에셋번들을 반환합니다.
@@ -592,6 +600,8 @@ namespace Point.Collections.ResourceControl
             
             return LoadAsset(p, in key);
         }
+#endif
+        #endregion
     }
 }
 

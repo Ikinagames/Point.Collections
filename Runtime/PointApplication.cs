@@ -132,6 +132,7 @@ namespace Point.Collections
 #endif
 
                 {
+                    PointHelper.s_LogHandler = new LowLevel.LogHandler();
                     PointHelper.s_LogHandler.SetLogFile(PointSettings.Instance.m_LogFilePath);
                 }
             }
@@ -205,7 +206,10 @@ namespace Point.Collections
             
             OnApplicationShutdown?.Invoke();
 
-            PointHelper.s_LogHandler.CloseLogFile();
+            if (PointSettings.Instance.m_EnableLogFile)
+            {
+                PointHelper.s_LogHandler.CloseLogFile();
+            }
         }
 
 #if UNITYENGINE && ENABLE_INPUT_SYSTEM

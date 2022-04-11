@@ -51,7 +51,7 @@ namespace Point.Collections
 
 #line hidden
 
-        internal static LowLevel.LogHandler s_LogHandler = new LowLevel.LogHandler();
+        internal static LowLevel.LogHandler s_LogHandler;
 
         private static LogChannel LogChannel => PointSettings.Instance.LogChannel;
 
