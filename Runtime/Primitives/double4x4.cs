@@ -13,11 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020
-#define UNITYENGINE
-#endif
+#if UNITY_2019 || !UNITY_2020_OR_NEWER
 
-#if !UNITYENGINE
+using System;
 using System.Runtime.CompilerServices;
 
 namespace Point.Collections
@@ -48,7 +46,7 @@ namespace Point.Collections
 
                 fixed (double4x4* ptr = &this)
                 {
-                    return ref *(double4*)((byte*)ptr + (nint)index * (nint)sizeof(double4));
+                    return ref *(double4*)((byte*)ptr + index * sizeof(double4));
                 }
             }
         }

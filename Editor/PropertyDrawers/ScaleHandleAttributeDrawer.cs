@@ -16,7 +16,6 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 #define DEBUG_MODE
 
-using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 

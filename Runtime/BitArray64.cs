@@ -13,12 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_COLLECTIONS
 using Unity.Collections;
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
@@ -28,7 +30,7 @@ using System.Runtime.InteropServices;
 
 namespace Point.Collections
 {
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
     [StructLayout(LayoutKind.Sequential)]
@@ -92,14 +94,14 @@ namespace Point.Collections
             }
         }
 
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         [NotBurstCompatible]
 #endif
         public override string ToString()
         {
             return y.ToString() + x.ToString();
         }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         [NotBurstCompatible]
 #endif
         public override bool Equals(object obj)

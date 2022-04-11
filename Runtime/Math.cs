@@ -13,11 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_2019 || !UNITY_2020_OR_NEWER
+#define UNITYENGINE_OLD
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
@@ -35,6 +38,7 @@ namespace Point.Collections
         public const float Deg2Rad = (float)System.Math.PI / 180f;
         public const float Rad2Deg = 57.29578f;
 
+#if !UNITYENGINE_OLD
         public static float TodB(float value)
         {
             double
@@ -66,17 +70,15 @@ namespace Point.Collections
             return (float)output;
         }
 
-        [System.Obsolete]
-        public static long min(in long x, in long y)
-        {
-#if UNITYENGINE
-            return Unity.Mathematics.math.min(x, y);
+//        [System.Obsolete]
+//        public static long min(in long x, in long y)
+//        {
+//#if !UNITYENGINE_OLD
+//            return Unity.Mathematics.math.min(x, y);
+//#else
+//            return x < y ? x : y;
+//        }
 #else
-            return x < y ? x : y;
-#endif
-        }
-
-#if !UNITYENGINE
         #region Unity.Mathematics
 
         public const float EPSILON = 1.1920929E-07f;
@@ -999,6 +1001,250 @@ namespace Point.Collections
         public static ulong asulong(double x)
         {
             return (ulong)aslong(x);
+        }
+
+        #endregion
+
+        #region f32tof16
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float f16tof32(uint x)
+        {
+            uint num = (x & 0x7FFF) << 13;
+            uint num2 = num & 0xF800000;
+            uint num3 = num + 939524096 + select(0u, 939524096u, num2 == 260046848);
+            return asfloat(select(num3, asuint(asfloat(num3 + 8388608) - 6.10351563E-05f), num2 == 0) | ((x & 0x8000) << 16));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 f16tof32(uint2 x)
+        {
+            uint2 lhs = (x & 32767u) << 13;
+            uint2 lhs2 = lhs & 260046848u;
+            uint2 @uint = lhs + 939524096u + select(0u, 939524096u, lhs2 == 260046848u);
+            return asfloat(select(@uint, asuint(asfloat(@uint + 8388608u) - 6.10351563E-05f), lhs2 == 0u) | ((x & 32768u) << 16));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 f16tof32(uint3 x)
+        {
+            uint3 lhs = (x & 32767u) << 13;
+            uint3 lhs2 = lhs & 260046848u;
+            uint3 @uint = lhs + 939524096u + select(0u, 939524096u, lhs2 == 260046848u);
+            return asfloat(select(@uint, asuint(asfloat(@uint + 8388608u) - 6.10351563E-05f), lhs2 == 0u) | ((x & 32768u) << 16));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 f16tof32(uint4 x)
+        {
+            uint4 lhs = (x & 32767u) << 13;
+            uint4 lhs2 = lhs & 260046848u;
+            uint4 @uint = lhs + 939524096u + select(0u, 939524096u, lhs2 == 260046848u);
+            return asfloat(select(@uint, asuint(asfloat(@uint + 8388608u) - 6.10351563E-05f), lhs2 == 0u) | ((x & 32768u) << 16));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint f32tof16(float x)
+        {
+            uint num = asuint(x);
+            uint num2 = num & 0x7FFFF000;
+            return select(asuint(min(asfloat(num2) * 1.92593E-34f, 260042752f)) + 4096 >> 13, select(31744u, 32256u, (int)num2 > 2139095040), (int)num2 >= 2139095040) | ((uint)((int)num & -2147479553) >> 16);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint2 f32tof16(float2 x)
+        {
+            uint2 lhs = asuint(x);
+            uint2 @uint = lhs & 2147479552u;
+            return select((uint2)(asint(min(asfloat(@uint) * 1.92593E-34f, 260042752f)) + 4096) >> 13, select(31744u, 32256u, (int2)@uint > 2139095040), (int2)@uint >= 2139095040) | ((lhs & 2147487743u) >> 16);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint3 f32tof16(float3 x)
+        {
+            uint3 lhs = asuint(x);
+            uint3 @uint = lhs & 2147479552u;
+            return select((uint3)(asint(min(asfloat(@uint) * 1.92593E-34f, 260042752f)) + 4096) >> 13, select(31744u, 32256u, (int3)@uint > 2139095040), (int3)@uint >= 2139095040) | ((lhs & 2147487743u) >> 16);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint4 f32tof16(float4 x)
+        {
+            uint4 lhs = asuint(x);
+            uint4 @uint = lhs & 2147479552u;
+            return select((uint4)(asint(min(asfloat(@uint) * 1.92593E-34f, 260042752f)) + 4096) >> 13, select(31744u, 32256u, (int4)@uint > 2139095040), (int4)@uint >= 2139095040) | ((lhs & 2147487743u) >> 16);
+        }
+
+        #endregion
+
+        #region lzcnt
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int lzcnt(int x)
+        {
+            return lzcnt((uint)x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2 lzcnt(int2 x)
+        {
+            return new int2(lzcnt(x.x), lzcnt(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 lzcnt(int3 x)
+        {
+            return new int3(lzcnt(x.x), lzcnt(x.y), lzcnt(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4 lzcnt(int4 x)
+        {
+            return new int4(lzcnt(x.x), lzcnt(x.y), lzcnt(x.z), lzcnt(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int lzcnt(uint x)
+        {
+            if (x == 0)
+            {
+                return 32;
+            }
+
+            LongDoubleUnion longDoubleUnion = default(LongDoubleUnion);
+            longDoubleUnion.doubleValue = 0.0;
+            longDoubleUnion.longValue = 4841369599423283200L + (long)x;
+            longDoubleUnion.doubleValue -= 4503599627370496.0;
+            return 1054 - (int)(longDoubleUnion.longValue >> 52);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2 lzcnt(uint2 x)
+        {
+            return new int2(lzcnt(x.x), lzcnt(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 lzcnt(uint3 x)
+        {
+            return new int3(lzcnt(x.x), lzcnt(x.y), lzcnt(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4 lzcnt(uint4 x)
+        {
+            return new int4(lzcnt(x.x), lzcnt(x.y), lzcnt(x.z), lzcnt(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int lzcnt(long x)
+        {
+            return lzcnt((ulong)x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int lzcnt(ulong x)
+        {
+            if (x == 0L)
+            {
+                return 64;
+            }
+
+            uint num = (uint)(x >> 32);
+            uint num2 = (uint)((num != 0) ? num : x);
+            int num3 = (num != 0) ? 1054 : 1086;
+            LongDoubleUnion longDoubleUnion = default(LongDoubleUnion);
+            longDoubleUnion.doubleValue = 0.0;
+            longDoubleUnion.longValue = 4841369599423283200L + (long)num2;
+            longDoubleUnion.doubleValue -= 4503599627370496.0;
+            return num3 - (int)(longDoubleUnion.longValue >> 52);
+        }
+
+        #endregion
+
+        #region tzcnt
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int tzcnt(int x)
+        {
+            return tzcnt((uint)x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2 tzcnt(int2 x)
+        {
+            return new int2(tzcnt(x.x), tzcnt(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 tzcnt(int3 x)
+        {
+            return new int3(tzcnt(x.x), tzcnt(x.y), tzcnt(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4 tzcnt(int4 x)
+        {
+            return new int4(tzcnt(x.x), tzcnt(x.y), tzcnt(x.z), tzcnt(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int tzcnt(uint x)
+        {
+            if (x == 0)
+            {
+                return 32;
+            }
+
+            x &= (uint)(int)(0L - (long)x);
+            LongDoubleUnion longDoubleUnion = default(LongDoubleUnion);
+            longDoubleUnion.doubleValue = 0.0;
+            longDoubleUnion.longValue = 4841369599423283200L + (long)x;
+            longDoubleUnion.doubleValue -= 4503599627370496.0;
+            return (int)(longDoubleUnion.longValue >> 52) - 1023;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2 tzcnt(uint2 x)
+        {
+            return new int2(tzcnt(x.x), tzcnt(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 tzcnt(uint3 x)
+        {
+            return new int3(tzcnt(x.x), tzcnt(x.y), tzcnt(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4 tzcnt(uint4 x)
+        {
+            return new int4(tzcnt(x.x), tzcnt(x.y), tzcnt(x.z), tzcnt(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int tzcnt(long x)
+        {
+            return tzcnt((ulong)x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int tzcnt(ulong x)
+        {
+            if (x == 0L)
+            {
+                return 64;
+            }
+
+            x &= 0L - x;
+            uint num = (uint)x;
+            uint num2 = (uint)((num != 0) ? num : (x >> 32));
+            int num3 = (num != 0) ? 1023 : 991;
+            LongDoubleUnion longDoubleUnion = default(LongDoubleUnion);
+            longDoubleUnion.doubleValue = 0.0;
+            longDoubleUnion.longValue = 4841369599423283200L + (long)num2;
+            longDoubleUnion.doubleValue -= 4503599627370496.0;
+            return (int)(longDoubleUnion.longValue >> 52) - num3;
         }
 
         #endregion
@@ -3638,7 +3884,7 @@ namespace Point.Collections
                 case ShuffleComponent.RightW:
                     return b.w;
                 default:
-                    throw new ArgumentException("Invalid shuffle component: " + component);
+                    throw new System.ArgumentException("Invalid shuffle component: " + component);
             }
         }
 
@@ -3938,6 +4184,80 @@ namespace Point.Collections
         /// <returns>The componentwise sign of the input.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double4 sign(double4 x) { return new double4(sign(x.x), sign(x.y), sign(x.z), sign(x.w)); }
+
+        #endregion
+
+        #region countbits
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int countbits(int x)
+        {
+            return countbits((uint)x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2 countbits(int2 x)
+        {
+            return countbits((uint2)x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 countbits(int3 x)
+        {
+            return countbits((uint3)x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4 countbits(int4 x)
+        {
+            return countbits((uint4)x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int countbits(uint x)
+        {
+            x -= ((x >> 1) & 0x55555555);
+            x = (x & 0x33333333) + ((x >> 2) & 0x33333333);
+            return (int)(((x + (x >> 4)) & 0xF0F0F0F) * 16843009 >> 24);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int2 countbits(uint2 x)
+        {
+            x -= ((x >> 1) & 1431655765u);
+            x = (x & 858993459u) + ((x >> 2) & 858993459u);
+            return new int2(((x + (x >> 4)) & 252645135u) * 16843009u >> 24);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 countbits(uint3 x)
+        {
+            x -= ((x >> 1) & 1431655765u);
+            x = (x & 858993459u) + ((x >> 2) & 858993459u);
+            return new int3(((x + (x >> 4)) & 252645135u) * 16843009u >> 24);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int4 countbits(uint4 x)
+        {
+            x -= ((x >> 1) & 1431655765u);
+            x = (x & 858993459u) + ((x >> 2) & 858993459u);
+            return new int4(((x + (x >> 4)) & 252645135u) * 16843009u >> 24);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int countbits(ulong x)
+        {
+            x -= ((x >> 1) & 0x5555555555555555L);
+            x = (x & 0x3333333333333333L) + ((x >> 2) & 0x3333333333333333L);
+            return (int)(((x + (x >> 4)) & 0xF0F0F0F0F0F0F0FL) * 72340172838076673L >> 56);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int countbits(long x)
+        {
+            return countbits((ulong)x);
+        }
 
         #endregion
 

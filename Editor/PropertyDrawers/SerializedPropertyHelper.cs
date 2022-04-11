@@ -16,12 +16,14 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 #define DEBUG_MODE
 
+#if UNITY_MATHEMATICS
+using Unity.Mathematics;
+#endif
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Unity.Collections;
-using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
@@ -53,6 +55,8 @@ namespace Point.Collections.Editor
         }
 
         #endregion
+
+#if UNITY_COLLECTIONS
 
         #region Unity.Collections
 
@@ -361,6 +365,8 @@ namespace Point.Collections.Editor
 
         #endregion
 
+#endif
+
         public static Vector3 GetVector3(this SerializedProperty t)
         {
             if (t.propertyType == SerializedPropertyType.Vector3)
@@ -501,7 +507,7 @@ namespace Point.Collections.Editor
                 Type foundDrawerTargetType = null;
 
                 //$"{propertyType.Name} start".ToLog();
-                foreach (var drawerType in TypeHelper.GetTypesIter(t => !t.IsAbstract && !t.IsInterface && t.GetCustomAttributes<CustomPropertyDrawer>().Any()))
+                foreach (var drawerType in TypeHelper.GetTypesIter(other => !other.IsAbstract && !other.IsInterface && other.GetCustomAttributes<CustomPropertyDrawer>().Any()))
                 {
                     foreach (var customPropertyDrawer in drawerType.GetCustomAttributes<CustomPropertyDrawer>())
                     {

@@ -13,12 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_COLLECTIONS
 using Unity.Collections;
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
@@ -28,7 +30,7 @@ using System.Runtime.InteropServices;
 
 namespace Point.Collections
 {
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
     [BurstCompatible]
 #endif
     [StructLayout(LayoutKind.Sequential)]
@@ -37,74 +39,46 @@ namespace Point.Collections
         private byte
             x01, x02, y01, y02;
 
-        public bool this[int index]
+        public unsafe bool this[int index]
         {
             get
             {
-                return index switch
+                int mul = 0;
+                int left = index;
+                while (left > 7)
                 {
-                    0 => (x01 & 0b0000_0001) == 0b0000_0001,
-                    1 => (x01 & 0b0000_0010) == 0b0000_0010,
-                    2 => (x01 & 0b0000_0100) == 0b0000_0100,
-                    3 => (x01 & 0b0000_1000) == 0b0000_1000,
+                    left -= 8;
+                    mul++;
+                }
 
-                    4 => (x01 & 0b0001_0000) == 0b0001_0000,
-                    5 => (x01 & 0b0010_0000) == 0b0010_0000,
-                    6 => (x01 & 0b0100_0000) == 0b0100_0000,
-                    7 => (x01 & 0b1000_0000) == 0b1000_0000,
-
-                    8 => (x02 & 0b0000_0001) == 0b0000_0001,
-                    9 => (x02 & 0b0000_0010) == 0b0000_0010,
-                    10 => (x02 & 0b0000_0100) == 0b0000_0100,
-                    11 => (x02 & 0b0000_1000) == 0b0000_1000,
-
-                    12 => (x02 & 0b0001_0000) == 0b0001_0000,
-                    13 => (x02 & 0b0010_0000) == 0b0010_0000,
-                    14 => (x02 & 0b0100_0000) == 0b0100_0000,
-                    15 => (x02 & 0b1000_0000) == 0b1000_0000,
-
-                    16 => (y01 & 0b0000_0001) == 0b0000_0001,
-                    17 => (y01 & 0b0000_0010) == 0b0000_0010,
-                    18 => (y01 & 0b0000_0100) == 0b0000_0100,
-                    19 => (y01 & 0b0000_1000) == 0b0000_1000,
-
-                    20 => (y01 & 0b0001_0000) == 0b0001_0000,
-                    21 => (y01 & 0b0010_0000) == 0b0010_0000,
-                    22 => (y01 & 0b0100_0000) == 0b0100_0000,
-                    23 => (y01 & 0b1000_0000) == 0b1000_0000,
-
-                    24 => (y02 & 0b0000_0001) == 0b0000_0001,
-                    25 => (y02 & 0b0000_0010) == 0b0000_0010,
-                    26 => (y02 & 0b0000_0100) == 0b0000_0100,
-                    27 => (y02 & 0b0000_1000) == 0b0000_1000,
-
-                    28 => (y02 & 0b0001_0000) == 0b0001_0000,
-                    29 => (y02 & 0b0010_0000) == 0b0010_0000,
-                    30 => (y02 & 0b0100_0000) == 0b0100_0000,
-                    31 => (y02 & 0b1000_0000) == 0b1000_0000,
-                    _ => throw new IndexOutOfRangeException(),
-                };
+                fixed (byte* ptr = &x01)
+                {
+                    byte* p = ptr + mul;
+                    var target = 1 << left;
+                    return (*p & target) == target;
+                }
             }
             set
             {
-                byte temp = (byte)(1 << index % 8);
-                if (index < 0)
+                int mul = 0;
+                int left = index;
+                while (left > 7)
                 {
-                    x01 = (byte)(value ? x01 + temp : x01 - temp);
+                    left -= 8;
+                    mul++;
                 }
-                else if (index < 16)
+
+                fixed (byte* ptr = &x01)
                 {
-                    x02 = (byte)(value ? x02 + temp : x02 - temp);
+                    byte* p = ptr + mul;
+                    var target = 1 << left;
+                    if (((*p & target) == target) != value)
+                    {
+                        *p = (byte)(value ? *p + target : *p - target);
+                    }
+
+                    return;
                 }
-                else if (index < 24)
-                {
-                    y01 = (byte)(value ? y01 + temp : y01 - temp);
-                }
-                else if (index < 32)
-                {
-                    y02 = (byte)(value ? y02 + temp : y02 - temp);
-                }
-                else throw new IndexOutOfRangeException();
             }
         }
         public uint Value
@@ -156,14 +130,14 @@ namespace Point.Collections
             }
         }
 
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
         [NotBurstCompatible]
 #endif
         public override string ToString()
         {
             return Convert.ToString(Value, 2);
         }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
         [NotBurstCompatible]
 #endif
         public override bool Equals(object obj)

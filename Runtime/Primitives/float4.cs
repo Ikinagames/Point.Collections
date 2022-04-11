@@ -13,11 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020
-#define UNITYENGINE
-#endif
+#if UNITY_2019 || !UNITY_2020_OR_NEWER
 
-#if !UNITYENGINE
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -3860,7 +3858,7 @@ namespace Point.Collections
 
                 fixed (float4* ptr = &this)
                 {
-                    return *(float*)((byte*)ptr + (nint)index * (nint)4);
+                    return *(float*)((byte*)ptr + index * 4);
                 }
             }
             set
@@ -4375,6 +4373,8 @@ namespace Point.Collections
         {
             return $"float4({x.ToString(format, formatProvider)}f, {y.ToString(format, formatProvider)}f, {z.ToString(format, formatProvider)}f, {w.ToString(format, formatProvider)}f)";
         }
+
+        public static implicit operator float3(float4 t) => new float3(t.x, t.y, t.z);
     }
 }
 

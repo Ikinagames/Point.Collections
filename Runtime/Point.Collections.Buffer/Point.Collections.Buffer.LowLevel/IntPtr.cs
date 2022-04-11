@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
@@ -33,7 +33,7 @@ namespace Point.Collections.Buffer.LowLevel
     {
         public static IntPtr<T> Zero => new IntPtr<T>(IntPtr.Zero);
 
-        private readonly void* m_Ptr;
+        private readonly IntPtr m_Ptr;
         private readonly bool m_IsUnmanaged, m_IsAllocated;
 
         #region Constructors
@@ -42,14 +42,14 @@ namespace Point.Collections.Buffer.LowLevel
         {
             if (t.Equals(IntPtr.Zero))
             {
-                m_Ptr = null;
+                m_Ptr = IntPtr.Zero;
                 m_IsUnmanaged = false;
                 m_IsAllocated = false;
 
                 return;
             }
 
-            m_Ptr = t.ToPointer();
+            m_Ptr = t;
             m_IsUnmanaged = true;
             m_IsAllocated = false;
         }
@@ -73,7 +73,7 @@ namespace Point.Collections.Buffer.LowLevel
                 return;
             }
 
-            m_Ptr = NativeUtility.Malloc(Marshal.SizeOf<T>(), TypeHelper.AlignOf<T>(), Unity.Collections.Allocator.Persistent);
+            m_Ptr = (IntPtr)NativeUtility.Malloc(Marshal.SizeOf<T>(), TypeHelper.AlignOf<T>(), Unity.Collections.Allocator.Persistent);
 
             m_IsUnmanaged = true;
             m_IsAllocated = true;
@@ -87,7 +87,7 @@ namespace Point.Collections.Buffer.LowLevel
             }
 
             GCHandle handle = GCHandle.Alloc(obj, handleType);
-            m_Ptr = handle.AddrOfPinnedObject().ToPointer();
+            m_Ptr = handle.AddrOfPinnedObject();
 
             m_IsUnmanaged = false;
             m_IsAllocated = true;
@@ -97,7 +97,7 @@ namespace Point.Collections.Buffer.LowLevel
 
         #region Base Methods
 
-        public void* ToPointer() => m_Ptr;
+        public void* ToPointer() => m_Ptr.ToPointer();
 
         public bool IsEmpty()
         {
@@ -109,7 +109,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             if (m_IsAllocated)
             {
-                if (m_IsUnmanaged) NativeUtility.Free(m_Ptr, Unity.Collections.Allocator.Persistent);
+                if (m_IsUnmanaged) NativeUtility.Free(m_Ptr.ToPointer(), Unity.Collections.Allocator.Persistent);
                 else
                 {
                     GCHandle.FromIntPtr((IntPtr)m_Ptr).Free();
@@ -118,7 +118,7 @@ namespace Point.Collections.Buffer.LowLevel
         }
 
         public bool Equals(IntPtr<T> other) => m_Ptr == other.m_Ptr;
-        public bool Equals(IntPtr other) => m_Ptr == other.ToPointer();
+        public bool Equals(IntPtr other) => m_Ptr == other;
         public override bool Equals(object obj)
         {
             if (obj is IntPtr<T> t0) return Equals(t0);

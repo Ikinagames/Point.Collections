@@ -13,11 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_2019 || !UNITY_2020_OR_NEWER
+#define UNITYENGINE_OLD
+#endif
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -25,7 +28,10 @@ using Unity.Jobs;
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
+#if !UNITYENGINE_OLD
 using System;
+
+// https://issuetracker.unity3d.com/issues/ecs-compiler-wrongly-detect-unmanaged-structs-as-containing-nullabe-fields
 
 namespace Point.Collections.Buffer.LowLevel
 {
@@ -36,11 +42,11 @@ namespace Point.Collections.Buffer.LowLevel
     /// 버퍼 사이즈를 초과하여 아이템을 넣는 경우, 에러 로그를 보내고 받아들여지지 않습니다.
     /// </remarks>
     /// <typeparam name="T"></typeparam>
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
     public struct UnsafeFixedQueue<T> :
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         INativeDisposable, 
 #endif
         IDisposable, IEquatable<UnsafeFixedQueue<T>>
@@ -162,7 +168,7 @@ namespace Point.Collections.Buffer.LowLevel
 
             m_List = default(UnsafeAllocator<List>);
         }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         public JobHandle Dispose(JobHandle inputDeps)
         {
             //#if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -184,3 +190,5 @@ namespace Point.Collections.Buffer.LowLevel
         public bool Equals(UnsafeFixedQueue<T> other) => m_List.Equals(other.m_List);
     }
 }
+
+#endif

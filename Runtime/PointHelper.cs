@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
@@ -167,9 +167,9 @@ namespace Point.Collections
         /// 이 메소드가 실행된 <seealso cref="System.Threading.Thread"/> 가 Unity 의 메인 스크립트 스레드인지 반환합니다.
         /// </summary>
         /// <returns></returns>
-        #if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         [Unity.Collections.NotBurstCompatible]
-        #endif
+#endif
         public static bool AssertIsMainThread()
         {
             Threading.ThreadInfo currentThread = Threading.ThreadInfo.CurrentThread;
@@ -180,7 +180,7 @@ namespace Point.Collections
         /// <remarks>
         /// 만약 메인 스레드가 아닐 경우 에러 로그를 발생시킵니다.
         /// </remarks>
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         [Unity.Collections.NotBurstCompatible]
 #endif
         [System.Diagnostics.Conditional("DEBUG_MODE")]
@@ -211,7 +211,7 @@ namespace Point.Collections
         /// 다른 인덱스이어도 같은 스레드 선호도를 공유하는 예외사항이 있습니다. (ex. id = 1(Affinity 0), id = 8(Affinity 0)) 
         /// </remarks>
         /// <param name="expectedAffinity"></param>
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         [Unity.Collections.NotBurstCompatible]
 #endif
         [System.Diagnostics.Conditional("DEBUG_MODE")]

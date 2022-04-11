@@ -26,7 +26,7 @@ namespace Point.Collections
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
-        public readonly TKey Key;
+        public TKey Key;
         public TValue Value;
 
         public KeyValue(TKey key, TValue value)

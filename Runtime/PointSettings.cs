@@ -13,11 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+
+#if UNITY_2019 || !UNITY_2020_OR_NEWER
+#define UNITYENGINE_OLD
+#endif
 
 using UnityEngine;
 using System;
@@ -60,6 +64,77 @@ namespace Point.Collections
         }
         public string GetUserChannelName(LogChannel channel)
         {
+#if UNITYENGINE_OLD
+            switch (channel)
+            {
+                case LogChannel.User01:
+                    return string.IsNullOrEmpty(m_UserChannelNames[0]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User01) : m_UserChannelNames[0];
+                case LogChannel.User02:
+                    return string.IsNullOrEmpty(m_UserChannelNames[1]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User02) : m_UserChannelNames[1];
+                case LogChannel.User03:
+                    return string.IsNullOrEmpty(m_UserChannelNames[2]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User03) : m_UserChannelNames[2];
+                case LogChannel.User04:
+                    return string.IsNullOrEmpty(m_UserChannelNames[3]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User04) : m_UserChannelNames[3];
+                case LogChannel.User05:
+                    return string.IsNullOrEmpty(m_UserChannelNames[4]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User05) : m_UserChannelNames[4];
+                case LogChannel.User06:
+                    return string.IsNullOrEmpty(m_UserChannelNames[5]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User06) : m_UserChannelNames[5];
+                case LogChannel.User07:
+                    return string.IsNullOrEmpty(m_UserChannelNames[6]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User07) : m_UserChannelNames[6];
+                case LogChannel.User08:
+                    return string.IsNullOrEmpty(m_UserChannelNames[7]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User08) : m_UserChannelNames[7];
+                case LogChannel.User09:
+                    return string.IsNullOrEmpty(m_UserChannelNames[8]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User09) : m_UserChannelNames[8];
+                case LogChannel.User10:
+                    return string.IsNullOrEmpty(m_UserChannelNames[9]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User10) : m_UserChannelNames[9];
+                case LogChannel.User11:
+                    return string.IsNullOrEmpty(m_UserChannelNames[10]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User11) : m_UserChannelNames[10];
+                case LogChannel.User12:
+                    return string.IsNullOrEmpty(m_UserChannelNames[11]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User12) : m_UserChannelNames[11];
+                case LogChannel.User13:
+                    return string.IsNullOrEmpty(m_UserChannelNames[12]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User13) : m_UserChannelNames[12];
+                case LogChannel.User14:
+                    return string.IsNullOrEmpty(m_UserChannelNames[13]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User14) : m_UserChannelNames[13];
+                case LogChannel.User15:
+                    return string.IsNullOrEmpty(m_UserChannelNames[14]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User15) : m_UserChannelNames[14];
+                case LogChannel.User16:
+                    return string.IsNullOrEmpty(m_UserChannelNames[15]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User16) : m_UserChannelNames[15];
+                case LogChannel.User17:
+                    return string.IsNullOrEmpty(m_UserChannelNames[16]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User17) : m_UserChannelNames[16];
+                case LogChannel.User18:
+                    return string.IsNullOrEmpty(m_UserChannelNames[17]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User18) : m_UserChannelNames[17];
+                case LogChannel.User19:
+                    return string.IsNullOrEmpty(m_UserChannelNames[18]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User19) : m_UserChannelNames[18];
+                case LogChannel.User20:
+                    return string.IsNullOrEmpty(m_UserChannelNames[19]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User20) : m_UserChannelNames[19];
+                case LogChannel.User21:
+                    return string.IsNullOrEmpty(m_UserChannelNames[20]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User21) : m_UserChannelNames[20];
+                case LogChannel.User22:
+                    return string.IsNullOrEmpty(m_UserChannelNames[21]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User22) : m_UserChannelNames[21];
+                case LogChannel.User23:
+                    return string.IsNullOrEmpty(m_UserChannelNames[22]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User23) : m_UserChannelNames[22];
+                case LogChannel.User24:
+                    return string.IsNullOrEmpty(m_UserChannelNames[23]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User24) : m_UserChannelNames[23];
+                case LogChannel.User25:
+                    return string.IsNullOrEmpty(m_UserChannelNames[24]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User25) : m_UserChannelNames[24];
+                case LogChannel.User26:
+                    return string.IsNullOrEmpty(m_UserChannelNames[25]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User26) : m_UserChannelNames[25];
+                case LogChannel.User27:
+                    return string.IsNullOrEmpty(m_UserChannelNames[26]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User27) : m_UserChannelNames[26];
+                case LogChannel.Audio:
+                    return TypeHelper.Enum<LogChannel>.ToString(LogChannel.Audio);
+                case LogChannel.Collections:
+                    return TypeHelper.Enum<LogChannel>.ToString(LogChannel.Collections);
+                case LogChannel.Core:
+                    return TypeHelper.Enum<LogChannel>.ToString(LogChannel.Core);
+                case LogChannel.Editor:
+                    return TypeHelper.Enum<LogChannel>.ToString(LogChannel.Editor);
+                case LogChannel.None:
+                case LogChannel.All:
+                default:
+                    return "None";
+            }
+#else
             return channel switch
             {
                 LogChannel.User01 => string.IsNullOrEmpty(m_UserChannelNames[0]) ? TypeHelper.Enum<LogChannel>.ToString(LogChannel.User01) : m_UserChannelNames[0],
@@ -95,6 +170,7 @@ namespace Point.Collections
                 LogChannel.Editor => TypeHelper.Enum<LogChannel>.ToString(LogChannel.Editor),
                 _ => "None",
             };
+#endif
         }
     }
 }

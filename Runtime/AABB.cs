@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
@@ -21,9 +21,7 @@
 #if UNITY_BURST
 using Unity.Burst;
 #endif
-#if UNITY_COLLECTIONS
 using Unity.Collections;
-#endif
 #if UNITY_MATHEMATICS
 using Unity.Mathematics;
 #else
@@ -113,7 +111,7 @@ namespace Point.Collections
             float3 x, y, z, w;
             for (int i = 0; i < squares.Length; i++)
             {
-#if UNITY_MATHEMATICS
+#if UNITYENGINE
                 x = squares[i].c0;
                 y = squares[i].c1;
                 z = squares[i].c2;
@@ -140,7 +138,7 @@ namespace Point.Collections
             float3 x, y, z, w;
             for (int i = 0; i < squares.Length; i++)
             {
-#if UNITY_MATHEMATICS
+#if UNITYENGINE
                 x = squares[i].c0;
                 y = squares[i].c1;
                 z = squares[i].c2;
@@ -233,7 +231,7 @@ namespace Point.Collections
             return result;
         }
 #endif
-#if UNITYENGINE && UNITY_COLLECTIONS
+#if UNITYENGINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NativeArray<float3> GetVertices(Allocator allocator)
         {

@@ -13,11 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020
-#define UNITYENGINE
-#endif
+#if UNITY_2019 || !UNITY_2020_OR_NEWER
 
-#if !UNITYENGINE
+using System;
 using System.Runtime.CompilerServices;
 
 namespace Point.Collections
@@ -279,6 +277,15 @@ namespace Point.Collections
         public string ToString(string format, IFormatProvider formatProvider)
         {
             return $"quaternion({value.x.ToString(format, formatProvider)}f, {value.y.ToString(format, formatProvider)}f, {value.z.ToString(format, formatProvider)}f, {value.w.ToString(format, formatProvider)}f)";
+        }
+
+        public static implicit operator UnityEngine.Quaternion(quaternion t)
+        {
+            return new UnityEngine.Quaternion(t.value.x, t.value.y, t.value.z, t.value.w);
+        }
+        public static implicit operator quaternion(UnityEngine.Quaternion t)
+        {
+            return new quaternion(t.x, t.y, t.z, t.w);
         }
     }
 

@@ -13,13 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
 using Unity.Collections;
+#if UNITY_MATHEMATICS
 using Unity.Mathematics;
+#else
+using math = Point.Collections.Math;
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 using math = Point.Collections.Math;
@@ -30,7 +34,7 @@ using System.Globalization;
 
 namespace Point.Collections
 {
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
     public struct Plane

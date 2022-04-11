@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER && ENABLE_INPUT_SYSTEM
+#if UNITY_2019_1_OR_NEWER
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 #define DEBUG_MODE
 #endif

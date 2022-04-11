@@ -17,7 +17,7 @@
 #define DEBUG_MODE
 #endif
 
-#if UNITY_2020
+#if UNITY_2019_1_OR_NEWER
 #define UNITYENGINE
 #else
 #define POINT_COLLECTIONS_NATIVE

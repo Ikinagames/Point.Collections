@@ -17,8 +17,11 @@
 #define DEBUG_MODE
 #endif
 
-#if UNITY_2020
+#if UNITY_2019_1_OR_NEWER
 #define UNITYENGINE
+#if UNITY_2019 || !UNITY_2020_OR_NEWER
+#define UNITYENGINE_OLD
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
@@ -33,32 +36,68 @@ namespace Point.Collections.Editor
 {
     public static class ScriptUtilities
     {
+#if UNITYENGINE_OLD
+        private static char s_Spliter = ';';
+#endif
         public static bool IsDefinedSymbol(string constrains)
         {
+#if UNITYENGINE_OLD
+            string[] defined = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup).Split(s_Spliter);
+#else
             PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, out string[] defined);
+#endif
 
             return defined.Contains(constrains);
         }
         public static void DefineSymbol(string constrains)
         {
+#if UNITYENGINE_OLD
+            string[] defined = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup).Split(s_Spliter);
+#else
             PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, out string[] defined);
+#endif
             List<string> temp = defined.ToList();
             temp.Add(constrains);
 
+#if UNITYENGINE_OLD
+            Apply(temp);
+#else
             PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, temp.ToArray());
+#endif
             UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
         }
         public static void UndefSymbol(string constrains)
         {
+#if UNITYENGINE_OLD
+            string[] defined = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup).Split(s_Spliter);
+#else
             PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, out string[] defined);
+#endif
             if (!defined.Contains(constrains)) return;
 
             List<string> temp = defined.ToList();
             temp.Remove(constrains);
 
+#if UNITYENGINE_OLD
+            Apply(temp);
+#else
             PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, temp.ToArray());
+#endif
             UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
         }
+
+#if UNITYENGINE_OLD
+        private static void Apply(List<string> defines)
+        {
+            string sum = string.Empty;
+            for (int i = 0; i < defines.Count; i++)
+            {
+                sum += defines[i] + s_Spliter;
+            }
+
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, sum);
+        }
+#endif
     }
 }
 

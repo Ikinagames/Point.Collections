@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
@@ -194,7 +194,10 @@ namespace Point.Collections
         private void Update()
         {
             OnFrameUpdate?.Invoke();
+
+#if ENABLE_INPUT_SYSTEM
             InActiveHandler();
+#endif
         }
         protected override void OnShutdown()
         {
@@ -205,8 +208,7 @@ namespace Point.Collections
             PointHelper.s_LogHandler.CloseLogFile();
         }
 
-        [System.Diagnostics.Conditional("UNITYENGINE")]
-        [System.Diagnostics.Conditional("ENABLE_INPUT_SYSTEM")]
+#if UNITYENGINE && ENABLE_INPUT_SYSTEM
         private void InActiveHandler()
         {
             if (m_IsInActive) return;
@@ -217,7 +219,7 @@ namespace Point.Collections
                 EventBroadcaster.PostEvent(ApplicationInActiveEvent.GetEvent(true));
             }
         }
-
+#endif
 #endif
     }
 }

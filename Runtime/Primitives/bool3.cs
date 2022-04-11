@@ -13,15 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020
-#define UNITYENGINE
-#endif
+#if UNITY_2019 || !UNITY_2020_OR_NEWER
 
-#if !UNITYENGINE
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+
+using math = Point.Collections.Math;
 
 namespace Point.Collections
 {

@@ -13,12 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_COLLECTIONS
 using Unity.Collections;
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
@@ -29,7 +31,7 @@ namespace Point.Collections.Buffer.LowLevel
     /// <seealso cref="UnsafeLinearHashMap{TKey, TValue}"/>, <seealso cref="UnsafeLinearPtrHashMap{TKey, TValue}"/> 
     /// 등의 미리 할당된 해시맵을 Untyped 로 바꾸는 Wrapper struct 입니다.
     /// </summary>
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
     public struct UntypedUnsafeLinearHashMap

@@ -13,12 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020
-#define UNITYENGINE
-#endif
+#if UNITY_2019 || !UNITY_2020_OR_NEWER
 
-#if !UNITYENGINE
+using System;
 using System.Runtime.CompilerServices;
+
+using math = Point.Collections.Math;
 
 namespace Point.Collections
 {
@@ -48,7 +48,7 @@ namespace Point.Collections
 
                 fixed (float4x4* ptr = &this)
                 {
-                    return ref *(float4*)((byte*)ptr + (nint)index * (nint)sizeof(float4));
+                    return ref *(float4*)((byte*)ptr + index * sizeof(float4));
                 }
             }
         }
@@ -714,8 +714,12 @@ namespace Point.Collections
             float3x3 float3x = new float3x3(rotation);
             return new float4x4(new float4(float3x.c0 * scale.x, 0f), new float4(float3x.c1 * scale.y, 0f), new float4(float3x.c2 * scale.z, 0f), new float4(translation, 1f));
         }
-    }
 
+        public static float4 operator *(float4x4 x, float4 y)
+        {
+            return math.mul(x, y);
+        }
+    }
 }
 
 #endif

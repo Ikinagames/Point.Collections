@@ -13,12 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_COLLECTIONS
 using Unity.Collections;
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
@@ -27,7 +29,7 @@ using System;
 
 namespace Point.Collections
 {
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
     public struct Channel : IChannel, IEquatable<Channel>
@@ -39,22 +41,22 @@ namespace Point.Collections
         public static Channel Editor => new Channel(LogChannel.Editor);
 
         private int m_LogChannel;
-        private FixedString512Bytes m_Name;
+        //private FixedString512Bytes m_Name;
 
         public LogChannel LogChannel => (LogChannel)m_LogChannel;
 
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         [NotBurstCompatible]
 #endif
         private Channel(LogChannel channel)
         {
             m_LogChannel = (int)channel;
-            m_Name = TypeHelper.Enum<LogChannel>.ToString(channel);
+            //m_Name = TypeHelper.Enum<LogChannel>.ToString(channel);
         }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         [NotBurstCompatible]
 #endif
-        public override string ToString() => m_Name.ToString();
+        public override string ToString() => PointSettings.Instance.GetUserChannelName(LogChannel);
         public override int GetHashCode() => m_LogChannel;
 
         public override bool Equals(object obj) => obj is Channel && Equals((Channel)obj);

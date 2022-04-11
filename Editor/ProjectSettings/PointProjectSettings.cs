@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR || UNITY_2020
+#if UNITY_EDITOR || UNITY_2019_1_OR_NEWER
 #define UNITYENGINE
 #endif
 

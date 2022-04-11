@@ -13,12 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_COLLECTIONS
 using Unity.Collections;
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
@@ -31,7 +33,7 @@ namespace Point.Collections
     /// <summary>
     /// CheckSum 알고리즘으로 데이터 무결성 검사를 하는 구조체입니다.
     /// </summary>
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
     public struct CheckSum : IEquatable<CheckSum>, IEquatable<int>, IEquatable<uint>
@@ -85,11 +87,11 @@ namespace Point.Collections
             return result == 0;
         }
 
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         [NotBurstCompatible]
 #endif
         public override string ToString() => m_Hash.ToString();
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         [NotBurstCompatible]
 #endif
         public override bool Equals(

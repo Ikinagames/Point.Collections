@@ -13,13 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_COLLECTIONS
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
@@ -31,7 +33,7 @@ namespace Point.Collections.Buffer.LowLevel
     /// <summary>
     /// <see cref="UnsafeMemoryPool"/> 에서 할당받은 메모리 공간입니다.
     /// </summary>
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
     public struct UnsafeMemoryBlock : IEquatable<UnsafeMemoryBlock>, IValidation
@@ -73,7 +75,7 @@ namespace Point.Collections.Buffer.LowLevel
     /// <inheritdoc cref="UnsafeMemoryBlock"/>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
     public struct UnsafeMemoryBlock<T> : IValidation, IEquatable<UnsafeMemoryBlock<T>>, IEquatable<UnsafeMemoryBlock>

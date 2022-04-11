@@ -13,11 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_2019 || !UNITY_2020_OR_NEWER
+#define UNITYENGINE_OLD
+#endif
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -25,9 +28,13 @@ using Unity.Jobs;
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
+#if !UNITYENGINE_OLD
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
+
+// https://issuetracker.unity3d.com/issues/ecs-compiler-wrongly-detect-unmanaged-structs-as-containing-nullabe-fields
 
 namespace Point.Collections.Buffer.LowLevel
 {
@@ -36,12 +43,12 @@ namespace Point.Collections.Buffer.LowLevel
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
     public struct UnsafeLinearHashMap<TKey, TValue> :
         IEquatable<UnsafeLinearHashMap<TKey, TValue>>
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         , INativeDisposable 
 #endif
         , IDisposable, IEnumerable<KeyValue<TKey, TValue>>
@@ -216,7 +223,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             m_Buffer.Dispose();
         }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         public JobHandle Dispose(JobHandle inputDeps)
         {
             var result = m_Buffer.Dispose(inputDeps);
@@ -232,7 +239,7 @@ namespace Point.Collections.Buffer.LowLevel
             private int m_Index;
 
             public KeyValue<TKey, TValue> Current => m_Buffer[m_Index];
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
             [NotBurstCompatible]
 #endif
             object IEnumerator.Current => m_Buffer[m_Index];
@@ -320,3 +327,5 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
     }
 }
+
+#endif

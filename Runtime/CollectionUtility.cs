@@ -13,14 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
 using UnityEngine;
-using Unity.Burst;
 using Unity.Collections.LowLevel.Unsafe;
+#if UNITY_BURST
+using Unity.Burst;
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
@@ -36,7 +38,7 @@ namespace Point.Collections
 {
     public sealed class CollectionUtility : CLRSingleTone<CollectionUtility>
     {
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_MATHEMATICS
         private Unity.Mathematics.Random m_Random;
 #else
         private System.Random m_Random;
@@ -56,10 +58,11 @@ namespace Point.Collections
         }
         protected override void OnInitialize()
         {
+#if POINT_COLLECTIONS_NATIVE || !UNITY_MATHEMATICS
 #if POINT_COLLECTIONS_NATIVE
             NativeDebug.Initialize();
-
-            m_Random = new Random();
+#endif
+            m_Random = new System.Random();
 #else
             Instance.m_Random = new Unity.Mathematics.Random();
             Instance.m_Random.InitState();
@@ -87,7 +90,7 @@ namespace Point.Collections
 
         public static short CreateHashCode2()
         {
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_MATHEMATICS
             return unchecked((short)Instance.m_Random.NextInt(short.MinValue, short.MaxValue));
 #else
             return unchecked((short)Instance.m_Random.Next(short.MinValue, short.MaxValue));
@@ -95,7 +98,7 @@ namespace Point.Collections
         }
         public static int CreateHashCode() 
         {
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_MATHEMATICS
             return Instance.m_Random.NextInt(int.MinValue, int.MaxValue); 
 #else
             return Instance.m_Random.Next(int.MinValue, int.MaxValue);

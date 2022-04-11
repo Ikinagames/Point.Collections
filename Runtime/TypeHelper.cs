@@ -13,15 +13,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_2019_1_OR_NEWER
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
-
-#if UNITY_2020
 #define UNITYENGINE
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+#if UNITY_BURST
+using Unity.Burst;
 #endif
-
-//#undef UNITYENGINE
+#if UNITY_MATHEMATICS
+using Unity.Mathematics;
+#else
+using math = Point.Collections.Math;
+#endif
+#else
+#define POINT_COLLECTIONS_NATIVE
+using math = Point.Collections.Math;
+#endif
 
 using System;
 using System.Collections;
@@ -29,10 +39,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-#if UNITYENGINE
-using Unity.Burst;
-using Unity.Collections.LowLevel.Unsafe;
-#endif
 
 namespace Point.Collections
 {
@@ -338,7 +344,9 @@ namespace Point.Collections
             return output;
         }
 
+#if !UNITYENGINE || !UNITY_BURST
         private static readonly TypedDictionary<TypeInfo> s_TypeInfoDictionary = new TypedDictionary<TypeInfo>();
+#endif
 
         /// <summary>
         /// stack 에 할당될 수 있는 <see cref="System.Type"/> 의 Wrapper struct 를 반환합니다.
@@ -355,7 +363,7 @@ namespace Point.Collections
                 return new TypeInfo(type);
             }
 
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
             SharedStatic<TypeInfo> typeStatic = TypeStatic.GetValue(type);
 
             if (typeStatic.Data.Type == null)

@@ -13,26 +13,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_2019_1_OR_NEWER
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
-
-#if UNITY_2020
 #define UNITYENGINE
+using UnityEngine;
+using Unity.Collections;
+#if UNITY_MATHEMATICS
+using Unity.Mathematics;
+#else
+using math = Point.Collections.Math;
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
+using math = Point.Collections.Math;
 #endif
 
 using Newtonsoft.Json;
-#if UNITYENGINE
-using Unity.Collections;
-using Unity.Mathematics;
-using UnityEngine;
-#endif
 
 namespace Point.Collections
 {
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
     public struct Transformation
@@ -45,7 +47,9 @@ namespace Point.Collections
         public float3 localScale;
 
 #if UNITYENGINE
+#if UNITY_COLLECTIONS
         [NotBurstCompatible]
+#endif
         public Transformation(Transform tr)
         {
             localPosition = tr.localPosition;

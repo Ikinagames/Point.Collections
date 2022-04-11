@@ -89,8 +89,23 @@ namespace Point.Collections
                 {
 #if POINT_COLLECTIONS_NATIVE
                     Native.NativeFNV1a.fnv1a32_byte(temp, &length, &hash);
-#else
+#elif UNITYENGINE && UNITY_BURST
                     Burst.BurstFNV1a.fnv1a32_byte(temp, &length, &hash);
+#else
+                    if (bytes == null || bytes.Length == 0)
+                    {
+                        hash = kOffsetBasis32;
+                    }
+                    else
+                    {
+                        hash = kOffsetBasis32;
+
+                        for (int i = 0; i < length; i++)
+                        {
+                            hash *= kPrime32;
+                            hash ^= (uint)temp[i];
+                        }
+                    }
 #endif
                 }
             }

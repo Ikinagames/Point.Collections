@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
@@ -37,7 +37,7 @@ namespace Point.Collections.Buffer.LowLevel
     /// 추가적인 allocation 이 발생하지 않습니다. stack 에서 사용될때에는 레퍼런스로 넘겨줘야합니다.
     /// </remarks>
     /// <typeparam name="T"></typeparam>
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
     public struct UnsafeFixedListWrapper<T> : IFixedList<T>, IEquatable<UnsafeFixedListWrapper<T>>
@@ -48,7 +48,7 @@ namespace Point.Collections.Buffer.LowLevel
         private int m_Count;
 
         public int Capacity => m_Capacity;
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         int INativeList<T>.Capacity { get => m_Capacity; set => throw new NotImplementedException(); }
 #endif
         int IFixedList.Length => Length;
@@ -94,10 +94,12 @@ namespace Point.Collections.Buffer.LowLevel
             m_Capacity = array.Length;
             m_Count = array.Length;
         }
+#if UNITY_COLLECTIONS
         public UnsafeFixedListWrapper(NativeList<T> list)
         {
             this = list.ConvertToFixedWrapper();
         }
+#endif
 #endif
         public UnsafeFixedListWrapper(UnsafeReference<T> buffer, int capacity, int initialCount = 0)
         {
@@ -149,15 +151,17 @@ namespace Point.Collections.Buffer.LowLevel
         {
             return new UnsafeFixedListWrapper<T>(t);
         }
+#if UNITY_COLLECTIONS
         public static implicit operator UnsafeFixedListWrapper<T>(NativeList<T> t)
         {
             return new UnsafeFixedListWrapper<T>(t);
         }
 #endif
+#endif
     }
     public static class UnsafeFixedListWrapperExtensions
     {
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         public static UnsafeFixedListWrapper<T> ConvertToFixedWrapper<T>(this ref NativeList<T> t)
             where T : unmanaged
         {

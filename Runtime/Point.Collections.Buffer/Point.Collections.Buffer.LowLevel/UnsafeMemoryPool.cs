@@ -13,32 +13,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_2019 || !UNITY_2020_OR_NEWER
+#define UNITYENGINE_OLD
+#endif
 using Unity.Collections;
+#if UNITY_COLLECTIONS
 using Unity.Collections.LowLevel.Unsafe;
+#endif
 using Unity.Jobs;
 using Unity.Jobs.LowLevel.Unsafe;
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
+#if !UNITYENGINE_OLD
 using System;
 using System.Collections.Generic;
+
+// https://issuetracker.unity3d.com/issues/ecs-compiler-wrongly-detect-unmanaged-structs-as-containing-nullabe-fields
 
 namespace Point.Collections.Buffer.LowLevel
 {
     /// <summary>
     /// 매 Allocation 을 피하기 위한 메모리 공간 재사용 구조체입니다. 
     /// </summary>
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
     public struct UnsafeMemoryPool :
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         INativeDisposable,
 #endif
         IDisposable
@@ -278,7 +286,7 @@ namespace Point.Collections.Buffer.LowLevel
             m_Buffer[0].Dispose();
             m_Buffer.Dispose();
         }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         public JobHandle Dispose(JobHandle inputDeps)
         {
             var job = m_Buffer[0].Dispose(inputDeps);
@@ -290,11 +298,11 @@ namespace Point.Collections.Buffer.LowLevel
 
         #region Inner Classes
 
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         [BurstCompatible]
 #endif
         internal struct UnsafeBuffer : IDisposable
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
             , INativeDisposable
 #endif
         {
@@ -322,7 +330,7 @@ namespace Point.Collections.Buffer.LowLevel
                 buffer.Dispose();
                 m_MemoryBlockBuffer.Dispose();
             }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
             public JobHandle Dispose(JobHandle inputDeps)
             {
                 var job = buffer.Dispose(inputDeps);
@@ -333,7 +341,7 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
         }
 
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         [BurstCompatible]
 #endif
         private struct BucketComparer : IComparer<UnsafeMemoryBlock>
@@ -384,3 +392,5 @@ namespace Point.Collections.Buffer.LowLevel
         
     }
 }
+
+#endif

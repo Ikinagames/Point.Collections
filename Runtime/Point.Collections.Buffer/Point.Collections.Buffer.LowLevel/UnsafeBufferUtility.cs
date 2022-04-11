@@ -13,13 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_BURST
 using Unity.Burst;
 using Point.Collections.Burst;
+#endif
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 #else
@@ -34,12 +36,12 @@ using Point.Collections.Native;
 
 namespace Point.Collections.Buffer.LowLevel
 {
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
     [BurstCompile(CompileSynchronously = true, DisableSafetyChecks = true)]
 #endif
     public static unsafe class UnsafeBufferUtility
     {
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
         [BurstCompile]
 #endif
         public static byte* AsBytes<T>(ref T t, out int length)
@@ -66,24 +68,26 @@ namespace Point.Collections.Buffer.LowLevel
         /// <typeparam name="T"></typeparam>
         /// <param name="t"></param>
         /// <returns></returns>
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
         [BurstCompile]
 #endif
         public static Hash Calculate<T>(this ref T t) where T : unmanaged
         {
             byte* bytes = AsBytes(ref t, out int length);
             uint output;
-#if UNITYENGINE
+#if UNITYENGINE && UNITYBURST
             BurstFNV1a.fnv1a32_byte(bytes, &length, &output);
-#else
+#elif POINT_COLLECTIONS_NATIVE
             NativeFNV1a.fnv1a32_byte(bytes, &length, &output);
+#else
+            output = FNV1a32.Calculate(bytes, length);
 #endif
             Hash hash = new Hash(output);
 
             return hash;
         }
 
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
         [BurstCompile]
 #endif
         public unsafe static int BinarySearch<T, U>(T* ptr, int length, T value, U comp) 
@@ -110,7 +114,7 @@ namespace Point.Collections.Buffer.LowLevel
 
             return ~num;
         }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
         [BurstCompile]
 #endif
         public static bool BinaryComparer<T, U>(ref T x, ref U y)
@@ -136,7 +140,7 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
         }
 
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
         [BurstCompile]
 #endif
         public static void Sort<T, U>(in UnsafeReference<T> buffer, in int length, U comparer)
@@ -154,7 +158,7 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
         [BurstCompile]
 #endif
         public static void Swap<T>(in UnsafeReference<T> buffer, in int from, in int to)
@@ -173,8 +177,8 @@ namespace Point.Collections.Buffer.LowLevel
 
             return index >= 0;
         }
-        
-#if UNITYENGINE
+
+#if UNITYENGINE && UNITY_BURST
         [BurstCompile]
 #endif
         public static int IndexOf<T, U>(in UnsafeReference<T> array, in int length, U item)
@@ -198,7 +202,7 @@ namespace Point.Collections.Buffer.LowLevel
             return -1;
         }
 
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
         [BurstCompile]
 #endif
         public static bool RemoveForSwapBack<T, U>(UnsafeReference<T> array, int length, U element)
@@ -215,7 +219,7 @@ namespace Point.Collections.Buffer.LowLevel
 
             return true;
         }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
         [BurstCompile]
 #endif
         public static bool RemoveAtSwapBack<T>(UnsafeReference<T> array, int length, int index)
@@ -260,7 +264,7 @@ namespace Point.Collections.Buffer.LowLevel
 
         #region Memory
 
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
         [BurstCompile]
 #endif
         public static long CalculateFreeSpaceBetween(in UnsafeReference from, in int length, in UnsafeReference to)
@@ -281,8 +285,10 @@ namespace Point.Collections.Buffer.LowLevel
         {
             unsafe
             {
-                void* buffer = NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(t);
-                return ref UnsafeUtility.ArrayElementAsRef<T>(buffer, index);
+                T* buffer = (T*)NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(t);
+                //return ref UnsafeUtility.ArrayElementAsRef<T>(buffer, index);
+
+                return ref buffer[index];
             }
         }
 

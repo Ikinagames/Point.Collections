@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
@@ -27,7 +27,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace Point.Collections.Burst
 {
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
     [BurstCompile(CompileSynchronously = true, DisableSafetyChecks = true)]
 #endif
     internal static class CheckSumMathematics
@@ -104,7 +104,7 @@ namespace Point.Collections.Burst
             return output;
         }
 
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
         [BurstCompile]
 #endif
         private static unsafe uint GetSum(byte* bytes, int size)
@@ -116,7 +116,7 @@ namespace Point.Collections.Burst
             }
             return output;
         }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
         [BurstCompile]
 #endif
         private static unsafe uint RemoveHighNibble(in uint sum)
@@ -141,7 +141,7 @@ namespace Point.Collections.Burst
 
             return output;
         }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_BURST
         [BurstCompile]
 #endif
         private static uint Complement(in uint value)

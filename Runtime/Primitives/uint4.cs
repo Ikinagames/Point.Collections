@@ -13,11 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020
-#define UNITYENGINE
-#endif
+#if UNITY_2019 || !UNITY_2020_OR_NEWER
 
-#if !UNITYENGINE
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -3860,7 +3858,7 @@ namespace Point.Collections
 
                 fixed (uint4* ptr = &this)
                 {
-                    return *(uint*)((byte*)ptr + (nint)index * (nint)4);
+                    return *(uint*)((byte*)ptr + index * 4);
                 }
             }
             set
