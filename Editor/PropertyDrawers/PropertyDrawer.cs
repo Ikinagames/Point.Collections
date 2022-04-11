@@ -43,7 +43,7 @@ namespace Point.Collections.Editor
             BeforePropertyGUI(ref rect, property, label);
 
             NotEditableAttribute sealedViewAttribute
-                = fieldInfo.GetCustomAttribute<NotEditableAttribute>();
+                = fieldInfo?.GetCustomAttribute<NotEditableAttribute>();
 
             using (new EditorGUI.DisabledGroupScope(sealedViewAttribute != null))
             using (new EditorGUI.PropertyScope(position, label, property))

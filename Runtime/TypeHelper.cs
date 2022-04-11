@@ -206,6 +206,15 @@ namespace Point.Collections
         {
             return type.GetField(name, bindingFlags);
         }
+        public static FieldInfo GetFieldInfoRecursive(Type type, string name, BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+        {
+            var result = type.GetField(name, bindingFlags);
+            if (result == null && type.BaseType != null)
+            {
+                return GetFieldInfoRecursive(type.BaseType, name, bindingFlags);
+            }
+            return result;
+        }
         public static PropertyInfo GetPropertyInfo(Type type, string name, BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
         {
             return type.GetProperty(name, bindingFlags);
