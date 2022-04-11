@@ -33,6 +33,8 @@ using math = Point.Collections.Math;
 
 using System;
 using Point.Collections.Native;
+using Unity.Burst;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Point.Collections
 {

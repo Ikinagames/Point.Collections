@@ -18,13 +18,15 @@
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_2019 && !UNITY_2020_OR_NEWER
+#define UNITYENGINE_OLD
+using math = Point.Collections.Math;
+#endif
 #if UNITY_MATHEMATICS
 using Unity.Mathematics;
 #endif
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-
-using math = Point.Collections.Math;
 
 #if !UNITY_COLLECTIONS
 //using System.Runtime.InteropServices;
@@ -521,7 +523,7 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
                     );
 
-                NativeUtility.MemCpy(ptr, t.Ptr, Math.min(size, t.Size));
+                NativeUtility.MemCpy(ptr, t.Ptr, math.min(size, t.Size));
                 NativeUtility.Free(t.Ptr
 #if UNITYENGINE
                     , t.m_Allocator

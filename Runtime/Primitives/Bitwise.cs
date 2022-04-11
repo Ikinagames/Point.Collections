@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2019 || !UNITY_2020_OR_NEWER
+#if UNITY_2019 && UNITY_2020_OR_NEWER
 
 using System.Runtime.InteropServices;
 

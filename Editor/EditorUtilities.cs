@@ -18,6 +18,9 @@
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_MATHEMATICS
+using Unity.Mathematics;
+#endif
 
 using System;
 using System.IO;
