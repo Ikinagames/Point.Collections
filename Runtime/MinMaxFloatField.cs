@@ -25,7 +25,7 @@ using UnityEngine;
 namespace Point.Collections
 {
     [Serializable]
-    public class MinMaxFloat
+    public class MinMaxFloatField
     {
         [SerializeField]
         private float m_Min, m_Max;
@@ -33,12 +33,12 @@ namespace Point.Collections
         public float Min { get => m_Min; set { m_Min = value; } }
         public float Max { get => m_Max; set { m_Max = value; } }
 
-        public MinMaxFloat(float init)
+        public MinMaxFloatField(float init)
         {
             m_Min = init;
             m_Max = init;
         }
-        public MinMaxFloat(float min, float max)
+        public MinMaxFloatField(float min, float max)
         {
             m_Min = min;
             m_Max = max;

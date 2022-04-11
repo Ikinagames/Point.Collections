@@ -26,8 +26,8 @@ using UnityEngine;
 
 namespace Point.Collections.Editor
 {
-    [CustomPropertyDrawer(typeof(MinMaxFloat))]
-    internal sealed class MinMaxFloatPropertyDrawer : PropertyDrawer<MinMaxFloat>
+    [CustomPropertyDrawer(typeof(MinMaxFloatField))]
+    internal sealed class MinMaxFloatFieldPropertyDrawer : PropertyDrawer<MinMaxFloatField>
     {
         static class Helper
         {
