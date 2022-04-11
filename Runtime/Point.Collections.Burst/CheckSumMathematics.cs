@@ -18,9 +18,11 @@
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_BURST
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
