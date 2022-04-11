@@ -60,7 +60,6 @@ namespace Point.Collections.Editor
                 min = minProp.floatValue,
                 max = maxProp.floatValue;
 
-            EditorGUI.LabelField(rect.Pop(), property.propertyPath);
             var att = fieldInfo.GetCustomAttribute<RangeAttribute>();
             float minimum, maximum;
             if (att == null)
@@ -74,8 +73,9 @@ namespace Point.Collections.Editor
                 maximum = att.max;
             }
 
-            EditorGUI.MinMaxSlider(
+            CoreGUI.MinMaxSlider(
                 rect.Pop(PropertyDrawerHelper.GetPropertyHeight(1)),
+                label,
                 ref min,
                 ref max,
                 minimum,

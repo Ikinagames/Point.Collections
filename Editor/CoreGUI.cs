@@ -339,6 +339,74 @@ namespace Point.Collections.Editor
             return value;
         }
 
+        public static float2 MinMaxSlider(Rect position, string label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
+        {
+            const float c_Width = 80;
+
+            position.width -= c_Width;
+            EditorGUI.MinMaxSlider(position, label, ref minValue, ref maxValue, minLimit, maxLimit);
+
+            var tempRect = position;
+            tempRect.x += position.width - 10f;
+            tempRect.width = (c_Width * .5f) + 5f;
+
+            minValue = EditorGUI.DelayedFloatField(tempRect, GUIContent.none, minValue, EditorStyles.textField);
+            tempRect.x += (c_Width * .5f) - 2.5f;
+            maxValue = EditorGUI.DelayedFloatField(tempRect, GUIContent.none, maxValue, EditorStyles.textField);
+
+            return new float2(minValue, maxValue);
+        }
+        public static float2 MinMaxSlider(Rect position, GUIContent label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
+        {
+            const float c_Width = 80;
+
+            position.width -= c_Width;
+            EditorGUI.MinMaxSlider(position, label, ref minValue, ref maxValue, minLimit, maxLimit);
+
+            var tempRect = position;
+            tempRect.x += position.width - 10f;
+            tempRect.width = (c_Width * .5f) + 5f;
+
+            minValue = EditorGUI.DelayedFloatField(tempRect, GUIContent.none, minValue, EditorStyles.textField);
+            tempRect.x += (c_Width * .5f) - 2.5f;
+            maxValue = EditorGUI.DelayedFloatField(tempRect, GUIContent.none, maxValue, EditorStyles.textField);
+
+            return new float2(minValue, maxValue);
+        }
+        public static void MinMaxSlider(Rect position, string label, SerializedProperty minValue, SerializedProperty maxValue, float minLimit, float maxLimit)
+        {
+            position.width -= 50;
+            float tempMin = minValue.floatValue, tempMax = maxValue.floatValue;
+            EditorGUI.MinMaxSlider(position, label, ref tempMin, ref tempMax, minLimit, maxLimit);
+
+            var tempRect = position;
+            tempRect.x += position.width + .75f;
+            tempRect.width = 25 - 1.5f;
+
+            minValue.floatValue = tempMin;
+            maxValue.floatValue = tempMax;
+
+            EditorGUI.PropertyField(tempRect, minValue, GUIContent.none, true);
+            tempRect.x += 1.5f + 25;
+            EditorGUI.PropertyField(tempRect, maxValue, GUIContent.none, true);
+        }
+        public static void MinMaxSlider(Rect position, GUIContent label, SerializedProperty minValue, SerializedProperty maxValue, float minLimit, float maxLimit)
+        {
+            position.width -= 50;
+            float tempMin = minValue.floatValue, tempMax = maxValue.floatValue;
+            EditorGUI.MinMaxSlider(position, label, ref tempMin, ref tempMax, minLimit, maxLimit);
+
+            var tempRect = position;
+            tempRect.x += position.width + .75f;
+            tempRect.width = 25 - 1.5f;
+
+            minValue.floatValue = tempMin;
+            maxValue.floatValue = tempMax;
+
+            EditorGUI.PropertyField(tempRect, minValue, GUIContent.none, true);
+            tempRect.x += 1.5f + 25;
+            EditorGUI.PropertyField(tempRect, maxValue, GUIContent.none, true);
+        }
     }
 }
 
