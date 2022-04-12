@@ -71,6 +71,19 @@ namespace Point.Collections.Buffer
             EnableAtomicSafety = enableAtomicSafety;
         }
 
+        public ObjectPool(ObjectPool<T> parent)
+        {
+            m_Factory = parent.m_Factory;
+            m_OnGet = parent.m_OnGet;
+            m_OnReserve = parent.m_OnReserve;
+            m_OnRelease = parent.m_OnRelease;
+
+            m_Pool = new Stack<T>();
+
+            m_Owner = ThreadInfo.CurrentThread;
+            m_CheckSum = 0;
+        }
+
         public void AddObjects(int count)
         {
             while (0 < count--)

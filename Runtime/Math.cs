@@ -20,6 +20,9 @@
 #define UNITYENGINE
 #if UNITY_2019 && !UNITY_2020_OR_NEWER
 #define UNITYENGINE_OLD
+#if !UNITY_MATHEMATICS
+using math = Point.Collections.Math;
+#endif
 #endif
 #else
 #define POINT_COLLECTIONS_NATIVE
@@ -38,7 +41,6 @@ namespace Point.Collections
         public const float Deg2Rad = (float)System.Math.PI / 180f;
         public const float Rad2Deg = 57.29578f;
 
-#if !UNITYENGINE_OLD
         public static float TodB(float value)
         {
             double
@@ -46,10 +48,18 @@ namespace Point.Collections
                 output = 0;
             unsafe
             {
-#if POINT_COLLECTIONS_NATIVE
+#if UNITY_BURST
+                Burst.BurstMath.unity_todB(&linear, &output);
+#elif POINT_COLLECTIONS_NATIVE
                 Native.NativeMath.unity_todB(&linear, &output);
 #else
-                Burst.BurstMath.unity_todB(&linear, &output);
+                const double kMindB = -80;
+
+                if (linear == 0) output = kMindB;
+                else
+                {
+                    output = 20 * System.Math.Log10(linear);
+                }
 #endif
             }
             return (float)output;
@@ -61,14 +71,17 @@ namespace Point.Collections
                 output = 0;
             unsafe
             {
-#if POINT_COLLECTIONS_NATIVE
+#if UNITY_BURST
+                Burst.BurstMath.unity_fromdB(&decibel, &output);
+#elif POINT_COLLECTIONS_NATIVE
                 Native.NativeMath.unity_fromdB(&decibel, &output);
 #else
-                Burst.BurstMath.unity_fromdB(&decibel, &output);
+                output = System.Math.Pow(10, decibel / 20);
 #endif
             }
             return (float)output;
         }
+#if !UNITYENGINE_OLD
 
 //        [System.Obsolete]
 //        public static long min(in long x, in long y)

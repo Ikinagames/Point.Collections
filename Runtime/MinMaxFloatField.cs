@@ -46,8 +46,12 @@ namespace Point.Collections
 
         public float GetValue()
         {
+            if (m_Min == m_Max) return m_Min;
+
             return UnityEngine.Random.Range(m_Min, m_Max);
         }
+
+        public static implicit operator float(MinMaxFloatField t) => t.GetValue();
     }
 }
 

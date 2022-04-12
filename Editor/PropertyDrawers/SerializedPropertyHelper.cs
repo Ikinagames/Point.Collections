@@ -499,7 +499,7 @@ namespace Point.Collections.Editor
         }
         private static PropertyDrawer GetPropertyDrawer(SerializedProperty t)
         {
-            Type propertyType = t.GetSystemType();
+            Type propertyType = t.GetFieldInfo().FieldType;
 
             if (!s_CachedPropertyDrawers.TryGetValue(propertyType, out PropertyDrawer propertyDrawer))
             {
