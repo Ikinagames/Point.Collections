@@ -33,6 +33,8 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Point.Collections.Native;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Point.Collections.Buffer.LowLevel
 {
@@ -272,6 +274,18 @@ namespace Point.Collections.Buffer.LowLevel
             UnsafeReference<byte> p = (UnsafeReference<byte>)from;
 
             return to - (p + length);
+        }
+
+        public static T DeepClone<T>(this T obj)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(stream, obj);
+                stream.Position = 0;
+
+                return (T)formatter.Deserialize(stream);
+            }
         }
 
         #endregion

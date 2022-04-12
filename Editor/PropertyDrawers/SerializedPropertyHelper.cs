@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
@@ -595,6 +596,92 @@ namespace Point.Collections.Editor
             }
 
             return currentField;
+        }
+
+        public static object GetTargetObject(this SerializedProperty t)
+        {
+            return PropertyDrawerHelper.GetTargetObjectOfProperty(t);
+        }
+        public static void SetDefaultValue(this SerializedProperty t)
+        {
+            switch (t.propertyType)
+            {
+                case SerializedPropertyType.Integer:
+                    t.intValue = 0;
+                    break;
+                case SerializedPropertyType.Boolean:
+                    t.boolValue = false;
+                    break;
+                case SerializedPropertyType.Float:
+                    t.floatValue = 0;
+                    break;
+                case SerializedPropertyType.String:
+                    t.stringValue = String.Empty;
+                    break;
+                case SerializedPropertyType.Color:
+                    t.colorValue = Color.white;
+                    break;
+                case SerializedPropertyType.ObjectReference:
+                    t.objectReferenceValue = null;
+                    break;
+                case SerializedPropertyType.Enum:
+                    t.enumValueIndex = 0;
+                    break;
+                case SerializedPropertyType.Vector2:
+                    t.vector2Value = Vector2.zero;
+                    break;
+                case SerializedPropertyType.Vector3:
+                    t.vector3Value = Vector3.zero;
+                    break;
+                case SerializedPropertyType.Vector4:
+                    t.vector4Value = Vector4.zero;
+                    break;
+                case SerializedPropertyType.Rect:
+                    t.rectValue = default(Rect);
+                    break;
+                case SerializedPropertyType.AnimationCurve:
+                    t.animationCurveValue = new AnimationCurve();
+                    break;
+                case SerializedPropertyType.Bounds:
+                    t.boundsValue = default(Bounds);
+                    break;
+                case SerializedPropertyType.Gradient:
+                    t.colorValue = Color.white;
+                    break;
+                case SerializedPropertyType.Quaternion:
+                    t.quaternionValue = Quaternion.identity;
+                    break;
+                case SerializedPropertyType.Vector2Int:
+                    t.vector2IntValue = Vector2Int.zero;
+                    break;
+                case SerializedPropertyType.Vector3Int:
+                    t.vector3IntValue = Vector3Int.zero;
+                    break;
+                case SerializedPropertyType.RectInt:
+                    t.rectIntValue = default(RectInt);
+                    break;
+                case SerializedPropertyType.BoundsInt:
+                    t.boundsIntValue = default(BoundsInt);
+                    break;
+                case SerializedPropertyType.ManagedReference:
+                    t.managedReferenceValue = Activator.CreateInstance(t.GetFieldInfo().FieldType);
+                    break;
+                case SerializedPropertyType.Generic:
+                    //FieldInfo field = t.GetFieldInfo();
+                    //object defaultObj = Activator.CreateInstance(field.FieldType.GetElementType());
+
+                    ////var parent = t.GetParent().GetTargetObject();
+                    //field.SetValue(parent, Activator.CreateInstance(field.FieldType.GetElementType()));
+                    //break;
+
+                case SerializedPropertyType.LayerMask:
+                case SerializedPropertyType.ArraySize:
+                case SerializedPropertyType.Character:
+                case SerializedPropertyType.FixedBufferSize:
+                case SerializedPropertyType.ExposedReference:
+                default:
+                    throw new NotImplementedException($"{t.propertyType}");
+            }
         }
     }
 }
