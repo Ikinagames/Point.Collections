@@ -41,10 +41,6 @@ namespace Point.Collections.Editor
             }
         }
 
-        private void OnEnable()
-        {
-
-        }
         protected override void OnInspectorGUIContents()
         {
             base.OnInspectorGUIContents();
@@ -61,9 +57,10 @@ namespace Point.Collections.Editor
             }
 
             int lineCount = PointHelper.s_EditorLogs.GetLineCount();
-            if (lineCount > 10)
+            int maxCount = PointSettings.Instance.m_LogDisplayLines;
+            if (lineCount > maxCount)
             {
-                PointHelper.s_EditorLogs = PointHelper.s_EditorLogs.RemoveLines(0, 1);
+                PointHelper.s_EditorLogs = PointHelper.s_EditorLogs.RemoveLines(0, lineCount - maxCount);
             }
             EditorGUILayout.TextArea(PointHelper.s_EditorLogs, LogFieldStyle);
         }

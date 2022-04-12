@@ -38,6 +38,8 @@ namespace Point.Collections
         /// 경로는 <see cref="Application.persistentDataPath"/> 다음부터 시작됩니다. (ex. m_LogFilePath = "test.txt" => Application.persistentDataPath/test.txt
         /// </summary>
         [SerializeField] internal string m_LogFilePath = string.Empty;
+        [Tooltip("PointApplication editor 에서 보여질 로그 줄 최대")]
+        [SerializeField] public int m_LogDisplayLines = 30;
 
         [Header("Ingame")]
         [Tooltip("Point Application 객체를 Hierarchy 에 표시할지 결정합니다.")]
