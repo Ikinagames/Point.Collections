@@ -28,6 +28,18 @@ namespace Point.Collections.Editor
     {
         private bool m_Initialized = false;
 
+        public override sealed float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            float height = PropertyHeight(property, label);
+            foreach (var att in fieldInfo.GetCustomAttributes())
+            {
+                if (att is SpaceAttribute space)
+                {
+                    height += space.height == 0 ? EditorGUIUtility.standardVerticalSpacing : space.height;
+                }
+            }
+            return height;
+        }
         public override sealed void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             if (!m_Initialized)
@@ -42,14 +54,26 @@ namespace Point.Collections.Editor
             AutoRect rect = new AutoRect(position);
             BeforePropertyGUI(ref rect, property, label);
 
-            NotEditableAttribute sealedViewAttribute
-                = fieldInfo?.GetCustomAttribute<NotEditableAttribute>();
+            bool notEditable = false;
+            foreach (var att in fieldInfo.GetCustomAttributes())
+            {
+                if (att is NotEditableAttribute) notEditable = true;
+                else if (att is SpaceAttribute space)
+                {
+                    rect.Pop(space.height == 0 ? EditorGUIUtility.standardVerticalSpacing : space.height);
+                }
+            }
 
-            using (new EditorGUI.DisabledGroupScope(sealedViewAttribute != null))
+            using (new EditorGUI.DisabledGroupScope(notEditable))
             using (new EditorGUI.PropertyScope(position, label, property))
             {
                 OnPropertyGUI(ref rect, property, label);
             }
+        }
+
+        protected virtual float PropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return base.GetPropertyHeight(property, label);
         }
         protected virtual void OnInitialize(SerializedProperty property) { }
         protected virtual void OnInitialize(SerializedProperty property, GUIContent label) { }

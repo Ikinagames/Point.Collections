@@ -32,36 +32,34 @@ using UnityEngine;
 namespace Point.Collections.Editor
 {
     [CustomPropertyDrawer(typeof(AssetPathField), true)]
-    public sealed class AssetPathFieldPropertyDrawer : PropertyDrawer
+    public sealed class AssetPathFieldPropertyDrawer : PropertyDrawer<AssetPathField>
     {
         private const string c_AssetPathField = "p_AssetPath";
 
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        protected override void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
         {
-            using (new EditorGUI.PropertyScope(position, label, property))
+            SerializedProperty pathProperty = property.FindPropertyRelative(c_AssetPathField);
+
+            string assetPath = pathProperty.stringValue;
+            UnityEngine.Object asset = GetObjectAtPath(in assetPath);
+
+            Type targetType;
+            if (TypeHelper.TypeOf<AssetPathField>.Type.IsAssignableFrom(fieldInfo.FieldType) &&
+                fieldInfo.FieldType.BaseType.GenericTypeArguments.Length > 0)
             {
-                SerializedProperty pathProperty = property.FindPropertyRelative(c_AssetPathField);
+                targetType = fieldInfo.FieldType.BaseType.GenericTypeArguments[0];
+            }
+            else targetType = TypeHelper.TypeOf<UnityEngine.Object>.Type;
 
-                string assetPath = pathProperty.stringValue;
-                UnityEngine.Object asset = GetObjectAtPath(in assetPath);
+            using (var changeCheck = new EditorGUI.ChangeCheckScope())
+            {
+                UnityEngine.Object obj 
+                    = EditorGUI.ObjectField(rect.Pop(), label, asset, targetType, false);
 
-                Type targetType;
-                if (TypeHelper.TypeOf<AssetPathField>.Type.IsAssignableFrom(fieldInfo.FieldType) &&
-                    fieldInfo.FieldType.BaseType.GenericTypeArguments.Length > 0)
+                if (changeCheck.changed)
                 {
-                    targetType = fieldInfo.FieldType.BaseType.GenericTypeArguments[0];
-                }
-                else targetType = TypeHelper.TypeOf<UnityEngine.Object>.Type;
-
-                using (var changeCheck = new EditorGUI.ChangeCheckScope())
-                {
-                    UnityEngine.Object obj = EditorGUI.ObjectField(position, label, asset, targetType, false);
-
-                    if (changeCheck.changed)
-                    {
-                        pathProperty.stringValue
-                            = AssetDatabase.GetAssetPath(obj);
-                    }
+                    pathProperty.stringValue
+                        = AssetDatabase.GetAssetPath(obj);
                 }
             }
         }

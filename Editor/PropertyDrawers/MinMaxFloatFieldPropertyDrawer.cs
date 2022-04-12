@@ -44,10 +44,6 @@ namespace Point.Collections.Editor
             }
         }
 
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            return base.GetPropertyHeight(property, label);
-        }
         protected override void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
         {
             //base.OnPropertyGUI(ref rect, property, label);
