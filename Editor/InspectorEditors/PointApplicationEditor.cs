@@ -27,17 +27,45 @@ namespace Point.Collections.Editor
     [CustomEditor(typeof(PointApplication))]
     internal sealed class PointApplicationEditor : InspectorEditor<PointApplication>
     {
+        private static GUIStyle s_LogFieldStyle = null;
+        private static GUIStyle LogFieldStyle
+        {
+            get
+            {
+                if (s_LogFieldStyle == null)
+                {
+                    s_LogFieldStyle = CoreGUI.GetLabelStyle(TextAnchor.UpperLeft);
+                    s_LogFieldStyle.richText = true;
+                }
+                return s_LogFieldStyle;
+            }
+        }
+
+        private void OnEnable()
+        {
+
+        }
         protected override void OnInspectorGUIContents()
         {
             base.OnInspectorGUIContents();
 
+            DrawLogField();
+
+            Repaint();
+        }
+        private void DrawLogField()
+        {
             if (GUILayout.Button("Clear"))
             {
                 PointHelper.s_EditorLogs = string.Empty;
             }
-            EditorGUILayout.TextArea(PointHelper.s_EditorLogs);
 
-            Repaint();
+            int lineCount = PointHelper.s_EditorLogs.GetLineCount();
+            if (lineCount > 10)
+            {
+                PointHelper.s_EditorLogs = PointHelper.s_EditorLogs.RemoveLines(0, 1);
+            }
+            EditorGUILayout.TextArea(PointHelper.s_EditorLogs, LogFieldStyle);
         }
     }
 }

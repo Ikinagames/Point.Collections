@@ -14,6 +14,7 @@
 // limitations under the License.
 
 using System;
+using System.Linq;
 
 namespace Point.Collections
 {
@@ -28,6 +29,66 @@ namespace Point.Collections
         public static float ToSingle<T>(this T t) where T : struct, IConvertible => t.ToSingle(System.Globalization.CultureInfo.InvariantCulture);
         public static long ToInt64<T>(this T t) where T : struct, IConvertible => t.ToInt64(System.Globalization.CultureInfo.InvariantCulture);
         public static string ToString<T>(this T t) where T : struct, IConvertible => t.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+        #endregion
+
+        #region String
+
+        private const char c_StringLineSeperator = '\n';
+        private static string[] s_StringLineSpliter = new[] { "\r\n", "\r", "\n" };
+        private static char[] s_StringLineSpliterChar = new[] { '\r', '\n' };
+
+        /// <summary>
+        /// 이 스트링이 null 혹은 비었는지 반환합니다.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static bool IsNullOrEmpty(this string t)
+        {
+            return string.IsNullOrEmpty(t);
+        }
+        /// <summary>
+        /// 문자열 마지막에 Return iteral 을 추가하여 반환합니다.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static string ReturnAtLast(this string t)
+        {
+            return t + c_StringLineSeperator;
+        }
+        /// <summary>
+        /// 문자열 처음에 Return iteral 을 추가하여 반환합니다.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static string ReturnAtFirst(this string t)
+        {
+            return c_StringLineSeperator + t;
+        }
+
+        public static int GetLineCount(this string t)
+        {
+            return t.GetLines().Length;
+        }
+        public static string[] GetLines(this string t)
+        {
+            return t.Split(s_StringLineSpliter, StringSplitOptions.None);
+        }
+        public static string RemoveLines(this string t, int lineIndex, int count)
+        {
+            var lines = t.GetLines().ToList();
+            lines.RemoveRange(lineIndex, count);
+
+            string sum = string.Empty;
+            for (int i = 0; i < lines.Count; i++)
+            {
+                sum += lines[i];
+
+                if (i + 1 < lines.Count) sum += c_StringLineSeperator;
+            }
+
+            return sum;
+        }
 
         #endregion
     }

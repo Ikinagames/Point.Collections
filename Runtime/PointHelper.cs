@@ -105,7 +105,7 @@ namespace Point.Collections
             string str = LogStringFormat(channel, in msg, 0);
             UnityEngine.Debug.Log(str, context);
 #if UNITY_EDITOR
-            s_EditorLogs += str + "\n";
+            s_EditorLogs += s_EditorLogs.IsNullOrEmpty() ? str : str.ReturnAtFirst();
 #endif
         }
 
@@ -128,7 +128,7 @@ namespace Point.Collections
             string str = LogStringFormat(channel, in msg, 1);
             UnityEngine.Debug.LogWarning(str, context);
 #if UNITY_EDITOR
-            s_EditorLogs += str + "\n";
+            s_EditorLogs += s_EditorLogs.IsNullOrEmpty() ? str : str.ReturnAtFirst();
 #endif
         }
 
@@ -151,7 +151,7 @@ namespace Point.Collections
             string str = LogStringFormat(channel, in msg, 2);
             UnityEngine.Debug.LogError(str, context);
 #if UNITY_EDITOR
-            s_EditorLogs += str + "\n";
+            s_EditorLogs += s_EditorLogs.IsNullOrEmpty() ? str : str.ReturnAtFirst();
 #endif
         }
 
