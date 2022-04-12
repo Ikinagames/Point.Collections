@@ -67,7 +67,7 @@ namespace Point.Collections
 
 #if UNITYENGINE
         protected override bool EnableLog => false;
-        protected override bool HideInInspector => true;
+        protected override bool HideInInspector => !PointSettings.Instance.m_DisplayMainApplication;
 #endif
 
         private ThreadInfo m_MainThread;
@@ -114,12 +114,14 @@ namespace Point.Collections
         {
             m_MainThread = ThreadInfo.CurrentThread;
 #if UNITYENGINE
+#if UNITY_EDITOR
+            PointHelper.s_EditorLogs = string.Empty;
+#endif
 
 #if ENABLE_INPUT_SYSTEM
             m_InActiveTimer = Timer.Start();
             UnityEngine.InputSystem.InputSystem.onActionChange += InputSystem_onActionChange;
 #endif
-
             if (PointSettings.Instance.m_EnableLogFile)
             {
 #if DEBUG_MODE

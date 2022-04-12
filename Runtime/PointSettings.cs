@@ -40,10 +40,17 @@ namespace Point.Collections
         [SerializeField] internal string m_LogFilePath = string.Empty;
 
         [Header("Ingame")]
+        [Tooltip("Point Application 객체를 Hierarchy 에 표시할지 결정합니다.")]
+        [SerializeField] internal bool m_DisplayMainApplication = false; 
+#if ENABLE_INPUT_SYSTEM
+        [Tooltip("해당 시간(초) 만큼 인풋이 없을 경우 이벤트를 발생합니다.")]
         [SerializeField] private float m_InActiveTime = 120f;
+#endif
 
         public LogChannel LogChannel { get => m_LogChannel; set => m_LogChannel = value; }
+#if ENABLE_INPUT_SYSTEM
         public float InActiveTime { get => m_InActiveTime; set => m_InActiveTime = value; }
+#endif
 
         public string GetUserChannelNames(LogChannel channel)
         {

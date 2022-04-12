@@ -52,6 +52,12 @@ namespace Point.Collections
 #line hidden
 
         internal static LowLevel.LogHandler s_LogHandler;
+#if UNITY_EDITOR
+        /// <summary>
+        /// Editor Only
+        /// </summary>
+        public static string s_EditorLogs = string.Empty;
+#endif
 
         private static LogChannel LogChannel => PointSettings.Instance.LogChannel;
 
@@ -96,7 +102,11 @@ namespace Point.Collections
         {
             if ((LogChannel & channel) != channel) return;
 
-            UnityEngine.Debug.Log(LogStringFormat(channel, in msg, 0), context);
+            string str = LogStringFormat(channel, in msg, 0);
+            UnityEngine.Debug.Log(str, context);
+#if UNITY_EDITOR
+            s_EditorLogs += str + "\n";
+#endif
         }
 
         /// <summary>
@@ -115,7 +125,11 @@ namespace Point.Collections
         {
             if ((LogChannel & channel) != channel) return;
 
-            UnityEngine.Debug.LogWarning(LogStringFormat(channel, in msg, 1), context);
+            string str = LogStringFormat(channel, in msg, 1);
+            UnityEngine.Debug.LogWarning(str, context);
+#if UNITY_EDITOR
+            s_EditorLogs += str + "\n";
+#endif
         }
 
         public static string LogErrorString(Channel channel, in string msg) => LogStringFormat(channel, in msg, 2);
@@ -134,7 +148,11 @@ namespace Point.Collections
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void LogError(Channel channel, in string msg, UnityEngine.Object context)
         {
-            UnityEngine.Debug.LogError(LogStringFormat(channel, in msg, 2), context);
+            string str = LogStringFormat(channel, in msg, 2);
+            UnityEngine.Debug.LogError(str, context);
+#if UNITY_EDITOR
+            s_EditorLogs += str + "\n";
+#endif
         }
 
         /// <summary><inheritdoc cref="Log(Channel, in string)"/>></summary>

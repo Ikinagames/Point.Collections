@@ -20,12 +20,25 @@
 #define UNITYENGINE
 
 using UnityEditor;
+using UnityEngine;
 
 namespace Point.Collections.Editor
 {
-    [CustomEditor(typeof(StaticMonobehaviour<>), true)]
-    internal sealed class DefaultStaticMonobehaviourEditor : InspectorEditor<UnityEngine.MonoBehaviour>
+    [CustomEditor(typeof(PointApplication))]
+    internal sealed class PointApplicationEditor : InspectorEditor<PointApplication>
     {
+        protected override void OnInspectorGUIContents()
+        {
+            base.OnInspectorGUIContents();
+
+            if (GUILayout.Button("Clear"))
+            {
+                PointHelper.s_EditorLogs = string.Empty;
+            }
+            EditorGUILayout.TextArea(PointHelper.s_EditorLogs);
+
+            Repaint();
+        }
     }
 }
 
