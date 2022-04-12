@@ -17,6 +17,9 @@ using System;
 using System.Diagnostics;
 #if UNITY_2019_1_OR_NEWER
 using UnityEngine;
+#if UNITY_MATHEMATICS
+using Unity.Mathematics;
+#endif
 
 namespace Point.Collections
 {
