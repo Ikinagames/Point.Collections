@@ -19,17 +19,15 @@
 using Unity.Mathematics;
 #endif
 
-using NUnit.Framework.Constraints;
-using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
 namespace Point.Collections.Editor
 {
-    [CustomPropertyDrawer(typeof(MinMaxFloatField))]
-    internal sealed class MinMaxFloatFieldPropertyDrawer : PropertyDrawer<MinMaxFloatField>
+    [CustomPropertyDrawer(typeof(DecibelAttribute))]
+    internal sealed class DecibelAttributeDrawer : PropertyDrawer<DecibelAttribute>
     {
-        static class Helper
+        static class MinMaxFieldHelper
         {
             private const string 
                 c_MinText = "m_Min", c_MaxText = "m_Max";
@@ -44,54 +42,45 @@ namespace Point.Collections.Editor
             }
         }
 
+        const float minimum = -80, maximum = 0;
+
         protected override void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
         {
-            if (fieldInfo.GetCustomAttribute<DecibelAttribute>() != null)
+            if (fieldInfo.FieldType == TypeHelper.TypeOf<float>.Type)
             {
-                MinMaxFloatDecibelField(ref rect, property, label);
-                return;
+                FloatField(ref rect, property, label);
             }
-
-            SerializedProperty
-                minProp = Helper.GetMin(property),
-                maxProp = Helper.GetMax(property);
-
-            float 
-                min = minProp.floatValue,
-                max = maxProp.floatValue;
-
-            var att = fieldInfo.GetCustomAttribute<RangeAttribute>();
-            float minimum, maximum;
-            if (att == null)
+            else if (fieldInfo.FieldType == TypeHelper.TypeOf<MinMaxFloatField>.Type)
             {
-                minimum = float.MinValue;
-                maximum = float.MaxValue;
+                MinMaxFloatField(ref rect, property, label);
             }
-            else
-            {
-                minimum = att.min;
-                maximum = att.max;
-            }
+        }
 
-            CoreGUI.MinMaxSlider(
-                rect.Pop(PropertyDrawerHelper.GetPropertyHeight(1)),
+        private void FloatField(ref AutoRect rect, SerializedProperty property, GUIContent label)
+        {
+            Rect pos = rect.Pop(PropertyDrawerHelper.GetPropertyHeight(1));
+            float value = Math.TodB(property.floatValue);
+            
+            EditorGUI.BeginChangeCheck();
+            value = CoreGUI.Slider(
+                pos,
                 label,
-                ref min,
-                ref max,
+                value,
                 minimum,
                 maximum
                 );
 
-            minProp.floatValue = min;
-            maxProp.floatValue = max;
+            if (EditorGUI.EndChangeCheck())
+            {
+                property.floatValue = Math.FromdB(value);
+            }
         }
-
-        private void MinMaxFloatDecibelField(ref AutoRect rect, SerializedProperty property, GUIContent label)
+        private void MinMaxFloatField(ref AutoRect rect, SerializedProperty property, GUIContent label)
         {
             Rect pos = rect.Pop(PropertyDrawerHelper.GetPropertyHeight(1));
             SerializedProperty
-                minProp = Helper.GetMin(property),
-                maxProp = Helper.GetMax(property);
+                minProp = MinMaxFieldHelper.GetMin(property),
+                maxProp = MinMaxFieldHelper.GetMax(property);
 
             float
                 min = Math.TodB(minProp.floatValue),
@@ -106,8 +95,8 @@ namespace Point.Collections.Editor
                 label,
                 ref min,
                 ref max,
-                -80,
-                0
+                minimum,
+                maximum
                 );
 
             if (EditorGUI.EndChangeCheck())

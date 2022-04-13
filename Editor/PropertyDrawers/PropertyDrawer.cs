@@ -24,6 +24,8 @@ using UnityEngine;
 
 namespace Point.Collections.Editor
 {
+    /// <inheritdoc cref="PropertyDrawer"/>
+    /// <typeparam name="T">목표 타입</typeparam>
     public abstract class PropertyDrawer<T> : PropertyDrawer
     {
         private bool m_Initialized = false;
@@ -31,13 +33,13 @@ namespace Point.Collections.Editor
         public override sealed float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             float height = PropertyHeight(property, label);
-            foreach (var att in fieldInfo.GetCustomAttributes())
-            {
-                if (att is SpaceAttribute space)
-                {
-                    height += space.height == 0 ? EditorGUIUtility.standardVerticalSpacing : space.height;
-                }
-            }
+            //foreach (var att in fieldInfo.GetCustomAttributes())
+            //{
+            //    if (att is SpaceAttribute space)
+            //    {
+            //        height += space.height == 0 ? EditorGUIUtility.standardVerticalSpacing : space.height;
+            //    }
+            //}
             return height;
         }
         public override sealed void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -58,10 +60,10 @@ namespace Point.Collections.Editor
             foreach (var att in fieldInfo.GetCustomAttributes())
             {
                 if (att is NotEditableAttribute) notEditable = true;
-                else if (att is SpaceAttribute space)
-                {
-                    rect.Pop(space.height == 0 ? EditorGUIUtility.standardVerticalSpacing : space.height);
-                }
+                //else if (att is SpaceAttribute space)
+                //{
+                //    rect.Pop(space.height == 0 ? EditorGUIUtility.standardVerticalSpacing : space.height);
+                //}
             }
 
             using (new EditorGUI.DisabledGroupScope(notEditable))

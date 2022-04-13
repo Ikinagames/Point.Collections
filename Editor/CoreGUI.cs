@@ -215,25 +215,14 @@ namespace Point.Collections.Editor
 
         #endregion
 
+        #region Button
+
         public static bool LabelButton(Rect rect, GUIContent text, int size, TextAnchor textAnchor)
         {
             GUIContent temp = new GUIContent(text);
             temp.text = EditorUtilities.String(text.text, size);
 
             return GUI.Button(rect, temp, GetLabelStyle(textAnchor));
-        }
-        public static bool LabelToggle(Rect rect, bool value, string text)
-        {
-            GUIContent temp = new GUIContent(text);
-
-            return GUI.Toggle(rect, value, temp, LeftLabelStyle);
-        }
-        public static bool LabelToggle(Rect rect, bool value, GUIContent text, int size, TextAnchor textAnchor)
-        {
-            GUIContent temp = new GUIContent(text);
-            temp.text = EditorUtilities.String(text.text, size);
-
-            return GUI.Toggle(rect, value, temp, GetLabelStyle(textAnchor));
         }
 
         public static bool BoxButton(Rect rect, string content, Color color, Action onContextClick)
@@ -295,6 +284,25 @@ namespace Point.Collections.Editor
 
             return clicked;
         }
+
+        #endregion
+
+        #region Toggle
+
+        public static bool LabelToggle(Rect rect, bool value, string text)
+        {
+            GUIContent temp = new GUIContent(text);
+
+            return GUI.Toggle(rect, value, temp, LeftLabelStyle);
+        }
+        public static bool LabelToggle(Rect rect, bool value, GUIContent text, int size, TextAnchor textAnchor)
+        {
+            GUIContent temp = new GUIContent(text);
+            temp.text = EditorUtilities.String(text.text, size);
+
+            return GUI.Toggle(rect, value, temp, GetLabelStyle(textAnchor));
+        }
+
         public static bool BoxToggleButton(
             Rect rect, bool value, GUIContent content, Color enableColor, Color disableColor)
         {
@@ -341,6 +349,10 @@ namespace Point.Collections.Editor
 
             return value;
         }
+
+        #endregion
+
+        #region Min-Max Slider
 
         public static float2 MinMaxSlider(Rect position, string label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
         {
@@ -410,6 +422,29 @@ namespace Point.Collections.Editor
             tempRect.x += 1.5f + 25;
             EditorGUI.PropertyField(tempRect, maxValue, GUIContent.none, true);
         }
+
+        #endregion
+
+        #region Slider
+
+        public static float Slider(Rect position, string label, float value, float minLimit, float maxLimit)
+        {
+            value = EditorGUI.Slider(position, label, value, minLimit, maxLimit);
+
+            return value;
+        }
+        public static float Slider(Rect position, GUIContent label, float value, float minLimit, float maxLimit)
+        {
+            value = EditorGUI.Slider(position, label, value, minLimit, maxLimit);
+
+            return value;
+        }
+        public static void Slider(Rect position, GUIContent label, SerializedProperty property, float minLimit, float maxLimit)
+        {
+            EditorGUI.Slider(position, property, minLimit, maxLimit, label);
+        }
+
+        #endregion
     }
 }
 

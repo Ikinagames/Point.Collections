@@ -43,6 +43,9 @@ namespace Point.Collections
 
         public static float TodB(float value)
         {
+            if (value <= 0) return -80;
+            else if (1 <= value) return 0;
+
             double
                 linear = value,
                 output = 0;
@@ -66,6 +69,9 @@ namespace Point.Collections
         }
         public static float FromdB(float dB)
         {
+            if (dB <= -80) return 0;
+            else if (0 <= dB) return 1;
+
             double
                 decibel = dB,
                 output = 0;
