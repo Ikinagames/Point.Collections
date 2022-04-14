@@ -27,8 +27,7 @@ namespace Point.Collections.Editor
     [CustomPropertyDrawer(typeof(ArrayWrapper<>), true)]
     public class ArrayWrapperPropertyDrawer : PropertyDrawer<Array>
     {
-        private GUIContent m_HeaderText;
-        private AnimFloat m_Height;
+        private AnimFloat m_Height = null;
 
         Rect[] elementRects = new Rect[3];
 
@@ -44,7 +43,7 @@ namespace Point.Collections.Editor
         }
         protected virtual float GetElementHeight(SerializedProperty element)
         {
-            float height = EditorGUI.GetPropertyHeight(element, element.isExpanded ? true : false);
+            float height = EditorGUI.GetPropertyHeight(element);
             return height;
         }
 
@@ -53,19 +52,33 @@ namespace Point.Collections.Editor
         protected virtual void GetUserButtonWidth(List<float> list) { }
         protected virtual void UserButtonAction(Rect buttonPos, SerializedProperty element) { }
 
-        protected virtual void OnElementGUI(ref AutoRect rect, SerializedProperty element)
+        protected virtual void OnElementGUI(ref AutoRect rect, SerializedProperty child)
         {
-            //EditorGUI.PropertyField(rect.Pop(EditorGUI.GetPropertyHeight(element)), element, true);
-            element.Draw(ref rect, new GUIContent(element.displayName), true);
-        }
+            if (child.ChildCount() <= 1)
+            {
+                float height = EditorGUI.GetPropertyHeight(child);
+                EditorGUI.PropertyField(rect.Pop(height), child);
+            }
+            else
+            {
+                float height = EditorGUI.GetPropertyHeight(child, true);
+                EditorGUI.PropertyField(rect.Pop(height), child, true);
+                //var tempProp = child.Copy();
+                //tempProp.Next(true);
+                //do
+                //{
+                //    EditorGUI.PropertyField(rect.Pop(EditorGUI.GetPropertyHeight(tempProp)), tempProp);
+                //} while (tempProp.Next(false));
+            }
 
-        #endregion
+            //for (int i = 0; i < array.arraySize; i++)
+            //{
+            //    SerializedProperty element = array.GetArrayElementAtIndex(i);
 
-        #region Inits
+            //    height += GetElementHeight(element) + 3;
+            //}
 
-        protected override sealed void OnInitialize(SerializedProperty property, GUIContent label)
-        {
-            m_HeaderText = GetHeaderText(property, label);
+
         }
 
         #endregion
@@ -82,19 +95,25 @@ namespace Point.Collections.Editor
             SerializedProperty arr = GetArrayProperty(property);
             float height = 28;
 
-            if (arr.isExpanded)
+            // 이 어레이 펼침
+            if (property.isExpanded)
             {
-                for (int i = 0; i < arr.arraySize; i++)
-                {
-                    SerializedProperty element = arr.GetArrayElementAtIndex(i);
-
-                    height += GetElementHeight(element) + 3;
-                }
-
                 height += 12;
+
+                //height += EditorGUI.GetPropertyHeight(arr, false);
                 if (arr.arraySize == 0)
                 {
                     height += PropertyDrawerHelper.GetPropertyHeight(1);
+                }
+                else
+                {
+                    for (int i = 0; i < arr.arraySize; i++)
+                    {
+                        SerializedProperty element = arr.GetArrayElementAtIndex(i);
+
+                        if (element.isExpanded) height += PropertyDrawerHelper.GetPropertyHeight(1);
+                        height += GetElementHeight(element) + 3;
+                    }
                 }
             }
             else
@@ -107,8 +126,10 @@ namespace Point.Collections.Editor
                 m_Height = new AnimFloat(height);
                 m_Height.speed = 5;
             }
-            else m_Height.target = height;
-
+            else
+            {
+                m_Height.target = height;
+            }
             return m_Height.value;
         }
 
@@ -128,10 +149,9 @@ namespace Point.Collections.Editor
             PropertyDrawerHelper.DrawBlock(EditorGUI.IndentedRect(blockRect), Color.black);
             rect.Pop(3);
 
-            if (!DrawHeader(ref rect, arr)) // 15
+            if (!DrawHeader(ref rect, property, arr, label)) // 15
             {
                 m_ElementAlpha.target = 0;
-                RepaintInspector(property.serializedObject);
                 return;
             }
             m_ElementAlpha.target = 1;
@@ -150,28 +170,31 @@ namespace Point.Collections.Editor
                     CoreGUI.Label(rect.Pop(), new GUIContent("Empty"), m_ElementAlpha, TextAnchor.MiddleCenter);
                 }
             }
-            RepaintInspector(property.serializedObject);
         }
 
-        private bool DrawHeader(ref AutoRect rect, SerializedProperty property)
+        private bool DrawHeader(ref AutoRect rect, SerializedProperty property, SerializedProperty array, GUIContent label)
         {
             Rect headerRect = rect.Pop(17);
             Rect[] rects = AutoRect.DivideWithFixedWidthRight(headerRect, 40, 40, 40);
             AutoRect.AlignRect(ref headerRect, rects[0]);
 
-            property.isExpanded = CoreGUI.LabelToggle(EditorGUI.IndentedRect(headerRect), property.isExpanded, m_HeaderText, 15, TextAnchor.MiddleLeft);
+            property.isExpanded
+                = CoreGUI.LabelToggle(
+                    EditorGUI.IndentedRect(headerRect),
+                    property.isExpanded,
+                    GetHeaderText(array, label), 15, TextAnchor.MiddleLeft);
 
-            property.arraySize = EditorGUI.DelayedIntField(rects[0], property.arraySize);
+            array.arraySize = EditorGUI.DelayedIntField(rects[0], array.arraySize);
 
             if (GUI.Button(rects[1], "+"))
             {
-                property.InsertArrayElementAtIndex(property.arraySize);
+                array.InsertArrayElementAtIndex(array.arraySize);
             }
-            using (new EditorGUI.DisabledGroupScope(property.arraySize == 0))
+            using (new EditorGUI.DisabledGroupScope(array.arraySize == 0))
             {
                 if (GUI.Button(rects[2], "-"))
                 {
-                    property.DeleteArrayElementAtIndex(property.arraySize - 1);
+                    array.DeleteArrayElementAtIndex(array.arraySize - 1);
                 }
             }
 
@@ -186,10 +209,13 @@ namespace Point.Collections.Editor
             for (int i = 0; i < property.arraySize; i++)
             {
                 SerializedProperty element = property.GetArrayElementAtIndex(i);
+                float elementTotalHeight = GetElementHeight(element);
+                if (element.isExpanded) elementTotalHeight += PropertyDrawerHelper.GetPropertyHeight(1);
 
-                AutoRect elementAutoRect = new AutoRect(rect.Pop(GetElementHeight(element)));
+                AutoRect elementAutoRect = new AutoRect(rect.Pop(elementTotalHeight));
                 //Rect elementRect = elementAutoRect.Pop(EditorGUI.GetPropertyHeight(element, false));
-                Rect elementRect = elementAutoRect.Pop(EditorStyles.textField.CalcHeight(new GUIContent(element.displayName), rect.Current.width));
+                Rect elementRect = elementAutoRect.Pop(
+                    EditorStyles.textField.CalcHeight(new GUIContent(element.displayName), rect.Current.width));
 
                 PropertyDrawerHelper.DrawBlock(EditorGUI.IndentedRect(elementRect), Color.gray);
                 AutoRect.DivideWithRatio(elementRect, elementRects, elementRatio);
@@ -270,7 +296,7 @@ namespace Point.Collections.Editor
 
                 #endregion
 
-                if (element.isExpanded)
+                if (elementChildCount > 1 && element.isExpanded)
                 {
                     var child = element.Copy();
                     PropertyDrawerHelper.DrawRect(
@@ -278,30 +304,35 @@ namespace Point.Collections.Editor
                             Color.black);
 
                     elementAutoRect.Pop(2.5f);
-                    elementAutoRect.Indent(5);
-                    elementAutoRect.Indent();
+                    //elementAutoRect.Indent(5);
+                    EditorGUI.indentLevel++;
+                    //elementAutoRect.Indent();
 
-                    if (element.HasCustomPropertyDrawer())
-                    {
-                        element.Draw(ref elementAutoRect,
-                            new GUIContent(element.displayName), true);
-                    }
-                    else
-                    {
-                        child.Next(true);
+                    OnElementGUI(ref elementAutoRect, child);
+                    //if (element.HasCustomPropertyDrawer())
+                    //{
+                    //    element.Draw(ref elementAutoRect,
+                    //        new GUIContent(element.displayName), true);
+                    //}
+                    //else
+                    //{
+                    //    child.Next(true);
 
-                        int depth = child.depth;
-                        do
-                        {
-                            OnElementGUI(ref elementAutoRect, child);
+                    //    int depth = child.depth;
+                    //    do
+                    //    {
+                    //        OnElementGUI(ref elementAutoRect, child);
 
-                        } while (child.Next(false) && child.depth == depth);
-                    }
+                    //    } while (child.Next(false) && child.depth == depth);
+                    //}
+
+                    EditorGUI.indentLevel--;
+                    //elementAutoRect.Indent();
+                    //elementAutoRect.Indent(-5);
                 }
-
-                elementAutoRect.Indent(-5);
-                EditorUtilities.Line(rect.Pop(3));
             }
+
+            CoreGUI.Line(EditorGUI.IndentedRect(rect.Pop(3)));
         }
     }
 }

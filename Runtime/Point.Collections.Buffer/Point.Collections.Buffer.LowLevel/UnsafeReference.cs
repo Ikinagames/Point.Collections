@@ -47,7 +47,7 @@ namespace Point.Collections.Buffer.LowLevel
 #if UNITYENGINE
         [NativeDisableUnsafePtrRestriction]
 #endif
-        private unsafe IntPtr m_Ptr;
+        private unsafe void* m_Ptr;
 
         public IntPtr this[int offset]
         {
@@ -78,7 +78,7 @@ namespace Point.Collections.Buffer.LowLevel
         /// <summary>
         /// 실제 메모리 주소입니다.
         /// </summary>
-        public unsafe void* Ptr => m_Ptr.ToPointer();
+        public unsafe void* Ptr => m_Ptr;
         /// <summary>
         /// 실제 메모리 주소를 <seealso cref="System.IntPtr"/> 값으로 반환합니다.
         /// </summary>
@@ -91,14 +91,14 @@ namespace Point.Collections.Buffer.LowLevel
 
         public unsafe UnsafeReference(void* ptr)
         {
-            m_Ptr = (IntPtr)ptr;
+            m_Ptr = ptr;
             m_IsCreated = true;
         }
         public UnsafeReference(IntPtr ptr)
         {
             unsafe
             {
-                m_Ptr = ptr;
+                m_Ptr = ptr.ToPointer();
             }
             m_IsCreated = true;
         }
@@ -136,7 +136,7 @@ namespace Point.Collections.Buffer.LowLevel
             return new UnsafeReference(p);
         }
         public static implicit operator UnsafeReference(IntPtr p) => new UnsafeReference(p);
-        public static unsafe implicit operator void*(UnsafeReference p) => p.m_Ptr.ToPointer();
+        public static unsafe implicit operator void*(UnsafeReference p) => p.m_Ptr;
         public static unsafe implicit operator IntPtr(UnsafeReference p) => (IntPtr)p.m_Ptr;
     }
     /// <summary>
@@ -160,7 +160,7 @@ namespace Point.Collections.Buffer.LowLevel
 #if UNITYENGINE
         [NativeDisableUnsafePtrRestriction]
 #endif
-        private unsafe IntPtr m_Ptr;
+        private readonly unsafe void* m_Ptr;
 
         IntPtr IUnsafeReference.this[int offset]
         {
@@ -203,7 +203,18 @@ namespace Point.Collections.Buffer.LowLevel
         }
 
         /// <inheritdoc cref="UnsafeReference.Ptr"/>
-        public unsafe T* Ptr => (T*)m_Ptr;
+        public unsafe T* Ptr
+        {
+            get
+            {
+                if (m_Ptr == null)
+                {
+                    return null;
+                }
+
+                return (T*)m_Ptr;
+            }
+        }
         /// <inheritdoc cref="UnsafeReference.IntPtr"/>
         public IntPtr IntPtr { get { unsafe { return (IntPtr)m_Ptr; } } }
         /// <inheritdoc cref="GetValue"/>
@@ -216,13 +227,13 @@ namespace Point.Collections.Buffer.LowLevel
         {
             unsafe
             {
-                m_Ptr = ptr;
+                m_Ptr = ptr.ToPointer();
             }
             m_IsCreated = true;
         }
         public unsafe UnsafeReference(T* ptr)
         {
-            m_Ptr = (IntPtr)ptr;
+            m_Ptr = ptr;
             m_IsCreated = true;
         }
         public ReadOnly AsReadOnly() { unsafe { return new ReadOnly(m_Ptr); } }
@@ -230,10 +241,13 @@ namespace Point.Collections.Buffer.LowLevel
         /// <summary>
         /// 포인터의 값을 <typeparamref name="T"/> 로 읽어서 반환합니다.
         /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
         public ref T GetValue()
         {
             unsafe
             {
+                if (Ptr == null) throw new InvalidOperationException();
+
                 return ref *Ptr;
             }
         }
@@ -263,7 +277,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             unsafe
             {
-                return new UnsafeReference<T>(a.m_Ptr + b);
+                return new UnsafeReference<T>(a.Ptr + b);
             }
         }
         /// <summary>
@@ -276,7 +290,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             unsafe
             {
-                return new UnsafeReference<T>(a.m_Ptr - b);
+                return new UnsafeReference<T>(a.Ptr - b);
             }
         }
         /// <summary>
@@ -337,8 +351,8 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
         public struct ReadOnly
         {
-            private unsafe IntPtr m_Ptr;
-            private unsafe T* Ptr => (T*)m_Ptr.ToPointer();
+            private unsafe void* m_Ptr;
+            private unsafe T* Ptr => (T*)m_Ptr;
 
             public T this[int index]
             {
@@ -352,7 +366,7 @@ namespace Point.Collections.Buffer.LowLevel
             }
             public T Value { get { unsafe { return *Ptr; } } }
 
-            internal unsafe ReadOnly(IntPtr ptr)
+            internal unsafe ReadOnly(void* ptr)
             {
                 m_Ptr = ptr;
             }

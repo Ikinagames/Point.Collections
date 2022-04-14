@@ -18,7 +18,7 @@
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
-#if UNITY_2019 || !UNITY_2020_OR_NEWER
+#if UNITY_2019 && !UNITY_2020_OR_NEWER
 #define UNITYENGINE_OLD
 #endif
 using Unity.Collections;
@@ -158,6 +158,16 @@ namespace Point.Collections.Buffer.LowLevel
 
         public bool ContainsKey(TKey key) => TryFindIndexFor(key, out _);
 
+        public UnsafeReference<KeyValue<TKey, TValue>> Get(TKey key)
+        {
+            if (!TryFindIndexFor(key, out int index))
+            {
+                throw new ArgumentOutOfRangeException($"{key.ToString()}");
+            }
+
+            UnsafeReference<KeyValue<TKey, TValue>> ptr = m_Buffer.ElementAt(in index);
+            return ptr;
+        }
         public int Add(TKey key, TValue value)
         {
             if (!TryFindEmptyIndexFor(key, out int index))
@@ -204,6 +214,10 @@ namespace Point.Collections.Buffer.LowLevel
 
             m_Buffer[index] = default(KeyValue<TKey, TValue>);
             return true;
+        }
+        public void Clear()
+        {
+            m_Buffer.Clear();
         }
 
         public bool TryGetIndex(TKey key, out int index) => TryFindIndexFor(key, out index);
