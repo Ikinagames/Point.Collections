@@ -20,6 +20,7 @@
 #define UNITYENGINE
 
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEngine;
@@ -31,48 +32,11 @@ namespace Point.Collections.Editor
 {
     public sealed class CoreGUI : CLRSingleTone<CoreGUI>
     {
-        private static GUIStyle
-            s_CenterLabelStyle = null, s_RightLabelStyle = null, s_LeftLabelStyle = null;
+        #region GUI Styles
+
         private static GUIStyle s_BoxButtonStyle = null;
+        private static readonly Dictionary<TextAnchor, GUIStyle> s_CachedLabelStyles = new Dictionary<TextAnchor, GUIStyle>();
 
-        public static GUIStyle CenterLabelStyle
-        {
-            get
-            {
-                if (s_CenterLabelStyle == null)
-                {
-                    s_CenterLabelStyle = new GUIStyle(EditorStyles.label);
-                    s_CenterLabelStyle.alignment = TextAnchor.MiddleCenter;
-                }
-                return s_CenterLabelStyle;
-            }
-        }
-        public static GUIStyle RightLabelStyle
-        {
-            get
-            {
-                if (s_RightLabelStyle == null)
-                {
-                    s_RightLabelStyle = new GUIStyle(EditorStyles.label);
-                    s_RightLabelStyle.alignment = TextAnchor.MiddleRight;
-                }
-                return s_RightLabelStyle;
-            }
-        }
-        public static GUIStyle LeftLabelStyle
-        {
-            get
-            {
-                if (s_LeftLabelStyle == null)
-                {
-                    s_LeftLabelStyle = new GUIStyle(EditorStyles.label);
-                    s_LeftLabelStyle.alignment = TextAnchor.MiddleLeft;
-
-                    s_LeftLabelStyle.border = new RectOffset(5, 5, 5, 5);
-                }
-                return s_LeftLabelStyle;
-            }
-        }
         public static GUIStyle BoxButtonStyle
         {
             get
@@ -85,7 +49,10 @@ namespace Point.Collections.Editor
             }
         }
 
+        #endregion
+
         #region Line
+
         public static void SectorLine(int lines = 1)
         {
             Color old = GUI.backgroundColor;
@@ -137,38 +104,81 @@ namespace Point.Collections.Editor
 
             GUI.backgroundColor = old;
         }
+
         #endregion
 
         #region Label
 
+        public static void Label(GUIContent text, StringColor color)
+        {
+            GUIStyle style = GetLabelStyle(TextAnchor.UpperLeft);
+
+            GUIContent content = new GUIContent(text);
+            content.text = HTMLString.String(content.text, color);
+
+            EditorGUILayout.LabelField(content, style);
+        }
+        public static void Label(GUIContent text, int size)
+        {
+            GUIStyle style = GetLabelStyle(TextAnchor.UpperLeft);
+
+            GUIContent content = new GUIContent(text);
+            content.text = HTMLString.String(content.text, size);
+
+            EditorGUILayout.LabelField(content, style);
+        }
+        public static void Label(GUIContent text, StringColor color, int size)
+        {
+            GUIStyle style = GetLabelStyle(TextAnchor.UpperLeft);
+
+            GUIContent content = new GUIContent(text);
+            content.text = HTMLString.String(content.text, color, size);
+
+            EditorGUILayout.LabelField(content, style);
+        }
         public static void Label(GUIContent text, TextAnchor textAnchor = TextAnchor.MiddleLeft, params GUILayoutOption[] options)
         {
-            GUIStyle style;
-            if (textAnchor != TextAnchor.MiddleLeft)
-            {
-                style = new GUIStyle(EditorStyles.label);
-                style.alignment = textAnchor;
-            }
-            else style = EditorStyles.label;
+            GUIStyle style = GetLabelStyle(textAnchor);
 
             Rect rect = GUILayoutUtility.GetRect(text, style, options);
             EditorGUI.LabelField(rect, text, style);
         }
         public static void Label(GUIContent text1, GUIContent text2, TextAnchor textAnchor = TextAnchor.MiddleLeft, params GUILayoutOption[] options)
         {
-            GUIStyle style;
-            if (textAnchor != TextAnchor.MiddleLeft)
-            {
-                style = new GUIStyle(EditorStyles.label);
-                style.alignment = textAnchor;
-            }
-            else style = EditorStyles.label;
+            GUIStyle style = GetLabelStyle(textAnchor);
 
             Rect rect = GUILayoutUtility.GetRect(text2, style, options);
 
             EditorGUI.LabelField(rect, text1, text2, style);
         }
 
+        public static void Label(Rect rect, GUIContent text, StringColor color)
+        {
+            GUIStyle style = GetLabelStyle(TextAnchor.UpperLeft);
+
+            GUIContent content = new GUIContent(text);
+            content.text = HTMLString.String(content.text, color);
+
+            EditorGUI.LabelField(rect, content, style);
+        }
+        public static void Label(Rect rect, GUIContent text, int size)
+        {
+            GUIStyle style = GetLabelStyle(TextAnchor.UpperLeft);
+
+            GUIContent content = new GUIContent(text);
+            content.text = HTMLString.String(content.text, size);
+
+            EditorGUI.LabelField(rect, content, style);
+        }
+        public static void Label(Rect rect, GUIContent text, StringColor color, int size)
+        {
+            GUIStyle style = GetLabelStyle(TextAnchor.UpperLeft);
+
+            GUIContent content = new GUIContent(text);
+            content.text = HTMLString.String(content.text, color, size);
+
+            EditorGUI.LabelField(rect, content, style);
+        }
         public static void Label(Rect rect, string text) => Label(rect, new GUIContent(text), TextAnchor.MiddleLeft);
         public static void Label(Rect rect, GUIContent text) => Label(rect, text, TextAnchor.MiddleLeft);
         public static void Label(Rect rect, GUIContent text, TextAnchor textAnchor) => EditorGUI.LabelField(rect, text, GetLabelStyle(textAnchor));
@@ -190,25 +200,22 @@ namespace Point.Collections.Editor
         }
         public static void Label(Rect rect, GUIContent text1, GUIContent text2, TextAnchor textAnchor)
         {
-            GUIStyle style;
-            if (textAnchor != TextAnchor.MiddleLeft)
-            {
-                style = new GUIStyle(EditorStyles.label);
-                style.alignment = textAnchor;
-            }
-            else style = EditorStyles.label;
+            GUIStyle style = GetLabelStyle(textAnchor);
 
             EditorGUI.LabelField(rect, text1, text2, style);
         }
 
-
         public static GUIStyle GetLabelStyle(TextAnchor textAnchor)
         {
-            GUIStyle style = new GUIStyle(EditorStyles.label)
+            if (!s_CachedLabelStyles.TryGetValue(textAnchor, out var style))
             {
-                alignment = textAnchor,
-                richText = true
-            };
+                style = new GUIStyle(EditorStyles.label)
+                {
+                    alignment = textAnchor,
+                    richText = true
+                };
+                s_CachedLabelStyles.Add(textAnchor, style);
+            }
 
             return style;
         }
@@ -225,8 +232,16 @@ namespace Point.Collections.Editor
             return GUI.Button(rect, temp, GetLabelStyle(textAnchor));
         }
 
-        public static bool BoxButton(Rect rect, string content, Color color, Action onContextClick)
-            => BoxButton(rect, new GUIContent(content), color, onContextClick);
+        public static bool BoxButton(string content, Color color, params GUILayoutOption[] options) => BoxButton(content, color, null, options);
+        public static bool BoxButton(string content, Color color, Action onContextClick, params GUILayoutOption[] options)
+        {
+            GUIContent label = new GUIContent(content);
+            Rect rect = GUILayoutUtility.GetRect(label, BoxButtonStyle, options);
+
+            return BoxButton(rect, label, color, onContextClick);
+        }
+        public static bool BoxButton(Rect rect, string content, Color color) => BoxButton(rect, new GUIContent(content), color, null);
+        public static bool BoxButton(Rect rect, string content, Color color, Action onContextClick) => BoxButton(rect, new GUIContent(content), color, onContextClick);
         public static bool BoxButton(Rect rect, GUIContent content, Color color, Action onContextClick)
         {
             int enableCullID = GUIUtility.GetControlID(FocusType.Passive, rect);
@@ -239,11 +254,11 @@ namespace Point.Collections.Editor
 
                     Color origin = GUI.color;
                     GUI.color = Color.Lerp(color, Color.white, isHover && GUI.enabled ? .7f : 0);
-                    EditorStyles.toolbarButton.Draw(rect,
+                    BoxButtonStyle.Draw(rect,
                         isHover, isActive: true, on: true, false);
                     GUI.color = origin;
 
-                    CenterLabelStyle.Draw(rect, content, enableCullID);
+                    GetLabelStyle(TextAnchor.MiddleCenter).Draw(rect, content, enableCullID);
                     break;
                 case EventType.ContextClick:
                     if (!GUI.enabled || !rect.Contains(Event.current.mousePosition)) break;
@@ -289,11 +304,18 @@ namespace Point.Collections.Editor
 
         #region Toggle
 
+        static class ToggleHelper
+        {
+            public static GUIContent
+                FoldoutOpenedContent = new GUIContent(EditorStyleUtilities.FoldoutOpendString),
+                FoldoutClosedContent = new GUIContent(EditorStyleUtilities.FoldoutClosedString);
+        }
+
         public static bool LabelToggle(Rect rect, bool value, string text)
         {
             GUIContent temp = new GUIContent(text);
 
-            return GUI.Toggle(rect, value, temp, LeftLabelStyle);
+            return GUI.Toggle(rect, value, temp, GetLabelStyle(TextAnchor.MiddleLeft));
         }
         public static bool LabelToggle(Rect rect, bool value, GUIContent text, int size, TextAnchor textAnchor)
         {
@@ -303,6 +325,32 @@ namespace Point.Collections.Editor
             return GUI.Toggle(rect, value, temp, GetLabelStyle(textAnchor));
         }
 
+        public static bool BoxToggleButton(
+            bool value, string content, Color enableColor, Color disableColor, params GUILayoutOption[] options)
+        {
+            GUIContent label = new GUIContent(content);
+            Rect rect = GUILayoutUtility.GetRect(label, BoxButtonStyle, options);
+
+            return BoxToggleButton(rect, value, label, enableColor, disableColor);
+        }
+        public static bool BoxToggleButton(
+            bool value, Color enableColor, Color disableColor, params GUILayoutOption[] options)
+        {
+            Rect rect = GUILayoutUtility.GetRect(
+                value ? ToggleHelper.FoldoutOpenedContent : ToggleHelper.FoldoutClosedContent,
+                BoxButtonStyle, options);
+
+            return BoxToggleButton(rect, value, enableColor, disableColor);
+        }
+        public static bool BoxToggleButton(
+            bool value, GUIContent content, Color enableColor, Color disableColor, params GUILayoutOption[] options)
+        {
+            Rect rect = GUILayoutUtility.GetRect(content, BoxButtonStyle, options);
+            return BoxToggleButton(rect, value, content, enableColor, disableColor);
+        }
+        public static bool BoxToggleButton(
+            Rect rect, bool value, Color enableColor, Color disableColor)
+            => BoxToggleButton(rect, value, value ? ToggleHelper.FoldoutOpenedContent : ToggleHelper.FoldoutClosedContent, enableColor, disableColor);
         public static bool BoxToggleButton(
             Rect rect, bool value, GUIContent content, Color enableColor, Color disableColor)
         {
@@ -322,7 +370,7 @@ namespace Point.Collections.Editor
 
                     var temp = new GUIStyle(EditorStyles.label);
                     temp.alignment = TextAnchor.MiddleCenter;
-                    CenterLabelStyle.Draw(rect, content, enableCullID);
+                    GetLabelStyle(TextAnchor.MiddleCenter).Draw(rect, content, enableCullID);
                     break;
                 case EventType.MouseDown:
                     if (!GUI.enabled) break;
@@ -388,6 +436,7 @@ namespace Point.Collections.Editor
 
             return new float2(minValue, maxValue);
         }
+
         public static void MinMaxSlider(Rect position, string label, SerializedProperty minValue, SerializedProperty maxValue, float minLimit, float maxLimit)
         {
             position.width -= 50;
@@ -439,9 +488,127 @@ namespace Point.Collections.Editor
 
             return value;
         }
-        public static void Slider(Rect position, GUIContent label, SerializedProperty property, float minLimit, float maxLimit)
+
+        #endregion
+
+        #region Draw
+
+        public sealed class BoxBlock : IDisposable
         {
-            EditorGUI.Slider(position, property, minLimit, maxLimit, label);
+            Color m_PrevColor;
+            int m_PrevIndent;
+
+            GUILayout.HorizontalScope m_HorizontalScope;
+            GUILayout.VerticalScope m_VerticalScope;
+
+            public BoxBlock(Color color, params GUILayoutOption[] options)
+            {
+                m_PrevColor = GUI.backgroundColor;
+                m_PrevIndent = EditorGUI.indentLevel;
+
+                EditorGUI.indentLevel = 0;
+
+                m_HorizontalScope = new GUILayout.HorizontalScope();
+                GUILayout.Space(m_PrevIndent * 15);
+                GUI.backgroundColor = color;
+
+                m_VerticalScope = new GUILayout.VerticalScope(EditorStyleUtilities.Box, options);
+                GUI.backgroundColor = m_PrevColor;
+            }
+            public void Dispose()
+            {
+                m_VerticalScope.Dispose();
+                m_HorizontalScope.Dispose();
+
+                m_VerticalScope = null;
+                m_HorizontalScope = null;
+
+                EditorGUI.indentLevel = m_PrevIndent;
+                GUI.backgroundColor = m_PrevColor;
+            }
+        }
+
+        public static void DrawBlock(Rect rect, Color color)
+        {
+            color.a = .25f;
+
+            GUI.Box(rect, GUIContent.none, EditorStyles.helpBox);
+            EditorGUI.DrawRect(rect, color);
+        }
+        public static void DrawRect(Rect rect, Color color)
+        {
+            color.a = .25f;
+
+            EditorGUI.DrawRect(rect, color);
+        }
+
+        #endregion
+
+        #region Utils
+
+        public static float GetLineHeight(int lineCount)
+        {
+            float height = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+            return height * lineCount;
+        }
+
+        public static object AutoField(Type type, string label, object value, params GUILayoutOption[] options)
+        {
+            if (type == TypeHelper.TypeOf<int>.Type)
+            {
+                return EditorGUILayout.IntField(label, Convert.ToInt32(value), options);
+            }
+            else if (type == TypeHelper.TypeOf<float>.Type)
+            {
+                return EditorGUILayout.FloatField(label, Convert.ToSingle(value), options);
+            }
+            else if (type == TypeHelper.TypeOf<bool>.Type)
+            {
+                return EditorGUILayout.ToggleLeft(label, Convert.ToBoolean(value), options);
+            }
+            else if (type == TypeHelper.TypeOf<string>.Type)
+            {
+                return EditorGUILayout.TextField(label, Convert.ToString(value), options);
+            }
+            //else if (fieldInfo.FieldType == TypeHelper.TypeOf<float3>.Type)
+            //{
+            //    return EditorGUILayout.Vector3Field(label, (float3)(value), options);
+            //}
+            else if (type == TypeHelper.TypeOf<Vector3>.Type)
+            {
+                return EditorGUILayout.Vector3Field(label, (Vector3)(value), options);
+            }
+
+            throw new NotImplementedException();
+        }
+        public static object AutoField(Rect rect, Type type, string label, object value)
+        {
+            if (type == TypeHelper.TypeOf<int>.Type)
+            {
+                return EditorGUI.IntField(rect, label, Convert.ToInt32(value));
+            }
+            else if (type == TypeHelper.TypeOf<float>.Type)
+            {
+                return EditorGUI.FloatField(rect, label, Convert.ToSingle(value));
+            }
+            else if (type == TypeHelper.TypeOf<bool>.Type)
+            {
+                return EditorGUI.ToggleLeft(rect, label, Convert.ToBoolean(value));
+            }
+            else if (type == TypeHelper.TypeOf<string>.Type)
+            {
+                return EditorGUI.TextField(rect, label, Convert.ToString(value));
+            }
+            //else if (fieldInfo.FieldType == TypeHelper.TypeOf<float3>.Type)
+            //{
+            //    return EditorGUILayout.Vector3Field(label, (float3)(value), options);
+            //}
+            else if (type == TypeHelper.TypeOf<Vector3>.Type)
+            {
+                return EditorGUI.Vector3Field(rect, label, (Vector3)(value));
+            }
+
+            throw new NotImplementedException();
         }
 
         #endregion
