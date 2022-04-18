@@ -28,7 +28,9 @@
 
 #if UNITYENGINE
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 
@@ -98,6 +100,25 @@ namespace Point.Collections.Editor
             PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, sum);
         }
 #endif
+
+        public static MonoScript FindScriptFromClassName(string className)
+        {
+            var scriptGUIDs = AssetDatabase.FindAssets($"t:script {className}");
+
+            if (scriptGUIDs.Length == 0)
+                return null;
+
+            foreach (var scriptGUID in scriptGUIDs)
+            {
+                var assetPath = AssetDatabase.GUIDToAssetPath(scriptGUID);
+                var script = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
+
+                if (script != null && string.Equals(className, Path.GetFileNameWithoutExtension(assetPath), StringComparison.OrdinalIgnoreCase))
+                    return script;
+            }
+
+            return null;
+        }
     }
 }
 
