@@ -1,3 +1,6 @@
 [submodule ".native"]
 	path = .native
 	url = https://github.com/Syadeu/Point.Collections.Native.git
+[submodule "Plugins/NodeGraphProcessor"]
+	path = Plugins/NodeGraphProcessor
+	url = https://github.com/Ikinagames/NodeGraphProcessor.git
