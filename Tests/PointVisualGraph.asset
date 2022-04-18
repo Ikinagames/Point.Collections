@@ -1,0 +1,151 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8388694b33b3c784ab23f9949fd818fd, type: 3}
+  m_Name: PointVisualGraph
+  m_EditorClassIdentifier: 
+  serializedNodes: []
+  nodes:
+  - id: 0
+  - id: 1
+  - id: 2
+  - id: 3
+  - id: 4
+  - id: 5
+  - id: 6
+  edges: []
+  groups: []
+  stackNodes: []
+  pinnedElements: []
+  exposedParameters: []
+  serializedParameterList: []
+  stickyNotes: []
+  nodeInspectorReference: {fileID: 0}
+  position: {x: -36, y: 64, z: 0}
+  scale: {x: 1, y: 1, z: 1}
+  references:
+    version: 1
+    00000000:
+      type: {class: GameObjectNode, ns: Point.Collections.Graphs, asm: Point.Collections}
+      data:
+        nodeCustomName: 
+        GUID: 232ae299-d838-4c91-a36f-b52362bae313
+        computeOrder: 0
+        position:
+          serializedVersion: 2
+          x: 198
+          y: 378
+          width: 308
+          height: 95
+        expanded: 0
+        debug: 0
+        nodeLock: 0
+        output: {fileID: 0}
+    00000001:
+      type: {class: ColorNode, ns: Point.Collections.Graphs, asm: Point.Collections}
+      data:
+        nodeCustomName: 
+        GUID: 981222c6-60a9-42c2-8194-35fb7c86ae0d
+        computeOrder: 1
+        position:
+          serializedVersion: 2
+          x: 189
+          y: 47.160004
+          width: 200
+          height: 95
+        expanded: 0
+        debug: 0
+        nodeLock: 0
+        color: {r: 0, g: 0, b: 0, a: 0}
+    00000002:
+      type: {class: FloatNode, ns: Point.Collections.Graphs, asm: Point.Collections}
+      data:
+        nodeCustomName: 
+        GUID: 63d5d65f-1d74-4c64-a60a-8fa7b15c0ac5
+        computeOrder: 2
+        position:
+          serializedVersion: 2
+          x: 404
+          y: 43.160004
+          width: 102
+          height: 99
+        expanded: 0
+        debug: 0
+        nodeLock: 0
+        output: 0
+        input: 0
+    00000003:
+      type: {class: StringNode, ns: Point.Collections.Graphs, asm: Point.Collections}
+      data:
+        nodeCustomName: 
+        GUID: 143238ac-4cfa-42f7-9a43-a771def79777
+        computeOrder: 3
+        position:
+          serializedVersion: 2
+          x: 536
+          y: 47.160004
+          width: 214
+          height: 177
+        expanded: 0
+        debug: 0
+        nodeLock: 0
+        output: 
+    00000004:
+      type: {class: Vector2Node, ns: Point.Collections.Graphs, asm: Point.Collections}
+      data:
+        nodeCustomName: 
+        GUID: 5f0cbbe6-3352-48dd-b09e-b29162b90daf
+        computeOrder: 4
+        position:
+          serializedVersion: 2
+          x: 206
+          y: 252
+          width: 100
+          height: 100
+        expanded: 0
+        debug: 0
+        nodeLock: 0
+        output: {x: 0, y: 0}
+        input: {x: 0, y: 0}
+    00000005:
+      type: {class: Vector3Node, ns: Point.Collections.Graphs, asm: Point.Collections}
+      data:
+        nodeCustomName: 
+        GUID: c82d23a5-ba93-4b0f-a369-11b56413a9da
+        computeOrder: 5
+        position:
+          serializedVersion: 2
+          x: 444
+          y: 252
+          width: 102
+          height: 75
+        expanded: 0
+        debug: 0
+        nodeLock: 0
+        output: {x: 0, y: 0, z: 0}
+        input: {x: 0, y: 0, z: 0}
+    00000006:
+      type: {class: Vector4Node, ns: Point.Collections.Graphs, asm: Point.Collections}
+      data:
+        nodeCustomName: 
+        GUID: dd0dba20-5602-45ce-8582-9ca73b87a3d3
+        computeOrder: 6
+        position:
+          serializedVersion: 2
+          x: 724
+          y: 252
+          width: 102
+          height: 75
+        expanded: 0
+        debug: 0
+        nodeLock: 0
+        output: {x: 0, y: 0, z: 0, w: 0}
+        input: {x: 0, y: 0, z: 0, w: 0}

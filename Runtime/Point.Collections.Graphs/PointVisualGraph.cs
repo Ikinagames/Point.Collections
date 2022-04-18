@@ -19,17 +19,15 @@
 #endif
 #define UNITYENGINE
 
+using GraphProcessor;
 using System;
-using System.Collections.Generic;
-using UnityEditor;
-using UnityEditor.AnimatedValues;
 #if UNITY_MATHEMATICS
-using Unity.Mathematics;
 #endif
 
 namespace Point.Collections.Graphs
 {
-    internal class Class1
+    [Serializable]
+    public class PointVisualGraph : BaseGraph
     {
     }
 }
