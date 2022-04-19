@@ -25,17 +25,12 @@ using System.Linq;
 
 namespace Point.Collections.Graphs
 {
-    public class VisualGraphLogicProcessor : BaseGraphProcessor
+    public class VisualGraphLogicProcessor : VisualGraphProcessor
     {
         private EntryNode[] m_EntryNodes;
 
-        public VisualGraphLogicProcessor() : base(null) { }
         public VisualGraphLogicProcessor(VisualGraph graph) : base(graph)
         {
-        }
-        public void Initialize(VisualGraph graph)
-        {
-            this.graph = graph;
         }
         public override void Run()
         {
@@ -59,6 +54,29 @@ namespace Point.Collections.Graphs
                 Execute(outputNode);
             }
         }
+    }
+    public abstract class VisualGraphProcessor : BaseGraphProcessor
+    {
+        protected VisualGraphProcessor(BaseGraph graph) : base(graph) { }
+
+        internal void Initialize(object caller)
+        {
+            OnInitialize(caller);
+        }
+        internal void Reserve()
+        {
+            OnReserve();
+        }
+
+        /// <summary>
+        /// 프로세서가 실행되기전 가장 처음으로 실행되는 함수입니다.
+        /// </summary>
+        /// <param name="caller"></param>
+        protected virtual void OnInitialize(object caller) { }
+        /// <summary>
+        /// 프로세서가 모두 동작하고, 맨 마지막에 실행되는 함수입니다.
+        /// </summary>
+        protected virtual void OnReserve() { }
     }
 }
 

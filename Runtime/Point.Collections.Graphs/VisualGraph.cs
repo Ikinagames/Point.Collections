@@ -27,6 +27,46 @@ namespace Point.Collections.Graphs
     [Serializable]
     public class VisualGraph : BaseGraph
     {
+        const string c_This = "This";
+
+        private ExposedParameter m_ThisParameter;
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            m_ThisParameter = GetExposedParameter(c_This);
+        }
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            m_ThisParameter = null;
+        }
+        public virtual void Execute(object caller, VisualGraphProcessor processor)
+        {
+            OnInitialize();
+
+            OnExecute();
+
+            m_ThisParameter.value = caller;
+
+            processor.Initialize(caller);
+            {
+                processor.UpdateComputeOrder();
+                processor.Run();
+            }
+            processor.Reserve();
+        }
+
+        /// <summary>
+        /// <see cref="VisualGraph"/> 가 실행되기전 함수입니다.
+        /// </summary>
+        protected virtual void OnInitialize() { }
+        /// <summary>
+        /// <see cref="VisualGraph"/> 가 실행될때 직전 함수입니다.
+        /// </summary>
+        protected virtual void OnExecute() { }
     }
 }
 

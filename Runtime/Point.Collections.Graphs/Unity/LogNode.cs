@@ -19,13 +19,42 @@
 #endif
 #define UNITYENGINE
 
+using UnityEngine;
+using GraphProcessor;
 using System;
+#if UNITY_MATHEMATICS
+#endif
 
 namespace Point.Collections.Graphs
 {
-    [Serializable]
-    public class VisualLogicGraph : VisualGraph
+    [Serializable, NodeMenuItem("Debug/Log")]
+    public sealed class LogNode : BaseNode
     {
+        [Input]
+        private ConditionalLink link;
+        [SerializeField, Input(name = "Log")]
+        private string log;
+
+        [SerializeField, Setting("Log Type")]
+        private LogType logType = LogType.Log;
+
+        public override string name => "Log";
+
+        protected override void Process()
+        {
+            if (logType == LogType.Log)
+            {
+                Debug.Log(log);
+            }
+            else if (logType == LogType.Warning)
+            {
+                Debug.LogWarning(log);
+            }
+            else
+            {
+                Debug.LogError(log);
+            }
+        }
     }
 }
 

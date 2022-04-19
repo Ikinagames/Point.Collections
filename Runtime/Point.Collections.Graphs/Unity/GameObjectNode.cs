@@ -40,11 +40,6 @@ namespace Point.Collections.Graphs
             return true;
         }
     }
-
-    public class IsVisbie : BaseNode
-    {
-
-    }
 }
 
 #endif
