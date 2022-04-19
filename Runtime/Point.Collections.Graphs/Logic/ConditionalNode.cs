@@ -37,7 +37,8 @@ namespace Point.Collections.Graphs
 		[Input(name = "Executed", allowMultiple = true)]
 		public ConditionalLink executed;
 
-		public abstract IEnumerable<ConditionalNode> GetExecutedNodes();
+		/// <inheritdoc cref="IConditionalNode.GetExecutableNodes"/>
+		public abstract IEnumerable<BaseNode> GetExecutableNodes();
 
 		// Assure that the executed field is always at the top of the node port section
 		public override FieldInfo[] GetNodeFields()

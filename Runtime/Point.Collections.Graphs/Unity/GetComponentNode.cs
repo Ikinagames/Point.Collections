@@ -19,33 +19,41 @@
 #endif
 #define UNITYENGINE
 
-using GraphProcessor;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using UnityEngine;
+using GraphProcessor;
+#if UNITY_MATHEMATICS
+#endif
 
 namespace Point.Collections.Graphs
 {
-    [Serializable, NodeMenuItem("Logic/Entry")]
-    public class EntryNode : BaseNode, IConditionalNode
+    [System.Serializable, NodeMenuItem("Unity/Get Component")]
+    public class GetComponentNode : BaseNode
     {
-        [SerializeField, Output("Out")]
-        public bool block;
-		[Output(name = "Executes")]
-		public ConditionalLink executes;
+        [Input(name = "Target")]
+        private UnityEngine.Object target;
+        [SerializeField, Input(name = "Type")]
+        public string type;
 
-		public override string name => "Entry";
+        [Output(name = "Output")]
+        private Component output;
 
-        public EntryNode() : base() { }
-
-        public IEnumerable<BaseNode> GetExecutableNodes()
+        protected override void Process()
         {
-            return GetOutputNodes();
-		}
-		public override FieldInfo[] GetNodeFields() => base.GetNodeFields();
-	}
+            if (type.IsNullOrEmpty() || target == null) return;
+
+            //Type t = Type.GetType(m_Type);
+            
+            if (target is GameObject gameObject)
+            {
+                output = gameObject.GetComponent(type);
+                return;
+            }
+            else if (target is Component component)
+            {
+                output = component.GetComponent(type);
+            }
+        }
+    }
 }
 
 #endif

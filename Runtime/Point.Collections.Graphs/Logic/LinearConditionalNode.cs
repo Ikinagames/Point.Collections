@@ -34,11 +34,11 @@ namespace Point.Collections.Graphs
 		[Output(name = "Executes")]
 		public ConditionalLink executes;
 
-		public override IEnumerable<ConditionalNode> GetExecutedNodes()
+		public override IEnumerable<BaseNode> GetExecutableNodes()
 		{
 			// Return all the nodes connected to the executes port
 			return outputPorts.FirstOrDefault(n => n.fieldName == nameof(executes))
-				.GetEdges().Select(e => e.inputNode as ConditionalNode);
+				.GetEdges().Select(e => e.inputNode as BaseNode);
 		}
 	}
 }

@@ -19,6 +19,7 @@
 #endif
 #define UNITYENGINE
 
+using GraphProcessor;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -26,7 +27,11 @@ namespace Point.Collections.Graphs
 {
     interface IConditionalNode
 	{
-		IEnumerable<ConditionalNode> GetExecutedNodes();
+		/// <summary>
+		/// 이 노드에서 다음 노드로 갈 수 있는 노드를 지정합니다.
+		/// </summary>
+		/// <returns></returns>
+		IEnumerable<BaseNode> GetExecutableNodes();
 
 		FieldInfo[] GetNodeFields(); // Provide a custom order for fields (so conditional links are always at the top of the node)
 	}

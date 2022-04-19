@@ -22,6 +22,7 @@
 using GraphProcessor;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Point.Collections.Graphs
 {
@@ -47,25 +48,61 @@ namespace Point.Collections.Graphs
 
         private void Execute(BaseNode current)
         {
-            current.OnProcess();
-
-            foreach (var outputNode in current.GetOutputNodes())
+            try
             {
-                Execute(outputNode);
+                current.OnProcess();
+            }
+            catch (System.Exception ex)
+            {
+                PointHelper.LogError(Channel.Core, 
+                    $"Fatal Error. From {caller.GetType().Name}");
+                Debug.LogException(ex);
+
+                return;
+            }
+
+            if (current is IConditionalNode conditional)
+            {
+                var iter = conditional.GetExecutableNodes();
+                if (!iter.Any())
+                {
+                    $"?? {current.name}".ToLogError();
+                    return;
+                }
+
+                foreach (var outputNode in iter)
+                {
+                    Execute(outputNode);
+                }
+            }
+            else
+            {
+                foreach (var outputNode in current.GetOutputNodes())
+                {
+                    Execute(outputNode);
+                }
             }
         }
     }
     public abstract class VisualGraphProcessor : BaseGraphProcessor
     {
+        private object m_Caller;
+
+        protected object caller => m_Caller;
+
         protected VisualGraphProcessor(BaseGraph graph) : base(graph) { }
 
         internal void Initialize(object caller)
         {
+            m_Caller = caller;
+
             OnInitialize(caller);
         }
         internal void Reserve()
         {
             OnReserve();
+
+            m_Caller = null;
         }
 
         /// <summary>

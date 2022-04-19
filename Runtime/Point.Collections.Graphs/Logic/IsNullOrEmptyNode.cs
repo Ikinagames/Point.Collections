@@ -23,29 +23,32 @@ using GraphProcessor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 
 namespace Point.Collections.Graphs
 {
-    [Serializable, NodeMenuItem("Logic/Entry")]
-    public class EntryNode : BaseNode, IConditionalNode
+    [Serializable, NodeMenuItem("Logic/Conditional/IsNullOrEmpty")]
+	public sealed class IsNullOrEmptyNode : ConditionalNode
     {
-        [SerializeField, Output("Out")]
-        public bool block;
-		[Output(name = "Executes")]
-		public ConditionalLink executes;
+		[Input(name = "Object")]
+		public object obj;
 
-		public override string name => "Entry";
+		[Output(name = "True")]
+		public ConditionalLink @true;
+		[Output(name = "False")]
+		public ConditionalLink @false;
 
-        public EntryNode() : base() { }
+		public override string name => "Is Null or Empty";
 
-        public IEnumerable<BaseNode> GetExecutableNodes()
+        public override IEnumerable<BaseNode> GetExecutableNodes()
         {
-            return GetOutputNodes();
+			bool condition = obj == null;
+			string fieldName = condition ? nameof(@true) : nameof(@false);
+
+			return outputPorts.FirstOrDefault(n => n.fieldName.Equals(fieldName, StringComparison.InvariantCultureIgnoreCase))
+				.GetEdges().Select(e => e.inputNode as BaseNode);
 		}
-		public override FieldInfo[] GetNodeFields() => base.GetNodeFields();
-	}
+    }
 }
 
 #endif

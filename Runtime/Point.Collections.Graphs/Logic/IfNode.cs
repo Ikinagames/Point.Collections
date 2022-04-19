@@ -43,13 +43,13 @@ namespace Point.Collections.Graphs
 
 		public override string name => "If";
 
-		public override IEnumerable<ConditionalNode> GetExecutedNodes()
+		public override IEnumerable<BaseNode> GetExecutableNodes()
 		{
 			string fieldName = condition ? nameof(@true) : nameof(@false);
 
 			// Return all the nodes connected to either the true or false node
 			return outputPorts.FirstOrDefault(n => n.fieldName == fieldName)
-				.GetEdges().Select(e => e.inputNode as ConditionalNode);
+				.GetEdges().Select(e => e.inputNode as BaseNode);
 		}
 	}
 }
