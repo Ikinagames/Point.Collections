@@ -42,7 +42,14 @@ namespace Point.Collections.Graphs
 
         public override IEnumerable<BaseNode> GetExecutableNodes()
         {
-			bool condition = obj == null;
+			bool condition;
+			if (obj == null ||
+				(obj is IEmpty empty && empty.IsEmpty()))
+			{
+				condition = true;
+			}
+			else condition = false;
+
 			string fieldName = condition ? nameof(@true) : nameof(@false);
 
 			return outputPorts.FirstOrDefault(n => n.fieldName.Equals(fieldName, StringComparison.InvariantCultureIgnoreCase))
