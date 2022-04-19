@@ -32,7 +32,7 @@ using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
 {
-    [CustomEditor(typeof(PointVisualGraph), true)]
+    [CustomEditor(typeof(VisualGraph), true)]
     public class VisualGraphAssetInspector : GraphInspector
     {
         // protected override void CreateInspector()
@@ -43,7 +43,7 @@ namespace Point.Collections.Editor
         {
             base.CreateInspector();
 
-            root.Add(new Button(() => EditorWindow.GetWindow<PointVisualGraphWindow>().InitializeGraph(target as BaseGraph))
+            root.Add(new Button(() => EditorWindow.GetWindow<VisualGraphWindow>().InitializeGraph(target as BaseGraph))
             {
                 text = "Open base graph window"
             });

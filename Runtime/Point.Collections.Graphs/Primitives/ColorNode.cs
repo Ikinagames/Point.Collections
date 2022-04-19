@@ -19,16 +19,20 @@
 #endif
 #define UNITYENGINE
 
+using UnityEngine;
 using GraphProcessor;
-using System;
 #if UNITY_MATHEMATICS
 #endif
 
 namespace Point.Collections.Graphs
 {
-    [Serializable]
-    public class PointVisualGraph : BaseGraph
+    [System.Serializable, NodeMenuItem("Primitives/Color")]
+    public class ColorNode : BaseNode
     {
+        [Output(name = "Color"), SerializeField]
+        new public Color color;
+
+        public override string name => "Color";
     }
 }
 

@@ -33,15 +33,15 @@ using UnityEngine;
 
 namespace Point.Collections.Editor
 {
-    public static class PointVisualGraphAssetCallbacks
+    public static class VisualGraphAssetCallbacks
     {
         [MenuItem("Assets/Create/Point/Graphs/Visual Graph", false, 0)]
         public static void CreateGraphPorcessor()
         {
-            CreateGraphAsset<PointVisualGraph>();
+            CreateGraphAsset<VisualGraph>();
         }
 
-        private static T CreateGraphAsset<T>() where T : PointVisualGraph
+        private static T CreateGraphAsset<T>() where T : VisualGraph
         {
             if (TypeHelper.TypeOf<T>.IsAbstract || TypeHelper.TypeOf<T>.Type.IsInterface)
             {
@@ -62,9 +62,9 @@ namespace Point.Collections.Editor
             var asset = EditorUtility.InstanceIDToObject(instanceID) as BaseGraph;
 
             //if (asset != null && AssetDatabase.GetAssetPath(asset).Contains("Examples"))
-            if (asset != null && asset is PointVisualGraph baseGraph)
+            if (asset != null && asset is VisualGraph baseGraph)
             {
-                EditorWindow.GetWindow<PointVisualGraphWindow>().InitializeGraph(baseGraph);
+                EditorWindow.GetWindow<VisualGraphWindow>().InitializeGraph(baseGraph);
                 return true;
             }
             return false;

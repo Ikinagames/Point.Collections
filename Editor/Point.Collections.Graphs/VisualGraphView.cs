@@ -32,9 +32,9 @@ using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
 {
-    public class PointVisualGraphView : BaseGraphView
+    public class VisualGraphView : BaseGraphView
     {
-        public PointVisualGraphView(EditorWindow window) : base(window)
+        public VisualGraphView(EditorWindow window) : base(window)
         {
         }
 

@@ -32,7 +32,7 @@ using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
 {
-    public class PointVisualGraphWindow : BaseGraphWindow
+    public class VisualGraphWindow : BaseGraphWindow
     {
         protected override void OnDestroy()
         {
@@ -44,7 +44,7 @@ namespace Point.Collections.Editor
             titleContent = new GUIContent("Default Graph");
 
             // Here you can use the default BaseGraphView or a custom one (see section below)
-            var graphView = new PointVisualGraphView(this);
+            var graphView = new VisualGraphView(this);
 
             GridBackground background = new GridBackground();
             graphView.Insert(0, background);
