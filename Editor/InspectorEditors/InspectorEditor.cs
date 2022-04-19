@@ -55,7 +55,7 @@ namespace Point.Collections.Editor
             return property.FindPropertyRelative(name);
         }
 
-        public virtual string GetHeaderName() => TypeHelper.ToString(target.GetType());
+        public virtual string GetHeaderName() => ObjectNames.NicifyVariableName(TypeHelper.ToString(target.GetType()));
         public override sealed void OnInspectorGUI()
         {
             EditorUtilities.StringHeader(GetHeaderName());

@@ -25,8 +25,8 @@
 
 #if UNITYENGINE
 
-using GraphProcessor;
 using Point.Collections.Graphs;
+using System;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
@@ -36,38 +36,70 @@ namespace Point.Collections.Editor
     public static class VisualGraphAssetCallbacks
     {
         [MenuItem("Assets/Create/Point/Graphs/Visual Graph", false, 0)]
-        public static void CreateGraphPorcessor()
+        public static void CreateGraphProcessor()
         {
-            CreateGraphAsset<VisualGraph>();
+            CreateGraphAsset<VisualGraph>(true);
         }
-
-        private static T CreateGraphAsset<T>() where T : VisualGraph
+        [MenuItem("Assets/Create/Point/Graphs/Visual Logic Graph", false, 1)]
+        public static void CreateLogicGraphProcessor()
         {
-            if (TypeHelper.TypeOf<T>.IsAbstract || TypeHelper.TypeOf<T>.Type.IsInterface)
+            CreateGraphAsset<VisualLogicGraph>(true);
+        }
+        
+        public static VisualGraph CreateGraphAsset(Type type, bool save)
+        {
+            if (type.IsAbstract || type.IsInterface)
             {
                 PointHelper.LogError(Channel.Editor,
-                    $"Cannot create asset({TypeHelper.TypeOf<T>.ToString()}) is abstract.");
+                    $"Cannot create asset({TypeHelper.ToString(type)}) is abstract.");
                 return null;
             }
 
-            T graph = ScriptableObject.CreateInstance<T>();
-            ProjectWindowUtil.CreateAsset(graph, $"{TypeHelper.TypeOf<T>.ToString()}.asset");
+            VisualGraph graph = (VisualGraph)ScriptableObject.CreateInstance(type);
+            if (save)
+            {
+                ProjectWindowUtil.CreateAsset(graph, $"{TypeHelper.ToString(type)}.asset");
+            }
+
+            if (graph is VisualLogicGraph logicGraph)
+            {
+                EntryNode entryNode = new EntryNode();
+                entryNode.OnNodeCreated();
+
+                logicGraph.AddNode(entryNode);
+                logicGraph.AddExposedParameter("This", TypeHelper.TypeOf<ObjectExposedParameter>.Type);
+            }
 
             return graph;
         }
+        public static bool OpenGraphAsset(VisualGraph graph)
+        {
+            if (graph == null) return false;
+
+            else if (graph is VisualLogicGraph)
+            {
+                EditorWindow.GetWindow<VisualLogicGraphWindow>().InitializeGraph(graph);
+                return true;
+            }
+
+            else if (graph is VisualGraph)
+            {
+                EditorWindow.GetWindow<VisualGraphWindow>().InitializeGraph(graph);
+                return true;
+            }
+
+            return false;
+        }
+
+        public static T CreateGraphAsset<T>(bool save) where T : VisualGraph => (T)CreateGraphAsset(TypeHelper.TypeOf<T>.Type, save);
 
         [OnOpenAsset(0)]
         public static bool OnBaseGraphOpened(int instanceID, int line)
         {
-            var asset = EditorUtility.InstanceIDToObject(instanceID) as BaseGraph;
+            var asset = EditorUtility.InstanceIDToObject(instanceID) as VisualGraph;
+            if (asset == null) return false;
 
-            //if (asset != null && AssetDatabase.GetAssetPath(asset).Contains("Examples"))
-            if (asset != null && asset is VisualGraph baseGraph)
-            {
-                EditorWindow.GetWindow<VisualGraphWindow>().InitializeGraph(baseGraph);
-                return true;
-            }
-            return false;
+            return OpenGraphAsset(asset);
         }
     }
 }

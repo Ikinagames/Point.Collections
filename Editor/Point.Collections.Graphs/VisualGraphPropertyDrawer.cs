@@ -59,13 +59,13 @@ namespace Point.Collections.Editor
 
                     if (Button(ref rect, "Create Default Graph"))
                     {
+                        Undo.RecordObject(property.serializedObject.targetObject, "Create Default Graph");
+
                         ScriptableObject obj
-                            = ScriptableObject.CreateInstance(property.GetFieldInfo().FieldType);
+                            = VisualGraphAssetCallbacks.CreateGraphAsset(property.GetFieldInfo().FieldType, false);
                         AssetDatabase.AddObjectToAsset(obj, property.serializedObject.targetObject);
 
                         property.objectReferenceValue = obj;
-
-                        AssetDatabase.SaveAssets();
                     }
 
                     if (Button(ref rect, "Create Graph"))
@@ -90,7 +90,9 @@ namespace Point.Collections.Editor
                     }
                     if (Button(ref rect, "Open graph window"))
                     {
-                        EditorWindow.GetWindow<VisualGraphWindow>().InitializeGraph(property.objectReferenceValue as VisualGraph);
+                        VisualGraphAssetCallbacks.OpenGraphAsset(property.objectReferenceValue as VisualGraph);
+
+                        //EditorWindow.GetWindow<VisualGraphWindow>().InitializeGraph(property.objectReferenceValue as VisualGraph);
                     }
                 }
 

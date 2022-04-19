@@ -13,37 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
 
-using UnityEngine;
-using GraphProcessor;
-#if UNITY_MATHEMATICS
-#endif
+using UnityEditor;
 
-namespace Point.Collections.Graphs
+namespace Point.Collections.Editor
 {
-    [System.Serializable, NodeMenuItem("Unity/Game Object")]
-    public sealed class GameObjectNode : BaseNode, ICreateNodeFrom<GameObject>
+    [CustomEditor(typeof(AnimationEventBinder), true)]
+    internal sealed class AnimationEventBinderEditor : InspectorEditor<AnimationEventBinder>
     {
-        [Output(name = "Out"), SerializeField]
-        public GameObject output;
-
-        public override string name => "Game Object";
-
-        public bool InitializeNodeFromObject(GameObject value)
-        {
-            output = value;
-            return true;
-        }
-    }
-
-    public class IsVisbie : BaseNode
-    {
-
     }
 }
 

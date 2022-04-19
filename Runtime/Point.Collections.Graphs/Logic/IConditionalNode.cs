@@ -19,32 +19,17 @@
 #endif
 #define UNITYENGINE
 
-using UnityEngine;
-using GraphProcessor;
-#if UNITY_MATHEMATICS
-#endif
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace Point.Collections.Graphs
 {
-    [System.Serializable, NodeMenuItem("Unity/Game Object")]
-    public sealed class GameObjectNode : BaseNode, ICreateNodeFrom<GameObject>
-    {
-        [Output(name = "Out"), SerializeField]
-        public GameObject output;
+    interface IConditionalNode
+	{
+		IEnumerable<ConditionalNode> GetExecutedNodes();
 
-        public override string name => "Game Object";
-
-        public bool InitializeNodeFromObject(GameObject value)
-        {
-            output = value;
-            return true;
-        }
-    }
-
-    public class IsVisbie : BaseNode
-    {
-
-    }
+		FieldInfo[] GetNodeFields(); // Provide a custom order for fields (so conditional links are always at the top of the node)
+	}
 }
 
 #endif

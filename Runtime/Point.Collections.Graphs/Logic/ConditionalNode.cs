@@ -21,23 +21,32 @@
 
 using GraphProcessor;
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace Point.Collections.Graphs
 {
-    [Serializable]
-    public class VisualGraph : BaseGraph
-    {
-    }
+    [System.Serializable]
+	/// <summary>
+	/// This is the base class for every node that is executed by the conditional processor, it takes an executed bool as input to 
+	/// </summary>
+	public abstract class ConditionalNode : BaseNode, IConditionalNode
+	{
+		// These booleans will controls wether or not the execution of the folowing nodes will be done or discarded.
+		[Input(name = "Executed", allowMultiple = true)]
+		public ConditionalLink executed;
 
-    public abstract class VisualExposedParameter : ExposedParameter { }
+		public abstract IEnumerable<ConditionalNode> GetExecutedNodes();
 
-    [Serializable]
-    public class ObjectExposedParameter : VisualExposedParameter
-    {
-        [SerializeField, Output("Object")]
-        private UnityEngine.Object m_Object;
-    }
+		// Assure that the executed field is always at the top of the node port section
+		public override FieldInfo[] GetNodeFields()
+		{
+			var fields = base.GetNodeFields();
+			Array.Sort(fields, (f1, f2) => f1.Name == nameof(executed) ? -1 : 1);
+			return fields;
+		}
+	}
 }
 
 #endif

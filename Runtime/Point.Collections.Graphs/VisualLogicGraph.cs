@@ -19,31 +19,37 @@
 #endif
 #define UNITYENGINE
 
-using UnityEngine;
-using GraphProcessor;
-#if UNITY_MATHEMATICS
-#endif
+using System;
 
 namespace Point.Collections.Graphs
 {
-    [System.Serializable, NodeMenuItem("Unity/Game Object")]
-    public sealed class GameObjectNode : BaseNode, ICreateNodeFrom<GameObject>
+    [Serializable]
+    public class VisualLogicGraph : VisualGraph
     {
-        [Output(name = "Out"), SerializeField]
-        public GameObject output;
+        const string c_This = "This";
 
-        public override string name => "Game Object";
-
-        public bool InitializeNodeFromObject(GameObject value)
+        public void InitializeLogicGraph(UnityEngine.Object @this)
         {
-            output = value;
-            return true;
+            SetParameterValue(c_This, @this);
+        }
+        public void Reserve()
+        {
+            SetParameterValue(c_This, null);
         }
     }
 
-    public class IsVisbie : BaseNode
+    public static class VisualLogicGraphExtensions
     {
+        public static void Execute(this VisualLogicGraph t, UnityEngine.Object @this)
+        {
+            t.InitializeLogicGraph(@this);
 
+            VisualGraphLogicProcessor p = new VisualGraphLogicProcessor(t);
+            p.UpdateComputeOrder();
+            p.Run();
+
+            t.Reserve();
+        }
     }
 }
 

@@ -19,22 +19,10 @@
 #endif
 #define UNITYENGINE
 
-using GraphProcessor;
-using System;
-using UnityEngine;
-#if UNITY_MATHEMATICS
-#endif
 
 namespace Point.Collections.Graphs
 {
-    [Serializable, NodeMenuItem("Logic/Entry")]
-    public class EntryNode : BaseNode
-    {
-        [SerializeField, Output("Out")]
-        public bool block;
-
-        public override string name => "Entry";
-    }
+    public struct ConditionalLink { }
 }
 
 #endif
