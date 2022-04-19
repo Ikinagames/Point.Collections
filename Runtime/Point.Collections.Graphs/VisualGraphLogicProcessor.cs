@@ -20,6 +20,7 @@
 #define UNITYENGINE
 
 using GraphProcessor;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Point.Collections.Graphs

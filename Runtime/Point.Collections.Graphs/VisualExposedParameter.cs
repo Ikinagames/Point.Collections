@@ -20,14 +20,10 @@
 #define UNITYENGINE
 
 using GraphProcessor;
-using System;
 
 namespace Point.Collections.Graphs
 {
-    [Serializable]
-    public class VisualGraph : BaseGraph
-    {
-    }
+    public abstract class VisualExposedParameter : ExposedParameter { }
 }
 
 #endif

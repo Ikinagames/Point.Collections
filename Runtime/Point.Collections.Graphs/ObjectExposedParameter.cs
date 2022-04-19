@@ -21,12 +21,18 @@
 
 using GraphProcessor;
 using System;
+using UnityEngine;
 
 namespace Point.Collections.Graphs
 {
     [Serializable]
-    public class VisualGraph : BaseGraph
+    public class ObjectExposedParameter : VisualExposedParameter
     {
+        [SerializeField, Output("Object")]
+        private UnityEngine.Object m_Object;
+
+        public override Type GetValueType() => TypeHelper.TypeOf<UnityEngine.Object>.Type;
+        public override object value { get => m_Object; set => m_Object = (UnityEngine.Object)value; }
     }
 }
 

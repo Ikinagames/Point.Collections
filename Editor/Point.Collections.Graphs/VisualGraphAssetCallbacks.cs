@@ -67,7 +67,8 @@ namespace Point.Collections.Editor
                 entryNode.OnNodeCreated();
 
                 logicGraph.AddNode(entryNode);
-                logicGraph.AddExposedParameter("This", TypeHelper.TypeOf<ObjectExposedParameter>.Type);
+                string paramGuid = logicGraph.AddExposedParameter("This", TypeHelper.TypeOf<ObjectExposedParameter>.Type);
+                //var param = logicGraph.GetExposedParameterFromGUID(paramGuid);
             }
 
             return graph;
