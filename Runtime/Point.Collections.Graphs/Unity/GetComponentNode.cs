@@ -42,8 +42,8 @@ namespace Point.Collections.Graphs
         {
             if (target == null)
             {
-                PointHelper.LogError(Channel.Core,
-                    $"Input is null.");
+                //PointHelper.LogError(Channel.Core,
+                //    $"Input is null.");
                 return;
             }
             else if (!TypeHelper.InheritsFrom<UnityEngine.Object>(target.GetType()))
