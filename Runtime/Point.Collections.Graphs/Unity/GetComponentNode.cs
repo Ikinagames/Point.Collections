@@ -21,37 +21,63 @@
 
 using UnityEngine;
 using GraphProcessor;
+using System.Collections.Generic;
+using System.Linq;
 #if UNITY_MATHEMATICS
 #endif
 
 namespace Point.Collections.Graphs
 {
     [System.Serializable, NodeMenuItem("Unity/Get Component")]
-    public class GetComponentNode : BaseNode
+    public abstract class GetComponentNode<TComponent> : BaseNode
+        where TComponent : Component
     {
         [Input(name = "Target")]
-        private UnityEngine.Object target;
-        [SerializeField, Input(name = "Type")]
-        public string type;
+        protected object target;
 
         [Output(name = "Output")]
-        private Component output;
+        protected TComponent output;
 
-        protected override void Process()
+        protected override sealed void Process()
         {
-            if (type.IsNullOrEmpty() || target == null) return;
+            if (target == null)
+            {
+                PointHelper.LogError(Channel.Core,
+                    $"Input is null.");
+                return;
+            }
+            else if (!TypeHelper.InheritsFrom<UnityEngine.Object>(target.GetType()))
+            {
+                PointHelper.LogError(Channel.Core,
+                    $"Input({TypeHelper.ToString(target.GetType())}) is not inherits from {nameof(UnityEngine.Object)}. ");
+                return;
+            }
 
-            //Type t = Type.GetType(m_Type);
-            
             if (target is GameObject gameObject)
             {
-                output = gameObject.GetComponent(type);
-                return;
+                output = gameObject.GetComponentInChildren<TComponent>();
             }
             else if (target is Component component)
             {
-                output = component.GetComponent(type);
+                output = component.GetComponent<TComponent>();
             }
+        }
+
+        [CustomPortInput(nameof(target), typeof(UnityEngine.Object))]
+        public void PullInputs(List<SerializableEdge> edges)
+        {
+            "pull input executed".ToLog();
+
+            if (edges.Count != 1)
+            {
+                target = null;
+                return;
+            }
+
+            target = (UnityEngine.Object)edges[0].passThroughBuffer;
+
+            ParameterNode node = (ParameterNode)edges[0].outputNode;
+            $"{node.parameterGUID} :: {node.parameter?.ToString()} :: {node.parameter ?.value} :: {edges[0].passThroughBuffer}".ToLog();
         }
     }
 }

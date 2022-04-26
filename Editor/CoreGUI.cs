@@ -143,6 +143,24 @@ namespace Point.Collections.Editor
             Rect rect = GUILayoutUtility.GetRect(text, style, options);
             EditorGUI.LabelField(rect, text, style);
         }
+        public static void Label(GUIContent text, int size, TextAnchor textAnchor = TextAnchor.MiddleLeft, params GUILayoutOption[] options)
+        {
+            GUIStyle style = GetLabelStyle(textAnchor);
+            GUIContent content = new GUIContent(text);
+            content.text = HTMLString.String(text.text, size);
+
+            Rect rect = GUILayoutUtility.GetRect(content, style, options);
+            EditorGUI.LabelField(rect, content, style);
+        }
+        public static void Label(GUIContent text, int size, StringColor color, TextAnchor textAnchor = TextAnchor.MiddleLeft, params GUILayoutOption[] options)
+        {
+            GUIStyle style = GetLabelStyle(textAnchor);
+            GUIContent content = new GUIContent(text);
+            content.text = HTMLString.String(text.text, color, size);
+
+            Rect rect = GUILayoutUtility.GetRect(content, style, options);
+            EditorGUI.LabelField(rect, content, style);
+        }
         public static void Label(GUIContent text1, GUIContent text2, TextAnchor textAnchor = TextAnchor.MiddleLeft, params GUILayoutOption[] options)
         {
             GUIStyle style = GetLabelStyle(textAnchor);

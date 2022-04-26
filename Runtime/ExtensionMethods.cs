@@ -15,6 +15,7 @@
 
 using System;
 using System.Linq;
+using UnityEngine;
 
 namespace Point.Collections
 {
@@ -89,6 +90,20 @@ namespace Point.Collections
 
             return sum;
         }
+
+        #endregion
+
+        #region Monobehaviour
+
+        public static T GetOrAddComponent<T>(this GameObject t)
+            where T : UnityEngine.Component
+        {
+            T p = t.GetComponent<T>();
+            if (p == null) p = t.AddComponent<T>();
+
+            return p;
+        }
+        public static T GetOrAddComponent<T>(this Transform t) where T : UnityEngine.Component => t.gameObject.GetOrAddComponent<T>();
 
         #endregion
     }

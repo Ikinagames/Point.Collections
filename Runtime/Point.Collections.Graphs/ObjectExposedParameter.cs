@@ -21,18 +21,29 @@
 
 using GraphProcessor;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Point.Collections.Graphs
 {
     [Serializable]
-    public class ObjectExposedParameter : VisualExposedParameter
+    public sealed class ObjectExposedParameter : VisualExposedParameter
     {
         [SerializeField, Output("Object")]
         private UnityEngine.Object m_Object;
 
         public override Type GetValueType() => TypeHelper.TypeOf<UnityEngine.Object>.Type;
         public override object value { get => m_Object; set => m_Object = (UnityEngine.Object)value; }
+
+        [CustomPortOutput(nameof(m_Object), typeof(UnityEngine.Object))]
+        public void PushOutputs(List<SerializableEdge> connectedEdges)
+        {
+            "push objs".ToLog();
+            for (int i = 0; i < connectedEdges.Count; i++)
+            {
+                connectedEdges[i].passThroughBuffer = m_Object;
+            }
+        }
     }
 }
 

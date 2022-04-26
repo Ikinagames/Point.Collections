@@ -36,7 +36,7 @@ namespace Point.Collections
     /// <seealso cref="IStaticInitializer"/> 을 상속받아 추가로 사용자의 추가 행동없이 즉시 생성되도록 할 수 있습니다.
     /// </remarks>
     /// <typeparam name="T"></typeparam>
-    public abstract class StaticMonobehaviour<T> : UnityEngine.MonoBehaviour, IStaticMonobehaviour
+    public abstract class StaticMonobehaviour<T> : PointMonobehaviour, IStaticMonobehaviour
         where T : UnityEngine.MonoBehaviour, IStaticMonobehaviour
     {
         private static T s_Instance;

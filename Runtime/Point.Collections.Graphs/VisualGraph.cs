@@ -29,19 +29,19 @@ namespace Point.Collections.Graphs
     {
         const string c_This = "This";
 
-        private ExposedParameter m_ThisParameter;
+        //private ExposedParameter m_ThisParameter;
 
         protected override void OnEnable()
         {
             base.OnEnable();
 
-            m_ThisParameter = GetExposedParameter(c_This);
+            //m_ThisParameter = GetExposedParameter(c_This);
         }
         protected override void OnDisable()
         {
             base.OnDisable();
 
-            m_ThisParameter = null;
+            //m_ThisParameter = null;
         }
         public virtual void Execute(object caller, VisualGraphProcessor processor)
         {
@@ -49,14 +49,21 @@ namespace Point.Collections.Graphs
 
             OnExecute();
 
-            m_ThisParameter.value = caller;
+            //m_ThisParameter.value = caller;
+            if (!SetParameterValue(c_This, caller))
+            {
+                PointHelper.LogError(Channel.Core,
+                    $"Could not set this parameter of graph.");
+            }
 
+            //$"{GetParameterValue(c_This).ToString()}".ToLog();
             processor.Initialize(caller);
             {
                 processor.UpdateComputeOrder();
                 processor.Run();
             }
             processor.Reserve();
+            SetParameterValue(c_This, null);
         }
 
         /// <summary>

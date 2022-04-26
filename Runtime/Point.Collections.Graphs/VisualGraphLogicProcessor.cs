@@ -66,7 +66,7 @@ namespace Point.Collections.Graphs
                 var iter = conditional.GetExecutableNodes();
                 if (!iter.Any())
                 {
-                    $"?? {current.name}".ToLogError();
+                    //$"?? {current.name}".ToLogError();
                     return;
                 }
 
