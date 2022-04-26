@@ -7,7 +7,8 @@
         "Unity.Collections",
         "Unity.Addressables",
         "Unity.InputSystem",
-        "com.alelievr.NodeGraphProcessor.Runtime"
+        "com.alelievr.NodeGraphProcessor.Runtime",
+        "Unity.Timeline"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
