@@ -70,7 +70,8 @@ namespace Point.Collections
     }
     /// <inheritdoc cref="AssetPathField"/>
     /// <typeparam name="T"></typeparam>
-    public abstract class AssetPathField<T> : AssetPathField, IEquatable<AssetPathField<T>>
+    [Serializable]
+    public class AssetPathField<T> : AssetPathField, IEquatable<AssetPathField<T>>
         where T : UnityEngine.Object
     {
         public override System.Type TargetType => TypeHelper.TypeOf<T>.Type;
@@ -100,6 +101,11 @@ namespace Point.Collections
         public AssetPathField(string path) : base(path) { }
 
         public bool Equals(AssetPathField<T> other) => p_AssetPath.Equals(other.p_AssetPath) && TargetType.Equals(other.TargetType);
+    }
+    [Serializable]
+    public sealed class AudioClipPathField : AssetPathField<AudioClip>
+    {
+        public AudioClipPathField(string path) : base(path) { }
     }
 }
 

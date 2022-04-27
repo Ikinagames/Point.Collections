@@ -451,7 +451,10 @@ namespace Point.Collections.Editor
         public static int ChildCount(this SerializedProperty t)
         {
             var temp = t.Copy();
-            temp.Next(true);
+            if (!temp.Next(true))
+            {
+                return 0;
+            }
 
             int count = 0;
             do

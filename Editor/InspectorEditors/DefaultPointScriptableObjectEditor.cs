@@ -18,28 +18,15 @@
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
-#if UNITY_COLLECTIONS
-#endif
-#else
-#define POINT_COLLECTIONS_NATIVE
-#endif
 
-using Newtonsoft.Json;
-using System;
+using UnityEditor;
 
-namespace Point.Collections.Actions
+namespace Point.Collections.Editor
 {
-    /// <summary>
-    /// <see cref="IConstAction"/>, <see cref="ConstAction{TValue}"/> 을 참조할 수 있는 레퍼런스 입니다.
-    /// </summary>
-    [JsonConverter(typeof(IO.Json.ConstActionReferenceJsonConverter))]
-    public interface IConstActionReference : IEmpty
+    [CustomEditor(typeof(PointScriptableObject), true)]
+    internal sealed class DefaultPointScriptableObjectEditor : InspectorEditor<PointScriptableObject>
     {
-        [JsonIgnore]
-        Guid Guid { get; }
-        [JsonIgnore]
-        object[] Arguments { get; }
-
-        void SetArguments(params object[] args);
     }
 }
+
+#endif
