@@ -366,6 +366,35 @@ namespace Point.Collections.Editor
 
         #endregion
 
+        #region ConstActionReference
+
+        public static void SetConstActionReference(SerializedProperty property, Guid guid, params object[] args)
+        {
+            ConstActionReferenceSetGuid(property, guid);
+            ConstActionReferenceSetArguments(property, args);
+        }
+        public static void ConstActionReferenceSetGuid(SerializedProperty property, Guid guid)
+        {
+            var guidProp = property.FindPropertyRelative("m_Guid");
+            guidProp.stringValue = guid.ToString();
+        }
+        public static void ConstActionReferenceSetArguments(SerializedProperty property, params object[] args)
+        {
+            var argsProp = property.FindPropertyRelative("m_Arguments");
+
+            argsProp.ClearArray();
+            for (int i = 0; i < args.Length; i++)
+            {
+                argsProp.InsertArrayElementAtIndex(0);
+            }
+            for (int i = 0; i < args.Length; i++)
+            {
+                argsProp.GetArrayElementAtIndex(i).managedReferenceValue = args[i];
+            }
+        }
+
+        #endregion
+
 #endif
 
         public static Vector3 GetVector3(this SerializedProperty t)
