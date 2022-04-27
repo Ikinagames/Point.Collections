@@ -460,6 +460,43 @@ namespace Point.Collections.ResourceControl
         }
 
         [NotBurstCompatible]
+        internal static unsafe bool HasAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in FixedString4096Bytes key)
+        {
+            if (!bundleP.Value.loaded)
+            {
+                PointHelper.LogError(LogChannel.Collections,
+                    $"Cound not load asset {key}. Target AssetBundle is not loaded.");
+
+                return false;
+            }
+
+            Hash hash = new Hash(key);
+            if (!Instance.m_MappedAssets.ContainsKey(hash))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        [NotBurstCompatible]
+        internal static unsafe bool HasAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in Hash key)
+        {
+            if (!bundleP.Value.loaded)
+            {
+                PointHelper.LogError(LogChannel.Collections,
+                    $"Cound not load asset {key}. Target AssetBundle is not loaded.");
+
+                return false;
+            }
+
+            if (!Instance.m_MappedAssets.ContainsKey(key))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        [NotBurstCompatible]
         internal static unsafe AssetInfo LoadAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in FixedString4096Bytes key)
         {
             if (!bundleP.Value.loaded)
@@ -473,7 +510,14 @@ namespace Point.Collections.ResourceControl
             }
 
             Hash hash = new Hash(key);
-            Mapped index = Instance.m_MappedAssets[hash];
+            if (!Instance.m_MappedAssets.TryGetValue(hash, out var index))
+            {
+                PointHelper.LogError(LogChannel.Collections,
+                    $"Cound not load asset {key}. Target is not listed in target AssetBundle.");
+
+                return AssetInfo.Invalid;
+            }
+            //Mapped index = Instance.m_MappedAssets[hash];
 
             ref UnsafeAssetInfo assetInfo = ref bundleP.Value.assets.ElementAt(index.assetIndex);
 

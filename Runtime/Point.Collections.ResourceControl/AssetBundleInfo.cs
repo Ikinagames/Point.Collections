@@ -208,6 +208,18 @@ namespace Point.Collections.ResourceControl
             }
         }
 
+        public bool HasAsset(in Hash key)
+        {
+            this.ThrowIfIsNotValid();
+
+            return ResourceManager.HasAsset(pointer, in key);
+        }
+        public bool HasAsset(in FixedString4096Bytes key)
+        {
+            this.ThrowIfIsNotValid();
+
+            return ResourceManager.HasAsset(pointer, in key);
+        }
         public AssetInfo LoadAsset(in FixedString4096Bytes key)
         {
             this.ThrowIfIsNotValid();

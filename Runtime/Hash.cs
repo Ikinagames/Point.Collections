@@ -93,6 +93,13 @@ namespace Point.Collections
             m_Key = key;
 #endif
         }
+        public Hash(FixedString128Bytes key)
+        {
+            m_Value = FNV1a32.Calculate(key);
+#if DEBUG_MODE
+            m_Key = key;
+#endif
+        }
 #endif
 
         public bool Equals(Hash other) => m_Value.Equals(other.m_Value);
