@@ -23,6 +23,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 #else
 using math = Point.Collections.Math;
+using float3 = UnityEngine.Vector3;
 #endif
 #else
 #define POINT_COLLECTIONS_NATIVE

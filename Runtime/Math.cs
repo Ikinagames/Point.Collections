@@ -87,17 +87,7 @@ namespace Point.Collections
             }
             return (float)output;
         }
-#if !UNITYENGINE_OLD
-
-//        [System.Obsolete]
-//        public static long min(in long x, in long y)
-//        {
-//#if !UNITYENGINE_OLD
-//            return Unity.Mathematics.math.min(x, y);
-//#else
-//            return x < y ? x : y;
-//        }
-#else
+#if UNITYENGINE_OLD
         #region Unity.Mathematics
 
         public const float EPSILON = 1.1920929E-07f;
