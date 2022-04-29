@@ -39,7 +39,7 @@ namespace Point.Collections.Editor
         }
         private SerializedProperty GetArgumentsField(SerializedProperty property)
         {
-            return property.FindPropertyRelative("m_Arguments");
+            return property.FindPropertyRelative("m_ArgumentsStr");
         }
 
         protected override void OnInitialize(SerializedProperty property)
@@ -174,12 +174,12 @@ namespace Point.Collections.Editor
                             //     argElement,
                             //     argElement.isExpanded
                             //     );
-                            argElement.managedReferenceValue =
+                            argElement.stringValue =
                                 CoreGUI.AutoField(
                                     AutoRect.Indent(rect.Pop(), 10),
                                     infomation.ArgumentFields[i].FieldType,
                                     ObjectNames.NicifyVariableName(infomation.ArgumentFields[i].Name),
-                                    currentValue.Arguments[i]);
+                                    currentValue.Arguments[i]).ToString();
                         }
                         rect.Indent(-10);
                     }

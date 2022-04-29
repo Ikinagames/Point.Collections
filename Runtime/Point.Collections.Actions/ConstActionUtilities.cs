@@ -82,7 +82,6 @@ namespace Point.Collections.Actions
             private readonly Type m_Type;
             private readonly Type m_ReturnType;
             private readonly FieldInfo[] m_ArgumentFields;
-            //private readonly JsonPropertyAttribute[] m_JsonPropertyAttributes;
 
             public Guid Guid => m_Type.GUID;
             /// <summary>
@@ -94,7 +93,6 @@ namespace Point.Collections.Actions
             /// </summary>
             public Type ReturnType => m_ReturnType;
             public FieldInfo[] ArgumentFields => m_ArgumentFields;
-            //public JsonPropertyAttribute[] JsonAttributes => m_JsonPropertyAttributes;
 
             internal Info(Type type)
             {
@@ -103,18 +101,14 @@ namespace Point.Collections.Actions
 
                 var iter
                     = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
-                    //.Where(t => t.GetCustomAttribute<JsonPropertyAttribute>() != null);
                 if (iter.Any())
                 {
                     m_ArgumentFields = iter.ToArray();
                     Array.Sort(m_ArgumentFields, comparer: new JsonPropertyComparer());
-
-                    //m_JsonPropertyAttributes = m_ArgumentFields.Select(t => t.GetCustomAttribute<JsonPropertyAttribute>()).ToArray();
                 }
                 else
                 {
                     m_ArgumentFields = Array.Empty<FieldInfo>();
-                    //m_JsonPropertyAttributes = Array.Empty<JsonPropertyAttribute>();
                 }
             }
 

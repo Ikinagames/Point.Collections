@@ -28,6 +28,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Point.Collections.Actions
 {
@@ -71,18 +72,19 @@ namespace Point.Collections.Actions
         }
     }
 
-    public abstract class ConstActionReferenceBase : IConstActionReference
+    public abstract class ConstActionReferenceBase : IConstActionReference, ISerializationCallbackReceiver
     {
 #if UNITYENGINE
         [UnityEngine.SerializeField]
 #endif
-        [JsonProperty(Order = 0, PropertyName = "Guid")]
         protected string m_Guid = String.Empty;
 #if UNITYENGINE
         [UnityEngine.SerializeReference]
 #endif
-        [JsonProperty(Order = 1, PropertyName = "Arguments")]
         protected object[] m_Arguments = Array.Empty<object>();
+
+        [SerializeField]
+        private string[] m_ArgumentsStr = Array.Empty<string>();
 
         public Guid Guid
         {
@@ -93,8 +95,39 @@ namespace Point.Collections.Actions
             }
         }
         public object[] Arguments => m_Arguments;
-
+        
         public bool IsEmpty() => m_Guid.Equals(Guid.Empty);
         public void SetArguments(params object[] args) => m_Arguments = args;
+
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
+        {
+            if (m_Arguments.Length == 0) return;
+
+            if (m_ArgumentsStr.Length != m_Arguments.Length)
+            {
+                Array.Resize(ref m_ArgumentsStr, m_Arguments.Length);
+            }
+
+            for (int i = 0; i < m_Arguments.Length; i++)
+            {
+                m_ArgumentsStr[i] = m_Arguments[i].ToString();
+            }
+        }
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
+        {
+            if (!ConstActionUtilities.TryGetWithGuid(Guid, out var info))
+            {
+                return;
+            }
+
+            if (m_Arguments.Length != m_ArgumentsStr.Length)
+            {
+                Array.Resize(ref m_Arguments, m_ArgumentsStr.Length);
+            }
+            for (int i = 0; i < m_ArgumentsStr.Length; i++)
+            {
+                m_Arguments[i] = Convert.ChangeType(m_ArgumentsStr[i], info.ArgumentFields[i].FieldType);
+            }
+        }
     }
 }
