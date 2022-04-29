@@ -497,6 +497,39 @@ namespace Point.Collections.ResourceControl
             return true;
         }
         [NotBurstCompatible]
+        internal static unsafe AssetInfo LoadAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in Hash hash)
+        {
+            if (!bundleP.Value.loaded)
+            {
+                PointHelper.LogError(LogChannel.Collections,
+                    $"Cound not load asset {hash}. Target AssetBundle is not loaded.");
+
+                return AssetInfo.Invalid;
+            }
+
+            if (!Instance.m_MappedAssets.TryGetValue(hash, out var index))
+            {
+                PointHelper.LogError(LogChannel.Collections,
+                    $"Cound not load asset {hash}. Target is not listed in target AssetBundle.");
+
+                return AssetInfo.Invalid;
+            }
+
+            ref UnsafeAssetInfo assetInfo = ref bundleP.Value.assets.ElementAt(index.assetIndex);
+
+            assetInfo.loaded = true;
+            
+            AssetContainer bundle = Instance.m_AssetBundles[index.bundleIndex];
+            UnityEngine.Object obj = bundle.GetAsset(hash);
+            if (obj == null) obj = bundle.LoadAsset(assetInfo.key.ToString());
+
+            AssetInfo asset = new AssetInfo(bundleP, hash);
+
+            assetInfo.checkSum ^= hash;
+            Instance.m_ReferenceCheckSum ^= hash;
+            return asset;
+        }
+        [NotBurstCompatible]
         internal static unsafe AssetInfo LoadAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in FixedString4096Bytes key)
         {
             if (!bundleP.Value.loaded)

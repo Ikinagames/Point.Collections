@@ -220,13 +220,35 @@ namespace Point.Collections.ResourceControl
 
             return ResourceManager.HasAsset(pointer, in key);
         }
+        /// <summary>
+        /// 에셋을 로드합니다.
+        /// </summary>
+        /// <remarks>
+        /// 로드되어 반환된 <see cref="AssetInfo"/> 는 사용이 끝난 후 반드시 <see cref="Reserve(in AssetInfo)"/> 를 통해 반환되어야합니다.
+        /// </remarks>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public AssetInfo LoadAsset(in Hash key)
+        {
+            this.ThrowIfIsNotValid();
+
+            return ResourceManager.LoadAsset(pointer, in key);
+        }
+        /// <inheritdoc cref="LoadAsset(in Hash)"/>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public AssetInfo LoadAsset(in FixedString4096Bytes key)
         {
             this.ThrowIfIsNotValid();
 
             return ResourceManager.LoadAsset(pointer, in key);
         }
-        public void Reserve(ref AssetInfo asset)
+        /// <summary>
+        /// 에셋을 반환합니다.
+        /// </summary>
+        /// <param name="asset"></param>
+        /// <exception cref="Exception"></exception>
+        public void Reserve(in AssetInfo asset)
         {
             this.ThrowIfIsNotValid();
 
