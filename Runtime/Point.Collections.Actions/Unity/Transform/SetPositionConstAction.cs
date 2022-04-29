@@ -31,17 +31,31 @@ using UnityEngine;
 
 namespace Point.Collections.Actions
 {
-    [DisplayName("Unity/Audio/Set AudioSource Volume")]
-    [Guid("5BC2C433-4386-482E-AA12-B0AABC2999B2")]
-    public sealed class SetAudioSourceVolume : ConstAction<int, AudioSource>
+    [DisplayName("Unity/Transform/Set Position")]
+    [Guid("26BC0A4C-8E6D-49A4-8B05-313761E86BEB")]
+    public sealed class SetPositionConstAction : ConstAction<int, UnityEngine.Object>
     {
-        [SerializeField, Decibel]
-        private float m_Volume = 1;
+        [SerializeField]
+        private Vector3 m_Position;
 
-        protected override int Execute(AudioSource arg0)
+        protected override int Execute(UnityEngine.Object arg0)
         {
+            Transform tr;
+            if (arg0 is GameObject gameObj)
+            {
+                tr = gameObj.transform;
+            }
+            else if (arg0 is Transform)
+            {
+                tr = arg0 as Transform;
+            }
+            else if (arg0 is UnityEngine.Component component)
+            {
+                tr = component.transform;
+            }
+            else return 0;
 
-
+            tr.position = m_Position;
             return 0;
         }
     }
