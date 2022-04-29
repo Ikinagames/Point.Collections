@@ -25,22 +25,24 @@
 #endif
 
 using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+using UnityEngine;
 
 namespace Point.Collections.Actions
 {
-#if UNITYENGINE
-    [UnityEngine.Scripting.RequireImplementors]
-#endif
-    public interface IConstAction : IDisposable
+    [DisplayName("Unity/Audio/Set AudioSource Volume")]
+    [Guid("5BC2C433-4386-482E-AA12-B0AABC2999B2")]
+    public sealed class SetAudioSourceVolume : ConstAction<int, AudioSource>
     {
-        Type ReturnType { get; }
+        [SerializeField, Decibel]
+        private float m_Volume = 1;
 
-        ConstActionUtilities.Info GetInfo();
-        void SetArguments(params object[] args);
+        protected override int Execute(AudioSource arg0)
+        {
 
-        void Initialize();
-        object Execute(params object[] args);
 
-        void OnShutdown();
+            return 0;
+        }
     }
 }

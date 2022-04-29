@@ -69,7 +69,7 @@ namespace Point.Collections.Actions
             return s_ConstActions[type.GUID];
         }
 
-        public static object Execute(this IConstActionReference action)
+        public static object Execute(this IConstActionReference action, params object[] args)
         {
             if (!ConstActionUtilities.TryGetWithGuid(action.Guid, out var info))
             {
@@ -84,7 +84,7 @@ namespace Point.Collections.Actions
             object result;
             try
             {
-                result = constAction.Execute();
+                result = constAction.Execute(args);
             }
             catch (Exception ex)
             {
@@ -104,9 +104,13 @@ namespace Point.Collections.Actions
                 action[i].Execute();
             }
         }
-        public static TValue Execute<TValue>(this ConstActionReference<TValue> action)
+        public static TResult Execute<TResult>(this ConstActionReference<TResult> action)
         {
-            return (TValue)Execute((IConstActionReference)action);
+            return (TResult)Execute((IConstActionReference)action);
+        }
+        public static TResult Execute<TResult>(this ConstActionReference<TResult> action, params object[] args)
+        {
+            return (TResult)Execute((IConstActionReference)action, args);
         }
 
         ///// <summary>

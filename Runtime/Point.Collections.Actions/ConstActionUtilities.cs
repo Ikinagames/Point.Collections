@@ -49,7 +49,7 @@ namespace Point.Collections.Actions
                 {
                     s_Types = TypeHelper
                         .GetTypesIter(t => !t.IsInterface && !t.IsAbstract &&
-                            TypeHelper.TypeOf<IConstAction>.Type.IsAssignableFrom(t)).ToArray();
+                            TypeHelper.InheritsFrom<ConstActionBase>(t)).ToArray();
                 }
 
                 return s_Types;
@@ -82,7 +82,7 @@ namespace Point.Collections.Actions
             private readonly Type m_Type;
             private readonly Type m_ReturnType;
             private readonly FieldInfo[] m_ArgumentFields;
-            private readonly JsonPropertyAttribute[] m_JsonPropertyAttributes;
+            //private readonly JsonPropertyAttribute[] m_JsonPropertyAttributes;
 
             public Guid Guid => m_Type.GUID;
             /// <summary>
@@ -94,7 +94,7 @@ namespace Point.Collections.Actions
             /// </summary>
             public Type ReturnType => m_ReturnType;
             public FieldInfo[] ArgumentFields => m_ArgumentFields;
-            public JsonPropertyAttribute[] JsonAttributes => m_JsonPropertyAttributes;
+            //public JsonPropertyAttribute[] JsonAttributes => m_JsonPropertyAttributes;
 
             internal Info(Type type)
             {
@@ -102,23 +102,23 @@ namespace Point.Collections.Actions
                 m_ReturnType = type.BaseType.GenericTypeArguments[0];
 
                 var iter
-                    = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                    .Where(t => t.GetCustomAttribute<JsonPropertyAttribute>() != null);
+                    = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+                    //.Where(t => t.GetCustomAttribute<JsonPropertyAttribute>() != null);
                 if (iter.Any())
                 {
                     m_ArgumentFields = iter.ToArray();
                     Array.Sort(m_ArgumentFields, comparer: new JsonPropertyComparer());
 
-                    m_JsonPropertyAttributes = m_ArgumentFields.Select(t => t.GetCustomAttribute<JsonPropertyAttribute>()).ToArray();
+                    //m_JsonPropertyAttributes = m_ArgumentFields.Select(t => t.GetCustomAttribute<JsonPropertyAttribute>()).ToArray();
                 }
                 else
                 {
                     m_ArgumentFields = Array.Empty<FieldInfo>();
-                    m_JsonPropertyAttributes = Array.Empty<JsonPropertyAttribute>();
+                    //m_JsonPropertyAttributes = Array.Empty<JsonPropertyAttribute>();
                 }
             }
 
-            public void SetArguments(IConstAction instance, params object[] args)
+            public void SetArguments(object instance, params object[] args)
             {
                 for (int i = 0; i < args.Length && i < m_ArgumentFields.Length; i++)
                 {

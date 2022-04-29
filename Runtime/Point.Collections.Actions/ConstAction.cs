@@ -37,36 +37,59 @@ namespace Point.Collections.Actions
     /// 정의된 <see cref="ConstAction{TValue}"/> 는 <seealso cref="ConstActionReference{TValue}"/> 를 통해 
     /// 레퍼런스 될 수 있습니다.
     /// </remarks>
-    /// <typeparam name="TValue">
+    /// <typeparam name="TResult">
     /// 의미있는 값을 반환하지 않는다면 int 를 사용하세요
     /// </typeparam>
     [Serializable]
-    public abstract class ConstAction<TValue> : IConstAction
+    public abstract class ConstAction<TResult> : ConstActionBase<TResult>
     {
-        Type IConstAction.ReturnType => TypeHelper.TypeOf<TValue>.Type;
-
-        public ConstAction()
+        protected internal override sealed object InternalExecute(params object[] args)
         {
+            return Execute();
         }
+        protected abstract TResult Execute();
+    }
+    public abstract class ConstAction<TResult, T> : ConstActionBase<TResult>
+    {
+        protected internal override object InternalExecute(params object[] args)
+        {
+            if (args == null || args.Length == 0)
+            {
+                return Execute(default(T));
+            }
+
+            T arg0 = (T)args[0];
+
+            return Execute(arg0);
+        }
+        protected abstract TResult Execute(T arg0);
+    }
+
+    public abstract class ConstActionBase : IConstAction
+    {
+        protected abstract Type ReturnType { get; }
+        Type IConstAction.ReturnType => ReturnType;
 
         ConstActionUtilities.Info IConstAction.GetInfo() => ConstActionUtilities.HashMap[GetType()];
         void IConstAction.SetArguments(params object[] args) => InternalSetArguments(args);
 
         void IConstAction.Initialize() => OnInitialize();
-        object IConstAction.Execute() => InternalExecute();
+        object IConstAction.Execute(params object[] args) => InternalExecute();
         void IConstAction.OnShutdown() => OnShutdown();
         void IDisposable.Dispose() => OnDispose();
 
-        protected virtual void InternalSetArguments(params object[] args)
+        internal protected virtual void InternalSetArguments(params object[] args)
         {
             ConstActionUtilities.HashMap[GetType()].SetArguments(this, args);
         }
-        protected virtual TValue InternalExecute() => Execute();
+        internal protected abstract object InternalExecute(params object[] args);
 
         protected virtual void OnInitialize() { }
-        protected abstract TValue Execute();
-
         protected virtual void OnShutdown() { }
         protected virtual void OnDispose() { }
+    }
+    public abstract class ConstActionBase<TResult> : ConstActionBase
+    {
+        protected override sealed Type ReturnType => TypeHelper.TypeOf<TResult>.Type;
     }
 }

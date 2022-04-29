@@ -33,29 +33,8 @@ namespace Point.Collections.Actions
 {
     /// <inheritdoc cref="IConstActionReference"/>
     [Serializable]
-    public sealed class ConstActionReference : IConstActionReference
+    public sealed class ConstActionReference : ConstActionReferenceBase
     {
-#if UNITYENGINE
-        [UnityEngine.SerializeField]
-#endif
-        [JsonProperty(Order = 0, PropertyName = "Guid")]
-        private string m_Guid = String.Empty;
-#if UNITYENGINE
-        [UnityEngine.SerializeReference]
-#endif
-        [JsonProperty(Order = 1, PropertyName = "Arguments")]
-        private object[] m_Arguments;
-
-        public Guid Guid
-        {
-            get
-            {
-                if (!Guid.TryParse(m_Guid, out var result)) return Guid.Empty;
-                return result;
-            }
-        }
-        public object[] Arguments => m_Arguments;
-
         public ConstActionReference()
         {
             m_Guid = Guid.Empty.ToString();
@@ -70,36 +49,12 @@ namespace Point.Collections.Actions
             }
             else m_Arguments = args.ToArray();
         }
-
-        public bool IsEmpty() => m_Guid.Equals(Guid.Empty);
-        public void SetArguments(params object[] args) => m_Arguments = args;
     }
     /// <inheritdoc cref="IConstActionReference"/>
-    /// <typeparam name="TValue">이 액션이 수행했을 때 반환하는 값의 타입입니다.</typeparam>
+    /// <typeparam name="TResult">이 액션이 수행했을 때 반환하는 값의 타입입니다.</typeparam>
     [Serializable]
-    public sealed class ConstActionReference<TValue> : IConstActionReference
+    public sealed class ConstActionReference<TResult> : ConstActionReferenceBase
     {
-#if UNITYENGINE
-        [UnityEngine.SerializeField]
-#endif
-        [JsonProperty(Order = 0, PropertyName = "Guid")]
-        private string m_Guid = String.Empty;
-#if UNITYENGINE
-        [UnityEngine.SerializeReference]
-#endif
-        [JsonProperty(Order = 1, PropertyName = "Arguments")]
-        private object[] m_Arguments = Array.Empty<object>();
-
-        public Guid Guid
-        {
-            get
-            {
-                if (!Guid.TryParse(m_Guid, out var result)) return Guid.Empty;
-                return result;
-            }
-        }
-        public object[] Arguments => m_Arguments;
-
         public ConstActionReference()
         {
             m_Guid = Guid.Empty.ToString();
@@ -114,6 +69,30 @@ namespace Point.Collections.Actions
             }
             else m_Arguments = args.ToArray();
         }
+    }
+
+    public abstract class ConstActionReferenceBase : IConstActionReference
+    {
+#if UNITYENGINE
+        [UnityEngine.SerializeField]
+#endif
+        [JsonProperty(Order = 0, PropertyName = "Guid")]
+        protected string m_Guid = String.Empty;
+#if UNITYENGINE
+        [UnityEngine.SerializeReference]
+#endif
+        [JsonProperty(Order = 1, PropertyName = "Arguments")]
+        protected object[] m_Arguments = Array.Empty<object>();
+
+        public Guid Guid
+        {
+            get
+            {
+                if (!Guid.TryParse(m_Guid, out var result)) return Guid.Empty;
+                return result;
+            }
+        }
+        public object[] Arguments => m_Arguments;
 
         public bool IsEmpty() => m_Guid.Equals(Guid.Empty);
         public void SetArguments(params object[] args) => m_Arguments = args;
