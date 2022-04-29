@@ -32,7 +32,7 @@ namespace Point.Collections.Actions
 {
     [DisplayName("Unity/Destroy")]
     [Guid("AC591D0A-88AE-45DB-8915-929876111840")]
-    public sealed class DestroyObjectConstAction : ConstAction<int, UnityEngine.Object>
+    internal sealed class DestroyObjectConstAction : ConstAction<int, UnityEngine.Object>
     {
         protected override int Execute(UnityEngine.Object arg0)
         {

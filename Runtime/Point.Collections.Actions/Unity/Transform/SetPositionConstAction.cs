@@ -33,7 +33,7 @@ namespace Point.Collections.Actions
 {
     [DisplayName("Unity/Transform/Set Position")]
     [Guid("26BC0A4C-8E6D-49A4-8B05-313761E86BEB")]
-    public sealed class SetPositionConstAction : ConstAction<int, UnityEngine.Object>
+    internal sealed class SetPositionConstAction : ConstAction<int, UnityEngine.Object>
     {
         [SerializeField]
         private Vector3 m_Position;

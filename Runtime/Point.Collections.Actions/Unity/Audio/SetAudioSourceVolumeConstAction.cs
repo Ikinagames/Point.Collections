@@ -33,7 +33,7 @@ namespace Point.Collections.Actions
 {
     [DisplayName("Unity/Audio/Set AudioSource Volume")]
     [Guid("5BC2C433-4386-482E-AA12-B0AABC2999B2")]
-    public sealed class SetAudioSourceVolumeConstAction : ConstAction<int, AudioSource>
+    internal sealed class SetAudioSourceVolumeConstAction : ConstAction<int, AudioSource>
     {
         [SerializeField, Decibel]
         private float m_Volume = 1;
