@@ -93,6 +93,10 @@ namespace Point.Collections.Editor
         }
         private static void OnPostHeaderGUI(UnityEditor.Editor obj)
         {
+            if (obj.target is AssetImporter || obj.target is MonoScript)
+            {
+                return;
+            }
             using (new EditorGUILayout.HorizontalScope())
             {
                 s_DisplayAssetInspector = 
@@ -110,10 +114,6 @@ namespace Point.Collections.Editor
             if (!s_AssetDatabaseBuilded || !s_DisplayAssetInspector)
             {
                 CoreGUI.Line();
-                return;
-            }
-            else if (obj.target is AssetImporter || obj.target is MonoScript)
-            {
                 return;
             }
 
