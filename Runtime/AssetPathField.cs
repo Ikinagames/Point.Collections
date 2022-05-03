@@ -20,6 +20,7 @@
 #define UNITYENGINE
 
 using System;
+using System.IO;
 using UnityEngine;
 
 namespace Point.Collections
@@ -28,7 +29,7 @@ namespace Point.Collections
     /// <see cref="UnityEngine.Object"/> 의 reletive path 를 담을 수 있습니다.
     /// </summary>
     [System.Serializable]
-    public class AssetPathField : IEquatable<AssetPathField>
+    public class AssetPathField : IEmpty, IEquatable<AssetPathField>
     {
         [SerializeField] protected string p_AssetPath = string.Empty;
 
@@ -66,6 +67,49 @@ namespace Point.Collections
             p_AssetPath = path;
         }
 
+#if UNITY_EDITOR
+        /// <summary>
+        /// Editor Only
+        /// </summary>
+        /// <returns></returns>
+        public bool IsInEditorFolder()
+        {
+            const string c_Str = "editor";
+            return p_AssetPath.ToLowerInvariant().Contains(c_Str);
+        }
+        /// <summary>
+        /// Editor Only
+        /// </summary>
+        /// <returns></returns>
+        public bool IsInPluginFolder()
+        {
+            const string c_Str = "plugins";
+            return p_AssetPath.ToLowerInvariant().Contains(c_Str);
+        }
+        /// <summary>
+        /// Editor Only
+        /// </summary>
+        /// <returns></returns>
+        public bool IsInResourceFolder()
+        {
+            const string c_Str = "resources";
+            return p_AssetPath.ToLowerInvariant().Contains(c_Str);
+        }
+
+        /// <summary>
+        /// Editor Only 
+        /// <inheritdoc cref="UnityEditor.AssetDatabase.GetDependencies(string)"/>
+        /// </summary>
+        /// <returns>
+        /// <inheritdoc cref="UnityEditor.AssetDatabase.GetDependencies(string)"/>
+        /// </returns>
+        public string[] GetDependencies()
+        {
+            return UnityEditor.AssetDatabase.GetDependencies(p_AssetPath);
+        }
+#endif
+
+        public bool IsEmpty() => p_AssetPath.IsNullOrEmpty();
         public bool Equals(AssetPathField other) => p_AssetPath.Equals(other.p_AssetPath);
     }
     /// <inheritdoc cref="AssetPathField"/>

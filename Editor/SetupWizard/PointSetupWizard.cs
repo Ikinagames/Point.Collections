@@ -69,8 +69,8 @@ namespace Point.Collections.Editor
 
         private void OnEnable()
         {
-            m_DisableTexture = AssetHelper.LoadAsset<Texture2D>("CrossYellow", "CoreSystemEditor");
-            m_EnableTexture = AssetHelper.LoadAsset<Texture2D>("TickGreen", "CoreSystemEditor");
+            m_DisableTexture = AssetHelper.LoadAsset<Texture2D>("CrossYellow", "PointEditor");
+            m_EnableTexture = AssetHelper.LoadAsset<Texture2D>("TickGreen", "PointEditor");
 
             titleStyle = new GUIStyle();
             titleStyle.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;

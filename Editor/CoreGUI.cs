@@ -127,6 +127,13 @@ namespace Point.Collections.Editor
 
             EditorGUILayout.LabelField(content, style);
         }
+        public static void Label(string text, int size)
+        {
+            GUIStyle style = GetLabelStyle(TextAnchor.UpperLeft);
+
+            text = HTMLString.String(text, size);
+            EditorGUILayout.LabelField(text, style);
+        }
         public static void Label(GUIContent text, StringColor color, int size)
         {
             GUIStyle style = GetLabelStyle(TextAnchor.UpperLeft);
@@ -151,6 +158,13 @@ namespace Point.Collections.Editor
 
             Rect rect = GUILayoutUtility.GetRect(content, style, options);
             EditorGUI.LabelField(rect, content, style);
+        }
+        public static void Label(string text, int size, TextAnchor textAnchor = TextAnchor.MiddleLeft, params GUILayoutOption[] options)
+        {
+            GUIStyle style = GetLabelStyle(textAnchor);
+            text = HTMLString.String(text, size);
+
+            EditorGUILayout.LabelField(text, style, options);
         }
         public static void Label(GUIContent text, int size, StringColor color, TextAnchor textAnchor = TextAnchor.MiddleLeft, params GUILayoutOption[] options)
         {
@@ -242,6 +256,21 @@ namespace Point.Collections.Editor
 
         #region Button
 
+        public static bool LabelButton(string text, TextAnchor textAnchor = TextAnchor.UpperLeft)
+        {
+            return GUILayout.Button(text, GetLabelStyle(textAnchor));
+        }
+        public static bool LabelButton(GUIContent content, TextAnchor textAnchor = TextAnchor.UpperLeft)
+        {
+            return GUILayout.Button(content, GetLabelStyle(textAnchor));
+        }
+        public static bool LabelButton(GUIContent text, int size, TextAnchor textAnchor)
+        {
+            GUIContent temp = new GUIContent(text);
+            temp.text = EditorUtilities.String(text.text, size);
+
+            return GUILayout.Button(temp, GetLabelStyle(textAnchor));
+        }
         public static bool LabelButton(Rect rect, GUIContent text, int size, TextAnchor textAnchor)
         {
             GUIContent temp = new GUIContent(text);
@@ -334,6 +363,22 @@ namespace Point.Collections.Editor
             GUIContent temp = new GUIContent(text);
 
             return GUI.Toggle(rect, value, temp, GetLabelStyle(TextAnchor.MiddleLeft));
+        }
+        public static bool LabelToggle(bool value, string text, int size, TextAnchor textAnchor)
+        {
+            text = HTMLString.String(text, size);
+            return GUILayout.Toggle(value, 
+                (value ? EditorStyleUtilities.FoldoutClosedString : EditorStyleUtilities.FoldoutOpendString) +
+                text, 
+                
+                GetLabelStyle(textAnchor));
+        }
+        public static bool LabelToggle(bool value, GUIContent text, int size, TextAnchor textAnchor)
+        {
+            GUIContent temp = new GUIContent(text);
+            temp.text = EditorUtilities.String(text.text, size);
+
+            return GUILayout.Toggle(value, temp, GetLabelStyle(textAnchor));
         }
         public static bool LabelToggle(Rect rect, bool value, GUIContent text, int size, TextAnchor textAnchor)
         {
