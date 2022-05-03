@@ -27,6 +27,7 @@ using UnityEngine;
 
 namespace Point.Collections
 {
+    [RequireComponent(typeof(Animator))]
     public abstract class AnimationEventBinder : MonoBehaviour
     {
         /// <summary>
