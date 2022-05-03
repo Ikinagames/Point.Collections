@@ -368,7 +368,7 @@ namespace Point.Collections.Editor
         {
             text = HTMLString.String(text, size);
             return GUILayout.Toggle(value, 
-                (value ? EditorStyleUtilities.FoldoutClosedString : EditorStyleUtilities.FoldoutOpendString) +
+                (value ? EditorStyleUtilities.FoldoutOpendString : EditorStyleUtilities.FoldoutClosedString) +
                 text, 
                 
                 GetLabelStyle(textAnchor));
