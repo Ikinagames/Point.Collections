@@ -48,17 +48,21 @@ namespace Point.Collections.Editor
             string assetPath = pathProperty.stringValue;
             UnityEngine.Object asset = GetObjectAtPath(in assetPath);
 
+            Type fieldType;
+            if (fieldInfo.FieldType.IsArray) fieldType = fieldInfo.FieldType.GetElementType();
+            else fieldType = fieldInfo.FieldType;
+
             Type targetType;
-            if (TypeHelper.InheritsFrom(fieldInfo.FieldType, s_GenericType))
+            if (TypeHelper.InheritsFrom(fieldType, s_GenericType))
             {
-                if (fieldInfo.FieldType.IsGenericType && 
-                    s_GenericType.Equals(fieldInfo.FieldType.GetGenericTypeDefinition()))
+                if (fieldType.IsGenericType && 
+                    s_GenericType.Equals(fieldType.GetGenericTypeDefinition()))
                 {
-                    targetType = fieldInfo.FieldType.GenericTypeArguments[0];
+                    targetType = fieldType.GenericTypeArguments[0];
                 }
                 else
                 {
-                    Type genericDef = TypeHelper.GetGenericBaseType(fieldInfo.FieldType, s_GenericType);
+                    Type genericDef = TypeHelper.GetGenericBaseType(fieldType, s_GenericType);
                     targetType = genericDef.GenericTypeArguments[0];
                 }
             }
@@ -67,17 +71,31 @@ namespace Point.Collections.Editor
                 targetType = TypeHelper.TypeOf<UnityEngine.Object>.Type;
             }
 
-            using (var changeCheck = new EditorGUI.ChangeCheckScope())
-            {
-                Rect pos = rect.Pop();
-                UnityEngine.Object obj 
-                    = EditorGUI.ObjectField(pos, label, asset, targetType, false);
+            Rect[] pos = AutoRect.DivideWithRatio(rect.Pop(), .9f, .1f);
 
-                if (changeCheck.changed)
+            label = property.IsInArray() ? GUIContent.none : label;
+            if (!property.isExpanded)
+            {
+                using (var changeCheck = new EditorGUI.ChangeCheckScope())
                 {
-                    pathProperty.stringValue
-                        = AssetDatabase.GetAssetPath(obj);
+                    UnityEngine.Object obj
+                        = EditorGUI.ObjectField(pos[0], label, asset, targetType, false);
+
+                    if (changeCheck.changed)
+                    {
+                        pathProperty.stringValue
+                            = AssetDatabase.GetAssetPath(obj);
+                    }
                 }
+            }
+            else
+            {
+                pathProperty.stringValue = EditorGUI.TextField(pos[0], label, pathProperty.stringValue);
+            }
+
+            if (GUI.Button(pos[1], "Raw"))
+            {
+                property.isExpanded = !property.isExpanded;
             }
         }
 
