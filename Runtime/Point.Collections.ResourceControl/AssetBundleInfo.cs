@@ -243,6 +243,19 @@ namespace Point.Collections.ResourceControl
 
             return ResourceManager.LoadAsset(pointer, in key);
         }
+
+        public bool TryLoadAsset(in Hash key, out AssetInfo asset)
+        {
+            if (!HasAsset(in key))
+            {
+                asset = default(AssetInfo);
+                return false;
+            }
+
+            asset = LoadAsset(in key);
+            return true;
+        }
+
         /// <summary>
         /// 에셋을 반환합니다.
         /// </summary>
