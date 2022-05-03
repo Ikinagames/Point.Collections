@@ -87,13 +87,19 @@ namespace Point.Collections.Editor
         static AssetHelper()
         {
             LoadResources();
-            //RebuildAssetDatabase();
-
+            
             UnityEditor.Editor.finishedDefaultHeaderGUI += OnPostHeaderGUI;
         }
         private static void OnPostHeaderGUI(UnityEditor.Editor obj)
         {
+            bool isPrefab = PrefabUtility.IsPartOfAnyPrefab(obj.target);
+
             if (obj.target is AssetImporter || obj.target is MonoScript)
+            {
+                return;
+            }
+            // 프리팹 오브젝트이지만, 루트가 아닌 자식 오브젝트일 경우 무시
+            else if (isPrefab && !PrefabUtility.IsAnyPrefabInstanceRoot(obj.target as GameObject))
             {
                 return;
             }
@@ -117,7 +123,13 @@ namespace Point.Collections.Editor
                 return;
             }
 
-            string assetPath = AssetDatabase.GetAssetPath(obj.target);
+            string assetPath;
+            if (isPrefab)
+            {
+                assetPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(obj.target);
+            }
+            else assetPath = AssetDatabase.GetAssetPath(obj.target);
+
             if (assetPath.IsNullOrEmpty() || 
                 !s_AssetDatabase.TryGetValue(assetPath, out AssetInfo info))
             {
@@ -143,7 +155,7 @@ namespace Point.Collections.Editor
             {
                 using (new EditorGUILayout.VerticalScope())
                 {
-                    s_DisplayReferences = EditorGUILayout.ToggleLeft("Display References", s_DisplayReferences);
+                    s_DisplayReferences = EditorGUILayout.ToggleLeft(s_DisplayReferencesContent, s_DisplayReferences);
 
                     if (s_DisplayReferences)
                     {
@@ -158,7 +170,7 @@ namespace Point.Collections.Editor
                 }
                 using (new EditorGUILayout.VerticalScope())
                 {
-                    s_DisplayDependencies = EditorGUILayout.ToggleLeft("Display Dependencies", s_DisplayDependencies);
+                    s_DisplayDependencies = EditorGUILayout.ToggleLeft(s_DisplayDependenciesContent, s_DisplayDependencies);
 
                     if (s_DisplayDependencies)
                     {
