@@ -113,5 +113,7 @@ namespace Point.Collections
 
             return true;
         }
+
+        public static implicit operator Type(TypeInfo t) => t.Type;
     }
 }

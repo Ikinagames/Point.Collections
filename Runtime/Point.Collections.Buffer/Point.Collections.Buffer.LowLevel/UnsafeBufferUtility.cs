@@ -424,8 +424,8 @@ namespace Point.Collections.Buffer.LowLevel
             }
             return fields;
         }
-        public static unsafe UnsafeExportedData ExportData<T>(in T t, Allocator allocator) 
-            where T : unmanaged
+        public static unsafe UnsafeExportedData ExportData<T>(in T t, Allocator allocator)
+             where T : unmanaged
         {
             ExportFieldInfo fields = GetExportFieldInfo(TypeHelper.TypeOf<T>.Type);
 
@@ -444,12 +444,12 @@ namespace Point.Collections.Buffer.LowLevel
                 }
             }
 
-            return new UnsafeExportedData(alloc);
+            return new UnsafeExportedData(TypeHelper.TypeOf<T>.Type.ToTypeInfo(), alloc);
         }
-        public static unsafe T ReadData<T>(this in UnsafeExportedData t, int index) 
+        public static unsafe T ReadData<T>(this in UnsafeExportedData t, int index)
             where T : unmanaged
         {
-            ExportFieldInfo fields = GetExportFieldInfo(TypeHelper.TypeOf<T>.Type);
+            ExportFieldInfo fields = GetExportFieldInfo(t.Type);
 
             UnsafeAllocator alloc = t.Allocator;
 
@@ -470,12 +470,15 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
     public struct UnsafeExportedData : IValidation, IDisposable, INativeDisposable
     {
+        private readonly TypeInfo m_Type;
         private UnsafeAllocator m_Allocator;
 
+        public TypeInfo Type => m_Type;
         public UnsafeAllocator Allocator => m_Allocator;
 
-        internal UnsafeExportedData(UnsafeAllocator allocator)
+        internal UnsafeExportedData(TypeInfo type, UnsafeAllocator allocator)
         {
+            m_Type = type;
             m_Allocator = allocator;
         }
 
