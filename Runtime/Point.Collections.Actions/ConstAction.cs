@@ -49,6 +49,7 @@ namespace Point.Collections.Actions
         }
         protected abstract TResult Execute();
     }
+    [Serializable]
     public abstract class ConstAction<TResult, T> : ConstActionBase<TResult>
     {
         protected internal override object InternalExecute(params object[] args)
