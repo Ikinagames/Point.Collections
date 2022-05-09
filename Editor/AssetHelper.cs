@@ -53,6 +53,8 @@ namespace Point.Collections.Editor
                 string[] movedAssets,
                 string[] movedFromAssetPaths)
             {
+                if (!UtilityMenu.EnableAssetInspector) return;
+
                 foreach (string importedAsset in importedAssets)
                 {
                     AddAssetDatabase(importedAsset);
@@ -92,6 +94,8 @@ namespace Point.Collections.Editor
         }
         private static void OnPostHeaderGUI(UnityEditor.Editor obj)
         {
+            if (!UtilityMenu.EnableAssetInspector) return;
+
             bool isPrefab = PrefabUtility.IsPartOfAnyPrefab(obj.target);
 
             if (obj.target is AssetImporter || obj.target is MonoScript)
