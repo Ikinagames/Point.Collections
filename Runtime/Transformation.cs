@@ -56,6 +56,12 @@ namespace Point.Collections
             localRotation = tr.localRotation;
             localScale = tr.localScale;
         }
+        public Transformation(float3 position, quaternion rotation, float3 scale)
+        {
+            localPosition = position;
+            localRotation = rotation;
+            localScale = scale;
+        }
 
         public static implicit operator Transformation(Transform t)
         {
