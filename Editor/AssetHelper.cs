@@ -241,6 +241,8 @@ namespace Point.Collections.Editor
         }
         private static void RemoveAssetDatabase(string path)
         {
+            if (!s_AssetDatabase.ContainsKey(path)) return;
+
             AssetInfo info = s_AssetDatabase[path];
             info.RemoveReferenceSet(s_AssetDatabase);
 
