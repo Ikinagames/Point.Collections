@@ -28,10 +28,11 @@ namespace Point.Collections.ResourceControl.LowLevel
     [Guid("a05b0346-54fa-44cf-975d-14082836aa61")]
     internal struct UnsafeAssetInfo : IEquatable<UnsafeAssetInfo>
     {
-        public FixedString4096Bytes key;
+        public FixedString512Bytes key;
         public bool loaded;
 
         public Hash checkSum;
+        public Timer lastUsage;
 
         public bool Equals(UnsafeAssetInfo other) => key.Equals(other.key);
     }

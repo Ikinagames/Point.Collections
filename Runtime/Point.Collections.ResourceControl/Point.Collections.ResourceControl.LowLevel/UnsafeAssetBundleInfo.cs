@@ -60,7 +60,6 @@ namespace Point.Collections.ResourceControl.LowLevel
 
             assets = default;
         }
-
         public void Dispose()
         {
             if (assets.IsCreated)
@@ -68,9 +67,14 @@ namespace Point.Collections.ResourceControl.LowLevel
                 assets.Dispose();
             }
         }
-        public bool Equals(UnsafeAssetBundleInfo other) => index.Equals(other.index);
+
+        public ref UnsafeAssetInfo GetAssetInfo(in int assetIndex)
+        {
+            return ref assets.ElementAt(assetIndex);
+        }
 
         public bool IsValid() => index >= 0 && m_Using;
+        public bool Equals(UnsafeAssetBundleInfo other) => index.Equals(other.index);
     }
 }
 

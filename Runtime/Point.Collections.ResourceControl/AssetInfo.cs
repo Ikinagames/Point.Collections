@@ -40,7 +40,7 @@ namespace Point.Collections.ResourceControl
     /// </summary>
     [BurstCompatible]
     [Guid("b92cc9a9-b577-4759-b623-d794bd86d430")]
-    public readonly struct AssetInfo : IValidation, IEquatable<AssetInfo>, IDisposable
+    public struct AssetInfo : IValidation, IEquatable<AssetInfo>, IDisposable
     {
         public static AssetInfo Invalid => default(AssetInfo);
 
@@ -48,6 +48,8 @@ namespace Point.Collections.ResourceControl
         internal readonly UnsafeReference<UnsafeAssetBundleInfo> m_BundlePointer;
         [NonSerialized]
         internal readonly Hash m_Key;
+        private readonly Timer m_CreationTime;
+        private Timer m_LastUsedTime;
 
         /// <summary>
         /// <seealso cref="UnityEngine.AssetBundle"/> 내 에셋.
@@ -63,6 +65,8 @@ namespace Point.Collections.ResourceControl
                 this.ThrowIfIsNotValid();
 
                 ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+
+                m_LastUsedTime = Timer.Start();
                 return bundleInfo.m_Assets[m_Key];
             }
         }
@@ -73,6 +77,14 @@ namespace Point.Collections.ResourceControl
 
             m_BundlePointer = bundle;
             this.m_Key = key;
+
+            m_CreationTime = Timer.Start();
+            m_LastUsedTime = m_CreationTime;
+        }
+
+        public float GetElapsedTimeSinceLastUsage()
+        {
+            return m_LastUsedTime.ElapsedTime;
         }
 
         /// <summary>

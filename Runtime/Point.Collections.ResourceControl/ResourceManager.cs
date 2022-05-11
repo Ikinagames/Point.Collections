@@ -48,83 +48,31 @@ namespace Point.Collections.ResourceControl
     /*                          Unsafe pointer를 포함하는 코드입니다                          */
     //////////////////////////////////////////////////////////////////////////////////////////
 
+    // TODO: 개별 에셋 로드/언로드 기능 미지원
+
     public sealed class ResourceManager : StaticMonobehaviour<ResourceManager>
     {
-#if !UNITYENGINE_OLD
-        private const string c_FileUri = "file:///";
-
         protected override bool EnableLog => false;
         protected override bool HideInInspector => true;
 
-        private NativeList<UnsafeAssetBundleInfo> m_AssetBundleInfos;
-        private List<AssetContainer> m_AssetBundles;
+#if !UNITYENGINE_OLD
+        private const string c_FileUri = "file:///";
 
-        private JobHandle 
+        [NonSerialized] private NativeList<UnsafeAssetBundleInfo> m_AssetBundleInfos;
+        [NonSerialized] private List<AssetContainer> m_AssetBundles;
+
+        [NonSerialized] private JobHandle 
             m_GlobalJobHandle,
+            m_LateUpdateJobHandle,
             m_MapingJobHandle;
 
         // key = path, value = bundleIndex
-        private NativeHashMap<Hash, Mapped> m_MappedAssets;
-        private Hash m_ReferenceCheckSum;
+        [NonSerialized] private NativeHashMap<Hash, Mapped> m_MappedAssets;
+        [NonSerialized] private Hash m_ReferenceCheckSum;
 
-        internal sealed class AssetContainer
-        {
-            private AssetBundle m_AssetBundle;
-            // 현재 로드된 에셋들의 HashMap 입니다.
-            public Dictionary<Hash, UnityEngine.Object> m_Assets;
+        private NativeList<Mapped> m_WaitForUnloadIndices;
 
-            public AssetBundle AssetBundle
-            {
-                get => m_AssetBundle;
-                set => m_AssetBundle = value;
-            }
-
-            public AssetContainer()
-            {
-                m_AssetBundle = null;
-                m_Assets = new Dictionary<Hash, UnityEngine.Object>();
-            }
-            public AssetContainer(AssetBundle assetBundle)
-            {
-                m_AssetBundle = assetBundle;
-                m_Assets = new Dictionary<Hash, UnityEngine.Object>();
-            }
-
-            public UnityEngine.Object GetAsset(Hash hash)
-            {
-                if (m_Assets.TryGetValue(hash, out var obj)) return obj;
-                return null;
-            }
-            public UnityEngine.Object LoadAsset(string key)
-            {
-				key = key.ToLowerInvariant();
-								Hash hash = new Hash(key);
-
-                if (m_Assets.TryGetValue(hash, out var obj)) return obj;
-
-                obj = m_AssetBundle.LoadAsset(key);
-                m_Assets.Add(hash, obj);
-
-                return obj;
-            }
-
-            public void Clear()
-            {
-                m_AssetBundle = null;
-                m_Assets.Clear();
-            }
-        }
-        internal struct Mapped
-        {
-            public int bundleIndex;
-            public int assetIndex;
-
-            public Mapped(int bundle, int asset)
-            {
-                bundleIndex = bundle;
-                assetIndex = asset;
-            }
-        }
+        #region Initialize
 
         protected override void OnInitialize()
         {
@@ -132,6 +80,7 @@ namespace Point.Collections.ResourceControl
             m_AssetBundles = new List<AssetContainer>();
 
             m_MappedAssets = new NativeHashMap<Hash, Mapped>(1024, AllocatorManager.Persistent);
+            m_WaitForUnloadIndices = new NativeList<Mapped>(1024, AllocatorManager.Persistent);
         }
         protected override void OnShutdown()
         {
@@ -146,7 +95,47 @@ namespace Point.Collections.ResourceControl
             m_AssetBundles = null;
 
             m_MappedAssets.Dispose();
+            m_WaitForUnloadIndices.Dispose();
         }
+
+        #endregion
+
+        #region Monobehaviour Messages
+
+        private void LateUpdate()
+        {
+            if (!m_MapingJobHandle.IsCompleted) return;
+            m_MapingJobHandle.Complete();
+            m_LateUpdateJobHandle.Complete();
+
+            //for (int i = 0; i < m_WaitForUnloadIndices.Length; i++)
+            //{
+            //    Mapped mapped = m_WaitForUnloadIndices[i];
+            //    var bundlePtr = GetUnsafeAssetBundleInfo(in mapped.bundleIndex);
+            //    var asset bundlePtr.Value.GetAssetInfo(in mapped.assetIndex);
+            //}
+
+            m_WaitForUnloadIndices.Clear();
+            NativeList<Mapped>.ParallelWriter wr = m_WaitForUnloadIndices.AsParallelWriter();
+            for (int i = 0; i < m_AssetBundleInfos.Length; i++)
+            {
+                FindExceededUsageTime findExceeded = new FindExceededUsageTime(
+                    i,
+                    m_AssetBundleInfos[i].assets,
+                    wr
+                    );
+                JobHandle jobHandle = findExceeded.Schedule(m_AssetBundleInfos[i].assets.Length, 64, m_LateUpdateJobHandle);
+
+                m_LateUpdateJobHandle = JobHandle.CombineDependencies(m_LateUpdateJobHandle, jobHandle);
+            }
+
+            m_GlobalJobHandle = JobHandle.CombineDependencies(m_GlobalJobHandle, m_LateUpdateJobHandle);
+            JobHandle.ScheduleBatchedJobs();
+        }
+
+        #endregion
+
+        #region Privates
 
         /// <summary>
         /// 버퍼에서 현재 사용중이 아닌 주소의 배열 인덱스를 반환합니다. 
@@ -206,6 +195,356 @@ namespace Point.Collections.ResourceControl
             assetBundle = default;
             return false;
         }
+
+        #endregion
+
+        #region Internal
+
+        internal static unsafe AssetBundleInfo GetAssetBundleInfo(in int index)
+        {
+            ref UnsafeAssetBundleInfo temp = ref Instance.m_AssetBundleInfos.ElementAt(index);
+
+            AssetBundleInfo info
+                = new AssetBundleInfo((UnsafeAssetBundleInfo*)UnsafeUtility.AddressOf(ref temp), temp.m_Generation);
+
+            return info;
+        }
+        internal static unsafe UnsafeReference<UnsafeAssetBundleInfo> GetUnsafeAssetBundleInfo(in int index)
+        {
+            ref UnsafeAssetBundleInfo temp = ref Instance.m_AssetBundleInfos.ElementAt(index);
+            UnsafeAssetBundleInfo* p = (UnsafeAssetBundleInfo*)UnsafeUtility.AddressOf(ref temp);
+
+            return p;
+        }
+        internal static unsafe AssetContainer GetAssetBundle(in int index)
+        {
+            if (Instance.m_AssetBundles[index] == null)
+            {
+                Instance.m_AssetBundles[index] = new AssetContainer();
+            }
+            return Instance.m_AssetBundles[index];
+        }
+
+        internal static unsafe AssetBundle LoadAssetBundle(UnsafeAssetBundleInfo* p)
+        {
+            string path = p->uri.ToString().Replace(c_FileUri, string.Empty);
+            int index = p->index;
+
+            byte[] binary = File.ReadAllBytes(path);
+            AssetBundle bundle = AssetBundle.LoadFromMemory(binary);
+
+            p->loaded = true;
+
+            AssetContainer container = GetAssetBundle(in index);
+            container.AssetBundle = bundle;
+
+            UpdateAssetInfos(p, bundle);
+
+            return bundle;
+        }
+
+        internal static unsafe AsyncOperation LoadAssetBundleAsync(UnsafeAssetBundleInfo* p)
+        {
+            int index = p->index;
+            var request = UnityWebRequestAssetBundle.GetAssetBundle(p->uri.ToString(), p->crc);
+            //AssetBundle bundle = AssetBundle.LoadFromFile(p->uri.ToString());
+
+            var handler = new AssetBundleLoadAsyncHandler();
+            return handler.Initialize(p, GetAssetBundle(in index), request);
+        }
+
+        internal static unsafe void UnloadAssetBundle(ref UnsafeAssetBundleInfo p, bool unloadAllLoadedObjects)
+            => UnloadAssetBundle((UnsafeAssetBundleInfo*)UnsafeUtility.AddressOf(ref p), unloadAllLoadedObjects);
+        internal static unsafe void UnloadAssetBundle(UnsafeAssetBundleInfo* p, bool unloadAllLoadedObjects)
+        {
+            int index = p->index;
+
+            p->loaded = false;
+            p->assets.Dispose();
+
+            Instance.m_AssetBundles[index].AssetBundle.Unload(unloadAllLoadedObjects);
+            Instance.m_AssetBundles[index].Clear();
+        }
+
+        internal static unsafe JobHandle UpdateAssetInfos(UnsafeAssetBundleInfo* p, AssetBundle assetBundle)
+        {
+            var assetNames = assetBundle.GetAllAssetNames().Select(str => (FixedString512Bytes)str).ToArray();
+            NativeArray<FixedString512Bytes> names = new NativeArray<FixedString512Bytes>(assetNames, Allocator.TempJob);
+
+            Instance.m_MapingJobHandle.Complete();
+
+            if (!p->assets.IsCreated)
+            {
+                p->assets = new UnsafeList<UnsafeAssetInfo>(names.Length, AllocatorManager.Persistent, NativeArrayOptions.UninitializedMemory);
+                p->assets.Length = names.Length;
+            }
+            else
+            {
+                p->assets.Clear();
+            }
+
+            UpdateAssetInfoJob job = new UpdateAssetInfoJob()
+            {
+                m_BundleIndex = p->index,
+                m_Names = names,
+                m_HashMap = p->assets.Ptr,
+                m_MappedAssets = Instance.m_MappedAssets.AsParallelWriter()
+            };
+
+            JobHandle handle = job.Schedule(names.Length, 64, Instance.m_MapingJobHandle);
+            p->m_JobHandle = JobHandle.CombineDependencies(p->m_JobHandle, handle);
+
+            Instance.m_MapingJobHandle = JobHandle.CombineDependencies(Instance.m_MapingJobHandle, handle);
+
+            return handle;
+        }
+
+        [BurstCompile(CompileSynchronously = true)]
+        private unsafe struct UpdateAssetInfoJob : IJobParallelFor
+        {
+            [ReadOnly] public int m_BundleIndex;
+            [ReadOnly, DeallocateOnJobCompletion] public NativeArray<FixedString512Bytes> m_Names;
+            [WriteOnly, NativeDisableUnsafePtrRestriction] public UnsafeAssetInfo* m_HashMap;
+            [WriteOnly] public NativeHashMap<Hash, Mapped>.ParallelWriter m_MappedAssets;
+
+            public void Execute(int i)
+            {
+                UnsafeAssetInfo assetInfo = new UnsafeAssetInfo()
+                {
+                    key = m_Names[i],
+                    loaded = false,
+                };
+
+                Hash hash = new Hash(m_Names[i]);
+
+                UnsafeUtility.WriteArrayElement(m_HashMap, i, assetInfo);
+                m_MappedAssets.TryAdd(hash, new Mapped(m_BundleIndex, i));
+            }
+        }
+        [BurstCompile(CompileSynchronously = true)]
+        private struct FindExceededUsageTime : IJobParallelFor
+        {
+            private const float c_ExceedTime = 300;
+
+            [ReadOnly] private readonly int m_Index;
+            [ReadOnly] private UnsafeList<UnsafeAssetInfo> assets;
+
+            [WriteOnly]
+            private NativeList<Mapped>.ParallelWriter results;
+
+            public FindExceededUsageTime(int bundleIndex, UnsafeList<UnsafeAssetInfo> assets,
+                NativeList<Mapped>.ParallelWriter results)
+            {
+                m_Index = bundleIndex;
+                this.assets = assets;
+                this.results = results;
+            }
+
+            public void Execute(int i)
+            {
+                UnsafeAssetInfo target = assets[i];
+                // If the target has active references, skip
+                if (!target.loaded || !target.checkSum.IsEmpty()) return;
+
+                if (!target.lastUsage.IsExceeded(c_ExceedTime))
+                {
+                    return;
+                }
+
+                results.AddNoResize(new ResourceManager.Mapped(m_Index, i));
+            }
+        }
+
+        [NotBurstCompatible]
+        internal static unsafe bool HasAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in FixedString4096Bytes key)
+        {
+            Instance.m_MapingJobHandle.Complete();
+
+            if (!bundleP.Value.loaded)
+            {
+                PointHelper.LogError(LogChannel.Collections,
+                    $"Cound not load asset {key}. Target AssetBundle is not loaded.");
+
+                return false;
+            }
+
+            Hash hash = new Hash(key.ToString().ToLowerInvariant());
+            if (!Instance.m_MappedAssets.ContainsKey(hash))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        [NotBurstCompatible]
+        internal static unsafe bool HasAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in Hash key)
+        {
+            Instance.m_MapingJobHandle.Complete();
+
+            if (!bundleP.Value.loaded)
+            {
+                PointHelper.LogError(LogChannel.Collections,
+                    $"Cound not load asset {key}. Target AssetBundle is not loaded.");
+
+                return false;
+            }
+
+            if (!Instance.m_MappedAssets.ContainsKey(key))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        [NotBurstCompatible]
+        internal static unsafe AssetInfo LoadAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in Hash hash)
+        {
+            Instance.m_MapingJobHandle.Complete();
+
+            if (!bundleP.Value.loaded)
+            {
+                PointHelper.LogError(LogChannel.Collections,
+                    $"Cound not load asset {hash}. Target AssetBundle is not loaded.");
+
+                return AssetInfo.Invalid;
+            }
+
+            if (!Instance.m_MappedAssets.TryGetValue(hash, out var index))
+            {
+                PointHelper.LogError(LogChannel.Collections,
+                    $"Cound not load asset {hash}. Target is not listed in target AssetBundle.");
+
+                return AssetInfo.Invalid;
+            }
+
+            ref UnsafeAssetInfo assetInfo = ref bundleP.Value.GetAssetInfo(in index.assetIndex);
+            assetInfo.loaded = true;
+            assetInfo.lastUsage = Timer.Start();
+
+            //AssetContainer bundle = Instance.m_AssetBundles[index.bundleIndex];
+            //UnityEngine.Object obj = bundle.GetAsset(hash);
+            //if (obj == null) obj = bundle.LoadAsset(assetInfo.key.ToString());
+
+            AssetInfo asset = new AssetInfo(bundleP, hash);
+            assetInfo.checkSum ^= hash;
+            Instance.m_ReferenceCheckSum ^= hash;
+
+            return asset;
+        }
+        [NotBurstCompatible]
+        internal static unsafe AssetInfo LoadAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in FixedString4096Bytes key)
+        {
+            Instance.m_MapingJobHandle.Complete();
+
+            if (!bundleP.Value.loaded)
+            {
+                PointHelper.LogError(LogChannel.Collections,
+                    $"Cound not load asset {key}. Target AssetBundle is not loaded.");
+
+                return AssetInfo.Invalid;
+            }
+
+            Hash hash = new Hash(key.ToString().ToLowerInvariant());
+            if (!Instance.m_MappedAssets.TryGetValue(hash, out var index))
+            {
+                PointHelper.LogError(LogChannel.Collections,
+                    $"Cound not load asset {key}. Target is not listed in target AssetBundle.");
+
+                return AssetInfo.Invalid;
+            }
+
+            ref UnsafeAssetInfo assetInfo = ref bundleP.Value.GetAssetInfo(in index.assetIndex);
+            assetInfo.loaded = true;
+            assetInfo.lastUsage = Timer.Start();
+
+            //AssetContainer bundle = Instance.m_AssetBundles[index.bundleIndex];
+            //UnityEngine.Object obj = bundle.GetAsset(hash);
+            //if (obj == null) obj = bundle.LoadAsset(key.ToString());
+
+            AssetInfo asset = new AssetInfo(bundleP, hash);
+            assetInfo.checkSum ^= hash;
+            Instance.m_ReferenceCheckSum ^= hash;
+
+            return asset;
+        }
+        internal static unsafe void Reserve(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in AssetInfo key)
+        {
+            if (!bundleP.Value.loaded)
+            {
+                throw new InvalidOperationException();
+            }
+
+            Mapped index = Instance.m_MappedAssets[key.m_Key];
+            ref UnsafeAssetInfo assetInfo = ref bundleP.Value.assets.ElementAt(index.assetIndex);
+            if (!assetInfo.loaded)
+            {
+                throw new Exception("2");
+            }
+
+            assetInfo.checkSum ^= key.m_Key;
+            Instance.m_ReferenceCheckSum ^= key.m_Key;
+        }
+
+        #endregion
+
+        #region Inner Classes
+
+        internal sealed class AssetContainer
+        {
+            private AssetBundle m_AssetBundle;
+            // 현재 로드된 에셋들의 HashMap 입니다.
+            public Dictionary<Hash, UnityEngine.Object> m_Assets;
+
+            public AssetBundle AssetBundle
+            {
+                get => m_AssetBundle;
+                set => m_AssetBundle = value;
+            }
+
+            public AssetContainer() : this(null) { }
+            public AssetContainer(AssetBundle assetBundle)
+            {
+                m_AssetBundle = assetBundle;
+                m_Assets = new Dictionary<Hash, UnityEngine.Object>();
+            }
+
+            public UnityEngine.Object GetAsset(Hash hash)
+            {
+                if (m_Assets.TryGetValue(hash, out var obj)) return obj;
+                return null;
+            }
+            public UnityEngine.Object LoadAsset(string key)
+            {
+				key = key.ToLowerInvariant();
+                Hash hash = new Hash(key);
+
+                if (m_Assets.TryGetValue(hash, out var obj)) return obj;
+
+                obj = m_AssetBundle.LoadAsset(key);
+                m_Assets.Add(hash, obj);
+
+                return obj;
+            }
+
+            public void Clear()
+            {
+                m_AssetBundle = null;
+                m_Assets.Clear();
+            }
+        }
+        internal struct Mapped
+        {
+            public int bundleIndex;
+            public int assetIndex;
+
+            public Mapped(int bundle, int asset)
+            {
+                bundleIndex = bundle;
+                assetIndex = asset;
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// 에셋 번들을 상대 경로로 추가하여 정보를 반환합니다. 
@@ -341,266 +680,6 @@ namespace Point.Collections.ResourceControl
 
             Instance.m_AssetBundles[index] = null;
         }
-
-        #region Internal
-
-        internal static unsafe AssetBundleInfo GetAssetBundleInfo(in int index)
-        {
-            ref UnsafeAssetBundleInfo temp = ref Instance.m_AssetBundleInfos.ElementAt(index);
-
-            AssetBundleInfo info 
-                = new AssetBundleInfo((UnsafeAssetBundleInfo*)UnsafeUtility.AddressOf(ref temp), temp.m_Generation);
-
-            return info;
-        }
-        internal static unsafe UnsafeReference<UnsafeAssetBundleInfo> GetUnsafeAssetBundleInfo(in int index)
-        {
-            ref UnsafeAssetBundleInfo temp = ref Instance.m_AssetBundleInfos.ElementAt(index);
-            UnsafeAssetBundleInfo* p = (UnsafeAssetBundleInfo*)UnsafeUtility.AddressOf(ref temp);
-
-            return p;
-        }
-        internal static unsafe AssetContainer GetAssetBundle(in int index)
-        {
-            if (Instance.m_AssetBundles[index] == null)
-            {
-                Instance.m_AssetBundles[index] = new AssetContainer();
-            }
-            return Instance.m_AssetBundles[index];
-        }
-
-        internal static unsafe AssetBundle LoadAssetBundle(UnsafeAssetBundleInfo* p)
-        {
-            string path = p->uri.ToString().Replace(c_FileUri, string.Empty);
-            int index = p->index;
-
-            byte[] binary = File.ReadAllBytes(path);
-            AssetBundle bundle = AssetBundle.LoadFromMemory(binary);
-
-            p->loaded = true;
-
-            AssetContainer container = GetAssetBundle(in index);
-            container.AssetBundle = bundle;
-
-            UpdateAssetInfos(p, bundle);
-
-            return bundle;
-        }
-
-        internal static unsafe AsyncOperation LoadAssetBundleAsync(UnsafeAssetBundleInfo* p)
-        {
-            int index = p->index;
-            var request = UnityWebRequestAssetBundle.GetAssetBundle(p->uri.ToString(), p->crc);
-            //AssetBundle bundle = AssetBundle.LoadFromFile(p->uri.ToString());
-
-            var handler = new AssetBundleLoadAsyncHandler();
-            return handler.Initialize(p, GetAssetBundle(in index), request);
-        }
-
-        internal static unsafe void UnloadAssetBundle(ref UnsafeAssetBundleInfo p, bool unloadAllLoadedObjects)
-            => UnloadAssetBundle((UnsafeAssetBundleInfo*)UnsafeUtility.AddressOf(ref p), unloadAllLoadedObjects);
-        internal static unsafe void UnloadAssetBundle(UnsafeAssetBundleInfo* p, bool unloadAllLoadedObjects)
-        {
-            int index = p->index;
-
-            p->loaded = false;
-            p->assets.Dispose();
-
-            Instance.m_AssetBundles[index].AssetBundle.Unload(unloadAllLoadedObjects);
-            Instance.m_AssetBundles[index].Clear();
-        }
-
-        internal static unsafe JobHandle UpdateAssetInfos(UnsafeAssetBundleInfo* p, AssetBundle assetBundle)
-        {
-            var assetNames = assetBundle.GetAllAssetNames().Select(str => (FixedString4096Bytes)str).ToArray();
-            NativeArray<FixedString4096Bytes> names = new NativeArray<FixedString4096Bytes>(assetNames, Allocator.TempJob);
-
-            Instance.m_MapingJobHandle.Complete();
-
-            if (!p->assets.IsCreated)
-            {
-                p->assets = new UnsafeList<UnsafeAssetInfo>(names.Length, AllocatorManager.Persistent, NativeArrayOptions.UninitializedMemory);
-                p->assets.Length = names.Length;
-            }
-            else
-            {
-                p->assets.Clear();
-            }
-
-            UpdateAssetInfoJob job = new UpdateAssetInfoJob()
-            {
-                m_BundleIndex = p->index,
-                m_Names = names,
-                m_HashMap = p->assets.Ptr,
-                m_MappedAssets = Instance.m_MappedAssets.AsParallelWriter()
-            };
-
-            JobHandle handle = job.Schedule(names.Length, 64, Instance.m_MapingJobHandle);
-            p->m_JobHandle = JobHandle.CombineDependencies(p->m_JobHandle, handle);
-
-            Instance.m_MapingJobHandle = JobHandle.CombineDependencies(Instance.m_MapingJobHandle, handle);
-
-            return handle;
-        }
-
-        [BurstCompile(CompileSynchronously = true)]
-        private unsafe struct UpdateAssetInfoJob : IJobParallelFor
-        {
-            [ReadOnly] public int m_BundleIndex;
-            [ReadOnly, DeallocateOnJobCompletion] public NativeArray<FixedString4096Bytes> m_Names;
-            [WriteOnly, NativeDisableUnsafePtrRestriction] public UnsafeAssetInfo* m_HashMap;
-            [WriteOnly] public NativeHashMap<Hash, Mapped>.ParallelWriter m_MappedAssets;
-
-            public void Execute(int i)
-            {
-                UnsafeAssetInfo assetInfo = new UnsafeAssetInfo()
-                {
-                    key = m_Names[i],
-                    loaded = false,
-                };
-
-                Hash hash = new Hash(m_Names[i]);
-
-                UnsafeUtility.WriteArrayElement(m_HashMap, i, assetInfo);
-                m_MappedAssets.TryAdd(hash, new Mapped(m_BundleIndex, i));
-            }
-        }
-
-        [NotBurstCompatible]
-        internal static unsafe bool HasAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in FixedString4096Bytes key)
-        {
-            Instance.m_MapingJobHandle.Complete();
-
-            if (!bundleP.Value.loaded)
-            {
-                PointHelper.LogError(LogChannel.Collections,
-                    $"Cound not load asset {key}. Target AssetBundle is not loaded.");
-
-                return false;
-            }
-
-            Hash hash = new Hash(key.ToString().ToLowerInvariant());
-            if (!Instance.m_MappedAssets.ContainsKey(hash))
-            {
-                return false;
-            }
-
-            return true;
-        }
-        [NotBurstCompatible]
-        internal static unsafe bool HasAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in Hash key)
-        {
-            Instance.m_MapingJobHandle.Complete();
-
-            if (!bundleP.Value.loaded)
-            {
-                PointHelper.LogError(LogChannel.Collections,
-                    $"Cound not load asset {key}. Target AssetBundle is not loaded.");
-
-                return false;
-            }
-
-            if (!Instance.m_MappedAssets.ContainsKey(key))
-            {
-                return false;
-            }
-
-            return true;
-        }
-        [NotBurstCompatible]
-        internal static unsafe AssetInfo LoadAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in Hash hash)
-        {
-            Instance.m_MapingJobHandle.Complete();
-
-            if (!bundleP.Value.loaded)
-            {
-                PointHelper.LogError(LogChannel.Collections,
-                    $"Cound not load asset {hash}. Target AssetBundle is not loaded.");
-
-                return AssetInfo.Invalid;
-            }
-
-            if (!Instance.m_MappedAssets.TryGetValue(hash, out var index))
-            {
-                PointHelper.LogError(LogChannel.Collections,
-                    $"Cound not load asset {hash}. Target is not listed in target AssetBundle.");
-
-                return AssetInfo.Invalid;
-            }
-
-            ref UnsafeAssetInfo assetInfo = ref bundleP.Value.assets.ElementAt(index.assetIndex);
-
-            assetInfo.loaded = true;
-            
-            AssetContainer bundle = Instance.m_AssetBundles[index.bundleIndex];
-            UnityEngine.Object obj = bundle.GetAsset(hash);
-            if (obj == null) obj = bundle.LoadAsset(assetInfo.key.ToString());
-
-            AssetInfo asset = new AssetInfo(bundleP, hash);
-
-            assetInfo.checkSum ^= hash;
-            Instance.m_ReferenceCheckSum ^= hash;
-            return asset;
-        }
-        [NotBurstCompatible]
-        internal static unsafe AssetInfo LoadAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in FixedString4096Bytes key)
-        {
-            Instance.m_MapingJobHandle.Complete();
-
-            if (!bundleP.Value.loaded)
-            {
-                PointHelper.LogError(LogChannel.Collections,
-                    $"Cound not load asset {key}. Target AssetBundle is not loaded.");
-
-                return AssetInfo.Invalid;
-
-                //throw new InvalidOperationException();
-            }
-
-            Hash hash = new Hash(key.ToString().ToLowerInvariant());
-            if (!Instance.m_MappedAssets.TryGetValue(hash, out var index))
-            {
-                PointHelper.LogError(LogChannel.Collections,
-                    $"Cound not load asset {key}. Target is not listed in target AssetBundle.");
-
-                return AssetInfo.Invalid;
-            }
-            //Mapped index = Instance.m_MappedAssets[hash];
-
-            ref UnsafeAssetInfo assetInfo = ref bundleP.Value.assets.ElementAt(index.assetIndex);
-
-            assetInfo.loaded = true;
-
-            //AssetContainer bundle = Instance.m_AssetBundles[index.bundleIndex];
-            //UnityEngine.Object obj = bundle.GetAsset(hash);
-            //if (obj == null) obj = bundle.LoadAsset(key.ToString());
-
-            AssetInfo asset = new AssetInfo(bundleP, hash);
-
-            assetInfo.checkSum ^= hash;
-            Instance.m_ReferenceCheckSum ^= hash;
-            return asset;
-        }
-        internal static unsafe void Reserve(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in AssetInfo key)
-        {
-            if (!bundleP.Value.loaded)
-            {
-                throw new InvalidOperationException();
-            }
-
-            Mapped index = Instance.m_MappedAssets[key.m_Key];
-            ref UnsafeAssetInfo assetInfo = ref bundleP.Value.assets.ElementAt(index.assetIndex);
-
-            if (!assetInfo.loaded)
-            {
-                throw new Exception("2");
-            }
-            
-            assetInfo.checkSum ^= key.m_Key;
-            Instance.m_ReferenceCheckSum ^= key.m_Key;
-        }
-
-        #endregion
 
         /// <summary>
         /// 해당 키의 에셋의 에셋번들을 반환합니다.
