@@ -70,7 +70,7 @@ namespace Point.Collections.ResourceControl
         [NonSerialized] private NativeHashMap<Hash, Mapped> m_MappedAssets;
         [NonSerialized] private Hash m_ReferenceCheckSum;
 
-        private NativeList<Mapped> m_WaitForUnloadIndices;
+        //private NativeList<Mapped> m_WaitForUnloadIndices;
 
         #region Initialize
 
@@ -80,7 +80,7 @@ namespace Point.Collections.ResourceControl
             m_AssetBundles = new List<AssetContainer>();
 
             m_MappedAssets = new NativeHashMap<Hash, Mapped>(1024, AllocatorManager.Persistent);
-            m_WaitForUnloadIndices = new NativeList<Mapped>(1024, AllocatorManager.Persistent);
+            //m_WaitForUnloadIndices = new NativeList<Mapped>(1024, AllocatorManager.Persistent);
         }
         protected override void OnShutdown()
         {
@@ -95,43 +95,43 @@ namespace Point.Collections.ResourceControl
             m_AssetBundles = null;
 
             m_MappedAssets.Dispose();
-            m_WaitForUnloadIndices.Dispose();
+            //m_WaitForUnloadIndices.Dispose();
         }
 
         #endregion
 
         #region Monobehaviour Messages
 
-        private void LateUpdate()
-        {
-            if (!m_MapingJobHandle.IsCompleted) return;
-            m_MapingJobHandle.Complete();
-            m_LateUpdateJobHandle.Complete();
+        //private void LateUpdate()
+        //{
+        //    if (!m_MapingJobHandle.IsCompleted) return;
+        //    m_MapingJobHandle.Complete();
+        //    m_LateUpdateJobHandle.Complete();
 
-            //for (int i = 0; i < m_WaitForUnloadIndices.Length; i++)
-            //{
-            //    Mapped mapped = m_WaitForUnloadIndices[i];
-            //    var bundlePtr = GetUnsafeAssetBundleInfo(in mapped.bundleIndex);
-            //    var asset bundlePtr.Value.GetAssetInfo(in mapped.assetIndex);
-            //}
+        //    //for (int i = 0; i < m_WaitForUnloadIndices.Length; i++)
+        //    //{
+        //    //    Mapped mapped = m_WaitForUnloadIndices[i];
+        //    //    var bundlePtr = GetUnsafeAssetBundleInfo(in mapped.bundleIndex);
+        //    //    var asset bundlePtr.Value.GetAssetInfo(in mapped.assetIndex);
+        //    //}
 
-            m_WaitForUnloadIndices.Clear();
-            NativeList<Mapped>.ParallelWriter wr = m_WaitForUnloadIndices.AsParallelWriter();
-            for (int i = 0; i < m_AssetBundleInfos.Length; i++)
-            {
-                FindExceededUsageTime findExceeded = new FindExceededUsageTime(
-                    i,
-                    m_AssetBundleInfos[i].assets,
-                    wr
-                    );
-                JobHandle jobHandle = findExceeded.Schedule(m_AssetBundleInfos[i].assets.Length, 64, m_LateUpdateJobHandle);
+        //    m_WaitForUnloadIndices.Clear();
+        //    NativeList<Mapped>.ParallelWriter wr = m_WaitForUnloadIndices.AsParallelWriter();
+        //    for (int i = 0; i < m_AssetBundleInfos.Length; i++)
+        //    {
+        //        FindExceededUsageTime findExceeded = new FindExceededUsageTime(
+        //            i,
+        //            m_AssetBundleInfos[i].assets,
+        //            wr
+        //            );
+        //        JobHandle jobHandle = findExceeded.Schedule(m_AssetBundleInfos[i].assets.Length, 64, m_LateUpdateJobHandle);
 
-                m_LateUpdateJobHandle = JobHandle.CombineDependencies(m_LateUpdateJobHandle, jobHandle);
-            }
+        //        m_LateUpdateJobHandle = JobHandle.CombineDependencies(m_LateUpdateJobHandle, jobHandle);
+        //    }
 
-            m_GlobalJobHandle = JobHandle.CombineDependencies(m_GlobalJobHandle, m_LateUpdateJobHandle);
-            JobHandle.ScheduleBatchedJobs();
-        }
+        //    m_GlobalJobHandle = JobHandle.CombineDependencies(m_GlobalJobHandle, m_LateUpdateJobHandle);
+        //    JobHandle.ScheduleBatchedJobs();
+        //}
 
         #endregion
 
@@ -421,9 +421,10 @@ namespace Point.Collections.ResourceControl
             assetInfo.loaded = true;
             assetInfo.lastUsage = Timer.Start();
 
-            //AssetContainer bundle = Instance.m_AssetBundles[index.bundleIndex];
-            //UnityEngine.Object obj = bundle.GetAsset(hash);
-            //if (obj == null) obj = bundle.LoadAsset(assetInfo.key.ToString());
+            // TODO : temp code
+            AssetContainer bundle = Instance.m_AssetBundles[index.bundleIndex];
+            UnityEngine.Object obj = bundle.GetAsset(hash);
+            if (obj == null) obj = bundle.LoadAsset(assetInfo.key.ToString());
 
             AssetInfo asset = new AssetInfo(bundleP, hash);
             assetInfo.checkSum ^= hash;
@@ -457,9 +458,10 @@ namespace Point.Collections.ResourceControl
             assetInfo.loaded = true;
             assetInfo.lastUsage = Timer.Start();
 
-            //AssetContainer bundle = Instance.m_AssetBundles[index.bundleIndex];
-            //UnityEngine.Object obj = bundle.GetAsset(hash);
-            //if (obj == null) obj = bundle.LoadAsset(key.ToString());
+            // TODO : temp code
+            AssetContainer bundle = Instance.m_AssetBundles[index.bundleIndex];
+            UnityEngine.Object obj = bundle.GetAsset(hash);
+            if (obj == null) obj = bundle.LoadAsset(key.ToString());
 
             AssetInfo asset = new AssetInfo(bundleP, hash);
             assetInfo.checkSum ^= hash;

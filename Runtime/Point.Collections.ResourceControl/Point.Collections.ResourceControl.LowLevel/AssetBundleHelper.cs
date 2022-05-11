@@ -27,6 +27,7 @@ namespace Point.Collections.ResourceControl.LowLevel
 {
     internal static class AssetBundleHelper
     {
+#line hidden
         [Conditional("DEBUG_MODE")]
         public static void ThrowIfIsNotValid(
             this in AssetInfo other,
@@ -49,6 +50,7 @@ namespace Point.Collections.ResourceControl.LowLevel
                 throw new InvalidOperationException();
             }
         }
+#line default
     }
 }
 
