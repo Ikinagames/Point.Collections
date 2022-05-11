@@ -50,6 +50,7 @@ namespace Point.Collections.ResourceControl
 
     // TODO: 개별 에셋 로드/언로드 기능 미지원
 
+    [AddComponentMenu("")]
     public sealed class ResourceManager : StaticMonobehaviour<ResourceManager>
     {
         protected override bool EnableLog => false;
