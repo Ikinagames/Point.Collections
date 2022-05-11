@@ -472,7 +472,7 @@ namespace Point.Collections.ResourceControl
                 return false;
             }
 
-            Hash hash = new Hash(key);
+            Hash hash = new Hash(key.ToString().ToLowerInvariant());
             if (!Instance.m_MappedAssets.ContainsKey(hash))
             {
                 return false;
@@ -550,7 +550,7 @@ namespace Point.Collections.ResourceControl
                 //throw new InvalidOperationException();
             }
 
-            Hash hash = new Hash(key);
+            Hash hash = new Hash(key.ToString().ToLowerInvariant());
             if (!Instance.m_MappedAssets.TryGetValue(hash, out var index))
             {
                 PointHelper.LogError(LogChannel.Collections,
@@ -564,9 +564,9 @@ namespace Point.Collections.ResourceControl
 
             assetInfo.loaded = true;
 
-            AssetContainer bundle = Instance.m_AssetBundles[index.bundleIndex];
-            UnityEngine.Object obj = bundle.GetAsset(hash);
-            if (obj == null) obj = bundle.LoadAsset(key.ToString());
+            //AssetContainer bundle = Instance.m_AssetBundles[index.bundleIndex];
+            //UnityEngine.Object obj = bundle.GetAsset(hash);
+            //if (obj == null) obj = bundle.LoadAsset(key.ToString());
 
             AssetInfo asset = new AssetInfo(bundleP, hash);
 
@@ -604,7 +604,7 @@ namespace Point.Collections.ResourceControl
         {
             Instance.m_MapingJobHandle.Complete();
 
-            Hash hash = new Hash(key);
+            Hash hash = new Hash(key.ToString().ToLowerInvariant());
             if (!Instance.m_MappedAssets.TryGetValue(hash, out Mapped index))
             {
 #if UNITY_EDITOR
@@ -627,7 +627,7 @@ namespace Point.Collections.ResourceControl
         {
             Instance.m_MapingJobHandle.Complete();
 
-            Hash hash = new Hash(key);
+            Hash hash = new Hash(key.ToString().ToLowerInvariant());
             if (!Instance.m_MappedAssets.TryGetValue(hash, out Mapped index))
             {
 #if UNITY_EDITOR
@@ -659,7 +659,7 @@ namespace Point.Collections.ResourceControl
         {
             Instance.m_MapingJobHandle.Complete();
 
-            Hash hash = new Hash(key);
+            Hash hash = new Hash(key.ToString().ToLowerInvariant());
             if (!Instance.m_MappedAssets.ContainsKey(hash))
             {
 #if UNITY_EDITOR
