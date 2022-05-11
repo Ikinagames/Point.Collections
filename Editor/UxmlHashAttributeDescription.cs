@@ -13,21 +13,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_2019_1_OR_NEWER
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
+#endif
+#define UNITYENGINE
 
-using UnityEditor;
-using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
 {
-    [CustomPropertyDrawer(typeof(Hash))]
-    public sealed class HashPropertyDrawer : PropertyDrawer<Hash>
+    public sealed class UxmlHashAttributeDescription : TypedUxmlAttributeDescription<Hash>
     {
-        protected override void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
+        public override string defaultValueAsString => string.Empty;
+
+        public override Hash GetValueFromBag(IUxmlAttributes bag, CreationContext cc)
         {
-            SerializedProperty valueProp = property.FindPropertyRelative("m_Value");
-            EditorGUI.PropertyField(rect.Pop(), valueProp, new GUIContent("Hash"));
+            return GetValueFromBag(bag, cc, (string s, Hash t) =>
+            {
+                if (!s.IsNullOrEmpty() && uint.TryParse(s, out uint result))
+                {
+                    return new Hash(result);
+                }
+                return Hash.Empty;
+            },
+            Hash.Empty);
         }
     }
 }

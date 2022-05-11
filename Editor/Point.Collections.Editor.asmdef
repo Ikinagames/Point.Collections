@@ -6,7 +6,9 @@
         "Unity.Mathematics",
         "Unity.Collections",
         "com.alelievr.NodeGraphProcessor.Runtime",
-        "com.alelievr.NodeGraphProcessor.Editor"
+        "com.alelievr.NodeGraphProcessor.Editor",
+        "UnityEditor.UI",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [
         "Editor"
