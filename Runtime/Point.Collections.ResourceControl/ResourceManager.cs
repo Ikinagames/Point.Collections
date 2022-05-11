@@ -462,6 +462,8 @@ namespace Point.Collections.ResourceControl
         [NotBurstCompatible]
         internal static unsafe bool HasAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in FixedString4096Bytes key)
         {
+            Instance.m_MapingJobHandle.Complete();
+
             if (!bundleP.Value.loaded)
             {
                 PointHelper.LogError(LogChannel.Collections,
@@ -481,6 +483,8 @@ namespace Point.Collections.ResourceControl
         [NotBurstCompatible]
         internal static unsafe bool HasAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in Hash key)
         {
+            Instance.m_MapingJobHandle.Complete();
+
             if (!bundleP.Value.loaded)
             {
                 PointHelper.LogError(LogChannel.Collections,
@@ -499,6 +503,8 @@ namespace Point.Collections.ResourceControl
         [NotBurstCompatible]
         internal static unsafe AssetInfo LoadAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in Hash hash)
         {
+            Instance.m_MapingJobHandle.Complete();
+
             if (!bundleP.Value.loaded)
             {
                 PointHelper.LogError(LogChannel.Collections,
@@ -532,6 +538,8 @@ namespace Point.Collections.ResourceControl
         [NotBurstCompatible]
         internal static unsafe AssetInfo LoadAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in FixedString4096Bytes key)
         {
+            Instance.m_MapingJobHandle.Complete();
+
             if (!bundleP.Value.loaded)
             {
                 PointHelper.LogError(LogChannel.Collections,
