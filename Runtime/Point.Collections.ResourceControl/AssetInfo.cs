@@ -28,6 +28,13 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace Point.Collections.ResourceControl
 {
+    //////////////////////////////////////////////////////////////////////////////////////////
+    /*                                   Critical Section                                   */
+    /*                                       수정금지                                        */
+    /*                                                                                      */
+    /*                          Unsafe pointer를 포함하는 코드입니다                          */
+    //////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// <see cref="AssetBundleInfo"/> 가 담고있는 에셋의 정보입니다.
     /// </summary>
@@ -38,9 +45,9 @@ namespace Point.Collections.ResourceControl
         public static AssetInfo Invalid => default(AssetInfo);
 
         [NativeDisableUnsafePtrRestriction, NonSerialized]
-        internal readonly UnsafeReference<UnsafeAssetBundleInfo> bundlePointer;
+        internal readonly UnsafeReference<UnsafeAssetBundleInfo> m_BundlePointer;
         [NonSerialized]
-        internal readonly Hash key;
+        internal readonly Hash m_Key;
 
         /// <summary>
         /// <seealso cref="UnityEngine.AssetBundle"/> 내 에셋.
@@ -55,8 +62,8 @@ namespace Point.Collections.ResourceControl
             {
                 this.ThrowIfIsNotValid();
 
-                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(bundlePointer.Value.index);
-                return bundleInfo.m_Assets[key];
+                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+                return bundleInfo.m_Assets[m_Key];
             }
         }
 
@@ -64,8 +71,8 @@ namespace Point.Collections.ResourceControl
         {
             this = default(AssetInfo);
 
-            bundlePointer = bundle;
-            this.key = key;
+            m_BundlePointer = bundle;
+            this.m_Key = key;
         }
 
         /// <summary>
@@ -82,24 +89,31 @@ namespace Point.Collections.ResourceControl
         public bool IsValid()
         {
             ResourceManager.AssetContainer bundle;
-            if (!bundlePointer.IsCreated) return false;
+            if (!m_BundlePointer.IsCreated) return false;
 
-            bundle = ResourceManager.GetAssetBundle(bundlePointer.Value.index);
+            bundle = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
 
-            return bundle.m_Assets.ContainsKey(key);
+            return bundle.m_Assets.ContainsKey(m_Key);
         }
         public bool Equals(AssetInfo other)
         {
-            return bundlePointer.Equals(other.bundlePointer) && key.Equals(other.key);
+            return m_BundlePointer.Equals(other.m_BundlePointer) && m_Key.Equals(other.m_Key);
         }
 
         void IDisposable.Dispose()
         {
             this.ThrowIfIsNotValid();
 
-            ResourceManager.Reserve(bundlePointer, in this);
+            ResourceManager.Reserve(m_BundlePointer, in this);
         }
+
+        [NotBurstCompatible]
+        public override string ToString() => m_Key.ToString();
     }
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    /*                                End of Critical Section                               */
+    //////////////////////////////////////////////////////////////////////////////////////////
 }
 
 #endif

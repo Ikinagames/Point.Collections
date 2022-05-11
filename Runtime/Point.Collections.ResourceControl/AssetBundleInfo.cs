@@ -23,14 +23,19 @@ using Point.Collections.Buffer.LowLevel;
 using Point.Collections.ResourceControl.LowLevel;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace Point.Collections.ResourceControl
 {
+    //////////////////////////////////////////////////////////////////////////////////////////
+    /*                                   Critical Section                                   */
+    /*                                       수정금지                                        */
+    /*                                                                                      */
+    /*                          Unsafe pointer를 포함하는 코드입니다                          */
+    //////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// <see cref="UnityEngine.AssetBundle"/> 의 정보입니다.
     /// </summary>
@@ -40,16 +45,16 @@ namespace Point.Collections.ResourceControl
     {
         public static AssetBundleInfo Invalid => default(AssetBundleInfo);
 
-        internal readonly UnsafeReference<UnsafeAssetBundleInfo> pointer;
-        internal readonly uint generation;
+        internal readonly UnsafeReference<UnsafeAssetBundleInfo> m_Pointer;
+        internal readonly uint m_Generation;
 
         internal unsafe ref UnsafeAssetBundleInfo Ref
         {
             get
             {
-                pointer.Value.m_JobHandle.Complete();
+                m_Pointer.Value.m_JobHandle.Complete();
 
-                return ref pointer.Value;
+                return ref m_Pointer.Value;
             }
         }
 
@@ -84,8 +89,8 @@ namespace Point.Collections.ResourceControl
 
         internal unsafe AssetBundleInfo(UnsafeAssetBundleInfo* p, uint generation)
         {
-            pointer = p;
-            this.generation = generation;
+            m_Pointer = p;
+            this.m_Generation = generation;
         }
 
         [NotBurstCompatible]
@@ -104,7 +109,7 @@ namespace Point.Collections.ResourceControl
 
             unsafe
             {
-                return ResourceManager.LoadAssetBundle(pointer);
+                return ResourceManager.LoadAssetBundle(m_Pointer);
             }
         }
         [NotBurstCompatible]
@@ -123,7 +128,7 @@ namespace Point.Collections.ResourceControl
 
             unsafe
             {
-                return ResourceManager.LoadAssetBundleAsync(pointer);
+                return ResourceManager.LoadAssetBundleAsync(m_Pointer);
             }
         }
 
@@ -139,16 +144,22 @@ namespace Point.Collections.ResourceControl
 #if DEBUG_MODE
             if (!Ref.assets.IsCreated)
             {
-                throw new Exception();
+                PointHelper.LogError(LogChannel.Collections,
+                    $"This invalid {nameof(AssetBundleInfo)} cannot be unloaded.");
+                return;
             }
+
+            const string c_ReferencesNotReserved =
+                "Asset({0}) has references that didn\'t reserved. This is not allowed.\n" +
+                "Please call {1} for returns their pointer.";
 
             for (int i = 0; i < Ref.assets.Length; i++)
             {
                 if (Ref.assets[i].checkSum != 0)
                 {
                     PointHelper.LogError(LogChannel.Collections,
-                        $"Asset({Ref.assets[i].key}) has references that didn\'t reserved. " +
-                        $"This is not allowed.");
+                        string.Format(c_ReferencesNotReserved,
+                            Ref.assets[i].key, nameof(AssetInfo.Reserve)));
                 }
             }
 #endif
@@ -208,17 +219,25 @@ namespace Point.Collections.ResourceControl
             }
         }
 
+        /// <summary>
+        /// 에셋이 있는지 반환합니다.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public bool HasAsset(in Hash key)
         {
             this.ThrowIfIsNotValid();
 
-            return ResourceManager.HasAsset(pointer, in key);
+            return ResourceManager.HasAsset(m_Pointer, in key);
         }
+        /// <inheritdoc cref="HasAsset(in Hash)"/>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public bool HasAsset(in FixedString4096Bytes key)
         {
             this.ThrowIfIsNotValid();
 
-            return ResourceManager.HasAsset(pointer, in key);
+            return ResourceManager.HasAsset(m_Pointer, in key);
         }
         /// <summary>
         /// 에셋을 로드합니다.
@@ -232,7 +251,7 @@ namespace Point.Collections.ResourceControl
         {
             this.ThrowIfIsNotValid();
 
-            return ResourceManager.LoadAsset(pointer, in key);
+            return ResourceManager.LoadAsset(m_Pointer, in key);
         }
         /// <inheritdoc cref="LoadAsset(in Hash)"/>
         /// <param name="key"></param>
@@ -241,9 +260,12 @@ namespace Point.Collections.ResourceControl
         {
             this.ThrowIfIsNotValid();
 
-            return ResourceManager.LoadAsset(pointer, in key);
+            return ResourceManager.LoadAsset(m_Pointer, in key);
         }
-
+        /// <summary><inheritdoc cref="LoadAsset(in Hash)"/></summary>
+        /// <param name="key"></param>
+        /// <param name="asset"></param>
+        /// <returns></returns>
         public bool TryLoadAsset(in Hash key, out AssetInfo asset)
         {
             if (!HasAsset(in key))
@@ -265,17 +287,37 @@ namespace Point.Collections.ResourceControl
         {
             this.ThrowIfIsNotValid();
 
-            if (!asset.bundlePointer.Equals(pointer))
+            if (!asset.IsValid())
             {
-                throw new Exception();
+                PointHelper.LogError(Channel.Collections,
+                    $"Target asset({asset}) is not valid. Cannot be reserved.");
+                return;
+            }
+            else if (!asset.m_BundlePointer.Equals(m_Pointer))
+            {
+                PointHelper.LogError(Channel.Collections,
+                    $"Target asset({asset}) is not part of this {nameof(UnityEngine.AssetBundle)}({this}) Cannot be reserved.\n"
+#if DEBUG_MODE
+                    + $"AssetPointer: {asset.m_BundlePointer}, ThisPointer: {m_Pointer}"
+#endif
+                    );
+
+                return;
+                throw new InvalidCastException($"{asset.m_BundlePointer} :: {m_Pointer}");
             }
 
-            ResourceManager.Reserve(pointer, in asset);
+            ResourceManager.Reserve(m_Pointer, in asset);
         }
 
         public bool IsValid() => !Equals(Invalid);
-        public bool Equals(AssetBundleInfo other) => pointer.Equals(other.pointer);
+        public bool Equals(AssetBundleInfo other) => m_Pointer.Equals(other.m_Pointer);
+        [NotBurstCompatible]
+        public override string ToString() => AssetBundle != null ? AssetBundle.name : "INVALID_ASSETBUNDLE-INFO";
     }
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    /*                                End of Critical Section                               */
+    //////////////////////////////////////////////////////////////////////////////////////////
 }
 
 #endif

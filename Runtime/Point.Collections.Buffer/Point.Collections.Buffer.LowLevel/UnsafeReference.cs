@@ -29,6 +29,13 @@ using System.Runtime.InteropServices;
 
 namespace Point.Collections.Buffer.LowLevel
 {
+    //////////////////////////////////////////////////////////////////////////////////////////
+    /*                                   Critical Section                                   */
+    /*                                       수정금지                                        */
+    /*                                                                                      */
+    /*                          Unsafe pointer를 포함하는 코드입니다                          */
+    //////////////////////////////////////////////////////////////////////////////////////////
+
     /// <summary>
     /// <inheritdoc cref="IUnsafeReference"/>
     /// </summary>
@@ -42,8 +49,8 @@ namespace Point.Collections.Buffer.LowLevel
         )]
     public struct UnsafeReference : IUnsafeReference, IEquatable<UnsafeReference>
     {
-        [MarshalAs(UnmanagedType.U1)]
-        private bool m_IsCreated;
+        //[MarshalAs(UnmanagedType.U1)]
+        //private bool m_IsCreated;
 #if UNITYENGINE
         [NativeDisableUnsafePtrRestriction]
 #endif
@@ -87,12 +94,12 @@ namespace Point.Collections.Buffer.LowLevel
         /// <summary>
         /// 이 포인터가 사용자에 의헤 할당되었는지 반환합니다.
         /// </summary>
-        public bool IsCreated => m_IsCreated;
+        public bool IsCreated => !IntPtr.Equals(IntPtr.Zero);
 
         public unsafe UnsafeReference(void* ptr)
         {
             m_Ptr = ptr;
-            m_IsCreated = true;
+            //m_IsCreated = true;
         }
         public UnsafeReference(IntPtr ptr)
         {
@@ -100,7 +107,7 @@ namespace Point.Collections.Buffer.LowLevel
             {
                 m_Ptr = ptr.ToPointer();
             }
-            m_IsCreated = true;
+            //m_IsCreated = true;
         }
 
         public bool Equals(UnsafeReference other)
@@ -138,6 +145,9 @@ namespace Point.Collections.Buffer.LowLevel
         public static implicit operator UnsafeReference(IntPtr p) => new UnsafeReference(p);
         public static unsafe implicit operator void*(UnsafeReference p) => p.m_Ptr;
         public static unsafe implicit operator IntPtr(UnsafeReference p) => (IntPtr)p.m_Ptr;
+
+        [NotBurstCompatible]
+        public override unsafe string ToString() => ((long)m_Ptr).ToString("X4");
     }
     /// <summary>
     /// <inheritdoc cref="IUnsafeReference"/>
@@ -155,8 +165,8 @@ namespace Point.Collections.Buffer.LowLevel
         IEquatable<UnsafeReference<T>>, IEquatable<UnsafeReference>
         where T : unmanaged
     {
-        [MarshalAs(UnmanagedType.U1)]
-        private bool m_IsCreated;
+        //[MarshalAs(UnmanagedType.U1)]
+        //private bool m_IsCreated;
 #if UNITYENGINE
         [NativeDisableUnsafePtrRestriction]
 #endif
@@ -221,7 +231,7 @@ namespace Point.Collections.Buffer.LowLevel
         public ref T Value => ref GetValue();
 
         /// <inheritdoc cref="UnsafeReference.IsCreated"/>
-        public bool IsCreated => m_IsCreated;
+        public bool IsCreated => !IntPtr.Equals(IntPtr.Zero);
 
         public UnsafeReference(IntPtr ptr)
         {
@@ -229,12 +239,12 @@ namespace Point.Collections.Buffer.LowLevel
             {
                 m_Ptr = ptr.ToPointer();
             }
-            m_IsCreated = true;
+            //m_IsCreated = true;
         }
         public unsafe UnsafeReference(T* ptr)
         {
             m_Ptr = ptr;
-            m_IsCreated = true;
+            //m_IsCreated = true;
         }
         public ReadOnly AsReadOnly() { unsafe { return new ReadOnly(m_Ptr); } }
 
@@ -346,6 +356,9 @@ namespace Point.Collections.Buffer.LowLevel
         public static unsafe implicit operator IntPtr(UnsafeReference<T> p) => (IntPtr)p.m_Ptr;
         public static unsafe implicit operator IntPtr<T>(UnsafeReference<T> p) => new IntPtr<T>((IntPtr)p.m_Ptr);
 
+        [NotBurstCompatible]
+        public override unsafe string ToString() => ((long)m_Ptr).ToString("X4");
+
 #if UNITYENGINE && UNITY_COLLECTIONS
         [BurstCompatible]
 #endif
@@ -372,4 +385,8 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
     }
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    /*                                End of Critical Section                               */
+    //////////////////////////////////////////////////////////////////////////////////////////
 }

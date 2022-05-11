@@ -43,7 +43,13 @@ namespace Point.Collections.ResourceControl
 {
     public sealed class ResourceManager : StaticMonobehaviour<ResourceManager>
     {
-        #region For Newer Version
+        //////////////////////////////////////////////////////////////////////////////////////////
+        /*                                   Critical Section                                   */
+        /*                                       수정금지                                        */
+        /*                                                                                      */
+        /*                          Unsafe pointer를 포함하는 코드입니다                          */
+        //////////////////////////////////////////////////////////////////////////////////////////
+
 #if !UNITYENGINE_OLD
         private const string c_FileUri = "file:///";
 
@@ -91,7 +97,8 @@ namespace Point.Collections.ResourceControl
             }
             public UnityEngine.Object LoadAsset(string key)
             {
-                Hash hash = new Hash(key);
+				key = key.ToLowerInvariant();
+								Hash hash = new Hash(key);
 
                 if (m_Assets.TryGetValue(hash, out var obj)) return obj;
 
@@ -306,7 +313,7 @@ namespace Point.Collections.ResourceControl
             AssetBundleInfo bundleInfo = GetAssetBundleInfo(in index);
             unsafe
             {
-                UpdateAssetInfos(bundleInfo.pointer, assetBundle);
+                UpdateAssetInfos(bundleInfo.m_Pointer, assetBundle);
             }
 
             return bundleInfo;
@@ -581,7 +588,7 @@ namespace Point.Collections.ResourceControl
                 throw new InvalidOperationException();
             }
 
-            Mapped index = Instance.m_MappedAssets[key.key];
+            Mapped index = Instance.m_MappedAssets[key.m_Key];
             ref UnsafeAssetInfo assetInfo = ref bundleP.Value.assets.ElementAt(index.assetIndex);
 
             if (!assetInfo.loaded)
@@ -589,8 +596,8 @@ namespace Point.Collections.ResourceControl
                 throw new Exception("2");
             }
             
-            assetInfo.checkSum ^= key.key;
-            Instance.m_ReferenceCheckSum ^= key.key;
+            assetInfo.checkSum ^= key.m_Key;
+            Instance.m_ReferenceCheckSum ^= key.m_Key;
         }
 
         #endregion
@@ -686,7 +693,9 @@ namespace Point.Collections.ResourceControl
             return LoadAsset(p, in key);
         }
 #endif
-        #endregion
+        //////////////////////////////////////////////////////////////////////////////////////////
+        /*                                End of Critical Section                               */
+        //////////////////////////////////////////////////////////////////////////////////////////
     }
 }
 
