@@ -21,21 +21,22 @@
 #if UNITY_2019 && !UNITY_2020_1_OR_NEWER
 #define UNITYENGINE_OLD
 #else
-#if UNITY_MATHEMATICS
-#endif
-#endif
-
 using Point.Collections.ResourceControl.LowLevel;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using System.Diagnostics;
 using Point.Collections.Diagnostics;
+#if UNITY_MATHEMATICS
+using Unity.Mathematics;
+#endif
+#endif
 
 namespace Point.Collections.ResourceControl
 {
     public static class ResourceExtensions
     {
+#if !UNITYENGINE_OLD
         #region Debug
 
         private static readonly Dictionary<Hash, Dictionary<Hash, StackFrame>> s_AssetLoadCallFrames = new Dictionary<Hash, Dictionary<Hash, StackFrame>>();
@@ -121,6 +122,7 @@ namespace Point.Collections.ResourceControl
         {
             t.UnsafeInfo.assetHandleType = type;
         }
+#endif
     }
 }
 

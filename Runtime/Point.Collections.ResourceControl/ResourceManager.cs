@@ -21,13 +21,8 @@
 #if UNITY_2019 && !UNITY_2020_1_OR_NEWER
 #define UNITYENGINE_OLD
 #else
-#if UNITY_MATHEMATICS
-using Unity.Mathematics;
-#endif
-#endif
-
-using Point.Collections.Buffer.LowLevel;
 using Point.Collections.ResourceControl.LowLevel;
+using Point.Collections.Buffer.LowLevel;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -36,8 +31,13 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using UnityEngine;
 using UnityEngine.Networking;
+#if UNITY_MATHEMATICS
+using Unity.Mathematics;
+#endif
+#endif
+
+using UnityEngine;
 
 namespace Point.Collections.ResourceControl
 {
