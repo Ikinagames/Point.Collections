@@ -51,7 +51,7 @@ namespace Point.Collections.ResourceControl
         private readonly Timer m_CreationTime;
 
         [NotBurstCompatible]
-        private ref UnsafeAssetInfo UnsafeInfo
+        internal ref UnsafeAssetInfo UnsafeInfo
         {
             get
             {
@@ -205,7 +205,7 @@ namespace Point.Collections.ResourceControl
         private readonly Timer m_CreationTime;
 
         [NotBurstCompatible]
-        private ref UnsafeAssetInfo UnsafeInfo
+        internal ref UnsafeAssetInfo UnsafeInfo
         {
             get
             {

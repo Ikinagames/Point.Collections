@@ -165,7 +165,7 @@ namespace Point.Collections.ResourceControl
                     foreach (var stackFrame in loadedFrames.Values)
                     {
 #if UNITY_EDITOR
-                        context = ResourceDebugExtensions.LoadScriptFile(stackFrame);
+                        context = ResourceExtensions.LoadScriptFile(stackFrame);
 #endif
                         PointHelper.LogError(LogChannel.Core,
                             string.Format(c_ReferencesNotReserved,

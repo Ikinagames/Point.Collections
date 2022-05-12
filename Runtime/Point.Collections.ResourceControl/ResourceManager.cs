@@ -114,6 +114,12 @@ namespace Point.Collections.ResourceControl
                 var bundleP = GetUnsafeAssetBundleInfo(in index.bundleIndex);
 
                 ref UnsafeAssetInfo assetInfo = ref bundleP.Value.GetAssetInfo(in index.assetIndex);
+                if (assetInfo.assetHandleType == AssetHandleType.Pinned)
+                {
+                    m_WaitForUnloadIndices.RemoveAt(i);
+                    continue;
+                }
+
                 if (!assetInfo.lastUsage.IsExceeded(c_UnloadTime))
                 {
                     continue;

@@ -34,8 +34,10 @@ using Point.Collections.Diagnostics;
 
 namespace Point.Collections.ResourceControl
 {
-    public static class ResourceDebugExtensions
+    public static class ResourceExtensions
     {
+        #region Debug
+
         private static readonly Dictionary<Hash, Dictionary<Hash, StackFrame>> s_AssetLoadCallFrames = new Dictionary<Hash, Dictionary<Hash, StackFrame>>();
         public static void AddDebugger(this in AssetInfo assetInfo)
         {
@@ -93,6 +95,32 @@ namespace Point.Collections.ResourceControl
             return UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEditor.MonoScript>(path);
         }
 #endif
+
+        #endregion
+
+        /// <summary>
+        /// 에셋의 언로드 시기를 업데이트합니다.
+        /// </summary>
+        /// <param name="t"></param>
+        public static void NotifyHandle(this AssetInfo t)
+        {
+            t.UnsafeInfo.lastUsage = Timer.Start();
+        }
+        public static void NotifyHandle<T>(this AssetInfo<T> t)
+            where T : UnityEngine.Object
+        {
+            t.UnsafeInfo.lastUsage = Timer.Start();
+        }
+
+        public static void SetAssetHandle(this in AssetInfo t, AssetHandleType type)
+        {
+            t.UnsafeInfo.assetHandleType = type;
+        }
+        public static void SetAssetHandle<T>(this in AssetInfo<T> t, AssetHandleType type)
+            where T : UnityEngine.Object
+        {
+            t.UnsafeInfo.assetHandleType = type;
+        }
     }
 }
 
