@@ -79,6 +79,52 @@ namespace Point.Collections.ResourceControl
                 return bundleInfo.m_Assets[m_Key].Value;
             }
         }
+        /// <summary>
+        /// 에셋이 로드되어 메모리에 존재하는지 반환합니다.
+        /// </summary>
+        /// <remarks>
+        /// <seealso cref="AssetBundleInfo.LoadAssetAsync(in Hash)"/> 등의 비동기 로드를 실행하면 <see cref="Asset"/> 프로퍼티는 에셋이 로드될 때까지 null 을 반환합니다.
+        /// </remarks>
+        public bool IsLoaded
+        {
+            get
+            {
+                this.ThrowIfIsNotValid();
+
+                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+                return bundleInfo.m_Assets[m_Key].HasValue;
+            }
+        }
+        /// <summary>
+        /// 에셋 로드가 완료되면 실행되는 이벤트입니다.
+        /// </summary>
+        /// <remarks>
+        /// 에셋이 이미 로드된 상태라면, 등록할 이벤트는 즉시 실행됩니다.
+        /// </remarks>
+        public event Action<UnityEngine.Object> OnLoaded
+        {
+            add
+            {
+                this.ThrowIfIsNotValid();
+
+                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+                Promise<UnityEngine.Object> promise = bundleInfo.m_Assets[m_Key];
+
+                promise.OnCompleted += value;
+            }
+            remove
+            {
+                this.ThrowIfIsNotValid();
+
+                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+                Promise<UnityEngine.Object> promise = bundleInfo.m_Assets[m_Key];
+
+                promise.OnCompleted -= value;
+            }
+        }
+        /// <summary>
+        /// 에셋의 키 값입니다.
+        /// </summary>
         public Hash Key => m_Key;
 
         public AssetInfo(Hash key)
@@ -186,6 +232,53 @@ namespace Point.Collections.ResourceControl
                 return bundleInfo.m_Assets[m_Key].Value as T;
             }
         }
+        /// <summary>
+        /// 에셋이 로드되어 메모리에 존재하는지 반환합니다.
+        /// </summary>
+        /// <remarks>
+        /// <seealso cref="AssetBundleInfo.LoadAssetAsync(in Hash)"/> 등의 비동기 로드를 실행하면 <see cref="Asset"/> 프로퍼티는 에셋이 로드될 때까지 null 을 반환합니다.
+        /// </remarks>
+        public bool IsLoaded
+        {
+            get
+            {
+                ((AssetInfo)this).ThrowIfIsNotValid();
+
+                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+                return bundleInfo.m_Assets[m_Key].HasValue;
+            }
+        }
+        /// <summary>
+        /// 에셋 로드가 완료되면 실행되는 이벤트입니다.
+        /// </summary>
+        /// <remarks>
+        /// 에셋이 이미 로드된 상태라면, 등록할 이벤트는 즉시 실행됩니다.
+        /// </remarks>
+        public event Action<UnityEngine.Object> OnLoadedUntyped
+        {
+            add
+            {
+                ((AssetInfo)this).ThrowIfIsNotValid();
+
+                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+                Promise<UnityEngine.Object> promise = bundleInfo.m_Assets[m_Key];
+
+                promise.OnCompleted += value;
+            }
+            remove
+            {
+                ((AssetInfo)this).ThrowIfIsNotValid();
+
+                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+                Promise<UnityEngine.Object> promise = bundleInfo.m_Assets[m_Key];
+
+                promise.OnCompleted -= value;
+            }
+        }
+
+        /// <summary>
+        /// 에셋의 키 값입니다.
+        /// </summary>
         public Hash Key => m_Key;
 
         public AssetInfo(Hash key)
@@ -205,6 +298,10 @@ namespace Point.Collections.ResourceControl
             m_CreationTime = Timer.Start();
         }
 
+        /// <summary>
+        /// 마지막으로 사용된(<seealso cref="Asset"/> 에 접근하면 초기화됨) 후, 경과된 시간(초) 를 반환합니다.
+        /// </summary>
+        /// <returns></returns>
         public float GetElapsedTimeSinceLastUsage()
         {
             return UnsafeInfo.lastUsage.ElapsedTime;

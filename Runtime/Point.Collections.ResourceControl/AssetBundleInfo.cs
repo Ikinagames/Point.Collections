@@ -253,6 +253,9 @@ namespace Point.Collections.ResourceControl
 
             return ResourceManager.LoadAsset(m_Pointer, in key);
         }
+        /// <inheritdoc cref="LoadAsset(in Hash)"/>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public AssetInfo LoadAssetAsync(in Hash key)
         {
             this.ThrowIfIsNotValid();
@@ -268,6 +271,9 @@ namespace Point.Collections.ResourceControl
 
             return ResourceManager.LoadAsset(m_Pointer, in key);
         }
+        /// <inheritdoc cref="LoadAsset(in Hash)"/>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public AssetInfo LoadAssetAsync(in FixedString512Bytes key)
         {
             this.ThrowIfIsNotValid();
@@ -370,6 +376,10 @@ namespace Point.Collections.ResourceControl
             ResourceManager.Reserve(m_Pointer, in asset);
         }
 
+        /// <summary>
+        /// 이 에셋 번들이 유효한지 반환합니다.
+        /// </summary>
+        /// <returns></returns>
         public bool IsValid() => !Equals(Invalid);
         public bool Equals(AssetBundleInfo other) => m_Pointer.Equals(other.m_Pointer);
         [NotBurstCompatible]
