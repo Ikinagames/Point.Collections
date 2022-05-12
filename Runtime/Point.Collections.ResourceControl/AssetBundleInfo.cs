@@ -151,15 +151,27 @@ namespace Point.Collections.ResourceControl
 
             const string c_ReferencesNotReserved =
                 "Asset({0}) has references that didn\'t reserved. This is not allowed.\n" +
-                "Please call {1} for returns their pointer.";
+                "Called From: {1}\n" +
+                "Please call {2} for returns their pointer.";
 
+            UnityEngine.Object context = null;
             for (int i = 0; i < Ref.assets.Length; i++)
             {
-                if (Ref.assets[i].checkSum != 0)
+                if (Ref.assets[i].checkSum == 0) continue;
+
+                var loadedFrames = Ref.assets[i].GetLoadedFrame();
+                if (loadedFrames != null)
                 {
-                    PointHelper.LogError(LogChannel.Core,
-                        string.Format(c_ReferencesNotReserved,
-                            Ref.assets[i].key, nameof(AssetInfo.Reserve)));
+                    foreach (var stackFrame in loadedFrames.Values)
+                    {
+#if UNITY_EDITOR
+                        context = ResourceDebugExtensions.LoadScriptFile(stackFrame);
+#endif
+                        PointHelper.LogError(LogChannel.Core,
+                            string.Format(c_ReferencesNotReserved,
+                                Ref.assets[i].key, stackFrame.ToString(), nameof(AssetInfo.Reserve)),
+                            context);
+                    }
                 }
             }
 #endif
@@ -251,7 +263,11 @@ namespace Point.Collections.ResourceControl
         {
             this.ThrowIfIsNotValid();
 
-            return ResourceManager.LoadAsset(m_Pointer, in key);
+            AssetInfo assetInfo = ResourceManager.LoadAsset(m_Pointer, in key);
+#if DEBUG_MODE
+            assetInfo.AddDebugger();
+#endif
+            return assetInfo;
         }
         /// <inheritdoc cref="LoadAsset(in Hash)"/>
         /// <param name="key"></param>
@@ -260,7 +276,11 @@ namespace Point.Collections.ResourceControl
         {
             this.ThrowIfIsNotValid();
 
-            return ResourceManager.LoadAssetAsync(m_Pointer, in key);
+            AssetInfo assetInfo = ResourceManager.LoadAssetAsync(m_Pointer, in key);
+#if DEBUG_MODE
+            assetInfo.AddDebugger();
+#endif
+            return assetInfo;
         }
         /// <inheritdoc cref="LoadAsset(in Hash)"/>
         /// <param name="key"></param>
@@ -269,7 +289,11 @@ namespace Point.Collections.ResourceControl
         {
             this.ThrowIfIsNotValid();
 
-            return ResourceManager.LoadAsset(m_Pointer, in key);
+            AssetInfo assetInfo = ResourceManager.LoadAsset(m_Pointer, in key);
+#if DEBUG_MODE
+            assetInfo.AddDebugger();
+#endif
+            return assetInfo;
         }
         /// <inheritdoc cref="LoadAsset(in Hash)"/>
         /// <param name="key"></param>
@@ -278,53 +302,67 @@ namespace Point.Collections.ResourceControl
         {
             this.ThrowIfIsNotValid();
 
-            return ResourceManager.LoadAssetAsync(m_Pointer, in key);
+            AssetInfo assetInfo = ResourceManager.LoadAssetAsync(m_Pointer, in key);
+#if DEBUG_MODE
+            assetInfo.AddDebugger();
+#endif
+            return assetInfo;
         }
         /// <summary><inheritdoc cref="LoadAsset(in Hash)"/></summary>
         /// <param name="key"></param>
-        /// <param name="asset"></param>
+        /// <param name="assetInfo"></param>
         /// <returns></returns>
-        public bool TryLoadAsset(in Hash key, out AssetInfo asset)
+        public bool TryLoadAsset(in Hash key, out AssetInfo assetInfo)
         {
             if (!HasAsset(in key))
             {
-                asset = default(AssetInfo);
+                assetInfo = default(AssetInfo);
                 return false;
             }
 
-            asset = LoadAsset(in key);
+            assetInfo = ResourceManager.LoadAsset(m_Pointer, in key);
+#if DEBUG_MODE
+            assetInfo.AddDebugger();
+#endif
             return true;
         }
         /// <summary><inheritdoc cref="LoadAsset(in Hash)"/></summary>
         /// <param name="key"></param>
-        /// <param name="asset"></param>
+        /// <param name="assetInfo"></param>
         /// <returns></returns>
-        public bool TryLoadAssetAsync(in Hash key, out AssetInfo asset)
+        public bool TryLoadAssetAsync(in Hash key, out AssetInfo assetInfo)
         {
             if (!HasAsset(in key))
             {
-                asset = default(AssetInfo);
+                assetInfo = default(AssetInfo);
                 return false;
             }
 
-            asset = LoadAssetAsync(in key);
+            assetInfo = ResourceManager.LoadAssetAsync(m_Pointer, in key);
+#if DEBUG_MODE
+            assetInfo.AddDebugger();
+#endif
             return true;
         }
         /// <summary><inheritdoc cref="LoadAsset(in Hash)"/></summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="key"></param>
-        /// <param name="asset"></param>
+        /// <param name="assetInfo"></param>
         /// <returns></returns>
-        public bool TryLoadAsset<T>(in Hash key, out AssetInfo<T> asset)
+        public bool TryLoadAsset<T>(in Hash key, out AssetInfo<T> assetInfo)
             where T : UnityEngine.Object
         {
             if (!HasAsset(in key))
             {
-                asset = default(AssetInfo<T>);
+                assetInfo = default(AssetInfo<T>);
                 return false;
             }
 
-            asset = (AssetInfo<T>)LoadAsset(in key);
+            AssetInfo assetInfoUntyped = ResourceManager.LoadAsset(m_Pointer, in key);
+#if DEBUG_MODE
+            assetInfoUntyped.AddDebugger();
+#endif
+            assetInfo = (AssetInfo<T>)assetInfoUntyped;
             return true;
         }
         /// <summary><inheritdoc cref="LoadAsset(in Hash)"/></summary>
@@ -341,7 +379,12 @@ namespace Point.Collections.ResourceControl
                 return false;
             }
 
-            asset = (AssetInfo<T>)LoadAssetAsync(in key);
+
+            AssetInfo assetInfoUntyped = ResourceManager.LoadAssetAsync(m_Pointer, in key);
+#if DEBUG_MODE
+            assetInfoUntyped.AddDebugger();
+#endif
+            asset = (AssetInfo<T>)assetInfoUntyped;
             return true;
         }
 

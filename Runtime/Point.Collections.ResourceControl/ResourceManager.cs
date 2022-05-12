@@ -500,6 +500,8 @@ namespace Point.Collections.ResourceControl
             {
                 Instance.m_WaitForUnloadIndices.Add(index);
             }
+
+            asset.RemoveLoadedFrame();
         }
 
         #endregion

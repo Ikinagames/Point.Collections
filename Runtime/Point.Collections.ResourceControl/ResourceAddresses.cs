@@ -26,10 +26,8 @@ using Unity.Mathematics;
 #endif
 #endif
 
-using Point.Collections.ResourceControl.LowLevel;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -43,10 +41,6 @@ namespace Point.Collections.ResourceControl
         [SerializeField] private AssetPathField[] m_StreamingAssetBundles = Array.Empty<AssetPathField>();
 
         public IReadOnlyList<AssetPathField> StreamingAssetBundles => m_StreamingAssetBundles;
-    }
-
-    internal static class ResourceExtensions
-    {
     }
 }
 
