@@ -56,7 +56,7 @@ namespace Point.Collections.ResourceControl
 
 #if !UNITYENGINE_OLD
         private const string c_FileUri = "file:///";
-        private const float c_UnloadTime = 300.0f;
+        private const float c_UnloadTime = 5.0f;
 
         [NonSerialized] private NativeList<UnsafeAssetBundleInfo> m_AssetBundleInfos;
         [NonSerialized] private List<AssetContainer> m_AssetBundles;
@@ -578,6 +578,7 @@ namespace Point.Collections.ResourceControl
                     return;
                 }
 
+                Resources.UnloadAsset(promise.Value);
                 promise.Dispose();
                 m_Assets.Remove(hash);
             }
