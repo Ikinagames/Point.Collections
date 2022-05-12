@@ -47,10 +47,18 @@ namespace Point.Collections.ResourceControl
         [NativeDisableUnsafePtrRestriction, NonSerialized]
         internal readonly UnsafeReference<UnsafeAssetBundleInfo> m_BundlePointer;
         [NonSerialized]
-        internal readonly Hash m_Key;
+        internal readonly Hash m_InstanceID, m_Key;
         private readonly Timer m_CreationTime;
-        private Timer m_LastUsedTime;
 
+        [NotBurstCompatible]
+        private ref UnsafeAssetInfo UnsafeInfo
+        {
+            get
+            {
+                var assetInfoPtr = ResourceManager.GetUnsafeAssetInfo(in m_Key);
+                return ref assetInfoPtr.Value;
+            }
+        }
         /// <summary>
         /// <seealso cref="UnityEngine.AssetBundle"/> 내 에셋.
         /// </summary>
@@ -58,6 +66,7 @@ namespace Point.Collections.ResourceControl
         /// 반환된 객체는 <seealso cref="ResourceManager"/> 에서 <see cref="UnityEngine.AssetBundle"/> 단위로 관리되므로, 
         /// <see cref="UnityEngine.Object.Destroy(UnityEngine.Object)"/> 등과 같은 행위가 절때로 일어나서는 안됩니다.
         /// </remarks>
+        [NotBurstCompatible]
         public UnityEngine.Object Asset
         {
             get
@@ -66,25 +75,32 @@ namespace Point.Collections.ResourceControl
 
                 ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
 
-                m_LastUsedTime = Timer.Start();
-                return bundleInfo.m_Assets[m_Key];
+                UnsafeInfo.lastUsage = Timer.Start();
+                return bundleInfo.m_Assets[m_Key].Value;
             }
         }
+        public Hash Key => m_Key;
 
-        internal unsafe AssetInfo(UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash key)
+        public AssetInfo(Hash key)
+        {
+            this = default(AssetInfo);
+
+            m_Key = key;
+        }
+        internal unsafe AssetInfo(UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash instanceID, Hash key)
         {
             this = default(AssetInfo);
 
             m_BundlePointer = bundle;
+            m_InstanceID = instanceID;
             this.m_Key = key;
 
             m_CreationTime = Timer.Start();
-            m_LastUsedTime = m_CreationTime;
         }
 
         public float GetElapsedTimeSinceLastUsage()
         {
-            return m_LastUsedTime.ElapsedTime;
+            return UnsafeInfo.lastUsage.ElapsedTime;
         }
 
         /// <summary>
@@ -98,6 +114,7 @@ namespace Point.Collections.ResourceControl
         /// 유효한 에셋인지 반환합니다.
         /// </summary>
         /// <returns></returns>
+        [NotBurstCompatible]
         public bool IsValid()
         {
             ResourceManager.AssetContainer bundle;
@@ -121,6 +138,123 @@ namespace Point.Collections.ResourceControl
 
         [NotBurstCompatible]
         public override string ToString() => m_Key.ToString();
+
+        public static implicit operator UnityEngine.Object(AssetInfo t) => t.Asset;
+    }
+
+    /// <inheritdoc cref="AssetInfo"/>
+    /// <typeparam name="T"></typeparam>
+    [BurstCompatible]
+    [Guid("FC6B34C4-B9CA-48AD-A041-9522729CCD2A")]
+    public struct AssetInfo<T> : IValidation, IEquatable<AssetInfo<T>>, IDisposable
+        where T : UnityEngine.Object
+    {
+        public static AssetInfo<T> Invalid => default(AssetInfo<T>);
+
+        [NativeDisableUnsafePtrRestriction, NonSerialized]
+        internal readonly UnsafeReference<UnsafeAssetBundleInfo> m_BundlePointer;
+        [NonSerialized]
+        internal readonly Hash m_InstanceID, m_Key;
+        private readonly Timer m_CreationTime;
+
+        [NotBurstCompatible]
+        private ref UnsafeAssetInfo UnsafeInfo
+        {
+            get
+            {
+                var assetInfoPtr = ResourceManager.GetUnsafeAssetInfo(in m_Key);
+                return ref assetInfoPtr.Value;
+            }
+        }
+        /// <summary>
+        /// <seealso cref="UnityEngine.AssetBundle"/> 내 에셋.
+        /// </summary>
+        /// <remarks>
+        /// 반환된 객체는 <seealso cref="ResourceManager"/> 에서 <see cref="UnityEngine.AssetBundle"/> 단위로 관리되므로, 
+        /// <see cref="UnityEngine.Object.Destroy(UnityEngine.Object)"/> 등과 같은 행위가 절때로 일어나서는 안됩니다.
+        /// </remarks>
+        [NotBurstCompatible]
+        public T Asset
+        {
+            get
+            {
+                ((AssetInfo)this).ThrowIfIsNotValid();
+
+                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+
+                UnsafeInfo.lastUsage = Timer.Start();
+                return bundleInfo.m_Assets[m_Key].Value as T;
+            }
+        }
+        public Hash Key => m_Key;
+
+        public AssetInfo(Hash key)
+        {
+            this = default(AssetInfo<T>);
+
+            m_Key = key;
+        }
+        internal unsafe AssetInfo(UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash instanceID, Hash key)
+        {
+            this = default(AssetInfo<T>);
+
+            m_BundlePointer = bundle;
+            m_InstanceID = instanceID;
+            this.m_Key = key;
+
+            m_CreationTime = Timer.Start();
+        }
+
+        public float GetElapsedTimeSinceLastUsage()
+        {
+            return UnsafeInfo.lastUsage.ElapsedTime;
+        }
+
+        /// <summary>
+        /// 에셋의 레퍼런스를 반환합니다.
+        /// </summary>
+        public void Reserve()
+        {
+            ((IDisposable)this).Dispose();
+        }
+        /// <summary>
+        /// 유효한 에셋인지 반환합니다.
+        /// </summary>
+        /// <returns></returns>
+        [NotBurstCompatible]
+        public bool IsValid()
+        {
+            ResourceManager.AssetContainer bundle;
+            if (!m_BundlePointer.IsCreated) return false;
+
+            bundle = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+
+            return bundle.m_Assets.ContainsKey(m_Key);
+        }
+        public bool Equals(AssetInfo<T> other)
+        {
+            return m_BundlePointer.Equals(other.m_BundlePointer) && m_Key.Equals(other.m_Key);
+        }
+
+        void IDisposable.Dispose()
+        {
+            ((AssetInfo)this).ThrowIfIsNotValid();
+
+            ResourceManager.Reserve(m_BundlePointer, this);
+        }
+
+        [NotBurstCompatible]
+        public override string ToString() => m_Key.ToString();
+
+        public static explicit operator AssetInfo<T>(AssetInfo t)
+        {
+            return new AssetInfo<T>(t.m_BundlePointer, t.m_InstanceID, t.m_Key);
+        }
+        public static implicit operator AssetInfo(AssetInfo<T> t)
+        {
+            return new AssetInfo(t.m_BundlePointer, t.m_InstanceID, t.m_Key);
+        }
+        public static implicit operator T(AssetInfo<T> t) => t.Asset;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////

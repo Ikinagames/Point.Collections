@@ -19,6 +19,7 @@
 #endif
 #define UNITYENGINE
 
+using Point.Collections.Buffer.LowLevel;
 using System;
 using System.Runtime.InteropServices;
 using Unity.Collections;
@@ -37,7 +38,7 @@ namespace Point.Collections.ResourceControl.LowLevel
         public uint m_Generation;
         public bool m_Using;
 
-        public FixedString4096Bytes uri;
+        public FixedString512Bytes uri;
         public uint crc;
 
         public bool loaded;
@@ -71,6 +72,18 @@ namespace Point.Collections.ResourceControl.LowLevel
         public ref UnsafeAssetInfo GetAssetInfo(in int assetIndex)
         {
             return ref assets.ElementAt(assetIndex);
+        }
+        public unsafe UnsafeReference<UnsafeAssetInfo> GetAssetInfoPointer(in int assetIndex)
+        {
+            return assets.Ptr + assetIndex;
+        }
+        public bool HasAnyReferences()
+        {
+            for (int i = 0; i < assets.Length; i++)
+            {
+                if (!assets[i].checkSum.IsEmpty()) return true;
+            }
+            return false;
         }
 
         public bool IsValid() => index >= 0 && m_Using;

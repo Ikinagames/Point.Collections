@@ -157,7 +157,7 @@ namespace Point.Collections.ResourceControl
             {
                 if (Ref.assets[i].checkSum != 0)
                 {
-                    PointHelper.LogError(LogChannel.Collections,
+                    PointHelper.LogError(LogChannel.Core,
                         string.Format(c_ReferencesNotReserved,
                             Ref.assets[i].key, nameof(AssetInfo.Reserve)));
                 }
@@ -233,7 +233,7 @@ namespace Point.Collections.ResourceControl
         /// <inheritdoc cref="HasAsset(in Hash)"/>
         /// <param name="key"></param>
         /// <returns></returns>
-        public bool HasAsset(in FixedString4096Bytes key)
+        public bool HasAsset(in FixedString512Bytes key)
         {
             this.ThrowIfIsNotValid();
 
@@ -253,14 +253,26 @@ namespace Point.Collections.ResourceControl
 
             return ResourceManager.LoadAsset(m_Pointer, in key);
         }
+        public AssetInfo LoadAssetAsync(in Hash key)
+        {
+            this.ThrowIfIsNotValid();
+
+            return ResourceManager.LoadAssetAsync(m_Pointer, in key);
+        }
         /// <inheritdoc cref="LoadAsset(in Hash)"/>
         /// <param name="key"></param>
         /// <returns></returns>
-        public AssetInfo LoadAsset(in FixedString4096Bytes key)
+        public AssetInfo LoadAsset(in FixedString512Bytes key)
         {
             this.ThrowIfIsNotValid();
 
             return ResourceManager.LoadAsset(m_Pointer, in key);
+        }
+        public AssetInfo LoadAssetAsync(in FixedString512Bytes key)
+        {
+            this.ThrowIfIsNotValid();
+
+            return ResourceManager.LoadAssetAsync(m_Pointer, in key);
         }
         /// <summary><inheritdoc cref="LoadAsset(in Hash)"/></summary>
         /// <param name="key"></param>
@@ -275,6 +287,55 @@ namespace Point.Collections.ResourceControl
             }
 
             asset = LoadAsset(in key);
+            return true;
+        }
+        /// <summary><inheritdoc cref="LoadAsset(in Hash)"/></summary>
+        /// <param name="key"></param>
+        /// <param name="asset"></param>
+        /// <returns></returns>
+        public bool TryLoadAssetAsync(in Hash key, out AssetInfo asset)
+        {
+            if (!HasAsset(in key))
+            {
+                asset = default(AssetInfo);
+                return false;
+            }
+
+            asset = LoadAssetAsync(in key);
+            return true;
+        }
+        /// <summary><inheritdoc cref="LoadAsset(in Hash)"/></summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key"></param>
+        /// <param name="asset"></param>
+        /// <returns></returns>
+        public bool TryLoadAsset<T>(in Hash key, out AssetInfo<T> asset)
+            where T : UnityEngine.Object
+        {
+            if (!HasAsset(in key))
+            {
+                asset = default(AssetInfo<T>);
+                return false;
+            }
+
+            asset = (AssetInfo<T>)LoadAsset(in key);
+            return true;
+        }
+        /// <summary><inheritdoc cref="LoadAsset(in Hash)"/></summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key"></param>
+        /// <param name="asset"></param>
+        /// <returns></returns>
+        public bool TryLoadAssetAsync<T>(in Hash key, out AssetInfo<T> asset)
+            where T : UnityEngine.Object
+        {
+            if (!HasAsset(in key))
+            {
+                asset = default(AssetInfo<T>);
+                return false;
+            }
+
+            asset = (AssetInfo<T>)LoadAssetAsync(in key);
             return true;
         }
 
