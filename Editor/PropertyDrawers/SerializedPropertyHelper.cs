@@ -397,6 +397,85 @@ namespace Point.Collections.Editor
 
         #endregion
 
+        #region AssetPathField
+
+        private static class AssetPathFieldHelper
+        {
+            const string c_Str = "p_AssetPath";
+
+            public static SerializedProperty GetAssetPathField(SerializedProperty property)
+            {
+                return property.FindPropertyRelative(c_Str);
+            }
+        }
+        public static void SetAssetPathField(SerializedProperty property, UnityEngine.Object obj)
+        {
+            SerializedProperty pathProp = AssetPathFieldHelper.GetAssetPathField(property);
+
+            pathProp.stringValue = obj == null ? string.Empty : AssetDatabase.GetAssetPath(obj);
+        }
+        public static void SetAssetPathFieldPath(SerializedProperty property, string path)
+        {
+            SerializedProperty pathProp = AssetPathFieldHelper.GetAssetPathField(property);
+
+            pathProp.stringValue = path;
+        }
+        public static string GetAssetPathFieldPath(SerializedProperty property)
+        {
+            SerializedProperty pathProp = AssetPathFieldHelper.GetAssetPathField(property);
+
+            return pathProp.stringValue;
+        }
+        public static UnityEngine.Object GetAssetPathField(SerializedProperty property)
+        {
+            SerializedProperty pathProp = AssetPathFieldHelper.GetAssetPathField(property);
+
+            return AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(pathProp.stringValue);
+        }
+        public static T GetAssetPathField<T>(SerializedProperty property)
+            where T : UnityEngine.Object
+        {
+            return GetAssetPathField(property) as T;
+        }
+
+        #endregion
+
+        #region MinMaxFloatField
+
+        private static class MinMaxFloatFieldHelper
+        {
+            const string c_Min = "m_Min", c_Max = "m_Max";
+
+            public static SerializedProperty GetMinProperty(SerializedProperty property)
+            {
+                return property.FindPropertyRelative(c_Min);
+            }
+            public static SerializedProperty GetMaxProperty(SerializedProperty property)
+            {
+                return property.FindPropertyRelative(c_Max);
+            }
+        }
+
+        public static Vector2 GetMinMaxField(SerializedProperty property)
+        {
+            SerializedProperty
+                minProp = MinMaxFloatFieldHelper.GetMinProperty(property),
+                maxProp = MinMaxFloatFieldHelper.GetMaxProperty(property);
+
+            return new Vector2(minProp.floatValue, maxProp.floatValue);
+        }
+        public static void SetMinMaxField(SerializedProperty property, Vector2 minMax)
+        {
+            SerializedProperty
+                minProp = MinMaxFloatFieldHelper.GetMinProperty(property),
+                maxProp = MinMaxFloatFieldHelper.GetMaxProperty(property);
+
+            minProp.floatValue = minMax.x;
+            maxProp.floatValue = minMax.y;
+        }
+
+        #endregion
+
         public static Vector3 GetVector3(this SerializedProperty t)
         {
             if (t.propertyType == SerializedPropertyType.Vector3)
@@ -463,6 +542,19 @@ namespace Point.Collections.Editor
             } while (temp.Next(false) && temp.depth > t.depth);
 
             return count;
+        }
+        public static IEnumerable<SerializedProperty> ForEachChild(this SerializedProperty t)
+        {
+            var temp = t.Copy();
+            if (!temp.Next(true))
+            {
+                yield break;
+            }
+
+            do
+            {
+                yield return temp.Copy();
+            } while (temp.Next(false) && temp.depth > t.depth);
         }
 
         #region Draw Method
