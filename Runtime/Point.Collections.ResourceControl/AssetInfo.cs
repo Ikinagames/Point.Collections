@@ -123,6 +123,7 @@ namespace Point.Collections.ResourceControl
                 promise.OnCompleted -= value;
             }
         }
+        public Hash InstanceID => m_InstanceID;
         /// <summary>
         /// 에셋의 키 값입니다.
         /// </summary>
@@ -169,7 +170,7 @@ namespace Point.Collections.ResourceControl
 
             bundle = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
 
-            return bundle.m_Assets.ContainsKey(m_Key);
+            return bundle.IsLoadedAsset(m_Key);
         }
         public bool Equals(AssetInfo other)
         {
@@ -277,7 +278,7 @@ namespace Point.Collections.ResourceControl
                 promise.OnCompleted -= value;
             }
         }
-
+        public Hash InstanceID => m_InstanceID;
         /// <summary>
         /// 에셋의 키 값입니다.
         /// </summary>
@@ -328,7 +329,7 @@ namespace Point.Collections.ResourceControl
 
             bundle = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
 
-            return bundle.m_Assets.ContainsKey(m_Key);
+            return bundle.IsLoadedAsset(m_Key);
         }
         public bool Equals(AssetInfo<T> other)
         {

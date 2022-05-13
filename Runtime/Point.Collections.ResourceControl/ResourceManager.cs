@@ -518,7 +518,7 @@ namespace Point.Collections.ResourceControl
         {
             private AssetBundle m_AssetBundle;
             // 현재 로드된 에셋들의 HashMap 입니다.
-            public Dictionary<Hash, Promise<UnityEngine.Object>> m_Assets;
+            private Dictionary<Hash, Promise<UnityEngine.Object>> m_Assets;
 
             public AssetBundle AssetBundle
             {
@@ -533,6 +533,10 @@ namespace Point.Collections.ResourceControl
                 m_Assets = new Dictionary<Hash, Promise<UnityEngine.Object>>();
             }
 
+            public bool IsLoadedAsset(Hash hash)
+            {
+                return m_Assets.ContainsKey(hash);
+            }
             public UnityEngine.Object GetAsset(Hash hash)
             {
                 if (m_Assets.TryGetValue(hash, out Promise<UnityEngine.Object> promise))
@@ -585,8 +589,14 @@ namespace Point.Collections.ResourceControl
                 }
 
                 Resources.UnloadAsset(promise.Value);
+
                 promise.Dispose();
                 m_Assets.Remove(hash);
+
+                if (m_Assets.Count == 0)
+                {
+                    m_AssetBundle.Unload(true);
+                }
             }
 
             public void Clear()
