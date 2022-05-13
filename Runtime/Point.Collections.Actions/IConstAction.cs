@@ -29,7 +29,12 @@ using System;
 namespace Point.Collections.Actions
 {
 #if UNITYENGINE
+
+#if UNITY_2020_1_OR_NEWER
     [UnityEngine.Scripting.RequireImplementors]
+#else
+    [UnityEngine.Scripting.Preserve]
+#endif
 #endif
     public interface IConstAction : IDisposable
     {

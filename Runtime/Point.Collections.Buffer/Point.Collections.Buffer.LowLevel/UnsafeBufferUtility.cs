@@ -393,16 +393,16 @@ namespace Point.Collections.Buffer.LowLevel
             {
                 var temp = t
                     .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
-                    .Where(t =>
+                    .Where(fieldInfo =>
                     {
-                        if (t.GetCustomAttribute<ExportDataAttribute>() == null) return false;
-                        else if (!t.IsPublic)
+                        if (fieldInfo.GetCustomAttribute<ExportDataAttribute>() == null) return false;
+                        else if (!fieldInfo.IsPublic)
                         {
-                            return t.GetCustomAttribute<SerializeField>() != null;
+                            return fieldInfo.GetCustomAttribute<SerializeField>() != null;
                         }
-                        return t.GetCustomAttribute<NonSerializedAttribute>() == null;
+                        return fieldInfo.GetCustomAttribute<NonSerializedAttribute>() == null;
                     })
-                    .OrderBy(t => TypeHelper.SizeOf(t.FieldType), new ExportDataComparer())
+                    .OrderBy(fieldInfo => TypeHelper.SizeOf(fieldInfo.FieldType), new ExportDataComparer())
                     .ToArray();
                 int size = 0, alignment = 0;
                 foreach (var item in temp)
@@ -465,10 +465,13 @@ namespace Point.Collections.Buffer.LowLevel
         }
 #endif
     }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
-    public struct UnsafeExportedData : IValidation, IDisposable, INativeDisposable
+    public struct UnsafeExportedData : IValidation, IDisposable
+#if UNITY_COLLECTIONS
+        , INativeDisposable
+#endif
     {
         private readonly TypeInfo m_Type;
         private UnsafeAllocator m_Allocator;
@@ -487,12 +490,14 @@ namespace Point.Collections.Buffer.LowLevel
         {
             m_Allocator.Dispose();
         }
+#if UNITY_COLLECTIONS
         public JobHandle Dispose(JobHandle inputDeps)
         {
             inputDeps = m_Allocator.Dispose(inputDeps);
 
             return inputDeps;
         }
+#endif
     }
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
     public class ExportDataAttribute : Attribute

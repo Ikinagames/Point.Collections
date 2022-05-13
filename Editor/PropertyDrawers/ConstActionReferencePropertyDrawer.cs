@@ -16,13 +16,11 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 #define DEBUG_MODE
 
-#if UNITY_MATHEMATICS
 using Point.Collections.Actions;
 using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-#endif
 using UnityEditor;
 using UnityEngine;
 

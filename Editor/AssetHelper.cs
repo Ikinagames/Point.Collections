@@ -204,31 +204,40 @@ namespace Point.Collections.Editor
             PointHelper.Log(Channel.Editor, c_Header);
 
             s_AssetDatabase.Clear();
-            
+
+#if UNITY_2020_1_OR_NEWER
             int id = Progress.Start(c_Header, "Gathering All Assets...", Progress.Options.None);
+#endif
             string[] allAssetPaths = AssetDatabase.GetAllAssetPaths();
             for (int i = 0; i < allAssetPaths.Length; i++)
             {
                 AssetInfo info = new AssetInfo(allAssetPaths[i]);
                 s_AssetDatabase.Add(allAssetPaths[i], info);
 
+#if UNITY_2020_1_OR_NEWER
                 Progress.Report(id, i / allAssetPaths.Length);
+#endif
             }
 
+#if UNITY_2020_1_OR_NEWER
             int subId = Progress.Start(c_Header, "Authoring All Assets...", parentId: id);
+#endif
 
             for (int i = 0; i < allAssetPaths.Length; i++)
             {
                 AssetInfo info = s_AssetDatabase[allAssetPaths[i]];
                 info.BuildReferenceSet(s_AssetDatabase);
 
+#if UNITY_2020_1_OR_NEWER
                 Progress.Report(subId, i / allAssetPaths.Length);
+#endif
                 //bool cancel = EditorUtility.DisplayCancelableProgressBar(c_Header, "Authoring All Assets...", i / allAssetPaths.Length);
                 //if (cancel) break;
             }
+#if UNITY_2020_1_OR_NEWER
             Progress.Remove(subId);
             Progress.Remove(id);
-
+#endif
             //EditorUtility.ClearProgressBar();
             s_AssetDatabaseBuilded = true;
         }

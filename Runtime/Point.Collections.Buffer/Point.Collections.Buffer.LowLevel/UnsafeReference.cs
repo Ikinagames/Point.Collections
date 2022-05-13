@@ -146,7 +146,9 @@ namespace Point.Collections.Buffer.LowLevel
         public static unsafe implicit operator void*(UnsafeReference p) => p.m_Ptr;
         public static unsafe implicit operator IntPtr(UnsafeReference p) => (IntPtr)p.m_Ptr;
 
+#if UNITY_COLLECTIONS
         [NotBurstCompatible]
+#endif
         public override unsafe string ToString() => ((long)m_Ptr).ToString("X4");
     }
     /// <summary>
@@ -356,7 +358,9 @@ namespace Point.Collections.Buffer.LowLevel
         public static unsafe implicit operator IntPtr(UnsafeReference<T> p) => (IntPtr)p.m_Ptr;
         public static unsafe implicit operator IntPtr<T>(UnsafeReference<T> p) => new IntPtr<T>((IntPtr)p.m_Ptr);
 
+#if UNITY_COLLECTIONS
         [NotBurstCompatible]
+#endif
         public override unsafe string ToString() => ((long)m_Ptr).ToString("X4");
 
 #if UNITYENGINE && UNITY_COLLECTIONS

@@ -366,6 +366,8 @@ namespace Point.Collections.Editor
 
         #endregion
 
+#endif
+
         #region ConstActionReference
 
         public static void SetConstActionReference(SerializedProperty property, Guid guid, params object[] args)
@@ -394,8 +396,6 @@ namespace Point.Collections.Editor
         }
 
         #endregion
-
-#endif
 
         public static Vector3 GetVector3(this SerializedProperty t)
         {
