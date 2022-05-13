@@ -316,7 +316,7 @@ namespace Point.Collections.ResourceControl
         {
             if (!HasAsset(in key))
             {
-                assetInfo = default(AssetInfo);
+                assetInfo = AssetInfo.Invalid;
                 return false;
             }
 
@@ -334,7 +334,7 @@ namespace Point.Collections.ResourceControl
         {
             if (!HasAsset(in key))
             {
-                assetInfo = default(AssetInfo);
+                assetInfo = AssetInfo.Invalid;
                 return false;
             }
 
@@ -354,7 +354,7 @@ namespace Point.Collections.ResourceControl
         {
             if (!HasAsset(in key))
             {
-                assetInfo = default(AssetInfo<T>);
+                assetInfo = AssetInfo<T>.Invalid;
                 return false;
             }
 
@@ -375,7 +375,7 @@ namespace Point.Collections.ResourceControl
         {
             if (!HasAsset(in key))
             {
-                asset = default(AssetInfo<T>);
+                asset = AssetInfo<T>.Invalid;
                 return false;
             }
 
