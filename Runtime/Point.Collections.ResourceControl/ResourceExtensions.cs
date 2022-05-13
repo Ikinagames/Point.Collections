@@ -42,6 +42,12 @@ namespace Point.Collections.ResourceControl
         private static readonly Dictionary<Hash, Dictionary<Hash, StackFrame>> s_AssetLoadCallFrames = new Dictionary<Hash, Dictionary<Hash, StackFrame>>();
         public static void AddDebugger(this in AssetInfo assetInfo)
         {
+            if (!assetInfo.IsValid())
+            {
+                //"? not valid".ToLogError();
+                return;
+            }
+
             if (!s_AssetLoadCallFrames.TryGetValue(assetInfo.m_Key, out var list))
             {
                 list = new Dictionary<Hash, StackFrame>();
@@ -51,6 +57,12 @@ namespace Point.Collections.ResourceControl
         }
         public static void AddDebugger(this in AssetInfo assetInfo, StackFrame stackFrame)
         {
+            if (!assetInfo.IsValid())
+            {
+                //"? not valid".ToLogError();
+                return;
+            }
+
             if (!s_AssetLoadCallFrames.TryGetValue(assetInfo.m_Key, out var list))
             {
                 list = new Dictionary<Hash, StackFrame>();
@@ -60,6 +72,12 @@ namespace Point.Collections.ResourceControl
         }
         public static void RemoveLoadedFrame(this in AssetInfo t)
         {
+            if (!t.IsValid())
+            {
+                //"? not valid".ToLogError();
+                return;
+            }
+
             if (!s_AssetLoadCallFrames.TryGetValue(t.m_Key, out var stackFrames)) return;
 
             stackFrames.Remove(t.m_InstanceID);
@@ -80,6 +98,12 @@ namespace Point.Collections.ResourceControl
         }
         public static StackFrame GetLoadedFrame(this in AssetInfo assetInfo)
         {
+            if (!assetInfo.IsValid())
+            {
+                //"? not valid".ToLogError();
+                return null;
+            }
+
             if (!s_AssetLoadCallFrames.TryGetValue(assetInfo.m_Key, out var stackFrames))
             {
                 return null;
@@ -105,21 +129,45 @@ namespace Point.Collections.ResourceControl
         /// <param name="t"></param>
         public static void NotifyHandle(this AssetInfo t)
         {
+            if (!t.IsValid())
+            {
+                //"? not valid".ToLogError();
+                return;
+            }
+
             t.UnsafeInfo.lastUsage = Timer.Start();
         }
         public static void NotifyHandle<T>(this AssetInfo<T> t)
             where T : UnityEngine.Object
         {
+            if (!t.IsValid())
+            {
+                //"? not valid".ToLogError();
+                return;
+            }
+
             t.UnsafeInfo.lastUsage = Timer.Start();
         }
 
         public static void SetAssetHandle(this in AssetInfo t, AssetHandleType type)
         {
+            if (!t.IsValid())
+            {
+                //"? not valid".ToLogError();
+                return;
+            }
+
             t.UnsafeInfo.assetHandleType = type;
         }
         public static void SetAssetHandle<T>(this in AssetInfo<T> t, AssetHandleType type)
             where T : UnityEngine.Object
         {
+            if (!t.IsValid())
+            {
+                //"? not valid".ToLogError();
+                return;
+            }
+
             t.UnsafeInfo.assetHandleType = type;
         }
 #endif
