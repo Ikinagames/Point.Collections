@@ -23,7 +23,7 @@
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
-#if UNITYENGINE
+#if ENABLE_NODEGRAPH && UNITYENGINE
 
 using Point.Collections.Graphs;
 using UnityEditor;
