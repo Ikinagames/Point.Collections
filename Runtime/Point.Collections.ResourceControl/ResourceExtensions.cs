@@ -40,6 +40,7 @@ namespace Point.Collections.ResourceControl
         #region Debug
 
         private static readonly Dictionary<Hash, Dictionary<Hash, StackFrame>> s_AssetLoadCallFrames = new Dictionary<Hash, Dictionary<Hash, StackFrame>>();
+        [Conditional("DEBUG_MODE")]
         public static void AddDebugger(this in AssetInfo assetInfo)
         {
             if (!assetInfo.IsValid())
@@ -55,6 +56,7 @@ namespace Point.Collections.ResourceControl
             }
             list[assetInfo.m_InstanceID] = (ScriptUtils.GetCallerFrame(2));
         }
+        [Conditional("DEBUG_MODE")]
         public static void AddDebugger(this in AssetInfo assetInfo, StackFrame stackFrame)
         {
             if (!assetInfo.IsValid())
@@ -70,6 +72,7 @@ namespace Point.Collections.ResourceControl
             }
             list[assetInfo.m_InstanceID] = (stackFrame);
         }
+        [Conditional("DEBUG_MODE")]
         public static void RemoveLoadedFrame(this in AssetInfo t)
         {
             if (!t.IsValid())
