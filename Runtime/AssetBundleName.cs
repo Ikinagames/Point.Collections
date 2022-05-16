@@ -19,22 +19,26 @@
 #endif
 #define UNITYENGINE
 #if UNITY_COLLECTIONS
-using Unity.Collections;
 #endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
+using System;
+
 namespace Point.Collections
 {
-    public unsafe interface IChar
+    [Serializable]
+    public struct AssetBundleName : IEquatable<AssetBundleName>
     {
-        int Length { get; }
-        char this[int index] { get; }
+        [UnityEngine.SerializeField]
+        private UnityEngine.PropertyName m_Name;
 
-        void Set(int index, char value);
-        string Read(int from, int to);
+        public AssetBundleName(string name)
+        {
+            m_Name = new UnityEngine.PropertyName(name);
+        }
 
-        string ToString();
+        public bool Equals(AssetBundleName other) => m_Name.Equals(other.m_Name);
     }
 }

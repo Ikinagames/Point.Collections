@@ -13,21 +13,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR
 #define DEBUG_MODE
 
+using System;
 using UnityEditor;
 using UnityEngine;
 
 namespace Point.Collections.Editor
 {
-    [CustomPropertyDrawer(typeof(Hash))]
-    internal sealed class HashPropertyDrawer : PropertyDrawer<Hash>
+    //[CustomPropertyDrawer(typeof(AssetBundleName))]
+    internal sealed class AssetBundleNamePropertyDrawer : PropertyDrawer<AssetBundleName>
     {
+        private string[] m_AssetBundleNames = Array.Empty<string>();
+
+        protected override void OnInitialize(SerializedProperty property)
+        {
+            m_AssetBundleNames = AssetDatabase.GetAllAssetBundleNames();
+
+            base.OnInitialize(property);
+        }
+
         protected override void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
         {
-            SerializedProperty valueProp = property.FindPropertyRelative("m_Value");
-            EditorGUI.PropertyField(rect.Pop(), valueProp, new GUIContent("Hash"));
+            base.OnPropertyGUI(ref rect, property, label);
         }
     }
 }
