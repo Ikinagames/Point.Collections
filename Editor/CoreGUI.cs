@@ -214,6 +214,7 @@ namespace Point.Collections.Editor
         public static void Label(Rect rect, string text) => Label(rect, new GUIContent(text), TextAnchor.MiddleLeft);
         public static void Label(Rect rect, GUIContent text) => Label(rect, text, TextAnchor.MiddleLeft);
         public static void Label(Rect rect, GUIContent text, TextAnchor textAnchor) => EditorGUI.LabelField(rect, text, GetLabelStyle(textAnchor));
+        public static void Label(Rect rect, string text, TextAnchor textAnchor) => EditorGUI.LabelField(rect, text, GetLabelStyle(textAnchor));
         public static void Label(Rect rect, GUIContent text, AnimFloat alpha, TextAnchor textAnchor)
         {
             GUIStyle style = GetLabelStyle(textAnchor);
@@ -229,6 +230,10 @@ namespace Point.Collections.Editor
             temp.text = EditorUtilities.String(text.text, size);
 
             EditorGUI.LabelField(rect, temp, GetLabelStyle(textAnchor));
+        }
+        public static void Label(Rect rect, string text, int size, TextAnchor textAnchor)
+        {
+            EditorGUI.LabelField(rect, EditorUtilities.String(text, size), GetLabelStyle(textAnchor));
         }
         public static void Label(Rect rect, GUIContent text1, GUIContent text2, TextAnchor textAnchor)
         {
