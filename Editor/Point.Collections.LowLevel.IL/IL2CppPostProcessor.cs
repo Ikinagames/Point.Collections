@@ -39,7 +39,15 @@ namespace Point.Collections.Editor
 
             return OnProcess(module, type, method, attribute, att);
         }
+        internal override bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, CustomAttribute attribute)
+        {
+            Attribute att = GetCustomAttribute(type, TargetAttributeType);
+
+            return OnProcess(module, type, attribute, att);
+        }
+
         public virtual bool OnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute, Attribute attributeInstance) { return false; }
+        public virtual bool OnProcess(ModuleDefinition module, TypeDefinition type, CustomAttribute attribute, Attribute attributeInstance) { return false; }
     }
     public abstract class IL2CppPostProcessor<T> : IL2CppPostProcessorBase
         where T : ILProcessorAttribute
@@ -52,6 +60,14 @@ namespace Point.Collections.Editor
 
             return OnProcess(module, type, method, attribute, att);
         }
+        internal override bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, CustomAttribute attribute)
+        {
+            T att = (T)GetCustomAttribute(type, TargetAttributeType);
+
+            return OnProcess(module, type, attribute, att);
+        }
+
+        public virtual bool OnProcess(ModuleDefinition module, TypeDefinition type, CustomAttribute attribute, T attributeInstance) { return false; }
         public virtual bool OnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute, T attributeInstance) { return false; }
     }
 }

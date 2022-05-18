@@ -14,9 +14,11 @@
 // limitations under the License.
 
 using Point.Collections.LowLevel.IL;
+using System;
 
 namespace Point.Collections
 {
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public sealed class LogAttribute : ILProcessorAttribute
     {
         public string Text { get; set; }

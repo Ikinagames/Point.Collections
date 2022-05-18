@@ -89,6 +89,7 @@ namespace Point.Collections.Actions
         protected virtual void OnShutdown() { }
         protected virtual void OnDispose() { }
     }
+
     public abstract class ConstActionBase<TResult> : ConstActionBase
     {
         protected override sealed Type ReturnType => TypeHelper.TypeOf<TResult>.Type;

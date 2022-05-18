@@ -187,6 +187,31 @@ namespace Point.Collections.Editor
             {
                 foreach (TypeDefinition typeDefinition in moduleDefinition.Types)
                 {
+                    processedAtts.Clear();
+                    foreach (CustomAttribute customAttribute in typeDefinition.CustomAttributes)
+                    {
+                        if (!postProcessors.TryGetValue(customAttribute.AttributeType.Name, out var processors))
+                        {
+                            continue;
+                        }
+
+                        for (int i = 0; i < processors.Count; i++)
+                        {
+                            processors[i].m_IsMethod = true;
+
+                            hasChanged |= processors[i].InternalOnProcess(moduleDefinition, typeDefinition, customAttribute);
+                        }
+
+                        processedAtts.Add(customAttribute);
+                    }
+                    // Remove the attribute so it won't be processed again
+                    for (int i = 0; i < processedAtts.Count; i++)
+                    {
+                        typeDefinition.CustomAttributes.Remove(processedAtts[i]);
+                    }
+
+                    // method
+
                     foreach (MethodDefinition methodDefinition in typeDefinition.Methods)
                     {
                         processedAtts.Clear();
@@ -200,6 +225,8 @@ namespace Point.Collections.Editor
 
                             for (int i = 0; i < processors.Count; i++)
                             {
+                                processors[i].m_IsMethod = true;
+
                                 hasChanged |= processors[i].InternalOnProcess(moduleDefinition, typeDefinition, methodDefinition, customAttribute);
 
                                 ComputeOffsets(methodDefinition.Body);

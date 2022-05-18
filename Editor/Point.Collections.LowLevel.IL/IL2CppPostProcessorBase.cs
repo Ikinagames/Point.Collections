@@ -33,9 +33,31 @@ namespace Point.Collections.Editor
 {
     public abstract class IL2CppPostProcessorBase
     {
+        internal bool m_IsMethod;
+
         public abstract Type TargetAttributeType { get; }
 
+        protected bool IsMethod => m_IsMethod;
+        protected bool IsType => !m_IsMethod;
+
         public virtual void OnInitialize() { }
+
+        /// <summary>
+        /// <see cref="IsType"/> 이 <see langword="true"/> 일 경우 실행됩니다.
+        /// </summary>
+        /// <param name="module"></param>
+        /// <param name="type"></param>
+        /// <param name="attribute"></param>
+        /// <returns></returns>
+        internal abstract bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, CustomAttribute attribute);
+        /// <summary>
+        /// <see cref="IsMethod"/> 가 <see langword="true"/> 일 경우 실행됩니다.
+        /// </summary>
+        /// <param name="module"></param>
+        /// <param name="type"></param>
+        /// <param name="method"></param>
+        /// <param name="attribute"></param>
+        /// <returns></returns>
         internal abstract bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute);
 
         internal protected Attribute GetCustomAttribute(TypeDefinition type, Type attributeType)
