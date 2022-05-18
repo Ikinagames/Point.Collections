@@ -28,6 +28,7 @@
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using NUnit.Framework;
+using Point.Collections.LowLevel.IL;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -51,20 +52,20 @@ namespace Point.Collections.Editor
     {
         #region Initialize
 
-        private static Dictionary<string, List<IL2CppPostProcessor>> postProcessors = new Dictionary<string, List<IL2CppPostProcessor>>();
+        private static Dictionary<string, List<IL2CppPostProcessorBase>> postProcessors = new Dictionary<string, List<IL2CppPostProcessorBase>>();
 
         static AssemblyPostProcessor()
         {
             var processorIter = TypeHelper
                 .GetTypesIter(t => !t.IsAbstract && !t.IsInterface)
-                .Where(TypeHelper.InheritsFrom<IL2CppPostProcessor>);
+                .Where(TypeHelper.InheritsFrom<IL2CppPostProcessorBase>);
             foreach (var item in processorIter)
             {
-                IL2CppPostProcessor ins = (IL2CppPostProcessor)Activator.CreateInstance(item);
+                IL2CppPostProcessorBase ins = (IL2CppPostProcessorBase)Activator.CreateInstance(item);
 
                 if (!postProcessors.TryGetValue(ins.TargetAttributeType.Name, out var list))
                 {
-                    list = new List<IL2CppPostProcessor>();
+                    list = new List<IL2CppPostProcessorBase>();
                     postProcessors.Add(ins.TargetAttributeType.Name, list);
                 }
 
@@ -73,9 +74,6 @@ namespace Point.Collections.Editor
             }
 
             CompilationPipeline.assemblyCompilationFinished += CompilationPipeline_assemblyCompilationFinished;
-
-            //AssemblyReloadEvents.beforeAssemblyReload -= ProcessAllAsemblies;
-            //AssemblyReloadEvents.beforeAssemblyReload += ProcessAllAsemblies;
         }
 
         private static void CompilationPipeline_assemblyCompilationFinished(string arg1, CompilerMessage[] arg2)
@@ -112,23 +110,17 @@ namespace Point.Collections.Editor
                     // Only process assemblies which are in the project
                     if (assembly.Location.Replace('\\', '/').StartsWith(Application.dataPath.Substring(0, Application.dataPath.Length - 7)))
                     {
-                        string tempFilePath = Application.dataPath + "/../Temp/" + Path.GetFileName(assembly.Location);
-                        //if (File.Exists(tempFilePath))
+                        //string tempFilePath = Application.dataPath + "/../Temp/" + Path.GetFileName(assembly.Location);
+
+                        using (var st = new FileStream(assembly.Location, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                         {
-                            using (var st = new FileStream(assembly.Location, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+                            AssemblyDefinition assemblyDefinition = AssemblyDefinition.ReadAssembly(st);
+                            if (AssemblyPostProcessor.PostProcessAssembly(assemblyDefinition))
                             {
-                                AssemblyDefinition assemblyDefinition = AssemblyDefinition.ReadAssembly(st);
-                                if (AssemblyPostProcessor.PostProcessAssembly(assemblyDefinition))
-                                {
-                                    st.Position = 0;
-                                    assemblyDefinition.Write(st);
-                                }
+                                st.Position = 0;
+                                assemblyDefinition.Write(st);
                             }
                         }
-                        //else
-                        //{
-                        //    "??fatal err".ToLogError();
-                        //}
                     }
                 }
                 catch (Exception e)
@@ -187,16 +179,6 @@ namespace Point.Collections.Editor
 
         #endregion
 
-
-        public static TypeReference GetILMethodProcessorAttribute()
-        {
-            return ToTypeReference(TypeHelper.TypeOf<ILMethodProcessorAttribute>.Type);
-        }
-        public static TypeReference GetTestAtt()
-        {
-            return ToTypeReference(TypeHelper.TypeOf<LogAttribute>.Type);
-        }
-
         private static bool PostProcessAssembly(AssemblyDefinition assemblyDefinition)
         {
             bool hasChanged = false;
@@ -218,7 +200,7 @@ namespace Point.Collections.Editor
 
                             for (int i = 0; i < processors.Count; i++)
                             {
-                                hasChanged |= processors[i].OnProcess(moduleDefinition, typeDefinition, methodDefinition, customAttribute);
+                                hasChanged |= processors[i].InternalOnProcess(moduleDefinition, typeDefinition, methodDefinition, customAttribute);
 
                                 ComputeOffsets(methodDefinition.Body);
                             }
@@ -231,11 +213,6 @@ namespace Point.Collections.Editor
                         {
                             methodDefinition.CustomAttributes.Remove(processedAtts[i]);
                         }
-                        //if (logAttribute != null)
-                        //{
-                        //    bool result = methodDefinition.CustomAttributes.Remove(logAttribute);
-                        //    $"remove :: {result} :: {logAttribute.AttributeType.FullName} from {methodDefinition.Name}".ToLog();
-                        //}
                     }
                 }
             }
@@ -265,42 +242,6 @@ namespace Point.Collections.Editor
             current = InsertBefore(ilProcessor, first, ilProcessor.Create(OpCodes.Call, logMethodReference));
 
             ComputeOffsets(method.Body);
-            return true;
-        }
-    }
-
-    public abstract class IL2CppPostProcessor
-    {
-        public abstract Type TargetAttributeType { get; }
-
-        public virtual void OnInitialize() { }
-        public virtual bool OnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute) { return false; }
-    }
-    public abstract class IL2CppPostProcessor<T> : IL2CppPostProcessor
-        where T : ILProcessorAttribute
-    {
-        public override sealed Type TargetAttributeType => TypeHelper.TypeOf<T>.Type;
-    }
-
-    internal sealed class LogAttributeILProcessor : IL2CppPostProcessor<LogAttribute>
-    {
-        public override void OnInitialize()
-        {
-            "init log att proc".ToLog();
-        }
-
-        public override bool OnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute)
-        {
-            MethodReference logMethodReference = module.ImportReference(typeof(Debug).GetMethod("Log", new Type[] { typeof(object) }));
-
-            ILProcessor ilProcessor = method.Body.GetILProcessor();
-            Instruction first = method.Body.Instructions.First();
-            Instruction last = method.Body.Instructions.Last();
-
-            //Insertion function
-            ilProcessor.InsertBefore(first, ilProcessor.Create(OpCodes.Ldstr, "Inject testes 123123"));
-            ilProcessor.InsertBefore(first, ilProcessor.Create(OpCodes.Call, logMethodReference));
-
             return true;
         }
     }

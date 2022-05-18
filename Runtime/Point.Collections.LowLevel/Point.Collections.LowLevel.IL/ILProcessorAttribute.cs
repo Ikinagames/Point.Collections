@@ -15,10 +15,7 @@
 
 using System;
 
-namespace Point.Collections
+namespace Point.Collections.LowLevel.IL
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public abstract class ILMethodProcessorAttribute : ILProcessorAttribute { }
-
     public abstract class ILProcessorAttribute : Attribute { }
 }

@@ -13,7 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Point.Collections.LowLevel.IL;
+
 namespace Point.Collections
 {
-    public sealed class LogAttribute : ILMethodProcessorAttribute { }
+    public sealed class LogAttribute : ILProcessorAttribute
+    {
+        public string Text { get; set; }
+
+        public LogAttribute(string text)
+        {
+            Text = text;
+        }
+    }
 }
