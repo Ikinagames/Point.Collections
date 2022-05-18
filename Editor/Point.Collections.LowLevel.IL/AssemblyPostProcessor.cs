@@ -35,6 +35,7 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Build;
+using UnityEditor.Build.Player;
 using UnityEditor.Build.Reporting;
 using UnityEditor.Callbacks;
 using UnityEditor.Compilation;
@@ -47,7 +48,7 @@ namespace Point.Collections.Editor
     // https://www.codersblock.org/blog//2014/06/integrating-monocecil-with-unity.html
     // https://stackoverflow.com/questions/49475927/mono-cecil-and-unity-not-playing-nice-together
 
-    [InitializeOnLoad]
+    //[InitializeOnLoad]
     public static class AssemblyPostProcessor /*: IPostBuildPlayerScriptDLLs*/
     {
         #region Initialize
@@ -73,23 +74,74 @@ namespace Point.Collections.Editor
                 ins.OnInitialize();
             }
 
-            CompilationPipeline.assemblyCompilationFinished += CompilationPipeline_assemblyCompilationFinished;
+            //CompilationPipeline.assemblyCompilationFinished += CompilationPipeline_assemblyCompilationFinished;
+
+            ProcessAllAsemblies();
         }
 
         private static void CompilationPipeline_assemblyCompilationFinished(string arg1, CompilerMessage[] arg2)
         {
+            if (hasGen == true) return;
+
             ProcessAllAsemblies();
+            hasGen = true;
         }
 
         private static bool hasGen = false;
 
-        [PostProcessBuild(1000)]
+        //[PostProcessBuild(1000)]
         private static void OnPostprocessBuildPlayer(BuildTarget buildTarget, string buildPath)
         {
             hasGen = false;
+
+            string pathDirectory = buildPath.Replace(Path.GetFileName(buildPath), string.Empty);
+            $"{pathDirectory}".ToLog();
+
+            ScriptingImplementation scriptTarget = PlayerSettings.GetScriptingBackend(EditorUserBuildSettings.selectedBuildTargetGroup);
+            if (scriptTarget == ScriptingImplementation.Mono2x)
+            {
+                const string c_MonoPath = "Ramsey_Data/Managed";
+                pathDirectory = Path.Combine(pathDirectory, c_MonoPath);
+
+                EditorApplication.LockReloadAssemblies();
+
+                foreach (string dllPath in Directory.GetFiles(pathDirectory))
+                {
+                    $"process {dllPath}, :: {Path.GetExtension(dllPath)}".ToLog();
+                    if (Path.GetExtension(dllPath) != ".dll")
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        using (var st = new FileStream(dllPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+                        //using (var st = new FileStream(tempFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+                        {
+                            AssemblyDefinition assemblyDefinition = AssemblyDefinition.ReadAssembly(st);
+                            if (AssemblyPostProcessor.PostProcessAssembly(assemblyDefinition))
+                            {
+                                st.Position = 0;
+                                assemblyDefinition.Write(st);
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogWarning(e);
+                    }
+                }
+
+                $"{pathDirectory}".ToLog();
+                EditorApplication.UnlockReloadAssemblies();
+            }
+            else
+            {
+                "not handled".ToLogError();
+            }
         }
 
-        [PostProcessScene]
+        //[PostProcessScene]
         public static void TestInjectMothodOnPost()
         {
             if (hasGen == true) return;
@@ -98,7 +150,7 @@ namespace Point.Collections.Editor
             ProcessAllAsemblies();
         }
 
-        [MenuItem("Point/Process Assemblies")]
+        //[MenuItem("Point/Process Assemblies")]
         public static void ProcessAllAsemblies()
         {
             // Lock assemblies while they may be altered
@@ -113,6 +165,7 @@ namespace Point.Collections.Editor
                         //string tempFilePath = Application.dataPath + "/../Temp/" + Path.GetFileName(assembly.Location);
 
                         using (var st = new FileStream(assembly.Location, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+                        //using (var st = new FileStream(tempFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                         {
                             AssemblyDefinition assemblyDefinition = AssemblyDefinition.ReadAssembly(st);
                             if (AssemblyPostProcessor.PostProcessAssembly(assemblyDefinition))
