@@ -35,6 +35,12 @@ namespace Point.Collections
         public bool HasValue => m_Value != null;
         public object Value => m_Value;
 
+        /// <summary>
+        /// 작업이 완료되고 값이 할당될 때 실행되는 이벤트입니다.
+        /// </summary>
+        /// <remarks>
+        /// 이미 작업이 완료되었거나 값을 할당받은 경우, 추가된 이벤트는 즉시 실행됩니다.
+        /// </remarks>
         public event Action<object> OnCompleted
         {
             add
@@ -53,6 +59,10 @@ namespace Point.Collections
             }
         }
 
+        public Promise(object value)
+        {
+            m_Value = value;
+        }
         public Promise(IPromiseProvider provider)
         {
             provider.OnComplete(OnCompleteMethod);
@@ -82,9 +92,11 @@ namespace Point.Collections
         private Action<T> m_OnCompleted;
 
         public bool HasValue => m_IsCompleted;
+        /// <inheritdoc cref="IPromise.Value"/>
         public T Value => m_Value;
         object IPromise.Value => m_Value;
 
+        /// <inheritdoc cref="Promise.OnCompleted"/>
         public event Action<T> OnCompleted
         {
             add
@@ -151,7 +163,13 @@ namespace Point.Collections
 
     internal interface IPromise
     {
+        /// <summary>
+        /// 값을 가지고 있나요?
+        /// </summary>
         bool HasValue { get; }
+        /// <summary>
+        /// 현재 가지고 있는 값
+        /// </summary>
         object Value { get; }
     }
 
