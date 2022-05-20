@@ -19,17 +19,19 @@
 #endif
 #define UNITYENGINE
 
+using System;
 using UnityEngine;
 using UnityEngine.Networking;
 
 namespace Point.Collections.ResourceControl.LowLevel
 {
-    internal sealed unsafe class AssetBundleLoadAsyncHandler
+    internal sealed unsafe class AssetBundleLoadAsyncHandler : IPromiseProvider<AssetBundle>
     {
         private UnsafeAssetBundleInfo* m_Bundle;
         private ResourceManager.AssetContainer m_AssetContainer;
 
         private UnityWebRequest m_WebRequest;
+        private Action<AssetBundle> m_OnComplete;
 
         public AsyncOperation Initialize(UnsafeAssetBundleInfo* bundle, ResourceManager.AssetContainer container, UnityWebRequest webRequest)
         {
@@ -43,6 +45,11 @@ namespace Point.Collections.ResourceControl.LowLevel
             return request;
         }
 
+        public void OnComplete(Action<AssetBundle> obj)
+        {
+            m_OnComplete += obj;
+        }
+
         private void M_WebRequest_completed(UnityEngine.AsyncOperation obj)
         {
             m_Bundle->loaded = true;
@@ -51,6 +58,8 @@ namespace Point.Collections.ResourceControl.LowLevel
 
             ResourceManager.GetAssetBundle(m_Bundle->index).AssetBundle = bundle;
             ResourceManager.UpdateAssetInfos(m_Bundle, bundle);
+
+            m_OnComplete?.Invoke(bundle);
         }
     }
 }

@@ -13,6 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
+#define CACHEABLE
+#endif
+
 #if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
@@ -243,10 +247,10 @@ namespace Point.Collections.ResourceControl
 
         internal static unsafe AssetContainer GetAssetBundle(in int index)
         {
-            if (Instance.m_AssetBundles[index] == null)
-            {
-                Instance.m_AssetBundles[index] = new AssetContainer();
-            }
+            //if (Instance.m_AssetBundles[index] == null)
+            //{
+            //    Instance.m_AssetBundles[index] = new AssetContainer();
+            //}
             return Instance.m_AssetBundles[index];
         }
 
@@ -270,9 +274,28 @@ namespace Point.Collections.ResourceControl
         internal static unsafe AsyncOperation LoadAssetBundleAsync(UnsafeAssetBundleInfo* p)
         {
             int index = p->index;
-            var request = UnityWebRequestAssetBundle.GetAssetBundle(p->uri.ToString(), p->crc);
-            //AssetBundle bundle = AssetBundle.LoadFromFile(p->uri.ToString());
+            string uri = p->uri.ToString();
+            UnityWebRequest request;
 
+#if CACHEABLE
+            // If uri is targeting remote server, cache file.
+            if (Instance.m_Manifest != null && !uri.StartsWith(c_FileUri))
+            {
+                string bundleName = Path.GetFileName(uri);
+                Cache cache = Caching.GetCacheByPath(PointPath.CachePath);
+                if (!cache.valid) cache = Caching.AddCache(PointPath.CachePath);
+
+                Caching.currentCacheForWriting = cache;
+                Hash128 hash = Instance.m_Manifest.GetAssetBundleHash(bundleName);
+                request = UnityWebRequestAssetBundle.GetAssetBundle(uri, hash, p->crc);
+            }
+            else
+#endif
+            {
+                request = UnityWebRequestAssetBundle.GetAssetBundle(uri, p->crc);
+            }
+
+            //AssetBundle bundle = AssetBundle.LoadFromFile(p->uri.ToString());
             var handler = new AssetBundleLoadAsyncHandler();
             return handler.Initialize(p, GetAssetBundle(in index), request);
         }
@@ -517,6 +540,7 @@ namespace Point.Collections.ResourceControl
         internal sealed class AssetContainer
         {
             private AssetBundle m_AssetBundle;
+            //public string[] m_Dependencies = Array.Empty<string>();
             // 현재 로드된 에셋들의 HashMap 입니다.
             private Dictionary<Hash, Promise<UnityEngine.Object>> m_Assets;
 
@@ -621,6 +645,23 @@ namespace Point.Collections.ResourceControl
 
         #endregion
 
+        private AssetBundleManifest m_Manifest;
+        public static AssetBundleManifest Manifest { get => Instance.m_Manifest; set => Instance.m_Manifest = value; }
+
+        public static void RegisterManifest(AssetBundle manifestBundle)
+        {
+            const string c_ManifestAssetName = "AssetBundleManifest";
+
+            AssetBundleManifest manifest = manifestBundle.LoadAsset<AssetBundleManifest>(c_ManifestAssetName);
+            manifestBundle.Unload(false);
+
+            Instance.m_Manifest = manifest;
+        }
+        public static void RegisterManifest(AssetBundleManifest manifest)
+        {
+            Instance.m_Manifest = manifest;
+        }
+
         /// <summary>
         /// 에셋 번들을 상대 경로로 추가하여 정보를 반환합니다. 
         /// </summary>
@@ -659,6 +700,7 @@ namespace Point.Collections.ResourceControl
             if (Instance.TryGetAssetBundleWithPath(uri, out var bundle)) return bundle;
 
             int index = Instance.GetUnusedAssetBundleBuffer();
+            AssetContainer assetContainer;
             if (index < 0)
             {
                 index = Instance.m_AssetBundles.Count;
@@ -670,8 +712,9 @@ namespace Point.Collections.ResourceControl
                     crc = crc
                 };
 
+                assetContainer = new AssetContainer();
                 Instance.m_AssetBundleInfos.Add(info);
-                Instance.m_AssetBundles.Add(null);
+                Instance.m_AssetBundles.Add(assetContainer);
             }
             else
             {
@@ -683,8 +726,28 @@ namespace Point.Collections.ResourceControl
                 info.uri = uri;
                 info.crc = crc;
 
-                Instance.m_AssetBundles[index] = null;
+                assetContainer = new AssetContainer();
+                Instance.m_AssetBundles[index] = assetContainer;
             }
+
+            if (Instance.m_Manifest == null && uri.StartsWith(c_FileUri))
+            {
+                string filePath = uri.Replace(c_FileUri, string.Empty),
+                    directoryPath = Path.GetDirectoryName(filePath),
+                    directoryName = directoryPath.Split(Path.DirectorySeparatorChar).Last(),
+                    manifestPath = Path.Combine(directoryPath, directoryName);
+
+                if (File.Exists(manifestPath))
+                {
+                    AssetBundle manifestBundle = AssetBundle.LoadFromFile(manifestPath);
+                    RegisterManifest(manifestBundle);
+
+                    //assetContainer.m_Dependencies = manifest.GetDirectDependencies(Path.GetFileName(filePath));
+
+                }
+            }
+
+            //
 
             return GetAssetBundleInfo(in index);
         }

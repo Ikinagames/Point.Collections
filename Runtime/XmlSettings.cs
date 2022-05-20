@@ -38,7 +38,7 @@ namespace Point.Collections
     /// </summary>
     public sealed class XmlSettings
     {
-        private static readonly string s_GlobalConfigPath = Path.Combine(Application.dataPath, "..", "Point",  "config.xml");
+        private static readonly string s_GlobalConfigPath = Path.Combine(PointPath.DataPath,  "config");
         private static readonly Dictionary<Type, FieldInfo[]> s_CachedSettingFields = new Dictionary<Type, FieldInfo[]>();
 
         private static readonly List<Type> s_StaticLoadedTypes = new List<Type>();
