@@ -302,7 +302,7 @@ namespace Point.Collections.ResourceControl
 
             return bundle;
         }
-        internal static unsafe AsyncOperation LoadAssetBundleAsync(UnsafeAssetBundleInfo* p)
+        internal static unsafe Promise<AssetBundle> LoadAssetBundleAsync(UnsafeAssetBundleInfo* p)
         {
             int index = p->index;
             string uri = p->uri.ToString();
@@ -328,7 +328,9 @@ namespace Point.Collections.ResourceControl
 
             //AssetBundle bundle = AssetBundle.LoadFromFile(p->uri.ToString());
             var handler = new AssetBundleLoadAsyncHandler();
-            return handler.Initialize(p, GetAssetBundle(in index), request);
+            handler.Initialize(p, GetAssetBundle(in index), request);
+
+            return new Promise<AssetBundle>(handler);
         }
 
         internal static unsafe void UnloadAssetBundle(ref UnsafeAssetBundleInfo p, bool unloadAllLoadedObjects)

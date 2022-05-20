@@ -113,7 +113,7 @@ namespace Point.Collections.ResourceControl
             }
         }
         [NotBurstCompatible]
-        public AsyncOperation LoadAsync()
+        public Promise<AssetBundle> LoadAsync()
         {
             this.ThrowIfIsNotValid();
 
