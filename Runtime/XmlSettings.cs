@@ -262,7 +262,7 @@ namespace Point.Collections
             }
 
             object value = ConvertToObject(fieldInfo.FieldType, element);
-            Debug.Log($"{fieldInfo.Name}={value} :: loaded");
+            //Debug.Log($"{fieldInfo.Name}={value} :: loaded");
 
             fieldInfo.SetValue(obj, value);
         }
@@ -281,7 +281,7 @@ namespace Point.Collections
                 SaveValue(objRoot, fieldInfo, obj);
             }
 
-            Debug.Log($"save doc for {obj.GetType().Name}");
+            //Debug.Log($"save doc for {obj.GetType().Name}");
             SaveDocument(objRoot, att.SaveToDisk);
         }
         /// <summary>
@@ -337,7 +337,7 @@ namespace Point.Collections
             }
 
             T result = (T)ConvertToObject(TypeHelper.TypeOf<T>.Type, value);
-            Debug.Log($"loaded result {result}");
+            //Debug.Log($"loaded result {result}");
             return result;
         }
         public static T LoadValueFromPref<T>(string key, string name, T defaultValue = default(T))
@@ -369,7 +369,7 @@ namespace Point.Collections
             }
 
             T result = (T)ConvertToObject(TypeHelper.TypeOf<T>.Type, value);
-            Debug.Log($"loaded result {result}");
+            //Debug.Log($"loaded result {result}");
             return result;
         }
 
