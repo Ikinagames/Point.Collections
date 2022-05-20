@@ -289,9 +289,18 @@ namespace Point.Collections.ResourceControl
             }
 
             string path = uri.Replace(c_FileUri, string.Empty);
-            
-            byte[] binary = File.ReadAllBytes(path);
-            AssetBundle bundle = AssetBundle.LoadFromMemory(binary);
+
+            AssetBundle bundle;
+            using (var st = File.OpenRead(path))
+            {
+                bundle = AssetBundle.LoadFromStream(st, p->crc);
+            }
+
+            if (bundle == null)
+            {
+                $"crc falid. {path} {p->crc}".ToLogError();
+                return null;
+            }
 
             p->loaded = true;
 
