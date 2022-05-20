@@ -45,7 +45,7 @@ namespace Point.Collections.ResourceControl.LowLevel
             return request;
         }
 
-        public void OnComplete(Action<AssetBundle> obj)
+        void IPromiseProvider<AssetBundle>.OnComplete(Action<AssetBundle> obj)
         {
             m_OnComplete += obj;
         }

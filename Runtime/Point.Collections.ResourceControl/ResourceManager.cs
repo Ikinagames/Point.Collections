@@ -254,11 +254,42 @@ namespace Point.Collections.ResourceControl
             return Instance.m_AssetBundles[index];
         }
 
-        internal static unsafe AssetBundle LoadAssetBundle(UnsafeAssetBundleInfo* p)
+        internal static unsafe Promise<AssetBundle> LoadAssetBundle(UnsafeAssetBundleInfo* p)
         {
-            string path = p->uri.ToString().Replace(c_FileUri, string.Empty);
             int index = p->index;
+            string uri = p->uri.ToString();
 
+            if (!uri.StartsWith(c_FileUri))
+            {
+                AssetBundleLoadAsyncHandler handler = new AssetBundleLoadAsyncHandler();
+                UnityWebRequest request;
+
+#if CACHEABLE
+                if (Instance.m_Manifest != null)
+                {
+                    string bundleName = Path.GetFileName(uri);
+                    Cache cache = Caching.GetCacheByPath(PointPath.CachePath);
+                    if (!cache.valid) cache = Caching.AddCache(PointPath.CachePath);
+
+                    Caching.currentCacheForWriting = cache;
+                    Hash128 hash = Instance.m_Manifest.GetAssetBundleHash(bundleName);
+
+                    request = UnityWebRequestAssetBundle.GetAssetBundle(uri, hash, p->crc);
+                }
+                else
+#endif
+                {
+                    request = UnityWebRequestAssetBundle.GetAssetBundle(uri, p->crc);
+                }
+                
+                handler.Initialize(p, GetAssetBundle(in index), request);
+
+                Promise<AssetBundle> promise = new Promise<AssetBundle>(handler);
+                return promise;
+            }
+
+            string path = uri.Replace(c_FileUri, string.Empty);
+            
             byte[] binary = File.ReadAllBytes(path);
             AssetBundle bundle = AssetBundle.LoadFromMemory(binary);
 

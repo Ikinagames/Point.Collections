@@ -94,7 +94,7 @@ namespace Point.Collections.ResourceControl
         }
 
         [NotBurstCompatible]
-        public AssetBundle Load()
+        public Promise<AssetBundle> Load()
         {
             this.ThrowIfIsNotValid();
 
