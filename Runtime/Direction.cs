@@ -13,19 +13,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Runtime.InteropServices;
 
 namespace Point.Collections
 {
     [Guid("050394ad-7885-4ce6-a798-38cb96838472")]
-    public enum Direction
+    [Flags]
+    public enum Direction : int
     {
         NONE = 0,
 
-        Up = 1 << 0,
-        Down = 1 << 1,
-        Left = 1 << 2,
-        Right = 1 << 3,
+        Up = 0b000001,
+        Down = 0b000010,
+        Left = 0b000100,
+        Right = 0b001000,
+        Forward = 0b010000,
+        Backward = 0b100000,
 
         UpDown = Up | Down,
         UpLeft = Up | Left,

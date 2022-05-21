@@ -80,16 +80,6 @@ namespace Point.Collections
         public static implicit operator LogChannel(Channel t) => (LogChannel)t.m_LogChannel;
         public static implicit operator Channel(LogChannel t) => new Channel(t);
 
-        //public static Channel operator &(LogChannel a, Channel b)
-        //{
-        //    LogChannel x = a, y = b;
-        //    return new Channel(x & y);
-        //}
-        //public static Channel operator &(Channel a, LogChannel b)
-        //{
-        //    LogChannel x = a, y = b;
-        //    return new Channel(x & y);
-        //}
         public static Channel operator &(Channel a, Channel b)
         {
             LogChannel x = a, y = b;

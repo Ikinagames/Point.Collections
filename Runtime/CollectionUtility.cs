@@ -88,7 +88,7 @@ namespace Point.Collections
             return JsonSerializerSettings;
         }
 
-        public static short CreateHashCode2()
+        public static short CreateHashCodeInt16()
         {
 #if UNITYENGINE && UNITY_MATHEMATICS
             return unchecked((short)Instance.m_Random.NextInt(short.MinValue, short.MaxValue));
