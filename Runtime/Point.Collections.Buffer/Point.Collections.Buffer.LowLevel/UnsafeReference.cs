@@ -94,7 +94,7 @@ namespace Point.Collections.Buffer.LowLevel
         /// <summary>
         /// 이 포인터가 사용자에 의헤 할당되었는지 반환합니다.
         /// </summary>
-        public bool IsCreated => !IntPtr.Equals(IntPtr.Zero);
+        public bool IsCreated { get { unsafe { return m_Ptr != null; } } }
 
         public unsafe UnsafeReference(void* ptr)
         {
@@ -233,7 +233,7 @@ namespace Point.Collections.Buffer.LowLevel
         public ref T Value => ref GetValue();
 
         /// <inheritdoc cref="UnsafeReference.IsCreated"/>
-        public bool IsCreated => !IntPtr.Equals(IntPtr.Zero);
+        public bool IsCreated { get { unsafe { return m_Ptr != null; } } }
 
         public UnsafeReference(IntPtr ptr)
         {

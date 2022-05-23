@@ -76,6 +76,7 @@ namespace Point.Collections.Buffer.LowLevel
 
         internal UnsafeReference<Buffer> m_Buffer;
 #if UNITYENGINE
+        private JobHandle m_JobHandle;
         internal readonly Allocator m_Allocator;
 #endif
 
@@ -135,6 +136,7 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
             }
 #if UNITYENGINE
+            m_JobHandle = default(JobHandle);
             m_Allocator = allocator;
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             UnsafeBufferUtility.CreateSafety(m_Buffer, allocator, out m_SafetyHandle);
@@ -167,6 +169,7 @@ namespace Point.Collections.Buffer.LowLevel
                 };
             }
 #if UNITYENGINE
+            m_JobHandle = default(JobHandle);
             m_Allocator = allocator;
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             UnsafeBufferUtility.CreateSafety(m_Buffer, allocator, out m_SafetyHandle);
@@ -180,6 +183,7 @@ namespace Point.Collections.Buffer.LowLevel
         /// </summary>
         public void Clear()
         {
+            CompleteAllJobs();
             unsafe
             {
                 NativeUtility.MemClear(m_Buffer.Value.Ptr, m_Buffer.Value.Size);
@@ -196,6 +200,8 @@ namespace Point.Collections.Buffer.LowLevel
         /// <param name="item"></param>
         public void Write<T>(T item) where T : unmanaged
         {
+            CompleteAllJobs();
+
             unsafe
             {
                 byte* bytes = UnsafeBufferUtility.AsBytes(ref item, out int length);
@@ -204,12 +210,15 @@ namespace Point.Collections.Buffer.LowLevel
         }
         public unsafe void Write(byte* bytes, int length)
         {
+            CompleteAllJobs();
+
             NativeUtility.MemCpy(m_Buffer.Value.Ptr, bytes, length);
         }
 
         public void Dispose()
         {
 #if UNITYENGINE && ENABLE_UNITY_COLLECTIONS_CHECKS
+            CompleteAllJobs();
             if (!UnsafeUtility.IsValidAllocator(m_Allocator))
             {
                 PointHelper.LogError(Channel.Collections,
@@ -258,6 +267,16 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
             m_Buffer = default(UnsafeReference<Buffer>);
             return result;
+        }
+
+        public void CompleteAllJobs()
+        {
+            m_JobHandle.Complete();
+        }
+        public JobHandle CombineDependencies(JobHandle inputDeps)
+        {
+            m_JobHandle = JobHandle.CombineDependencies(m_JobHandle, inputDeps);
+            return m_JobHandle;
         }
 #endif
 
