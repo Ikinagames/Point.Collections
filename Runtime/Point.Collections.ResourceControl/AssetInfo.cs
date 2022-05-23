@@ -179,11 +179,6 @@ namespace Point.Collections.ResourceControl
 
             return bundle.IsLoadedAsset(m_Key);
         }
-        public bool Equals(AssetInfo other)
-        {
-            return m_BundlePointer.Equals(other.m_BundlePointer) && m_Key.Equals(other.m_Key);
-        }
-
         void IDisposable.Dispose()
         {
             this.ThrowIfIsNotValid();
@@ -193,6 +188,24 @@ namespace Point.Collections.ResourceControl
 
         [NotBurstCompatible]
         public override string ToString() => m_Key.ToString();
+        public override int GetHashCode()
+        {
+            return m_InstanceID.ToInt32();
+        }
+        public bool Equals(AssetInfo other)
+        {
+            return m_BundlePointer.Equals(other.m_BundlePointer) && m_Key.Equals(other.m_Key);
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            else if (!(obj is AssetInfo)) return false;
+            AssetInfo other = (AssetInfo)obj;
+
+            return m_BundlePointer.Equals(other.m_BundlePointer) &&
+                m_InstanceID.Equals(other.m_InstanceID) &&
+                m_Key.Equals(other.m_Key);
+        }
 
         public static implicit operator UnityEngine.Object(AssetInfo t) => t.Asset;
     }
@@ -357,11 +370,6 @@ namespace Point.Collections.ResourceControl
 
             return bundle.IsLoadedAsset(m_Key);
         }
-        public bool Equals(AssetInfo<T> other)
-        {
-            return m_BundlePointer.Equals(other.m_BundlePointer) && m_Key.Equals(other.m_Key);
-        }
-
         void IDisposable.Dispose()
         {
             ((AssetInfo)this).ThrowIfIsNotValid();
@@ -371,6 +379,24 @@ namespace Point.Collections.ResourceControl
 
         [NotBurstCompatible]
         public override string ToString() => m_Key.ToString();
+        public override int GetHashCode()
+        {
+            return m_InstanceID.ToInt32();
+        }
+        public bool Equals(AssetInfo<T> other)
+        {
+            return m_BundlePointer.Equals(other.m_BundlePointer) && m_Key.Equals(other.m_Key);
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            else if (!(obj is AssetInfo<T>)) return false;
+            AssetInfo<T> other = (AssetInfo<T>)obj;
+
+            return m_BundlePointer.Equals(other.m_BundlePointer) &&
+                m_InstanceID.Equals(other.m_InstanceID) &&
+                m_Key.Equals(other.m_Key);
+        }
 
         public static explicit operator AssetInfo<T>(AssetInfo t)
         {
