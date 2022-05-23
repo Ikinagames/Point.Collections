@@ -123,7 +123,7 @@ namespace Point.Collections
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void LogWarning(Channel channel, in string msg, UnityEngine.Object context)
         {
-            if ((LogChannel & channel) != channel) return;
+            //if ((LogChannel & channel) != channel) return;
 
             string str = LogStringFormat(channel, in msg, 1);
             UnityEngine.Debug.LogWarning(str, context);
