@@ -30,7 +30,7 @@ using UnityEngine;
 
 namespace Point.Collections.ResourceControl
 {
-    public sealed class AssetRequest : IPromiseProvider<UnityEngine.Object>
+    internal sealed class AssetRequest : IPromiseProvider<UnityEngine.Object>
     {
         public static AssetRequest Initialize(AssetBundleRequest request)
         {
