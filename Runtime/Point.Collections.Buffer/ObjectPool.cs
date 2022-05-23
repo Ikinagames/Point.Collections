@@ -17,6 +17,7 @@
 #define DEBUG_MODE
 #endif
 
+using Point.Collections.Diagnostics;
 using Point.Collections.Threading;
 using System;
 using System.Collections.Generic;
@@ -32,6 +33,9 @@ namespace Point.Collections.Buffer
     public sealed class ObjectPool<T> : IDisposable
         where T : class
     {
+#if DEBUG_MODE
+        private readonly Dictionary<T, System.Diagnostics.StackFrame> m_DebugGets = new Dictionary<T, System.Diagnostics.StackFrame>();
+#endif
         private Func<T> m_Factory;
         private Action<T>
             m_OnGet, m_OnReserve, m_OnRelease;
@@ -102,15 +106,27 @@ namespace Point.Collections.Buffer
             {
                 t = m_Pool.Pop();
             }
-            else t = m_Factory.Invoke();
-
-            if (t == null) return null;
+            else
+            {
+                t = m_Factory.Invoke();
+                if (t == null)
+                {
+#if DEBUG_MODE
+                    PointHelper.LogWarning(Channel.Collections,
+                        $"Pool factory returned null object. Are you intended?");
+#endif
+                    return null;
+                }
+            }
 
             m_OnGet?.Invoke(t);
 
             int hash = t.GetHashCode();
             m_CheckSum ^= hash;
 
+#if DEBUG_MODE
+            m_DebugGets.Add(t, ScriptUtils.GetCallerFrame(1));
+#endif
             return t;
         }
         public void Reserve(T t)
@@ -129,6 +145,9 @@ namespace Point.Collections.Buffer
             m_CheckSum ^= hash;
 
             m_Pool.Push(t);
+#if DEBUG_MODE
+            m_DebugGets.Remove(t);
+#endif
         }
 
         public void Dispose()
@@ -139,6 +158,12 @@ namespace Point.Collections.Buffer
             if (m_CheckSum != 0)
             {
                 $"Pool is not fully reserved.".ToLogError();
+#if DEBUG_MODE
+                foreach (var item in m_DebugGets)
+                {
+                    $"From: {item.Value}".ToLogError(LogChannel.Collections);
+                }
+#endif
             }
 
             if (m_OnRelease != null)
