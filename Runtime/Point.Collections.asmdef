@@ -6,6 +6,7 @@
         "Unity.Burst",
         "Unity.Collections",
         "Unity.Addressables",
+        "Unity.ResourceManager",
         "Unity.InputSystem",
         "com.alelievr.NodeGraphProcessor.Runtime",
         "Unity.Timeline"
