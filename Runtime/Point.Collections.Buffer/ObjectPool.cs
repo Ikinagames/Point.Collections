@@ -104,6 +104,8 @@ namespace Point.Collections.Buffer
             }
             else t = m_Factory.Invoke();
 
+            if (t == null) return null;
+
             m_OnGet?.Invoke(t);
 
             int hash = t.GetHashCode();
@@ -114,6 +116,11 @@ namespace Point.Collections.Buffer
         public void Reserve(T t)
         {
 #if DEBUG_MODE
+            if (t == null)
+            {
+                "??".ToLogError();
+                return;
+            }
             if (EnableAtomicSafety) m_Owner.Validate();
 #endif
             m_OnReserve?.Invoke(t);

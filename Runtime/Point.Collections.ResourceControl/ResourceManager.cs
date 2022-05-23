@@ -603,28 +603,28 @@ namespace Point.Collections.ResourceControl
             {
                 return m_Assets.ContainsKey(hash);
             }
-            public UnityEngine.Object GetAsset(Hash hash)
+            public Promise<UnityEngine.Object> GetAsset(Hash hash)
             {
                 if (m_Assets.TryGetValue(hash, out Promise<UnityEngine.Object> promise))
                 {
-                    return promise.Value;
+                    return promise;
                 }
                 return null;
             }
-            public UnityEngine.Object LoadAsset(string key)
+            public Promise<UnityEngine.Object> LoadAsset(string key)
             {
 				key = key.ToLowerInvariant();
                 Hash hash = new Hash(key);
 
                 if (m_Assets.TryGetValue(hash, out Promise<UnityEngine.Object> promise))
                 {
-                    return promise.Value;
+                    return promise;
                 }
 
                 promise = new Promise<UnityEngine.Object>(m_AssetBundle.LoadAsset(key));
                 m_Assets.Add(hash, promise);
 
-                return promise.Value;
+                return promise;
             }
             public Promise<UnityEngine.Object> LoadAssetAsync(string key)
             {

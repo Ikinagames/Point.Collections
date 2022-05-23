@@ -75,8 +75,13 @@ namespace Point.Collections.ResourceControl
 
                 ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
 
-                UnsafeInfo.lastUsage = Timer.Start();
-                return bundleInfo.LoadAsset(UnsafeInfo.key.ToString());
+                var asset = bundleInfo.GetAsset(m_Key)?.Value;
+                if (asset != null)
+                {
+                    UnsafeInfo.lastUsage = Timer.Start();
+                }
+
+                return asset;
             }
         }
         /// <summary>
@@ -92,7 +97,9 @@ namespace Point.Collections.ResourceControl
                 this.ThrowIfIsNotValid();
 
                 ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
-                return bundleInfo.GetAsset(m_Key) != null;
+                var promise = bundleInfo.GetAsset(m_Key);
+
+                return promise != null && promise.HasValue;
             }
         }
         /// <summary>
@@ -230,8 +237,19 @@ namespace Point.Collections.ResourceControl
 
                 ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
 
+                var asset = bundleInfo.GetAsset(m_Key)?.Value;
+                if (asset == null)
+                {
+                    return null;
+                }
+
                 UnsafeInfo.lastUsage = Timer.Start();
-                return bundleInfo.LoadAsset(UnsafeInfo.key.ToString()) as T;
+                if (asset is UnityEngine.GameObject gameObject &&
+                    TypeHelper.InheritsFrom<UnityEngine.Component>(TypeHelper.TypeOf<T>.Type))
+                {
+                    return gameObject.GetComponent(TypeHelper.TypeOf<T>.Type) as T;
+                }
+                return asset as T;
             }
         }
         /// <summary>
@@ -247,7 +265,9 @@ namespace Point.Collections.ResourceControl
                 ((AssetInfo)this).ThrowIfIsNotValid();
 
                 ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
-                return bundleInfo.GetAsset(m_Key) != null;
+                var promise = bundleInfo.GetAsset(m_Key);
+
+                return promise != null && promise.HasValue;
             }
         }
         /// <summary>
@@ -290,10 +310,16 @@ namespace Point.Collections.ResourceControl
 
             m_Key = key;
         }
+        public AssetInfo(AssetInfo assetInfo)
+        {
+            m_BundlePointer = assetInfo.m_BundlePointer;
+            m_InstanceID = assetInfo.InstanceID;
+            this.m_Key = assetInfo.Key;
+
+            m_CreationTime = Timer.Start();
+        }
         internal unsafe AssetInfo(UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash instanceID, Hash key)
         {
-            this = default(AssetInfo<T>);
-
             m_BundlePointer = bundle;
             m_InstanceID = instanceID;
             this.m_Key = key;
@@ -348,7 +374,7 @@ namespace Point.Collections.ResourceControl
 
         public static explicit operator AssetInfo<T>(AssetInfo t)
         {
-            return new AssetInfo<T>(t.m_BundlePointer, t.m_InstanceID, t.m_Key);
+            return new AssetInfo<T>(t);
         }
         public static implicit operator AssetInfo(AssetInfo<T> t)
         {

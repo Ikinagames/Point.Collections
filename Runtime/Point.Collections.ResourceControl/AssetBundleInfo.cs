@@ -362,7 +362,12 @@ namespace Point.Collections.ResourceControl
 #if DEBUG_MODE
             assetInfoUntyped.AddDebugger();
 #endif
-            assetInfo = (AssetInfo<T>)assetInfoUntyped;
+            assetInfo = new AssetInfo<T>(assetInfoUntyped);
+            //$"{assetInfoUntyped.Key} :: {assetInfoUntyped.Asset != null} ? {assetInfo.Key} :: {assetInfo.Asset != null}".ToLogError();
+            //if (assetInfo.Asset != null)
+            //{
+            //    $"{assetInfo.Asset.name}".ToLogError();
+            //}
             return true;
         }
         /// <summary><inheritdoc cref="LoadAsset(in Hash)"/></summary>
