@@ -25,6 +25,13 @@
 #endif
 #endif
 
+using System;
+using System.Collections.Generic;
+using Unity.Collections;
+using Unity.Mathematics;
+using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using AddressableReference = UnityEngine.AddressableAssets.AssetReference;
 
 namespace Point.Collections.ResourceControl
