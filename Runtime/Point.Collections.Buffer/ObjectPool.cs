@@ -138,7 +138,7 @@ namespace Point.Collections.Buffer
 #endif
             if (m_CheckSum != 0)
             {
-                throw new Exception();
+                $"Pool is not fully reserved.".ToLogError();
             }
 
             if (m_OnRelease != null)

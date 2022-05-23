@@ -57,6 +57,24 @@ namespace Point.Collections.ResourceControl
             list[assetInfo.m_InstanceID] = (ScriptUtils.GetCallerFrame(2));
         }
         [Conditional("DEBUG_MODE")]
+        public static void AddDebugger<TObject>(this in AssetInfo<TObject> assetInfo)
+            where TObject : UnityEngine.Object
+        {
+            if (!assetInfo.IsValid())
+            {
+                //"? not valid".ToLogError();
+                return;
+            }
+
+            if (!s_AssetLoadCallFrames.TryGetValue(assetInfo.m_Key, out var list))
+            {
+                list = new Dictionary<Hash, StackFrame>();
+                s_AssetLoadCallFrames.Add(assetInfo.m_Key, list);
+            }
+            list[assetInfo.m_InstanceID] = (ScriptUtils.GetCallerFrame(2));
+        }
+
+        [Conditional("DEBUG_MODE")]
         public static void AddDebugger(this in AssetInfo assetInfo, StackFrame stackFrame)
         {
             if (!assetInfo.IsValid())

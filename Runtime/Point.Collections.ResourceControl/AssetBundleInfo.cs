@@ -167,7 +167,7 @@ namespace Point.Collections.ResourceControl
 #if UNITY_EDITOR
                         context = ResourceExtensions.LoadScriptFile(stackFrame);
 #endif
-                        PointHelper.LogError(LogChannel.Core,
+                        PointHelper.LogWarning(LogChannel.Core,
                             string.Format(c_ReferencesNotReserved,
                                 Ref.assets[i].key, stackFrame.ToString(), nameof(AssetInfo.Reserve)),
                             context);
