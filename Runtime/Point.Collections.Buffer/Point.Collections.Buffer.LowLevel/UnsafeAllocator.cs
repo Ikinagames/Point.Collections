@@ -661,6 +661,11 @@ namespace Point.Collections.Buffer.LowLevel
         {
             return UnsafeBufferUtility.RemoveForSwapBack(t.Ptr, t.Length, element);
         }
+        public static bool RemoveAtSwapBack<T>(this in UnsafeAllocator<T> t, int index)
+            where T : unmanaged
+        {
+            return UnsafeBufferUtility.RemoveAtSwapBack(t.Ptr, t.Length, index);
+        }
 
 #if UNITYENGINE
         /// <summary>
