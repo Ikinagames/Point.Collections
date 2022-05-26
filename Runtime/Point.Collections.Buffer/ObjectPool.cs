@@ -33,6 +33,12 @@ namespace Point.Collections.Buffer
     public sealed class ObjectPool<T> : IDisposable
         where T : class
     {
+        public static ObjectPool<T> Shared { get; } = new ObjectPool<T>() { m_Factory = DefaultFactory };
+        private static T DefaultFactory()
+        {
+            return Activator.CreateInstance<T>();
+        }
+
 #if DEBUG_MODE
         private readonly Dictionary<T, System.Diagnostics.StackFrame> m_DebugGets = new Dictionary<T, System.Diagnostics.StackFrame>();
 #endif

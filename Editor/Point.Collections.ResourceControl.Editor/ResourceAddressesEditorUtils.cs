@@ -22,7 +22,6 @@
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
-using Point.Collections.Editor;
 using Point.Collections.ResourceControl;
 using System.Collections.Generic;
 using System.Linq;

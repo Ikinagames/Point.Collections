@@ -175,10 +175,22 @@ namespace Point.Collections
 
     public interface IPromiseProvider
     {
+        /// <summary>
+        /// <see cref="Promise.OnCompleted"/> 를 통해 추가된 이벤트들이 실행되는 구현부입니다.
+        /// </summary>
+        /// <remarks>
+        /// 제공자는 완료되었을 때 <paramref name="obj"/> 가 실행되도록 구현하여야 합니다.
+        /// </remarks>
+        /// <param name="obj"></param>
         void OnComplete(Action<object> obj);
     }
     public interface IPromiseProvider<T>
     {
+        /// <summary>
+        /// <see cref="Promise{T}.OnCompleted"/> 를 통해 추가된 이벤트들이 실행되는 구현부입니다.
+        /// </summary>
+        /// <remarks><inheritdoc cref="IPromiseProvider.OnComplete(Action{object})"/></remarks>
+        /// <param name="obj"></param>
         void OnComplete(Action<T> obj);
     }
 }

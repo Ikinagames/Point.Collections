@@ -170,6 +170,22 @@ namespace Point.Collections.Editor
 
             CoreGUI.Label(rect.Pop(CoreGUI.GetLineHeight(1)), content);
         }
+        protected string TextField(ref AutoRect rect, string text)
+        {
+            return TextField(ref rect, GUIContent.none, text);
+        }
+        protected string TextField(ref AutoRect rect, string label, string text)
+        {
+            GUIContent content = new GUIContent(label);
+            return TextField(ref rect, content, text);
+        }
+        protected string TextField(ref AutoRect rect, GUIContent content, string text)
+        {
+            float height = EditorGUI.GetPropertyHeight(SerializedPropertyType.String, content);
+            AddAutoHeight(height);
+
+            return EditorGUI.TextField(rect.Pop(height), content, text);
+        }
 
         #region PropertyField
 

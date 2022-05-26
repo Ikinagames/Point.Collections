@@ -25,6 +25,7 @@
 #endif
 #endif
 
+using Point.Collections.Buffer;
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
@@ -32,6 +33,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceLocations;
 using AddressableReference = UnityEngine.AddressableAssets.AssetReference;
 
 namespace Point.Collections.ResourceControl
@@ -40,9 +42,9 @@ namespace Point.Collections.ResourceControl
     {
         [SerializeField] private List<AddressableAsset> m_AssetList = new List<AddressableAsset>();
 
-        public AddressableAsset this[int index]
+        public AssetReference this[int index]
         {
-            get => m_AssetList[index];
+            get => m_AssetList[index].AssetReference;
         }
 
 #if UNITY_EDITOR
@@ -71,157 +73,56 @@ namespace Point.Collections.ResourceControl
         }
 #endif
     }
-    public sealed class ResourceHashMap : StaticScriptableObject<ResourceHashMap>
-    {
-        [SerializeField] private List<ResourceList> m_ResourceLists = new List<ResourceList>();
-
-        public ResourceList this[int index]
-        {
-            get
-            {
-                return m_ResourceLists[index];
-            }
-        }
-        public AddressableAsset this[int2 index]
-        {
-            get
-            {
-                return m_ResourceLists[index.x][index.y];
-            }
-        }
-    }
-
     [Serializable]
-    public struct AssetReference : IValidation, IEquatable<AssetReference>
-    {
-        [SerializeField] private int2 m_Index;
-        [SerializeField] private FixedString128Bytes m_SubAssetName;
-
-        private bool m_IsCreated;
-
-        public bool IsCreated => m_IsCreated;
-        public bool IsSubAsset => !m_SubAssetName.IsEmpty;
-
-        public AssetReference(int2 index)
-        {
-            m_Index = index;
-            m_SubAssetName = default(FixedString128Bytes);
-
-            m_IsCreated = true;
-        }
-        public AssetReference(int2 index, FixedString128Bytes subAssetName)
-        {
-            m_Index = index;
-            m_SubAssetName = subAssetName;
-
-            m_IsCreated = true;
-        }
-
-        public bool IsValid()
-        {
-            if (!m_IsCreated) return false;
-
-            return true;
-        }
-        public bool Equals(AssetReference other) => m_Index.Equals(other.m_Index);
-
-        public AddressableAsset GetAddressableAsset()
-        {
-            if (!IsValid()) return null;
-
-            return ResourceHashMap.Instance[m_Index];
-        }
-
-        public static implicit operator AddressableAsset(AssetReference t) => t.GetAddressableAsset();
-    }
-    [Serializable]
-    public sealed class AddressableAsset : AddressableReference, IPromiseProvider<UnityEngine.Object>
+    public sealed class AddressableAsset
     {
         [SerializeField] private string m_DisplayName;
-        private Action<UnityEngine.Object> m_OnComplete;
-        private int m_InstanceCount = 0;
+        [SerializeField] private AddressableReference m_AssetReference;
 
         public string DisplayName { get => m_DisplayName; set => m_DisplayName = value; }
-
-        public event Action<UnityEngine.Object> OnComplete
-        {
-            add
-            {
-                if (IsDone)
-                {
-                    value?.Invoke(Asset);
-                    return;
-                }
-
-                m_OnComplete += value;
-            }
-            remove
-            {
-                m_OnComplete -= value;
-            }
-        }
+        public AddressableReference AssetReference => m_AssetReference;
 
         public AddressableAsset() : base() { }
 #if UNITY_EDITOR
         public AddressableAsset(string name, UnityEditor.GUID guid) : this(name, guid.ToString()) { }
 #endif
-        public AddressableAsset(string name, string guid) : base(guid)
+        public AddressableAsset(string name, string guid)
         {
             m_DisplayName = name;
-        }
-
-        public override AsyncOperationHandle<TObject> LoadAssetAsync<TObject>()
-        {
-            var handle = base.LoadAssetAsync<TObject>();
-            handle.CompletedTypeless += Handle_CompletedTypeless;
-
-            return handle;
-        }
-        public override AsyncOperationHandle<GameObject> InstantiateAsync(Transform parent = null, bool instantiateInWorldSpace = false)
-        {
-            var handle = base.InstantiateAsync(parent, instantiateInWorldSpace);
-            m_InstanceCount++;
-
-            return handle;
-        }
-        public override AsyncOperationHandle<GameObject> InstantiateAsync(Vector3 position, Quaternion rotation, Transform parent = null)
-        {
-            var handle = base.InstantiateAsync(position, rotation, parent);
-            m_InstanceCount++;
-
-            return handle;
-        }
-        public override void ReleaseInstance(GameObject obj)
-        {
-            base.ReleaseInstance(obj);
-            m_InstanceCount--;
-        }
-        public override void ReleaseAsset()
-        {
-            base.ReleaseAsset();
-        }
-
-        void IPromiseProvider<UnityEngine.Object>.OnComplete(Action<UnityEngine.Object> obj)
-        {
-            if (IsDone)
-            {
-                obj?.Invoke(Asset);
-
-                return;
-            }
-
-            m_OnComplete += obj;
-        }
-        private void Handle_CompletedTypeless(AsyncOperationHandle obj)
-        {
-            m_OnComplete?.Invoke(obj.Result as UnityEngine.Object);
-        }
-
-        public override string ToString()
-        {
-            return base.ToString();
+            m_AssetReference = new AddressableReference(guid);
         }
     }
+
+    //internal sealed class RegisterResourceManagerOperation : AsyncOperationBase<IList<UnityEngine.Object>>
+    //{
+    //    private Dictionary<IResourceLocation, AsyncOperationHandle> m_Resources;
+
+    //    AsyncOperationHandle<IList<UnityEngine.Object>> m_ResourceOperation;
+
+    //    public static AsyncOperationHandle<IList<UnityEngine.Object>> Get(AsyncOperationHandle<IList<UnityEngine.Object>> oper)
+    //    {
+    //        var ins = ObjectPool<RegisterResourceManagerOperation>.Shared.Get();
+
+    //        ins.m_Resources = ResourceManager.Instance.m_Resources;
+    //        ins.m_ResourceOperation = oper;
+
+    //        return Addressables.ResourceManager.StartOperation(ins, oper);
+    //    }
+
+    //    protected override void Execute()
+    //    {
+    //        IList<UnityEngine.Object> list = m_ResourceOperation.Result;
+    //        for (int i = 0; i < list.Count; i++)
+    //        {
+    //            this.
+    //            var completed = Addressables.ResourceManager.CreateCompletedOperation(list[i], string.Empty);
+    //            m_Resources.Add()
+    //        }
+            
+
+    //        ObjectPool<RegisterResourceManagerOperation>.Shared.Reserve(this);
+    //    }
+    //}
 }
 
 #endif

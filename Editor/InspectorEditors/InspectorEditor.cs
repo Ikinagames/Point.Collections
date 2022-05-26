@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
+using UnityEngine;
 
 namespace Point.Collections.Editor
 {
@@ -37,6 +38,19 @@ namespace Point.Collections.Editor
         /// <inheritdoc cref="UnityEditor.Editor.targets"/>
         /// </summary>
         public new T[] targets => base.targets.Select(t => (T)t).ToArray();
+
+        public string assetPath
+        {
+            get
+            {
+                if (!TypeHelper.InheritsFrom<ScriptableObject>(TypeHelper.TypeOf<T>.Type))
+                {
+                    return string.Empty;
+                }
+
+                return AssetDatabase.GetAssetPath(target);
+            }
+        }
 
         protected override sealed void OnHeaderGUI()
         {

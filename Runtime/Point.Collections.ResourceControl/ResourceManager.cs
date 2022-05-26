@@ -36,6 +36,13 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine.Networking;
+#if UNITY_ADDRESSABLES
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.ResourceLocations;
+using UnityEngine.ResourceManagement.ResourceProviders;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.SceneManagement;
+#endif
 #if UNITY_MATHEMATICS
 using Unity.Mathematics;
 #endif
@@ -85,7 +92,10 @@ namespace Point.Collections.ResourceControl
 
             m_MappedAssets = new NativeHashMap<Hash, Mapped>(1024, AllocatorManager.Persistent);
             m_WaitForUnloadIndices = new NativeList<Mapped>(1024, AllocatorManager.Persistent);
+
+            SceneManager.activeSceneChanged += SceneManager_activeSceneChanged;
         }
+
         protected override void OnShutdown()
         {
             m_MapingJobHandle.Complete();
@@ -100,6 +110,18 @@ namespace Point.Collections.ResourceControl
 
             m_MappedAssets.Dispose();
             m_WaitForUnloadIndices.Dispose();
+        }
+
+        #endregion
+
+        #region Event Handlers
+
+        private void SceneManager_activeSceneChanged(Scene previous, Scene target)
+        {
+#if UNITY_ADDRESSABLES
+            ResourceHashMap.Instance.UnloadSceneAssets(target);
+            ResourceHashMap.Instance.LoadSceneAssets(target, null);
+#endif
         }
 
         #endregion
@@ -574,6 +596,101 @@ namespace Point.Collections.ResourceControl
 
             asset.RemoveLoadedFrame();
         }
+
+        #endregion
+
+        #region Addressables
+
+#if UNITY_ADDRESSABLES
+        internal Dictionary<AssetRuntimeKey, IResourceLocation> m_Locations = new Dictionary<AssetRuntimeKey, IResourceLocation>();
+        
+        internal static AssetRuntimeKey EvaluateKey(AssetReference runtimeKey)
+        {
+            return new AssetRuntimeKey(FNV1a32.Calculate(((IKeyEvaluator)runtimeKey).RuntimeKey.ToString()));
+        }
+        private static Type EvaluateType(Type type)
+        {
+            if (type.IsArray)
+            {
+                type = type.GetElementType();
+            }
+            else if (type.IsGenericType && typeof(IList<>) == type.GetGenericTypeDefinition())
+            {
+                type = type.GetGenericArguments()[0];
+            }
+
+            return type;
+        }
+        public static IResourceLocation GetLocation(AssetReference runtimeKey, Type type)
+        {
+            AssetRuntimeKey key = EvaluateKey(runtimeKey);
+            if (Instance.m_Locations.TryGetValue(key, out IResourceLocation location)) return location;
+
+            object stringKey = ((IKeyEvaluator)runtimeKey).RuntimeKey;
+            type = EvaluateType(type);
+
+            foreach (var resourceLocator in Addressables.ResourceLocators)
+            {
+                if (!resourceLocator.Locate(stringKey, type, out IList<IResourceLocation> locations)) continue;
+
+                foreach (IResourceLocation item in locations)
+                {
+                    if (Addressables.ResourceManager.GetResourceProvider(type, item) == null)
+                    {
+                        continue;
+                    }
+
+                    Instance.m_Locations[key] = item;
+                    return item;
+                }
+            }
+
+            return null;
+        }
+        public static IResourceLocation GetLocation<TObject>(AssetReference runtimeKey)
+        {
+            Type type = TypeHelper.TypeOf<TObject>.Type;
+            return GetLocation(runtimeKey, type);
+        }
+
+        public static AsyncOperationHandle LoadAssetAsync(AssetReference runtimeKey)
+        {
+            IResourceLocation location = GetLocation(runtimeKey, TypeHelper.TypeOf<UnityEngine.Object>.Type);
+            if (location == null)
+            {
+                return Addressables.ResourceManager
+                    .CreateCompletedOperationWithException<UnityEngine.Object>(null, new InvalidKeyException(runtimeKey, TypeHelper.TypeOf<UnityEngine.Object>.Type));
+            }
+
+            return LoadAssetAsync(location);
+        }
+        public static AsyncOperationHandle<TObject> LoadAssetAsync<TObject>(AssetReference runtimeKey)
+            where TObject : UnityEngine.Object
+        {
+            IResourceLocation location = GetLocation(runtimeKey, TypeHelper.TypeOf<TObject>.Type);
+            if (location == null)
+            {
+                return Addressables.ResourceManager
+                    .CreateCompletedOperationWithException<TObject>(null, new InvalidKeyException(runtimeKey, TypeHelper.TypeOf<TObject>.Type));
+            }
+
+            return LoadAssetAsync<TObject>(location);
+        }
+
+        public static AsyncOperationHandle LoadAssetAsync(IResourceLocation location)
+        {
+            var handle = Addressables.ResourceManager.ProvideResource<UnityEngine.Object>(location);
+
+            return handle;
+        }
+        public static AsyncOperationHandle<TObject> LoadAssetAsync<TObject>(IResourceLocation location)
+            where TObject : UnityEngine.Object
+        {
+            var handle = Addressables.ResourceManager.ProvideResource<TObject>(location);
+
+            return handle;
+        }
+#endif
 
         #endregion
 
