@@ -97,16 +97,40 @@ namespace Point.Collections.ResourceControl.Editor
             Rect[] rects = AutoRect.DivideWithRatio(lane, .2f, .8f);
 
             string displayName;
+            AddressableAsset refAsset = null;
             if (isCreatedProp.boolValue && asset.IsValid())
             {
-                var refAsset = ResourceHashMap.Instance[listIndexProp.intValue].GetAddressableAsset(assetIndexProp.intValue);
+                refAsset = ResourceHashMap.Instance[listIndexProp.intValue].GetAddressableAsset(assetIndexProp.intValue);
                 displayName = NicifyDisplayName(refAsset);
-                //displayName = refAsset.FriendlyName.IsNullOrEmpty() ? refAsset.EditorAsset.name : refAsset.FriendlyName;
             }
             else displayName = "Invalid";
 
             EditorGUI.LabelField(rects[0], label);
-            if (CoreGUI.BoxButton(rects[1], displayName, Color.gray))
+            bool clicked = CoreGUI.BoxButton(rects[1], displayName, Color.gray, onContextClick: () =>
+            {
+                GenericMenu menu = new GenericMenu();
+                menu.AddDisabledItem(new GUIContent(displayName));
+                menu.AddSeparator(string.Empty);
+
+                GUIContent 
+                    context1 = new GUIContent("Select", "이 에셋을 프로젝트 창에서 선택합니다.");
+
+                if (refAsset == null)
+                {
+                    menu.AddDisabledItem(context1);
+                }
+                else
+                {
+                    menu.AddItem(context1, false, () =>
+                    {
+                        EditorGUIUtility.PingObject(refAsset.EditorAsset);
+                        Selection.activeObject = refAsset.EditorAsset;
+                    });
+                }
+                
+            });
+
+            if (clicked)
             {
                 Vector2 pos = Event.current.mousePosition;
                 pos = GUIUtility.GUIToScreenPoint(pos);
