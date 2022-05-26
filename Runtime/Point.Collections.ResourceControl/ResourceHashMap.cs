@@ -221,7 +221,6 @@ namespace Point.Collections.ResourceControl
             }
         }
         
-
         [SerializeField] private List<SceneBindedLabel> m_SceneBindedLabels = new List<SceneBindedLabel>();
         [SerializeField] private List<ResourceList> m_ResourceLists = new List<ResourceList>();
 
@@ -232,12 +231,49 @@ namespace Point.Collections.ResourceControl
                 return m_ResourceLists[index];
             }
         }
-        public AssetReference this[int2 index]
+        public AssetReference this[AssetIndex index]
         {
             get
             {
-                return m_ResourceLists[index.x][index.y];
+                return m_ResourceLists[index.m_Index.x][index.m_Index.y];
             }
+        }
+        public AssetReference this[string friendlyName]
+        {
+            get
+            {
+                AssetReference asset;
+                foreach (var list in m_ResourceLists)
+                {
+                    asset = list[friendlyName];
+                    if (asset.IsEmpty()) continue;
+
+                    return asset;
+                }
+
+                return AssetReference.Empty;
+            }
+        }
+
+        public bool TryGetAssetReference(AssetIndex index, out AssetReference asset)
+        {
+            asset = AssetReference.Empty;
+            if (index.IsEmpty()) return false;
+
+            int x = index.m_Index.x, y = index.m_Index.y;
+            if (x < 0 || y < 0 || m_ResourceLists.Count <= x)
+            {
+                return false;
+            }
+
+            ResourceList list = m_ResourceLists[x];
+            if (list.Count <= y)
+            {
+                return false;
+            }
+
+            asset = list[y];
+            return !asset.IsEmpty();
         }
 
         internal void LoadSceneAssets(Scene scene, Action<UnityEngine.Object> onCompleted)
@@ -262,18 +298,60 @@ namespace Point.Collections.ResourceControl
         }
     }
 
-    public struct AssetRuntimeKey
+    [Serializable]
+    public struct AssetIndex : IEmpty, IValidation
     {
-        private uint m_Key;
+        public static AssetIndex Empty = default(AssetIndex);
+
+        [SerializeField] internal int2 m_Index;
+        [SerializeField] private bool m_IsCreated;
+
+        public AssetReference AssetReference
+        {
+            get
+            {
+                ResourceHashMap.Instance.TryGetAssetReference(this, out var asset);
+                return asset;
+            }
+        }
+
+        public AssetIndex(int2 index)
+        {
+            m_Index = index;
+            m_IsCreated = true;
+        }
+
+        public bool IsEmpty() => !m_IsCreated;
+        public bool IsValid() => ResourceHashMap.Instance.TryGetAssetReference(this, out _);
+    }
+
+    public readonly struct AssetRuntimeKey : IEmpty, IEquatable<AssetRuntimeKey>
+    {
+        private readonly uint m_Key;
 
         public AssetRuntimeKey(uint key)
         {
             m_Key = key;
         }
+
+        public bool IsEmpty() => m_Key == 0;
+
+        public bool Equals(AssetRuntimeKey other) => m_Key.Equals(other.m_Key);
+        public override bool Equals(object obj)
+        {
+            if (!(obj is AssetRuntimeKey other)) return false;
+            else if (!m_Key.Equals(other.m_Key)) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => unchecked((int)m_Key);
     }
+
     [Serializable]
-    public struct AssetReference : IValidation, IKeyEvaluator, IEquatable<AssetReference>, IPromiseProvider<UnityEngine.Object>
+    public struct AssetReference : IValidation, IKeyEvaluator, IEmpty, IEquatable<AssetReference>, IPromiseProvider<UnityEngine.Object>
     {
+        public static AssetReference Empty => new AssetReference();
+
         [SerializeField] private FixedString128Bytes m_Key;
         [SerializeField] private FixedString128Bytes m_SubAssetName;
 
@@ -291,7 +369,7 @@ namespace Point.Collections.ResourceControl
                 return m_Key.ToString();
             }
         }
-        public AssetRuntimeKey RuntimeKey => ResourceManager.EvaluateKey(this);
+        public AssetRuntimeKey RuntimeKey => new AssetRuntimeKey(FNV1a32.Calculate(((IKeyEvaluator)this).RuntimeKey.ToString()));
         public bool IsSubAsset => !m_SubAssetName.IsEmpty;
 
         public IResourceLocation Location => ResourceManager.GetLocation(this, TypeHelper.TypeOf<UnityEngine.Object>.Type);
@@ -310,6 +388,10 @@ namespace Point.Collections.ResourceControl
             m_SubAssetName = subAssetName;
         }
 
+        public bool IsEmpty()
+        {
+            return m_Key.IsEmpty || (m_Key.IsEmpty && m_SubAssetName.IsEmpty);
+        }
         public bool IsValid()
         {
             const char c_guidstart = '[';
@@ -338,7 +420,6 @@ namespace Point.Collections.ResourceControl
             return new AssetReference(t.AssetGUID, t.SubObjectName);
         }
     }
-
 }
 
 #endif

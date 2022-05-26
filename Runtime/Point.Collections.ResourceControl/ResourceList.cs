@@ -42,9 +42,24 @@ namespace Point.Collections.ResourceControl
     {
         [SerializeField] private List<AddressableAsset> m_AssetList = new List<AddressableAsset>();
 
+        public int Count => m_AssetList.Count;
         public AssetReference this[int index]
         {
             get => m_AssetList[index].AssetReference;
+        }
+        public AssetReference this[string friendlyName]
+        {
+            get
+            {
+                for (int i = 0; i < m_AssetList.Count; i++)
+                {
+                    if (m_AssetList[i].DisplayName.Equals(friendlyName))
+                    {
+                        return m_AssetList[i].AssetReference;
+                    }
+                }
+                return AssetReference.Empty;
+            }
         }
 
 #if UNITY_EDITOR
@@ -72,14 +87,19 @@ namespace Point.Collections.ResourceControl
             m_AssetList.Add(temp);
         }
 #endif
+
+        public AddressableAsset GetAddressableAsset(int index)
+        {
+            return m_AssetList[index];
+        }
     }
     [Serializable]
     public sealed class AddressableAsset
     {
-        [SerializeField] private string m_DisplayName;
+        [SerializeField] private string m_FriendlyName;
         [SerializeField] private AddressableReference m_AssetReference;
 
-        public string DisplayName { get => m_DisplayName; set => m_DisplayName = value; }
+        public string DisplayName { get => m_FriendlyName; set => m_FriendlyName = value; }
         public AddressableReference AssetReference => m_AssetReference;
 
         public AddressableAsset() : base() { }
@@ -88,7 +108,7 @@ namespace Point.Collections.ResourceControl
 #endif
         public AddressableAsset(string name, string guid)
         {
-            m_DisplayName = name;
+            m_FriendlyName = name;
             m_AssetReference = new AddressableReference(guid);
         }
     }

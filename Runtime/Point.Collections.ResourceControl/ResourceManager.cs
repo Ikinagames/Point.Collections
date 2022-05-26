@@ -602,11 +602,11 @@ namespace Point.Collections.ResourceControl
         #region Addressables
 
 #if UNITY_ADDRESSABLES
-        internal Dictionary<AssetRuntimeKey, IResourceLocation> m_Locations = new Dictionary<AssetRuntimeKey, IResourceLocation>();
+        internal readonly Dictionary<AssetRuntimeKey, IResourceLocation> m_Locations = new Dictionary<AssetRuntimeKey, IResourceLocation>();
         
-        internal static AssetRuntimeKey EvaluateKey(AssetReference runtimeKey)
+        private static object EvaluateKey(AssetReference runtimeKey)
         {
-            return new AssetRuntimeKey(FNV1a32.Calculate(((IKeyEvaluator)runtimeKey).RuntimeKey.ToString()));
+            return ((IKeyEvaluator)runtimeKey).RuntimeKey;
         }
         private static Type EvaluateType(Type type)
         {
@@ -623,10 +623,10 @@ namespace Point.Collections.ResourceControl
         }
         public static IResourceLocation GetLocation(AssetReference runtimeKey, Type type)
         {
-            AssetRuntimeKey key = EvaluateKey(runtimeKey);
+            AssetRuntimeKey key = runtimeKey.RuntimeKey;
             if (Instance.m_Locations.TryGetValue(key, out IResourceLocation location)) return location;
 
-            object stringKey = ((IKeyEvaluator)runtimeKey).RuntimeKey;
+            object stringKey = EvaluateKey(runtimeKey);
             type = EvaluateType(type);
 
             foreach (var resourceLocator in Addressables.ResourceLocators)
