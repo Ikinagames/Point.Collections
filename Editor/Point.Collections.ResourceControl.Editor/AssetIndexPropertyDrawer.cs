@@ -168,7 +168,7 @@ namespace Point.Collections.ResourceControl.Editor
         public override List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
         {
             List<SearchTreeEntry> list = new List<SearchTreeEntry>();
-            list.Add(new SearchTreeGroupEntry(new GUIContent("References")));
+            list.Add(new SearchTreeGroupEntry(new GUIContent("Assets")));
             list.Add(new SearchTreeEntry(new GUIContent("None", CoreGUI.EmptyIcon))
             {
                 userData = new int2(-1),
