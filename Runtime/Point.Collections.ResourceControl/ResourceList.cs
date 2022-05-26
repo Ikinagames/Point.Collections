@@ -53,7 +53,7 @@ namespace Point.Collections.ResourceControl
             {
                 for (int i = 0; i < m_AssetList.Count; i++)
                 {
-                    if (m_AssetList[i].DisplayName.Equals(friendlyName))
+                    if (m_AssetList[i].FriendlyName.Equals(friendlyName))
                     {
                         return m_AssetList[i].AssetReference;
                     }
@@ -99,8 +99,11 @@ namespace Point.Collections.ResourceControl
         [SerializeField] private string m_FriendlyName;
         [SerializeField] private AddressableReference m_AssetReference;
 
-        public string DisplayName { get => m_FriendlyName; set => m_FriendlyName = value; }
+        public string FriendlyName { get => m_FriendlyName; set => m_FriendlyName = value; }
         public AddressableReference AssetReference => m_AssetReference;
+#if UNITY_EDITOR
+        public UnityEngine.Object EditorAsset => m_AssetReference.editorAsset;
+#endif
 
         public AddressableAsset() : base() { }
 #if UNITY_EDITOR

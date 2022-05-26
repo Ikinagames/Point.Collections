@@ -224,6 +224,9 @@ namespace Point.Collections.ResourceControl
         [SerializeField] private List<SceneBindedLabel> m_SceneBindedLabels = new List<SceneBindedLabel>();
         [SerializeField] private List<ResourceList> m_ResourceLists = new List<ResourceList>();
 
+        public AssetIndex AssetIndex;
+
+        public IReadOnlyList<ResourceList> ResourceLists => m_ResourceLists;
         public ResourceList this[int index]
         {
             get
@@ -231,6 +234,7 @@ namespace Point.Collections.ResourceControl
                 return m_ResourceLists[index];
             }
         }
+
         public AssetReference this[AssetIndex index]
         {
             get
@@ -320,6 +324,11 @@ namespace Point.Collections.ResourceControl
             m_Index = index;
             m_IsCreated = true;
         }
+        public AssetIndex(int x, int y)
+        {
+            m_Index = new int2(x, y);
+            m_IsCreated = true;
+        }
 
         public bool IsEmpty() => !m_IsCreated;
         public bool IsValid() => ResourceHashMap.Instance.TryGetAssetReference(this, out _);
@@ -373,13 +382,6 @@ namespace Point.Collections.ResourceControl
         public bool IsSubAsset => !m_SubAssetName.IsEmpty;
 
         public IResourceLocation Location => ResourceManager.GetLocation(this, TypeHelper.TypeOf<UnityEngine.Object>.Type);
-        public AsyncOperationHandle<UnityEngine.Object> Asset
-        {
-            get
-            {
-                return ResourceManager.LoadAssetAsync(this).Convert<UnityEngine.Object>();
-            }
-        }
 
         public AssetReference(FixedString128Bytes key) : this(key, default) { }
         public AssetReference(FixedString128Bytes key, FixedString128Bytes subAssetName)
@@ -410,7 +412,22 @@ namespace Point.Collections.ResourceControl
         bool IKeyEvaluator.RuntimeKeyIsValid() => IsValid();
         void IPromiseProvider<UnityEngine.Object>.OnComplete(Action<UnityEngine.Object> obj)
         {
-            Asset.Completed += t => obj?.Invoke(t.Result);
+            AsyncOperationHandle<UnityEngine.Object> oper = LoadAssetAsync();
+            oper.Completed += t =>
+            {
+                obj?.Invoke(t.Result);
+                Addressables.Release(oper);
+            };
+        }
+
+        public AsyncOperationHandle<UnityEngine.Object> LoadAssetAsync()
+        {
+            return ResourceManager.LoadAssetAsync<UnityEngine.Object>(this);
+        }
+        public AsyncOperationHandle<TObject> LoadAssetAsync<TObject>()
+            where TObject : UnityEngine.Object
+        {
+            return ResourceManager.LoadAssetAsync<TObject>(this);
         }
 
         public bool Equals(AssetReference other) => m_Key.Equals(other.m_Key);
