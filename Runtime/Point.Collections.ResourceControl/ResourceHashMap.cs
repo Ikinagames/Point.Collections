@@ -29,6 +29,7 @@ using Point.Collections.Buffer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -433,10 +434,25 @@ namespace Point.Collections.ResourceControl
         }
 
         public bool Equals(AssetReference other) => m_Key.Equals(other.m_Key);
+        public override string ToString()
+        {
+            if (IsEmpty()) return "Invalid";
+            else if (IsSubAsset) return $"{m_Key}[{m_SubAssetName}]";
+            return m_Key.ToString();
+        }
 
         public static implicit operator AssetReference(AddressableReference t)
         {
             return new AssetReference(t.AssetGUID, t.SubObjectName);
+        }
+        public static implicit operator AssetReference(string t)
+        {
+            Match match = Regex.Match(t, @"(^.+)" + Regex.Escape("[") + @"(.+)]");
+            if (match.Success)
+            {
+                return new AssetReference(match.Groups[1].Value, match.Groups[2].Value);
+            }
+            return new AssetReference(t);
         }
     }
 
