@@ -114,7 +114,6 @@ namespace Point.Collections.ResourceControl.Editor
         }
 
         [SerializeField] private AssetImportHandles m_AssetImportHandles = AssetImportHandles.None;
-        [SerializeField] private AssetStrategy m_Strategy = AssetStrategy.AssetBundle;
         [SerializeField] private string[] m_TrackedAssets = Array.Empty<string>();
 
         [SerializeField]
@@ -130,16 +129,11 @@ namespace Point.Collections.ResourceControl.Editor
         [NonSerialized] private BuildTarget m_InspectedPlatformDepends = BuildTarget.StandaloneWindows64;
 
         public AssetImportHandles ImportHandles => m_AssetImportHandles;
-        public AssetStrategy Strategy => m_Strategy;
         public IReadOnlyList<string> AssetIDs => m_TrackedAssets;
 
         private static class GUIStyleContents
         {
             public static GUIContent
-                AssetStrategy = new GUIContent(
-                    "Asset Strategy",
-                    "AssetBundle 과 Addressable 중, 주 리소스 관리자를 선택합니다."
-                    ),
                 AssetImportHandles = new GUIContent(
                     "Auto Asset Import",
                     "해당 타입의 에셋이 Import 되었을 때, 자동으로 ResourceAddresses 에서 해당 에셋을 관리합니다.")
@@ -159,9 +153,6 @@ namespace Point.Collections.ResourceControl.Editor
                 EditorUtilities.Line();
                 EditorGUI.indentLevel++;
 
-                EditorGUILayout.HelpBox(GUIStyleContents.AssetStrategy.tooltip, MessageType.Info);
-                m_Strategy
-                    = (AssetStrategy)EditorGUILayout.EnumPopup(GUIStyleContents.AssetStrategy, m_Strategy);
                 EditorGUILayout.HelpBox(GUIStyleContents.AssetImportHandles.tooltip, MessageType.Info);
                 m_AssetImportHandles
                     = (AssetImportHandles)EditorGUILayout.EnumFlagsField(GUIStyleContents.AssetImportHandles, m_AssetImportHandles);
@@ -176,7 +167,7 @@ namespace Point.Collections.ResourceControl.Editor
                 EditorGUI.indentLevel--;
             }
 
-            if (m_Strategy == AssetStrategy.AssetBundle)
+            //if (m_Strategy == AssetStrategy.AssetBundle)
             {
                 DrawAssetBundleGUI();
             }

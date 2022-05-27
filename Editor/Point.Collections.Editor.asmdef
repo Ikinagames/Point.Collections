@@ -8,7 +8,10 @@
         "com.alelievr.NodeGraphProcessor.Runtime",
         "com.alelievr.NodeGraphProcessor.Editor",
         "UnityEditor.UI",
-        "UnityEngine.UI"
+        "UnityEngine.UI",
+        "Unity.ResourceManager",
+        "Unity.Addressables",
+        "Unity.Addressables.Editor"
     ],
     "includePlatforms": [
         "Editor"

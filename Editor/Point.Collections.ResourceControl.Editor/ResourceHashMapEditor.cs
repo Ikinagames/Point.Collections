@@ -69,6 +69,13 @@ namespace Point.Collections.ResourceControl.Editor
     [CustomEditor(typeof(ResourceList))]
     internal sealed class ResourceListEditor : InspectorEditor<ResourceList>
     {
+        private SerializedProperty m_CatalogNameProperty;
+
+        private void OnEnable()
+        {
+            m_CatalogNameProperty = serializedObject.FindProperty("m_CatalogName");
+        }
+
         protected override void OnInspectorGUIContents()
         {
             using (var changed = new EditorGUI.ChangeCheckScope())
@@ -84,8 +91,12 @@ namespace Point.Collections.ResourceControl.Editor
                         ImportAssetOptions.ForceUpdate);
                 }
             }
+            EditorGUILayout.Space();
+
             
 
+
+            EditorGUILayout.Space();
             base.OnInspectorGUIContents();
         }
     }

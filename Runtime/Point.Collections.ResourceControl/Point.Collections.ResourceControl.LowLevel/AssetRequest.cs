@@ -28,7 +28,7 @@
 using System;
 using UnityEngine;
 
-namespace Point.Collections.ResourceControl
+namespace Point.Collections.ResourceControl.LowLevel
 {
     internal sealed class AssetRequest : IPromiseProvider<UnityEngine.Object>
     {
