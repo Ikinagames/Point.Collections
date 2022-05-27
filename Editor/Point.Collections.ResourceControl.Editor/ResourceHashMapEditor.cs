@@ -43,11 +43,11 @@ namespace Point.Collections.ResourceControl.Editor
                 if (CoreGUI.BoxButton("+", Color.gray))
                 {
                     int index = m_ResourceLists.arraySize;
-
+                    
                     ResourceList list = CreateInstance<ResourceList>();
                     list.name = "ResourceList " + index;
                     AssetDatabase.AddObjectToAsset(list, assetPath);
-
+                    
                     m_ResourceLists.InsertArrayElementAtIndex(index);
                     m_ResourceLists.GetArrayElementAtIndex(index).objectReferenceValue = list;
                 }
