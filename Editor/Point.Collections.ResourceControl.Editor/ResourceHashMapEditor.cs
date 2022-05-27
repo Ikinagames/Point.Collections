@@ -69,6 +69,8 @@ namespace Point.Collections.ResourceControl.Editor
                 }
             }
 
+            EditorGUILayout.Space();
+            CoreGUI.Line();
             using (new EditorGUI.DisabledGroupScope(true))
             {
                 EditorGUILayout.PropertyField(m_ResourceListsProperty);
