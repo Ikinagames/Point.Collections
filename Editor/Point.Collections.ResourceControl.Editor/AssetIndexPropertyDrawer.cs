@@ -264,7 +264,7 @@ namespace Point.Collections.ResourceControl.Editor
                 list.Add(new SearchTreeGroupEntry(new GUIContent("Catalogs")));
                 list.Add(new SearchTreeEntry(new GUIContent("None", CoreGUI.EmptyIcon))
                 {
-                    userData = new int2(-1),
+                    userData = string.Empty,
                     level = 1,
                 });
 
@@ -273,11 +273,12 @@ namespace Point.Collections.ResourceControl.Editor
                 foreach (string groupName in groupNames)
                 {
                     SearchTreeEntry entry = new SearchTreeEntry(
-                        new GUIContent(groupName))
+                        new GUIContent(groupName, CoreGUI.EmptyIcon))
                     {
                         level = 1,
                         userData = groupName
                     };
+                    list.Add(entry);
                 }
 
                 return list;
