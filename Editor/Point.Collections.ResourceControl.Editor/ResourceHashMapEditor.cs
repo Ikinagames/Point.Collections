@@ -211,7 +211,14 @@ namespace Point.Collections.ResourceControl.Editor
                         for (int i = 0; i < m_AssetListProperty.arraySize; i++)
                         {
                             var prop = m_AssetListProperty.GetArrayElementAtIndex(i);
-                            prop.isExpanded = EditorGUILayout.Foldout(prop.isExpanded, prop.displayName, true);
+                            string displayName;
+                            {
+                                var refAsset = target.GetAddressableAsset(i);
+                                displayName = refAsset.FriendlyName.IsNullOrEmpty() ?
+                                    refAsset.EditorAsset.name : refAsset.FriendlyName;
+                            }
+
+                            prop.isExpanded = EditorGUILayout.Foldout(prop.isExpanded, displayName, true);
                             if (!prop.isExpanded) continue;
 
                             using (new EditorGUI.IndentLevelScope())
