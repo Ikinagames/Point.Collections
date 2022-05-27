@@ -46,6 +46,12 @@ namespace Point.Collections.ResourceControl
 
             public bool TryLoadAsync(out AsyncOperationHandle<TObject> handle)
             {
+                if (m_IsLoaded)
+                {
+                    handle = m_LoadHandle;
+                    return true;
+                }
+
                 if (!m_Asset.IsValid())
                 {
                     handle = ResourceManager.CreateCompletedOperationExeception<TObject>(null,
