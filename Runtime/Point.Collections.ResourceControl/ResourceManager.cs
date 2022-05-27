@@ -625,10 +625,10 @@ namespace Point.Collections.ResourceControl
 
             return type;
         }
-        private static bool RequireChain()
-        {
-            return !Instance.m_AddressableInitializeHandle.IsDone;
-        }
+        //private static bool RequireChain()
+        //{
+        //    return !Instance.m_AddressableInitializeHandle.IsDone;
+        //}
         internal static AsyncOperationHandle<TObject> CreateCompletedOperation<TObject>(TObject result, System.Exception exception)
             where TObject : UnityEngine.Object
         {
@@ -653,7 +653,7 @@ namespace Point.Collections.ResourceControl
             object stringKey = EvaluateKey(runtimeKey);
             type = EvaluateType(type);
 
-            if (RequireChain())
+            //if (RequireChain())
             {
                 location = Addressables.ResourceManager.StartOperation(
                     FindResourceLocationOperation.Get(stringKey, type),
@@ -664,18 +664,18 @@ namespace Point.Collections.ResourceControl
                 return location;
             }
 
-            IResourceLocation resourceLocation = FindResourceLocationOperation.ExecuteOperation(stringKey, type);
-            if (resourceLocation != null)
-            {
-                location = Addressables.ResourceManager.CreateCompletedOperation(resourceLocation, string.Empty);
-            }
-            else
-            {
-                location = Addressables.ResourceManager.CreateCompletedOperationWithException(resourceLocation, 
-                    new InvalidKeyException(stringKey, type));
-            }
+            //IResourceLocation resourceLocation = FindResourceLocationOperation.ExecuteOperation(stringKey, type);
+            //if (resourceLocation != null)
+            //{
+            //    location = Addressables.ResourceManager.CreateCompletedOperation(resourceLocation, string.Empty);
+            //}
+            //else
+            //{
+            //    location = Addressables.ResourceManager.CreateCompletedOperationWithException(resourceLocation, 
+            //        new InvalidKeyException(stringKey, type));
+            //}
 
-            Instance.m_Locations[key] = location;
+            //Instance.m_Locations[key] = location;
             return location;
         }
         public static AsyncOperationHandle<IResourceLocation> GetLocation<TObject>(AssetReference runtimeKey)

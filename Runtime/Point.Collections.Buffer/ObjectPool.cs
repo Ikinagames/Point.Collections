@@ -33,10 +33,17 @@ namespace Point.Collections.Buffer
     public sealed class ObjectPool<T> : IDisposable
         where T : class
     {
-        public static ObjectPool<T> Shared { get; } = new ObjectPool<T>() { m_Factory = DefaultFactory };
+        public static ObjectPool<T> Shared { get; } = new ObjectPool<T>() { m_Factory = DefaultFactory, m_OnRelease = DefaultOnRelease };
         private static T DefaultFactory()
         {
             return Activator.CreateInstance<T>();
+        }
+        private static void DefaultOnRelease(T t)
+        {
+            if (t is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
         }
 
 #if DEBUG_MODE
@@ -46,7 +53,7 @@ namespace Point.Collections.Buffer
         private Action<T>
             m_OnGet, m_OnReserve, m_OnRelease;
 
-        private Stack<T> m_Pool;
+        private Stack<T> m_Pool = new Stack<T>();
 
         private ThreadInfo m_Owner;
         private int m_CheckSum;
