@@ -442,9 +442,7 @@ namespace Point.Collections.ResourceControl
 
     internal sealed class FindResourceLocationOperation : AsyncOperationBase<IResourceLocation>
     {
-        //private Dictionary<AssetRuntimeKey, AsyncOperationHandle<IResourceLocation>> HashMap { get; set; }
         private object RuntimeKey { get; set; }
-        //private AssetRuntimeKey Key { get; set; }
         private Type Type { get; set; }
 
         public static FindResourceLocationOperation Get(object runtimeKey, Type type)
@@ -467,7 +465,6 @@ namespace Point.Collections.ResourceControl
             else
             {
                 Complete(location, false, new InvalidKeyException(RuntimeKey, Type), true);
-                Destroy();
                 ObjectPool<FindResourceLocationOperation>.Shared.Reserve(this);
             }
         }
