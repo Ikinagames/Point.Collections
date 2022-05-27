@@ -214,8 +214,15 @@ namespace Point.Collections.ResourceControl.Editor
                             string displayName;
                             {
                                 var refAsset = target.GetAddressableAsset(i);
-                                displayName = refAsset.FriendlyName.IsNullOrEmpty() ?
-                                    refAsset.EditorAsset.name : refAsset.FriendlyName;
+
+                                if (refAsset.EditorAsset != null)
+                                {
+                                    displayName = refAsset.FriendlyName.IsNullOrEmpty() ?
+                                        refAsset.EditorAsset.name : refAsset.FriendlyName;
+
+                                    displayName += $" ({AssetDatabase.GetAssetPath(refAsset.EditorAsset)})";
+                                }
+                                else displayName = prop.displayName;
                             }
 
                             prop.isExpanded = EditorGUILayout.Foldout(prop.isExpanded, displayName, true);
