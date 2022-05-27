@@ -35,39 +35,47 @@ namespace Point.Collections.ResourceControl.Editor
     [CustomEditor(typeof(ResourceHashMap))]
     internal sealed class ResourceHashMapEditor : InspectorEditor<ResourceHashMap>
     {
-        private SerializedProperty m_ResourceLists;
+        private SerializedProperty m_SceneBindedLabelsProperty, m_ResourceListsProperty;
 
         private void OnEnable()
         {
-            m_ResourceLists = serializedObject.FindProperty("m_ResourceLists");
+            m_SceneBindedLabelsProperty = serializedObject.FindProperty("m_SceneBindedLabels");
+            m_ResourceListsProperty = serializedObject.FindProperty("m_ResourceLists");
         }
         protected override void OnInspectorGUIContents()
         {
+            EditorGUILayout.PropertyField(m_SceneBindedLabelsProperty);
+
             using (new EditorGUILayout.HorizontalScope())
             {
                 if (CoreGUI.BoxButton("+", Color.gray))
                 {
-                    int index = m_ResourceLists.arraySize;
+                    int index = m_ResourceListsProperty.arraySize;
                     
                     ResourceList list = CreateInstance<ResourceList>();
                     list.name = "ResourceList " + index;
                     AssetDatabase.AddObjectToAsset(list, assetPath);
                     
-                    m_ResourceLists.InsertArrayElementAtIndex(index);
-                    m_ResourceLists.GetArrayElementAtIndex(index).objectReferenceValue = list;
+                    m_ResourceListsProperty.InsertArrayElementAtIndex(index);
+                    m_ResourceListsProperty.GetArrayElementAtIndex(index).objectReferenceValue = list;
                 }
                 if (CoreGUI.BoxButton("-", Color.gray))
                 {
-                    int index = m_ResourceLists.arraySize - 1;
-                    ResourceList list = m_ResourceLists.GetArrayElementAtIndex(index).objectReferenceValue as ResourceList;
-                    m_ResourceLists.DeleteArrayElementAtIndex(index);
+                    int index = m_ResourceListsProperty.arraySize - 1;
+                    ResourceList list = m_ResourceListsProperty.GetArrayElementAtIndex(index).objectReferenceValue as ResourceList;
+                    m_ResourceListsProperty.DeleteArrayElementAtIndex(index);
 
                     AssetDatabase.RemoveObjectFromAsset(list);
                 }
             }
 
+            using (new EditorGUI.DisabledGroupScope(true))
+            {
+                EditorGUILayout.PropertyField(m_ResourceListsProperty);
+            }
+
             serializedObject.ApplyModifiedProperties();
-            base.OnInspectorGUIContents();
+            //base.OnInspectorGUIContents();
         }
     }
 

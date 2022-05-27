@@ -226,8 +226,6 @@ namespace Point.Collections.ResourceControl
         [SerializeField] private List<SceneBindedLabel> m_SceneBindedLabels = new List<SceneBindedLabel>();
         [SerializeField] private List<ResourceList> m_ResourceLists = new List<ResourceList>();
 
-        public AssetIndex AssetIndex;
-
         public IReadOnlyList<ResourceList> ResourceLists => m_ResourceLists;
         public ResourceList this[int index]
         {
