@@ -40,7 +40,7 @@ namespace Point.Collections.ResourceControl
 {
     public sealed class ResourceList : ScriptableObject
     {
-        [SerializeField] private string m_CatalogName = string.Empty;
+        [SerializeField] private CatalogReference m_Catalog;
         [SerializeField] private List<AddressableAsset> m_AssetList = new List<AddressableAsset>();
 
         public int Count => m_AssetList.Count;

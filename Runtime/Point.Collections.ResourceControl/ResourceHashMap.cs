@@ -337,6 +337,21 @@ namespace Point.Collections.ResourceControl
         public bool IsValid() => ResourceHashMap.Instance.TryGetAssetReference(this, out _);
     }
 
+    [Serializable]
+    public struct CatalogReference : IEmpty
+    {
+        public static CatalogReference Empty = default(CatalogReference);
+
+        [SerializeField] private FixedString128Bytes m_Name;
+
+        public CatalogReference(FixedString128Bytes name)
+        {
+            m_Name = name;
+        }
+
+        public bool IsEmpty() => m_Name.IsEmpty;
+    }
+
     public readonly struct AssetRuntimeKey : IEmpty, IEquatable<AssetRuntimeKey>
     {
         private readonly uint m_Key;

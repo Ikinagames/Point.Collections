@@ -21,6 +21,8 @@
 
 using Point.Collections.Editor;
 using UnityEditor;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -69,11 +71,13 @@ namespace Point.Collections.ResourceControl.Editor
     [CustomEditor(typeof(ResourceList))]
     internal sealed class ResourceListEditor : InspectorEditor<ResourceList>
     {
-        private SerializedProperty m_CatalogNameProperty;
+        private SerializedProperty m_CatalogProperty;
+        private SerializedProperty m_AssetListProperty;
 
         private void OnEnable()
         {
-            m_CatalogNameProperty = serializedObject.FindProperty("m_CatalogName");
+            m_CatalogProperty = serializedObject.FindProperty("m_Catalog");
+            m_AssetListProperty = serializedObject.FindProperty("m_AssetList");
         }
 
         protected override void OnInspectorGUIContents()
@@ -93,11 +97,25 @@ namespace Point.Collections.ResourceControl.Editor
             }
             EditorGUILayout.Space();
 
-            
+            EditorGUILayout.PropertyField(m_CatalogProperty);
+            //EditorGUILayout.DelayedTextField(m_CatalogProperty);
+            //using (new EditorGUI.DisabledGroupScope(m_CatalogProperty.stringValue.IsNullOrEmpty()))
+            //{
+            //    if (GUILayout.Button("Match with Catalog"))
+            //    {
+
+            //    }
+            //}
+
+            //AddressableAssetSettingsDefaultObject.GetSettings(true).FindAssetEntry()
 
 
-            EditorGUILayout.Space();
-            base.OnInspectorGUIContents();
+            //EditorGUILayout.Space();
+
+            EditorGUILayout.PropertyField(m_AssetListProperty);
+
+            serializedObject.ApplyModifiedProperties();
+            //base.OnInspectorGUIContents();
         }
     }
 }

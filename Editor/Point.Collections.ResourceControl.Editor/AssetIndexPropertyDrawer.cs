@@ -22,8 +22,10 @@
 using Point.Collections.Editor;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEditor;
+using UnityEditor.AddressableAssets;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
@@ -155,56 +157,138 @@ namespace Point.Collections.ResourceControl.Editor
                     );
             }
         }
+        private sealed class AssetIndexSearchProvider : SearchProviderBase
+        {
+            private Action<int2> m_OnClick;
+
+            public AssetIndexSearchProvider(Action<int2> onClick)
+            {
+                m_OnClick = onClick;
+            }
+            public override List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
+            {
+                List<SearchTreeEntry> list = new List<SearchTreeEntry>();
+                list.Add(new SearchTreeGroupEntry(new GUIContent("Assets")));
+                list.Add(new SearchTreeEntry(new GUIContent("None", CoreGUI.EmptyIcon))
+                {
+                    userData = new int2(-1),
+                    level = 1,
+                });
+
+                IReadOnlyList<ResourceList> resourceLists = ResourceHashMap.Instance.ResourceLists;
+                for (int i = 0; i < resourceLists.Count; i++)
+                {
+                    ResourceList resourceList = resourceLists[i];
+                    SearchTreeGroupEntry listGroup = new SearchTreeGroupEntry(new GUIContent(resourceList.name), 1);
+                    list.Add(listGroup);
+                    for (int j = 0; j < resourceList.Count; j++)
+                    {
+                        AddressableAsset asset = resourceList.GetAddressableAsset(j);
+                        string displayName = AssetIndexPropertyDrawer.NicifyDisplayName(asset);
+
+                        SearchTreeEntry entry = new SearchTreeEntry(
+                            new GUIContent(displayName, CoreGUI.EmptyIcon))
+                        {
+                            userData = new int2(i, j),
+                            level = 2
+                        };
+
+                        list.Add(entry);
+                    }
+                }
+
+                return list;
+            }
+            public override bool OnSelectEntry(SearchTreeEntry SearchTreeEntry, SearchWindowContext context)
+            {
+                if (SearchTreeEntry is SearchTreeGroupEntry) return true;
+
+                m_OnClick?.Invoke((int2)SearchTreeEntry.userData);
+                return true;
+            }
+        }
     }
 
-    internal sealed class AssetIndexSearchProvider : SearchProviderBase
+    [CustomPropertyDrawer(typeof(CatalogReference))]
+    internal sealed class CatalogReferencePropertyDrawer : PropertyDrawer<CatalogReference>
     {
-        private Action<int2> m_OnClick;
-
-        public AssetIndexSearchProvider(Action<int2> onClick)
+        private static class Helper
         {
-            m_OnClick = onClick;
-        }
-        public override List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
-        {
-            List<SearchTreeEntry> list = new List<SearchTreeEntry>();
-            list.Add(new SearchTreeGroupEntry(new GUIContent("Assets")));
-            list.Add(new SearchTreeEntry(new GUIContent("None", CoreGUI.EmptyIcon))
+            public static SerializedProperty GetCatalogName(SerializedProperty property)
             {
-                userData = new int2(-1),
-                level = 1,
-            });
-
-            IReadOnlyList<ResourceList> resourceLists = ResourceHashMap.Instance.ResourceLists;
-            for (int i = 0; i < resourceLists.Count; i++)
-            {
-                ResourceList resourceList = resourceLists[i];
-                SearchTreeGroupEntry listGroup = new SearchTreeGroupEntry(new GUIContent(resourceList.name), 1);
-                list.Add(listGroup);
-                for (int j = 0; j < resourceList.Count; j++)
-                {
-                    AddressableAsset asset = resourceList.GetAddressableAsset(j);
-                    string displayName = AssetIndexPropertyDrawer.NicifyDisplayName(asset);
-                    
-                    SearchTreeEntry entry = new SearchTreeEntry(
-                        new GUIContent(displayName, CoreGUI.EmptyIcon))
-                    {
-                        userData = new int2(i, j),
-                        level = 2
-                    };
-
-                    list.Add(entry);
-                }
+                const string c_Str = "m_Name";
+                return property.FindPropertyRelative(c_Str);
             }
-
-            return list;
         }
-        public override bool OnSelectEntry(SearchTreeEntry SearchTreeEntry, SearchWindowContext context)
-        {
-            if (SearchTreeEntry is SearchTreeGroupEntry) return true;
 
-            m_OnClick?.Invoke((int2)SearchTreeEntry.userData);
-            return true;
+        protected override float PropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return PropertyDrawerHelper.GetPropertyHeight(1);
+        }
+
+        protected override void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
+        {
+            SerializedProperty
+                catalogNameProp = Helper.GetCatalogName(property);
+
+            Rect lane = rect.Pop();
+            Rect[] rects = AutoRect.DivideWithRatio(lane, .2f, .8f);
+            EditorGUI.LabelField(rects[0], label);
+
+            string currentNameValue = SerializedPropertyHelper.ReadFixedString128Bytes(catalogNameProp).ToString();
+            string displayName = currentNameValue.IsNullOrEmpty() ? "Invalid" : currentNameValue;
+            bool clicked = CoreGUI.BoxButton(rects[1], displayName, Color.gray);
+
+            if (clicked)
+            {
+                Vector2 pos = Event.current.mousePosition;
+                pos = GUIUtility.GUIToScreenPoint(pos);
+
+                var provider = ScriptableObject.CreateInstance<CatalogSearchProvider>();
+                provider.m_OnClick = str =>
+                {
+                    SerializedPropertyHelper.SetFixedString128Bytes(catalogNameProp, str);
+                    property.serializedObject.ApplyModifiedProperties();
+                };
+                SearchWindow.Open(new SearchWindowContext(pos), provider);
+            }
+        }
+
+        private sealed class CatalogSearchProvider : SearchProviderBase
+        {
+            public Action<string> m_OnClick;
+
+            public override List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
+            {
+                List<SearchTreeEntry> list = new List<SearchTreeEntry>();
+                list.Add(new SearchTreeGroupEntry(new GUIContent("Catalogs")));
+                list.Add(new SearchTreeEntry(new GUIContent("None", CoreGUI.EmptyIcon))
+                {
+                    userData = new int2(-1),
+                    level = 1,
+                });
+
+                var settings = AddressableAssetSettingsDefaultObject.GetSettings(true);
+                var groupNames = settings.groups.Select(t => t.Name);
+                foreach (string groupName in groupNames)
+                {
+                    SearchTreeEntry entry = new SearchTreeEntry(
+                        new GUIContent(groupName))
+                    {
+                        level = 1,
+                        userData = groupName
+                    };
+                }
+
+                return list;
+            }
+            public override bool OnSelectEntry(SearchTreeEntry SearchTreeEntry, SearchWindowContext context)
+            {
+                if (SearchTreeEntry is SearchTreeGroupEntry) return true;
+
+                m_OnClick?.Invoke((string)SearchTreeEntry.userData);
+                return true;
+            }
         }
     }
 }
