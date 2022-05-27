@@ -28,6 +28,7 @@
 using Point.Collections.Buffer;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -42,6 +43,8 @@ namespace Point.Collections.ResourceControl
     {
         [SerializeField] private GroupReference m_Group;
         [SerializeField] private List<AddressableAsset> m_AssetList = new List<AddressableAsset>();
+
+        [NonSerialized] private IList<AddressableReference> m_AssetReferences;
 
         public int Count => m_AssetList.Count;
         public AssetReference this[int index]
@@ -63,7 +66,17 @@ namespace Point.Collections.ResourceControl
             }
         }
 
+        private void OnEnable()
+        {
+            m_AssetReferences = m_AssetList.Select(t => t.AssetReference).ToArray();
+        }
+
 #if UNITY_EDITOR
+        /// <summary>
+        /// Editor only
+        /// </summary>
+        public string Group => m_Group;
+
         /// <summary>
         /// Editor only
         /// </summary>
@@ -121,6 +134,19 @@ namespace Point.Collections.ResourceControl
         public AddressableAsset GetAddressableAsset(int index)
         {
             return m_AssetList[index];
+        }
+
+        public AsyncOperationHandle<IList<UnityEngine.Object>> LoadAssetsAsync(Action<UnityEngine.Object> callback)
+        {
+            if (m_AssetReferences.Count == 0)
+            {
+                IList<UnityEngine.Object> temp = Array.Empty<UnityEngine.Object>();
+                return ResourceManager.CreateCompletedOperation(temp);
+            }
+
+            var result = Addressables.LoadAssetsAsync<UnityEngine.Object>(m_AssetReferences, callback);
+
+            return result;
         }
     }
     [Serializable]

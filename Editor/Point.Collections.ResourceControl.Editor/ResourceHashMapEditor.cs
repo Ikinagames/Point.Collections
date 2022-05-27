@@ -22,6 +22,7 @@
 using Point.Collections.Editor;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Collections;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
@@ -75,7 +76,6 @@ namespace Point.Collections.ResourceControl.Editor
     {
         private SerializedProperty m_GroupProperty, m_GroupNameProperty;
         private SerializedProperty m_AssetListProperty;
-        //private List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
 
         private bool m_IsBindedToCatalog = false;
         private bool m_RequireRebuild = false;
@@ -86,33 +86,7 @@ namespace Point.Collections.ResourceControl.Editor
             m_GroupNameProperty = CatalogReferencePropertyDrawer.Helper.GetCatalogName(m_GroupProperty);
             m_AssetListProperty = serializedObject.FindProperty("m_AssetList");
 
-            Validate();
-        }
-        private void Validate()
-        {
-            AddressableAssetGroup addressableAssetGroup = GetGroup(m_GroupNameProperty);
-            if (addressableAssetGroup == null)
-            {
-                m_IsBindedToCatalog = false;
-                m_RequireRebuild = false;
-
-                return;
-            }
-
-            List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
-            addressableAssetGroup.GatherAllAssets(entries, true, true, true);
-
-            m_IsBindedToCatalog = true;
-            m_RequireRebuild = false;
-
-            for (int i = entries.Count - 1; i >= 0; i--)
-            {
-                if (!target.Contains(entries[i].guid))
-                {
-                    m_RequireRebuild = true;
-                    break;
-                }
-            }
+            Validate(target);
         }
         private void Rebuild()
         {
@@ -142,7 +116,7 @@ namespace Point.Collections.ResourceControl.Editor
                 EditorGUILayout.PropertyField(m_GroupProperty);
                 catalogChanged = changed.changed;
 
-                if (catalogChanged) Validate();
+                if (catalogChanged) Validate(target);
             }
 
             using (var changed = new EditorGUI.ChangeCheckScope())
@@ -221,15 +195,45 @@ namespace Point.Collections.ResourceControl.Editor
             //base.OnInspectorGUIContents();
         }
 
+        #region Utils
+
         private static AddressableAssetGroup GetGroup(SerializedProperty catalogNameProperty)
         {
             var catalogName = SerializedPropertyHelper.ReadFixedString128Bytes(catalogNameProperty);
-            if (catalogName.IsEmpty) return null;
+            return GetGroup(catalogName.IsEmpty ? string.Empty : catalogName.ToString());
+        }
+        private static AddressableAssetGroup GetGroup(string catalogName)
+        {
+            if (catalogName.IsNullOrEmpty()) return null;
 
             var settings = AddressableAssetSettingsDefaultObject.GetSettings(true);
 
             return settings.FindGroup(catalogName.ToString());
         }
+
+        public static bool Validate(ResourceList list)
+        {
+            AddressableAssetGroup addressableAssetGroup = GetGroup(list.Group);
+            if (addressableAssetGroup == null)
+            {
+                return true;
+            }
+
+            List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
+            addressableAssetGroup.GatherAllAssets(entries, true, true, true);
+
+            for (int i = entries.Count - 1; i >= 0; i--)
+            {
+                if (!list.Contains(entries[i].guid))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        #endregion
     }
 }
 

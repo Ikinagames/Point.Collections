@@ -627,17 +627,14 @@ namespace Point.Collections.ResourceControl
         }
 
         internal static AsyncOperationHandle<TObject> CreateCompletedOperation<TObject>(TObject result, System.Exception exception)
-            where TObject : UnityEngine.Object
         {
             return Addressables.ResourceManager.CreateCompletedOperationWithException(result, exception);
         }
         internal static AsyncOperationHandle<TObject> CreateCompletedOperationExeception<TObject>(TObject result, object runtimeKey, Type type)
-            where TObject : UnityEngine.Object
         {
             return Addressables.ResourceManager.CreateCompletedOperationWithException(result, new InvalidKeyException(runtimeKey, type));
         }
         internal static AsyncOperationHandle<TObject> CreateCompletedOperation<TObject>(TObject result)
-            where TObject : UnityEngine.Object
         {
             return Addressables.ResourceManager.CreateCompletedOperation(result, string.Empty);
         }
