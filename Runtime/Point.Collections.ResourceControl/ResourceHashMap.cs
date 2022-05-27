@@ -460,6 +460,11 @@ namespace Point.Collections.ResourceControl
 
         public static implicit operator AssetReference(AddressableReference t)
         {
+            if (t.AssetGUID.IsNullOrEmpty()) return Empty;
+            else if (t.SubObjectName.IsNullOrEmpty())
+            {
+                return new AssetReference(t.AssetGUID);
+            }
             return new AssetReference(t.AssetGUID, t.SubObjectName);
         }
         public static implicit operator AssetReference(string t)
