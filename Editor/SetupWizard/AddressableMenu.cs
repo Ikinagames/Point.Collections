@@ -26,6 +26,8 @@
 #if UNITYENGINE
 
 using Point.Collections.ResourceControl;
+using Point.Collections.ResourceControl.Editor;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -37,9 +39,32 @@ namespace Point.Collections.Editor
         public override string Name => "Addressables";
         public override int Order => 1;
 
+        private List<ResourceList> m_RequireRebuildList = new List<ResourceList>();
+
         public override bool Predicate()
         {
+            if (!ValidateResourceLists(m_RequireRebuildList))
+            {
+                return false;
+            }
+
             return true;
+
+            static bool ValidateResourceLists(List<ResourceList> requireRebuildList)
+            {
+                requireRebuildList.Clear();
+                bool result = true;
+                foreach (var item in ResourceHashMap.Instance.ResourceLists)
+                {
+                    if (!ResourceListEditor.Validate(item))
+                    {
+                        requireRebuildList.Add(item);
+                        result = false;
+                    }
+                }
+
+                return result;
+            }
         }
         public override void OnGUI()
         {
@@ -49,6 +74,19 @@ namespace Point.Collections.Editor
 
                 Selection.activeObject = hashMap;
                 EditorGUIUtility.PingObject(hashMap);
+            }
+
+            EditorGUILayout.Space();
+            if (m_RequireRebuildList.Count > 0)
+            {
+                for (int i = 0; i < m_RequireRebuildList.Count; i++)
+                {
+                    EditorGUILayout.LabelField($"Require Rebuild {m_RequireRebuildList[i].name}");
+                    if (GUILayout.Button("Require Rebuild"))
+                    {
+                        ResourceListEditor.Rebuild(m_RequireRebuildList[i]);
+                    }
+                }
             }
         }
     }

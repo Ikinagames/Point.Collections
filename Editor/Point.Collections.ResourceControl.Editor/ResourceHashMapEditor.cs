@@ -107,6 +107,19 @@ namespace Point.Collections.ResourceControl.Editor
             }
             m_RequireRebuild = false;
         }
+        public static void Rebuild(ResourceList list)
+        {
+            AddressableAssetGroup addressableAssetGroup = GetGroup(list.Group);
+            List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
+            addressableAssetGroup.GatherAllAssets(entries, true, true, true);
+
+            list.Clear();
+            for (int i = 0; i < entries.Count; i++)
+            {
+                list.AddAsset(string.Empty, entries[i].TargetAsset);
+            }
+            EditorUtility.SetDirty(list);
+        }
         private void Rebuild()
         {
             AddressableAssetGroup addressableAssetGroup = GetGroup(m_GroupNameProperty);
@@ -154,7 +167,8 @@ namespace Point.Collections.ResourceControl.Editor
 
             if (m_RequireRebuild)
             {
-                if (GUILayout.Button("Require Rebuild"))
+                EditorGUILayout.Space();
+                if (GUILayout.Button("!! Require Rebuild !!"))
                 {
                      Rebuild();
                      m_RequireRebuild = false;
@@ -216,18 +230,18 @@ namespace Point.Collections.ResourceControl.Editor
 
         #region Utils
 
-        private static AddressableAssetGroup GetGroup(SerializedProperty catalogNameProperty)
+        private static AddressableAssetGroup GetGroup(SerializedProperty groupNameProperty)
         {
-            var catalogName = SerializedPropertyHelper.ReadFixedString128Bytes(catalogNameProperty);
+            var catalogName = SerializedPropertyHelper.ReadFixedString128Bytes(groupNameProperty);
             return GetGroup(catalogName.IsEmpty ? string.Empty : catalogName.ToString());
         }
-        private static AddressableAssetGroup GetGroup(string catalogName)
+        private static AddressableAssetGroup GetGroup(string groupName)
         {
-            if (catalogName.IsNullOrEmpty()) return null;
+            if (groupName.IsNullOrEmpty()) return null;
 
             var settings = AddressableAssetSettingsDefaultObject.GetSettings(true);
 
-            return settings.FindGroup(catalogName.ToString());
+            return settings.FindGroup(groupName.ToString());
         }
 
         public static bool Validate(ResourceList list)
