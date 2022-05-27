@@ -337,18 +337,21 @@ namespace Point.Collections.ResourceControl
     }
 
     [Serializable]
-    public struct CatalogReference : IEmpty
+    public struct GroupReference : IEmpty
     {
-        public static CatalogReference Empty = default(CatalogReference);
+        public static GroupReference Empty = default(GroupReference);
 
         [SerializeField] private FixedString128Bytes m_Name;
 
-        public CatalogReference(FixedString128Bytes name)
+        public GroupReference(FixedString128Bytes name)
         {
             m_Name = name;
         }
 
         public bool IsEmpty() => m_Name.IsEmpty;
+        public override string ToString() => m_Name.ToString();
+
+        public static implicit operator string(GroupReference t) => t.m_Name.ToString();
     }
 
     public readonly struct AssetRuntimeKey : IEmpty, IEquatable<AssetRuntimeKey>

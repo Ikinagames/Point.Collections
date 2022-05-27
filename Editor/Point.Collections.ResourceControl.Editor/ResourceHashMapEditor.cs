@@ -73,46 +73,65 @@ namespace Point.Collections.ResourceControl.Editor
     [CustomEditor(typeof(ResourceList))]
     internal sealed class ResourceListEditor : InspectorEditor<ResourceList>
     {
-        private SerializedProperty m_CatalogProperty, m_CatalogNameProperty;
+        private SerializedProperty m_GroupProperty, m_GroupNameProperty;
         private SerializedProperty m_AssetListProperty;
-        private List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
+        //private List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
 
+        private bool m_IsBindedToCatalog = false;
         private bool m_RequireRebuild = false;
 
         private void OnEnable()
         {
-            m_CatalogProperty = serializedObject.FindProperty("m_Catalog");
-            m_CatalogNameProperty = CatalogReferencePropertyDrawer.Helper.GetCatalogName(m_CatalogProperty);
+            m_GroupProperty = serializedObject.FindProperty("m_Group");
+            m_GroupNameProperty = CatalogReferencePropertyDrawer.Helper.GetCatalogName(m_GroupProperty);
             m_AssetListProperty = serializedObject.FindProperty("m_AssetList");
 
             Validate();
         }
         private void Validate()
         {
-            entries.Clear();
-
-            AddressableAssetGroup addressableAssetGroup = GetGroup(m_CatalogNameProperty);
+            AddressableAssetGroup addressableAssetGroup = GetGroup(m_GroupNameProperty);
             if (addressableAssetGroup == null)
             {
+                m_IsBindedToCatalog = false;
                 m_RequireRebuild = false;
+
                 return;
             }
 
-            addressableAssetGroup.GatherAllAssets(entries, false, true, true);
+            List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
+            addressableAssetGroup.GatherAllAssets(entries, true, true, true);
+
+            m_IsBindedToCatalog = true;
+            m_RequireRebuild = false;
 
             for (int i = entries.Count - 1; i >= 0; i--)
             {
-                if (target.Contains(entries[i].guid))
+                if (!target.Contains(entries[i].guid))
                 {
-                    entries.RemoveAt(i);
-                    continue;
+                    m_RequireRebuild = true;
+                    break;
                 }
             }
+        }
+        private void Rebuild()
+        {
+            AddressableAssetGroup addressableAssetGroup = GetGroup(m_GroupNameProperty);
+            List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
+            addressableAssetGroup.GatherAllAssets(entries, true, true, true);
 
-            if (entries.Count > 0)
+            m_AssetListProperty.ClearArray();
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+
+            for (int i = 0; i < entries.Count; i++)
             {
-                m_RequireRebuild = true;
+                target.AddAsset(string.Empty, entries[i].TargetAsset);
             }
+
+            EditorUtility.SetDirty(target);
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
         }
 
         protected override void OnInspectorGUIContents()
@@ -120,7 +139,7 @@ namespace Point.Collections.ResourceControl.Editor
             bool catalogChanged = false;
             using (var changed = new EditorGUI.ChangeCheckScope())
             {
-                EditorGUILayout.PropertyField(m_CatalogProperty);
+                EditorGUILayout.PropertyField(m_GroupProperty);
                 catalogChanged = changed.changed;
 
                 if (catalogChanged) Validate();
@@ -144,19 +163,59 @@ namespace Point.Collections.ResourceControl.Editor
             {
                 if (GUILayout.Button("Require Rebuild"))
                 {
-                    m_AssetListProperty.ClearArray();
-                    for (int i = 0; i < entries.Count; i++)
-                    {
-                        target.AddAsset(string.Empty, entries[i].TargetAsset);
-                    }
-
-                    EditorUtility.SetDirty(target);
-                    m_RequireRebuild = false;
+                     Rebuild();
+                     m_RequireRebuild = false;
                 }
             }
             
             EditorGUILayout.Space();
-            EditorGUILayout.PropertyField(m_AssetListProperty);
+            if (m_IsBindedToCatalog)
+            {
+                var groupName = SerializedPropertyHelper.ReadFixedString128Bytes(m_GroupNameProperty);
+                CoreGUI.Label($"Binded to {groupName}", 15, TextAnchor.MiddleCenter);
+
+                using (new CoreGUI.BoxBlock(Color.gray))
+                {
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        CoreGUI.Label(m_AssetListProperty.displayName, 13, TextAnchor.MiddleLeft);
+                        
+                        if (GUILayout.Button("Rebuild", GUILayout.Width(100)))
+                        {
+                            Rebuild();
+                            m_RequireRebuild = false;
+                        }
+                    }
+
+                    CoreGUI.Line();
+
+                    using (new EditorGUI.IndentLevelScope())
+                    {
+                        for (int i = 0; i < m_AssetListProperty.arraySize; i++)
+                        {
+                            var prop = m_AssetListProperty.GetArrayElementAtIndex(i);
+                            prop.isExpanded = EditorGUILayout.Foldout(prop.isExpanded, prop.displayName);
+                            if (!prop.isExpanded) continue;
+
+                            using (new EditorGUI.IndentLevelScope())
+                            {
+                                prop.Next(true);
+                                EditorGUILayout.PropertyField(prop);
+                                prop.Next(false);
+                                using (new EditorGUI.DisabledGroupScope(true))
+                                {
+                                    EditorGUILayout.PropertyField(prop);
+                                }
+                            }
+                            //
+                        }
+                    }
+                }
+            }
+            else
+            {
+                EditorGUILayout.PropertyField(m_AssetListProperty);
+            }
 
             serializedObject.ApplyModifiedProperties();
             //base.OnInspectorGUIContents();

@@ -218,8 +218,8 @@ namespace Point.Collections.ResourceControl.Editor
         }
     }
 
-    [CustomPropertyDrawer(typeof(CatalogReference))]
-    internal sealed class CatalogReferencePropertyDrawer : PropertyDrawer<CatalogReference>
+    [CustomPropertyDrawer(typeof(GroupReference))]
+    internal sealed class CatalogReferencePropertyDrawer : PropertyDrawer<GroupReference>
     {
         public static class Helper
         {
@@ -279,6 +279,8 @@ namespace Point.Collections.ResourceControl.Editor
 
             public override List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
             {
+                const string c_BuiltInData = "Built In Data";
+
                 List<SearchTreeEntry> list = new List<SearchTreeEntry>();
                 list.Add(new SearchTreeGroupEntry(new GUIContent("Catalogs")));
                 list.Add(new SearchTreeEntry(new GUIContent("None", CoreGUI.EmptyIcon))
@@ -291,6 +293,8 @@ namespace Point.Collections.ResourceControl.Editor
                 var groupNames = settings.groups.Select(t => t.Name);
                 foreach (string groupName in groupNames)
                 {
+                    if (groupName.Equals(c_BuiltInData)) continue;
+
                     SearchTreeEntry entry = new SearchTreeEntry(
                         new GUIContent(groupName, CoreGUI.EmptyIcon))
                     {

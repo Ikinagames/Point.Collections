@@ -40,7 +40,7 @@ namespace Point.Collections.ResourceControl
 {
     public sealed class ResourceList : ScriptableObject
     {
-        [SerializeField] private CatalogReference m_Catalog;
+        [SerializeField] private GroupReference m_Group;
         [SerializeField] private List<AddressableAsset> m_AssetList = new List<AddressableAsset>();
 
         public int Count => m_AssetList.Count;
@@ -118,7 +118,6 @@ namespace Point.Collections.ResourceControl
             return false;
         }
 #endif
-
         public AddressableAsset GetAddressableAsset(int index)
         {
             return m_AssetList[index];
