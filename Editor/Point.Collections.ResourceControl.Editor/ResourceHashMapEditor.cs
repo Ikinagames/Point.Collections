@@ -86,7 +86,26 @@ namespace Point.Collections.ResourceControl.Editor
             m_GroupNameProperty = CatalogReferencePropertyDrawer.Helper.GetCatalogName(m_GroupProperty);
             m_AssetListProperty = serializedObject.FindProperty("m_AssetList");
 
-            Validate(target);
+            Validate();
+        }
+        private void Validate()
+        {
+            AddressableAssetGroup addressableAssetGroup = GetGroup(m_GroupNameProperty);
+            if (addressableAssetGroup == null)
+            {
+                m_IsBindedToCatalog = false;
+                m_RequireRebuild = false;
+
+                return;
+            }
+
+            m_IsBindedToCatalog = true;
+            if (!Validate(target))
+            {
+                m_RequireRebuild = true;
+                return;
+            }
+            m_RequireRebuild = false;
         }
         private void Rebuild()
         {
@@ -116,7 +135,7 @@ namespace Point.Collections.ResourceControl.Editor
                 EditorGUILayout.PropertyField(m_GroupProperty);
                 catalogChanged = changed.changed;
 
-                if (catalogChanged) Validate(target);
+                if (catalogChanged) Validate();
             }
 
             using (var changed = new EditorGUI.ChangeCheckScope())
