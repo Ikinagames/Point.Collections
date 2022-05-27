@@ -83,7 +83,7 @@ namespace Point.Collections.ResourceControl
         }
 
         [SerializeField]
-        protected ArrayWrapper<Asset> m_Assets = ArrayWrapper<Asset>.Empty;
+        protected Asset[] m_Assets = Array.Empty<Asset>();
 
         protected virtual void Awake()
         {
