@@ -34,6 +34,8 @@ namespace Point.Collections.ResourceControl.Editor
     [CustomPropertyDrawer(typeof(AssetIndex))]
     internal sealed class AssetIndexPropertyDrawer : PropertyDrawer<AssetIndex>
     {
+        private bool m_Changed = false;
+
         public static string NicifyDisplayName(AddressableAsset asset)
         {
             if (asset.FriendlyName.IsNullOrEmpty())
@@ -129,7 +131,6 @@ namespace Point.Collections.ResourceControl.Editor
                         Selection.activeObject = refAsset.EditorAsset;
                     });
                 }
-                
             });
 
             if (clicked)
@@ -137,29 +138,37 @@ namespace Point.Collections.ResourceControl.Editor
                 Vector2 pos = Event.current.mousePosition;
                 pos = GUIUtility.GUIToScreenPoint(pos);
 
-                SearchWindow.Open(new SearchWindowContext(pos),
-                    new AssetIndexSearchProvider(
-                        onClick: index =>
-                        {
-                            if (index.x < 0)
-                            {
-                                index = 0;
-                                isCreatedProp.boolValue = false;
-                            }
-                            else
-                            {
-                                isCreatedProp.boolValue = true;
-                            }
-                            listIndexProp.intValue = index.x;
-                            assetIndexProp.intValue = index.y;
-                            property.serializedObject.ApplyModifiedProperties();
-                        })
-                    );
+                var provider = ScriptableObject.CreateInstance<AssetIndexSearchProvider>();
+                provider.m_OnClick = index =>
+                {
+                    if (index.x < 0)
+                    {
+                        index = 0;
+                        isCreatedProp.boolValue = false;
+                    }
+                    else
+                    {
+                        isCreatedProp.boolValue = true;
+                    }
+                    listIndexProp.intValue = index.x;
+                    assetIndexProp.intValue = index.y;
+                    property.serializedObject.ApplyModifiedProperties();
+
+                    m_Changed = true;
+                };
+
+                SearchWindow.Open(new SearchWindowContext(pos), provider);
+            }
+
+            if (m_Changed)
+            {
+                GUI.changed = true;
+                m_Changed = false;
             }
         }
         private sealed class AssetIndexSearchProvider : SearchProviderBase
         {
-            private Action<int2> m_OnClick;
+            public Action<int2> m_OnClick;
 
             public AssetIndexSearchProvider(Action<int2> onClick)
             {
@@ -212,7 +221,7 @@ namespace Point.Collections.ResourceControl.Editor
     [CustomPropertyDrawer(typeof(CatalogReference))]
     internal sealed class CatalogReferencePropertyDrawer : PropertyDrawer<CatalogReference>
     {
-        private static class Helper
+        public static class Helper
         {
             public static SerializedProperty GetCatalogName(SerializedProperty property)
             {
@@ -220,6 +229,8 @@ namespace Point.Collections.ResourceControl.Editor
                 return property.FindPropertyRelative(c_Str);
             }
         }
+
+        private bool m_Changed = false;
 
         protected override float PropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -249,8 +260,16 @@ namespace Point.Collections.ResourceControl.Editor
                 {
                     SerializedPropertyHelper.SetFixedString128Bytes(catalogNameProp, str);
                     property.serializedObject.ApplyModifiedProperties();
+
+                    m_Changed = true;
                 };
                 SearchWindow.Open(new SearchWindowContext(pos), provider);
+            }
+
+            if (m_Changed)
+            {
+                GUI.changed = true;
+                m_Changed = false;
             }
         }
 

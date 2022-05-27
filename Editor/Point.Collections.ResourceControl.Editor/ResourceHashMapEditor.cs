@@ -20,6 +20,8 @@
 #define UNITYENGINE
 
 using Point.Collections.Editor;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
@@ -71,17 +73,59 @@ namespace Point.Collections.ResourceControl.Editor
     [CustomEditor(typeof(ResourceList))]
     internal sealed class ResourceListEditor : InspectorEditor<ResourceList>
     {
-        private SerializedProperty m_CatalogProperty;
+        private SerializedProperty m_CatalogProperty, m_CatalogNameProperty;
         private SerializedProperty m_AssetListProperty;
+        private List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
+
+        private bool m_RequireRebuild = false;
 
         private void OnEnable()
         {
             m_CatalogProperty = serializedObject.FindProperty("m_Catalog");
+            m_CatalogNameProperty = CatalogReferencePropertyDrawer.Helper.GetCatalogName(m_CatalogProperty);
             m_AssetListProperty = serializedObject.FindProperty("m_AssetList");
+
+            Validate();
+        }
+        private void Validate()
+        {
+            entries.Clear();
+
+            AddressableAssetGroup addressableAssetGroup = GetGroup(m_CatalogNameProperty);
+            if (addressableAssetGroup == null)
+            {
+                m_RequireRebuild = false;
+                return;
+            }
+
+            addressableAssetGroup.GatherAllAssets(entries, false, true, true);
+
+            for (int i = entries.Count - 1; i >= 0; i--)
+            {
+                if (target.Contains(entries[i].guid))
+                {
+                    entries.RemoveAt(i);
+                    continue;
+                }
+            }
+
+            if (entries.Count > 0)
+            {
+                m_RequireRebuild = true;
+            }
         }
 
         protected override void OnInspectorGUIContents()
         {
+            bool catalogChanged = false;
+            using (var changed = new EditorGUI.ChangeCheckScope())
+            {
+                EditorGUILayout.PropertyField(m_CatalogProperty);
+                catalogChanged = changed.changed;
+
+                if (catalogChanged) Validate();
+            }
+
             using (var changed = new EditorGUI.ChangeCheckScope())
             {
                 target.name = EditorGUILayout.DelayedTextField("Name", target.name);
@@ -95,27 +139,37 @@ namespace Point.Collections.ResourceControl.Editor
                         ImportAssetOptions.ForceUpdate);
                 }
             }
+
+            if (m_RequireRebuild)
+            {
+                if (GUILayout.Button("Require Rebuild"))
+                {
+                    m_AssetListProperty.ClearArray();
+                    for (int i = 0; i < entries.Count; i++)
+                    {
+                        target.AddAsset(string.Empty, entries[i].TargetAsset);
+                    }
+
+                    EditorUtility.SetDirty(target);
+                    m_RequireRebuild = false;
+                }
+            }
+            
             EditorGUILayout.Space();
-
-            EditorGUILayout.PropertyField(m_CatalogProperty);
-            //EditorGUILayout.DelayedTextField(m_CatalogProperty);
-            //using (new EditorGUI.DisabledGroupScope(m_CatalogProperty.stringValue.IsNullOrEmpty()))
-            //{
-            //    if (GUILayout.Button("Match with Catalog"))
-            //    {
-
-            //    }
-            //}
-
-            //AddressableAssetSettingsDefaultObject.GetSettings(true).FindAssetEntry()
-
-
-            //EditorGUILayout.Space();
-
             EditorGUILayout.PropertyField(m_AssetListProperty);
 
             serializedObject.ApplyModifiedProperties();
             //base.OnInspectorGUIContents();
+        }
+
+        private static AddressableAssetGroup GetGroup(SerializedProperty catalogNameProperty)
+        {
+            var catalogName = SerializedPropertyHelper.ReadFixedString128Bytes(catalogNameProperty);
+            if (catalogName.IsEmpty) return null;
+
+            var settings = AddressableAssetSettingsDefaultObject.GetSettings(true);
+
+            return settings.FindGroup(catalogName.ToString());
         }
     }
 }

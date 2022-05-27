@@ -67,6 +67,23 @@ namespace Point.Collections.ResourceControl
         /// <summary>
         /// Editor only
         /// </summary>
+        public void Clear()
+        {
+            m_AssetList.Clear();
+        }
+        /// <summary>
+        /// Editor only
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="asset"></param>
+        public void AddAsset(string name, string assetGuid)
+        {
+            AddressableAsset temp = new AddressableAsset(name, assetGuid);
+            m_AssetList.Add(temp);
+        }
+        /// <summary>
+        /// Editor only
+        /// </summary>
         /// <param name="name"></param>
         /// <param name="asset"></param>
         public void AddAsset(string name, AddressableReference asset)
@@ -86,6 +103,19 @@ namespace Point.Collections.ResourceControl
             AddressableAsset temp = new AddressableAsset(name, guid.ToString());
 
             m_AssetList.Add(temp);
+        }
+        /// <summary>
+        /// Editor only
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <returns></returns>
+        public bool Contains(string guid)
+        {
+            for (int i = 0; i < m_AssetList.Count; i++)
+            {
+                if (m_AssetList[i].AssetReference.AssetGUID.Equals(guid)) return true;
+            }
+            return false;
         }
 #endif
 

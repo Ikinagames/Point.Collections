@@ -25,7 +25,6 @@
 #endif
 #endif
 
-using Point.Collections.Buffer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -468,55 +467,6 @@ namespace Point.Collections.ResourceControl
                 return new AssetReference(match.Groups[1].Value, match.Groups[2].Value);
             }
             return new AssetReference(t);
-        }
-    }
-
-    internal sealed class FindResourceLocationOperation : AsyncOperationBase<IResourceLocation>
-    {
-        private object RuntimeKey { get; set; }
-        private Type Type { get; set; }
-
-        public static FindResourceLocationOperation Get(object runtimeKey, Type type)
-        {
-            var ins = ObjectPool<FindResourceLocationOperation>.Shared.Get();
-
-            ins.RuntimeKey = runtimeKey;
-            ins.Type = type;
-
-            return ins;
-        }
-
-        protected override void Execute()
-        {
-            IResourceLocation location = ExecuteOperation(RuntimeKey, Type);
-            if (location != null)
-            {
-                Complete(location, true, string.Empty);
-            }
-            else
-            {
-                Complete(location, false, new InvalidKeyException(RuntimeKey, Type), true);
-                ObjectPool<FindResourceLocationOperation>.Shared.Reserve(this);
-            }
-        }
-        public static IResourceLocation ExecuteOperation(object runtimeKey, Type type)
-        {
-            foreach (var resourceLocator in Addressables.ResourceLocators)
-            {
-                if (!resourceLocator.Locate(runtimeKey, type, out IList<IResourceLocation> locations)) continue;
-
-                foreach (IResourceLocation item in locations)
-                {
-                    if (Addressables.ResourceManager.GetResourceProvider(type, item) == null)
-                    {
-                        continue;
-                    }
-
-                    return item;
-                }
-            }
-
-            return null;
         }
     }
 }
