@@ -46,6 +46,9 @@ namespace Point.Collections.ResourceControl.Editor
         {
             EditorGUILayout.PropertyField(m_SceneBindedLabelsProperty);
 
+            EditorGUILayout.Space();
+            CoreGUI.Line();
+
             using (new EditorGUILayout.HorizontalScope())
             {
                 if (CoreGUI.BoxButton("+", Color.gray))
@@ -68,9 +71,6 @@ namespace Point.Collections.ResourceControl.Editor
                     AssetDatabase.RemoveObjectFromAsset(list);
                 }
             }
-
-            EditorGUILayout.Space();
-            CoreGUI.Line();
             using (new EditorGUI.DisabledGroupScope(true))
             {
                 EditorGUILayout.PropertyField(m_ResourceListsProperty);
