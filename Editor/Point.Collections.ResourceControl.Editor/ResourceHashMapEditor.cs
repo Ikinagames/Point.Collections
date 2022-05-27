@@ -65,6 +65,30 @@ namespace Point.Collections.ResourceControl.Editor
             base.OnInspectorGUIContents();
         }
     }
+
+    [CustomEditor(typeof(ResourceList))]
+    internal sealed class ResourceListEditor : InspectorEditor<ResourceList>
+    {
+        protected override void OnInspectorGUIContents()
+        {
+            using (var changed = new EditorGUI.ChangeCheckScope())
+            {
+                target.name = EditorGUILayout.DelayedTextField("Name", target.name);
+
+                if (changed.changed)
+                {
+                    EditorUtility.SetDirty(target);
+                    EditorUtility.SetDirty(ResourceHashMap.Instance);
+                    AssetDatabase.ImportAsset(
+                        AssetDatabase.GetAssetPath(ResourceHashMap.Instance), 
+                        ImportAssetOptions.ForceUpdate);
+                }
+            }
+            
+
+            base.OnInspectorGUIContents();
+        }
+    }
 }
 
 #endif

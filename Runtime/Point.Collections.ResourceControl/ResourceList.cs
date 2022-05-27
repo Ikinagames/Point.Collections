@@ -116,37 +116,6 @@ namespace Point.Collections.ResourceControl
             m_AssetReference = new AddressableReference(guid);
         }
     }
-
-    //internal sealed class RegisterResourceManagerOperation : AsyncOperationBase<IList<UnityEngine.Object>>
-    //{
-    //    private Dictionary<IResourceLocation, AsyncOperationHandle> m_Resources;
-
-    //    AsyncOperationHandle<IList<UnityEngine.Object>> m_ResourceOperation;
-
-    //    public static AsyncOperationHandle<IList<UnityEngine.Object>> Get(AsyncOperationHandle<IList<UnityEngine.Object>> oper)
-    //    {
-    //        var ins = ObjectPool<RegisterResourceManagerOperation>.Shared.Get();
-
-    //        ins.m_Resources = ResourceManager.Instance.m_Resources;
-    //        ins.m_ResourceOperation = oper;
-
-    //        return Addressables.ResourceManager.StartOperation(ins, oper);
-    //    }
-
-    //    protected override void Execute()
-    //    {
-    //        IList<UnityEngine.Object> list = m_ResourceOperation.Result;
-    //        for (int i = 0; i < list.Count; i++)
-    //        {
-    //            this.
-    //            var completed = Addressables.ResourceManager.CreateCompletedOperation(list[i], string.Empty);
-    //            m_Resources.Add()
-    //        }
-            
-
-    //        ObjectPool<RegisterResourceManagerOperation>.Shared.Reserve(this);
-    //    }
-    //}
 }
 
 #endif

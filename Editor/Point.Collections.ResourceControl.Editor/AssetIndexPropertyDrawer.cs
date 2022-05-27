@@ -179,21 +179,18 @@ namespace Point.Collections.ResourceControl.Editor
             for (int i = 0; i < resourceLists.Count; i++)
             {
                 ResourceList resourceList = resourceLists[i];
+                SearchTreeGroupEntry listGroup = new SearchTreeGroupEntry(new GUIContent(resourceList.name), 1);
+                list.Add(listGroup);
                 for (int j = 0; j < resourceList.Count; j++)
                 {
                     AddressableAsset asset = resourceList.GetAddressableAsset(j);
                     string displayName = AssetIndexPropertyDrawer.NicifyDisplayName(asset);
-                    //if (asset.FriendlyName.IsNullOrEmpty())
-                    //{
-                    //    displayName = asset.EditorAsset.name;
-                    //}
-                    //else displayName = asset.FriendlyName;
-
+                    
                     SearchTreeEntry entry = new SearchTreeEntry(
                         new GUIContent(displayName, CoreGUI.EmptyIcon))
                     {
                         userData = new int2(i, j),
-                        level = 1
+                        level = 2
                     };
 
                     list.Add(entry);

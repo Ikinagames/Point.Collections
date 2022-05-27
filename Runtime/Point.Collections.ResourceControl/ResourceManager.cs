@@ -36,12 +36,13 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 #if UNITY_ADDRESSABLES
 using UnityEngine.AddressableAssets;
+using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.SceneManagement;
 #endif
 #if UNITY_MATHEMATICS
 using Unity.Mathematics;
@@ -94,8 +95,10 @@ namespace Point.Collections.ResourceControl
             m_WaitForUnloadIndices = new NativeList<Mapped>(1024, AllocatorManager.Persistent);
 
             SceneManager.activeSceneChanged += SceneManager_activeSceneChanged;
+#if UNITY_ADDRESSABLES
+            m_AddressableInitializeHandle = Addressables.InitializeAsync();
+#endif
         }
-
         protected override void OnShutdown()
         {
             m_MapingJobHandle.Complete();
@@ -602,9 +605,10 @@ namespace Point.Collections.ResourceControl
         #region Addressables
 
 #if UNITY_ADDRESSABLES
-        internal readonly Dictionary<AssetRuntimeKey, IResourceLocation> m_Locations = new Dictionary<AssetRuntimeKey, IResourceLocation>();
+        private AsyncOperationHandle<IResourceLocator> m_AddressableInitializeHandle;
+        internal readonly Dictionary<AssetRuntimeKey, AsyncOperationHandle<IResourceLocation>> m_Locations = new Dictionary<AssetRuntimeKey, AsyncOperationHandle<IResourceLocation>>();
         
-        private static object EvaluateKey(AssetReference runtimeKey)
+        private static object EvaluateKey(IKeyEvaluator runtimeKey)
         {
             return ((IKeyEvaluator)runtimeKey).RuntimeKey;
         }
@@ -621,33 +625,60 @@ namespace Point.Collections.ResourceControl
 
             return type;
         }
-        public static IResourceLocation GetLocation(AssetReference runtimeKey, Type type)
+        private static bool RequireChain()
+        {
+            return !Instance.m_AddressableInitializeHandle.IsDone;
+        }
+        internal static AsyncOperationHandle<TObject> CreateCompletedOperation<TObject>(TObject result, System.Exception exception)
+            where TObject : UnityEngine.Object
+        {
+            return Addressables.ResourceManager.CreateCompletedOperationWithException(result, exception);
+        }
+        internal static AsyncOperationHandle<TObject> CreateCompletedOperationExeception<TObject>(TObject result, object runtimeKey, Type type)
+            where TObject : UnityEngine.Object
+        {
+            return Addressables.ResourceManager.CreateCompletedOperationWithException(result, new InvalidKeyException(runtimeKey, type));
+        }
+        internal static AsyncOperationHandle<TObject> CreateCompletedOperation<TObject>(TObject result)
+            where TObject : UnityEngine.Object
+        {
+            return Addressables.ResourceManager.CreateCompletedOperation(result, string.Empty);
+        }
+
+        public static AsyncOperationHandle<IResourceLocation> GetLocation(AssetReference runtimeKey, Type type)
         {
             AssetRuntimeKey key = runtimeKey.RuntimeKey;
-            if (Instance.m_Locations.TryGetValue(key, out IResourceLocation location)) return location;
+            if (Instance.m_Locations.TryGetValue(key, out AsyncOperationHandle<IResourceLocation> location)) return location;
 
             object stringKey = EvaluateKey(runtimeKey);
             type = EvaluateType(type);
 
-            foreach (var resourceLocator in Addressables.ResourceLocators)
+            if (RequireChain())
             {
-                if (!resourceLocator.Locate(stringKey, type, out IList<IResourceLocation> locations)) continue;
+                location = Addressables.ResourceManager.StartOperation(
+                    FindResourceLocationOperation.Get(stringKey, type),
+                    Instance.m_AddressableInitializeHandle
+                    );
 
-                foreach (IResourceLocation item in locations)
-                {
-                    if (Addressables.ResourceManager.GetResourceProvider(type, item) == null)
-                    {
-                        continue;
-                    }
-
-                    Instance.m_Locations[key] = item;
-                    return item;
-                }
+                Instance.m_Locations[key] = location;
+                return location;
             }
 
-            return null;
+            IResourceLocation resourceLocation = FindResourceLocationOperation.ExecuteOperation(stringKey, type);
+            if (resourceLocation != null)
+            {
+                location = Addressables.ResourceManager.CreateCompletedOperation(resourceLocation, string.Empty);
+            }
+            else
+            {
+                location = Addressables.ResourceManager.CreateCompletedOperationWithException(resourceLocation, 
+                    new InvalidKeyException(stringKey, type));
+            }
+
+            Instance.m_Locations[key] = location;
+            return location;
         }
-        public static IResourceLocation GetLocation<TObject>(AssetReference runtimeKey)
+        public static AsyncOperationHandle<IResourceLocation> GetLocation<TObject>(AssetReference runtimeKey)
         {
             Type type = TypeHelper.TypeOf<TObject>.Type;
             return GetLocation(runtimeKey, type);
@@ -655,40 +686,41 @@ namespace Point.Collections.ResourceControl
 
         public static AsyncOperationHandle LoadAssetAsync(AssetReference runtimeKey)
         {
-            IResourceLocation location = GetLocation(runtimeKey, TypeHelper.TypeOf<UnityEngine.Object>.Type);
-            if (location == null)
-            {
-                return Addressables.ResourceManager
-                    .CreateCompletedOperationWithException<UnityEngine.Object>(null, new InvalidKeyException(runtimeKey, TypeHelper.TypeOf<UnityEngine.Object>.Type));
-            }
+            var locationHandle = GetLocation(runtimeKey, TypeHelper.TypeOf<UnityEngine.Object>.Type);
 
-            return LoadAssetAsync(location);
+            return LoadAssetAsync(locationHandle);
         }
         public static AsyncOperationHandle<TObject> LoadAssetAsync<TObject>(AssetReference runtimeKey)
             where TObject : UnityEngine.Object
         {
-            IResourceLocation location = GetLocation(runtimeKey, TypeHelper.TypeOf<TObject>.Type);
-            if (location == null)
-            {
-                return Addressables.ResourceManager
-                    .CreateCompletedOperationWithException<TObject>(null, new InvalidKeyException(runtimeKey, TypeHelper.TypeOf<TObject>.Type));
-            }
+            var locationHandle = GetLocation(runtimeKey, TypeHelper.TypeOf<TObject>.Type);
 
-            return LoadAssetAsync<TObject>(location);
+            return LoadAssetAsync<TObject>(locationHandle);
         }
 
-        public static AsyncOperationHandle LoadAssetAsync(IResourceLocation location)
+        public static AsyncOperationHandle LoadAssetAsync(AsyncOperationHandle<IResourceLocation> location)
         {
-            var handle = Addressables.ResourceManager.ProvideResource<UnityEngine.Object>(location);
+            var handle = Addressables.ResourceManager.CreateChainOperation(
+                location,
+                t => Addressables.ResourceManager.ProvideResource<UnityEngine.Object>(t.Result)
+                );
 
             return handle;
         }
-        public static AsyncOperationHandle<TObject> LoadAssetAsync<TObject>(IResourceLocation location)
+        public static AsyncOperationHandle<TObject> LoadAssetAsync<TObject>(AsyncOperationHandle<IResourceLocation> location)
             where TObject : UnityEngine.Object
         {
-            var handle = Addressables.ResourceManager.ProvideResource<TObject>(location);
+            var handle = Addressables.ResourceManager.CreateChainOperation(
+                location,
+                t => Addressables.ResourceManager.ProvideResource<TObject>(t.Result)
+                );
 
             return handle;
+        }
+
+        public static void Release(AsyncOperationHandle handle)
+        {
+            Addressables.Release(handle);
         }
 #endif
 

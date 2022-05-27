@@ -25,6 +25,7 @@
 #endif
 #endif
 
+using Point.Collections.Buffer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +33,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.ResourceManagement.ResourceProviders;
@@ -381,7 +383,7 @@ namespace Point.Collections.ResourceControl
         public AssetRuntimeKey RuntimeKey => new AssetRuntimeKey(FNV1a32.Calculate(((IKeyEvaluator)this).RuntimeKey.ToString()));
         public bool IsSubAsset => !m_SubAssetName.IsEmpty;
 
-        public IResourceLocation Location => ResourceManager.GetLocation(this, TypeHelper.TypeOf<UnityEngine.Object>.Type);
+        public AsyncOperationHandle<IResourceLocation> Location => ResourceManager.GetLocation(this, TypeHelper.TypeOf<UnityEngine.Object>.Type);
 
         public AssetReference(FixedString128Bytes key) : this(key, default) { }
         public AssetReference(FixedString128Bytes key, FixedString128Bytes subAssetName)
@@ -435,6 +437,58 @@ namespace Point.Collections.ResourceControl
         public static implicit operator AssetReference(AddressableReference t)
         {
             return new AssetReference(t.AssetGUID, t.SubObjectName);
+        }
+    }
+
+    internal sealed class FindResourceLocationOperation : AsyncOperationBase<IResourceLocation>
+    {
+        //private Dictionary<AssetRuntimeKey, AsyncOperationHandle<IResourceLocation>> HashMap { get; set; }
+        private object RuntimeKey { get; set; }
+        //private AssetRuntimeKey Key { get; set; }
+        private Type Type { get; set; }
+
+        public static FindResourceLocationOperation Get(object runtimeKey, Type type)
+        {
+            var ins = ObjectPool<FindResourceLocationOperation>.Shared.Get();
+
+            ins.RuntimeKey = runtimeKey;
+            ins.Type = type;
+
+            return ins;
+        }
+
+        protected override void Execute()
+        {
+            IResourceLocation location = ExecuteOperation(RuntimeKey, Type);
+            if (location != null)
+            {
+                Complete(location, true, string.Empty);
+            }
+            else
+            {
+                Complete(location, false, new InvalidKeyException(RuntimeKey, Type), true);
+                Destroy();
+                ObjectPool<FindResourceLocationOperation>.Shared.Reserve(this);
+            }
+        }
+        public static IResourceLocation ExecuteOperation(object runtimeKey, Type type)
+        {
+            foreach (var resourceLocator in Addressables.ResourceLocators)
+            {
+                if (!resourceLocator.Locate(runtimeKey, type, out IList<IResourceLocation> locations)) continue;
+
+                foreach (IResourceLocation item in locations)
+                {
+                    if (Addressables.ResourceManager.GetResourceProvider(type, item) == null)
+                    {
+                        continue;
+                    }
+
+                    return item;
+                }
+            }
+
+            return null;
         }
     }
 }
