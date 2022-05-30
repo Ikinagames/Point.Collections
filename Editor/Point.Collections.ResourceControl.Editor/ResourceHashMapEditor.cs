@@ -93,7 +93,7 @@ namespace Point.Collections.ResourceControl.Editor
         private void OnEnable()
         {
             m_GroupProperty = serializedObject.FindProperty("m_Group");
-            m_GroupNameProperty = CatalogReferencePropertyDrawer.Helper.GetCatalogName(m_GroupProperty);
+            m_GroupNameProperty = GroupReferencePropertyDrawer.Helper.GetCatalogName(m_GroupProperty);
             m_AssetListProperty = serializedObject.FindProperty("m_AssetList");
 
             Validate();

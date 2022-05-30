@@ -149,28 +149,6 @@ namespace Point.Collections.ResourceControl
             return result;
         }
     }
-    [Serializable]
-    public sealed class AddressableAsset
-    {
-        [SerializeField] private string m_FriendlyName;
-        [SerializeField] private AddressableReference m_AssetReference;
-
-        public string FriendlyName { get => m_FriendlyName; set => m_FriendlyName = value; }
-        public AddressableReference AssetReference => m_AssetReference;
-#if UNITY_EDITOR
-        public UnityEngine.Object EditorAsset => m_AssetReference.editorAsset;
-#endif
-
-        public AddressableAsset() : base() { }
-#if UNITY_EDITOR
-        public AddressableAsset(string name, UnityEditor.GUID guid) : this(name, guid.ToString()) { }
-#endif
-        public AddressableAsset(string name, string guid)
-        {
-            m_FriendlyName = name;
-            m_AssetReference = new AddressableReference(guid);
-        }
-    }
 }
 
 #endif
