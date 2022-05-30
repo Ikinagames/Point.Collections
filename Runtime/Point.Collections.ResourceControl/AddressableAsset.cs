@@ -13,21 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2019_1_OR_NEWER && UNITY_ADDRESSABLES
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
 #if UNITY_2019 && !UNITY_2020_1_OR_NEWER
 #define UNITYENGINE_OLD
-#else
-#if UNITY_MATHEMATICS
-#endif
 #endif
 
 using System;
 using UnityEngine;
+#if UNITY_ADDRESSABLES
 using AddressableReference = UnityEngine.AddressableAssets.AssetReference;
+#endif
 
 namespace Point.Collections.ResourceControl
 {
@@ -35,10 +34,18 @@ namespace Point.Collections.ResourceControl
     public sealed class AddressableAsset
     {
         [SerializeField] private string m_FriendlyName;
+#if UNITY_ADDRESSABLES
         [SerializeField] private AddressableReference m_AssetReference;
+#else
+        [SerializeField] private AssetReference m_AssetReference;
+#endif
 
         public string FriendlyName { get => m_FriendlyName; set => m_FriendlyName = value; }
+#if UNITY_ADDRESSABLES
         public AddressableReference AssetReference => m_AssetReference;
+#else
+        public AssetReference AssetReference => m_AssetReference;
+#endif
 #if UNITY_EDITOR
         public UnityEngine.Object EditorAsset => m_AssetReference.editorAsset;
 #endif
@@ -47,11 +54,19 @@ namespace Point.Collections.ResourceControl
 #if UNITY_EDITOR
         public AddressableAsset(string name, UnityEditor.GUID guid) : this(name, guid.ToString()) { }
 #endif
+#if UNITY_ADDRESSABLES
         public AddressableAsset(string name, string guid)
         {
             m_FriendlyName = name;
             m_AssetReference = new AddressableReference(guid);
         }
+#else
+        public AddressableAsset(string name, string path)
+        {
+            m_FriendlyName = name;
+            m_AssetReference = new AssetReference(path);
+        }
+#endif
     }
 }
 

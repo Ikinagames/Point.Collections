@@ -13,16 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2019_1_OR_NEWER && UNITY_ADDRESSABLES
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
 #if UNITY_2019 && !UNITY_2020_1_OR_NEWER
 #define UNITYENGINE_OLD
-#else
-#if UNITY_MATHEMATICS
-#endif
 #endif
 
 using Point.Collections.Buffer;
@@ -32,10 +29,12 @@ using System.Linq;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+#if UNITY_ADDRESSABLES
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using AddressableReference = UnityEngine.AddressableAssets.AssetReference;
+#endif
 
 namespace Point.Collections.ResourceControl
 {
@@ -43,8 +42,6 @@ namespace Point.Collections.ResourceControl
     {
         [SerializeField] private GroupReference m_Group;
         [SerializeField] private List<AddressableAsset> m_AssetList = new List<AddressableAsset>();
-
-        [NonSerialized] private IList<AddressableReference> m_AssetReferences;
 
         public int Count => m_AssetList.Count;
         public AssetReference this[int index]
@@ -64,11 +61,6 @@ namespace Point.Collections.ResourceControl
                 }
                 return AssetReference.Empty;
             }
-        }
-
-        private void OnEnable()
-        {
-            m_AssetReferences = m_AssetList.Select(t => t.AssetReference).ToArray();
         }
 
 #if UNITY_EDITOR
@@ -98,16 +90,6 @@ namespace Point.Collections.ResourceControl
         /// Editor only
         /// </summary>
         /// <param name="name"></param>
-        /// <param name="asset"></param>
-        public void AddAsset(string name, AddressableReference asset)
-        {
-            AddressableAsset temp = new AddressableAsset(name, asset.AssetGUID);
-            m_AssetList.Add(temp);
-        }
-        /// <summary>
-        /// Editor only
-        /// </summary>
-        /// <param name="name"></param>
         /// <param name="obj"></param>
         public void AddAsset(string name, UnityEngine.Object obj)
         {
@@ -115,6 +97,18 @@ namespace Point.Collections.ResourceControl
             var guid = UnityEditor.AssetDatabase.GUIDFromAssetPath(path);
             AddressableAsset temp = new AddressableAsset(name, guid.ToString());
 
+            m_AssetList.Add(temp);
+        }
+
+#if UNITY_ADDRESSABLES
+        /// <summary>
+        /// Editor only
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="asset"></param>
+        public void AddAsset(string name, AddressableReference asset)
+        {
+            AddressableAsset temp = new AddressableAsset(name, asset.AssetGUID);
             m_AssetList.Add(temp);
         }
         /// <summary>
@@ -131,11 +125,13 @@ namespace Point.Collections.ResourceControl
             return false;
         }
 #endif
+#endif
         public AddressableAsset GetAddressableAsset(int index)
         {
             return m_AssetList[index];
         }
 
+#if UNITY_ADDRESSABLES
         public AsyncOperationHandle<IList<UnityEngine.Object>> LoadAssetsAsync(Action<UnityEngine.Object> callback)
         {
             if (m_AssetReferences.Count == 0)
@@ -148,6 +144,7 @@ namespace Point.Collections.ResourceControl
 
             return result;
         }
+#endif
     }
 }
 
