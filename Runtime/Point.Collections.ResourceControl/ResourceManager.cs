@@ -79,7 +79,7 @@ namespace Point.Collections.ResourceControl
             m_MapingJobHandle;
 
         // key = path, value = bundleIndex
-        [NonSerialized] private NativeHashMap<Hash, Mapped> m_MappedAssets;
+        [NonSerialized] private NativeHashMap<AssetRuntimeKey, Mapped> m_MappedAssets;
         [NonSerialized] private Hash m_ReferenceCheckSum;
 
         private NativeList<Mapped> m_WaitForUnloadIndices;
@@ -91,7 +91,7 @@ namespace Point.Collections.ResourceControl
             m_AssetBundleInfos = new NativeList<UnsafeAssetBundleInfo>(AllocatorManager.Persistent);
             m_AssetBundles = new List<AssetContainer>();
 
-            m_MappedAssets = new NativeHashMap<Hash, Mapped>(1024, AllocatorManager.Persistent);
+            m_MappedAssets = new NativeHashMap<AssetRuntimeKey, Mapped>(1024, AllocatorManager.Persistent);
             m_WaitForUnloadIndices = new NativeList<Mapped>(1024, AllocatorManager.Persistent);
 
             SceneManager.activeSceneChanged += SceneManager_activeSceneChanged;
@@ -252,7 +252,7 @@ namespace Point.Collections.ResourceControl
 
             return p;
         }
-        internal static unsafe UnsafeReference<UnsafeAssetInfo> GetUnsafeAssetInfo(in Hash hash)
+        internal static unsafe UnsafeReference<UnsafeAssetInfo> GetUnsafeAssetInfo(in AssetRuntimeKey hash)
         {
             Instance.m_MapingJobHandle.Complete();
 
@@ -382,7 +382,7 @@ namespace Point.Collections.ResourceControl
 
         internal static unsafe JobHandle UpdateAssetInfos(UnsafeAssetBundleInfo* p, AssetBundle assetBundle)
         {
-            var assetNames = assetBundle.GetAllAssetNames().Select(str => (FixedString512Bytes)str).ToArray();
+            var assetNames = assetBundle.GetAllAssetNames().Select(str => (FixedString512Bytes)str.ToLowerInvariant()).ToArray();
             NativeArray<FixedString512Bytes> names = new NativeArray<FixedString512Bytes>(assetNames, Allocator.TempJob);
 
             Instance.m_MapingJobHandle.Complete();
@@ -421,7 +421,7 @@ namespace Point.Collections.ResourceControl
             [ReadOnly] public int m_BundleIndex;
             [ReadOnly, DeallocateOnJobCompletion] public NativeArray<FixedString512Bytes> m_Names;
             [WriteOnly, NativeDisableUnsafePtrRestriction] public UnsafeAssetInfo* m_HashMap;
-            [WriteOnly] public NativeHashMap<Hash, Mapped>.ParallelWriter m_MappedAssets;
+            [WriteOnly] public NativeHashMap<AssetRuntimeKey, Mapped>.ParallelWriter m_MappedAssets;
 
             public void Execute(int i)
             {
@@ -431,7 +431,7 @@ namespace Point.Collections.ResourceControl
                     loaded = false,
                 };
 
-                Hash hash = new Hash(m_Names[i]);
+                AssetRuntimeKey hash = new AssetRuntimeKey(FNV1a32.Calculate(m_Names[i]));
 
                 UnsafeUtility.WriteArrayElement(m_HashMap, i, assetInfo);
                 m_MappedAssets.TryAdd(hash, new Mapped(m_BundleIndex, i));
@@ -453,7 +453,7 @@ namespace Point.Collections.ResourceControl
                 return false;
             }
 
-            Hash hash = new Hash(key.ToString().ToLowerInvariant());
+            AssetRuntimeKey hash = new AssetRuntimeKey(key);
             if (!Instance.m_MappedAssets.ContainsKey(hash))
             {
                 return false;
@@ -462,7 +462,7 @@ namespace Point.Collections.ResourceControl
             return true;
         }
         [NotBurstCompatible]
-        internal static unsafe bool HasAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in Hash key)
+        internal static unsafe bool HasAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in AssetRuntimeKey key)
         {
             Instance.m_MapingJobHandle.Complete();
 
@@ -483,7 +483,7 @@ namespace Point.Collections.ResourceControl
         }
 
         private static unsafe bool ValidateAsset(
-            UnsafeReference<UnsafeAssetBundleInfo> bundleP, in Hash hash, out Mapped index)
+            UnsafeReference<UnsafeAssetBundleInfo> bundleP, in AssetRuntimeKey hash, out Mapped index)
         {
             if (!bundleP.Value.loaded)
             {
@@ -504,7 +504,7 @@ namespace Point.Collections.ResourceControl
             return true;
         }
         [NotBurstCompatible]
-        internal static unsafe AssetInfo LoadAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in Hash hash)
+        internal static unsafe AssetInfo LoadAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in AssetRuntimeKey hash)
         {
             Instance.m_MapingJobHandle.Complete();
             if (!ValidateAsset(bundleP, in hash, out Mapped index))
@@ -522,7 +522,7 @@ namespace Point.Collections.ResourceControl
             return asset;
         }
         [NotBurstCompatible]
-        internal static unsafe AssetInfo LoadAssetAsync(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in Hash hash)
+        internal static unsafe AssetInfo LoadAssetAsync(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in AssetRuntimeKey hash)
         {
             Instance.m_MapingJobHandle.Complete();
             if (!ValidateAsset(bundleP, in hash, out Mapped index))
@@ -542,12 +542,12 @@ namespace Point.Collections.ResourceControl
         [NotBurstCompatible]
         internal static unsafe AssetInfo LoadAsset(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in FixedString512Bytes key)
         {
-            return LoadAsset(bundleP, new Hash(key.ToString().ToLowerInvariant()));
+            return LoadAsset(bundleP, new AssetRuntimeKey(key));
         }
         [NotBurstCompatible]
         internal static unsafe AssetInfo LoadAssetAsync(UnsafeReference<UnsafeAssetBundleInfo> bundleP, in FixedString512Bytes key)
         {
-            return LoadAssetAsync(bundleP, new Hash(key.ToString().ToLowerInvariant()));
+            return LoadAssetAsync(bundleP, new AssetRuntimeKey(key));
         }
 
         [NotBurstCompatible]
@@ -710,7 +710,7 @@ namespace Point.Collections.ResourceControl
             private AssetBundle m_AssetBundle;
             //public string[] m_Dependencies = Array.Empty<string>();
             // 현재 로드된 에셋들의 HashMap 입니다.
-            private Dictionary<Hash, Promise<UnityEngine.Object>> m_Assets;
+            private Dictionary<AssetRuntimeKey, Promise<UnityEngine.Object>> m_Assets;
 
             public AssetBundle AssetBundle
             {
@@ -722,14 +722,14 @@ namespace Point.Collections.ResourceControl
             public AssetContainer(AssetBundle assetBundle)
             {
                 m_AssetBundle = assetBundle;
-                m_Assets = new Dictionary<Hash, Promise<UnityEngine.Object>>();
+                m_Assets = new Dictionary<AssetRuntimeKey, Promise<UnityEngine.Object>>();
             }
 
-            public bool IsLoadedAsset(Hash hash)
+            public bool IsLoadedAsset(AssetRuntimeKey hash)
             {
                 return m_Assets.ContainsKey(hash);
             }
-            public Promise<UnityEngine.Object> GetAsset(Hash hash)
+            public Promise<UnityEngine.Object> GetAsset(AssetRuntimeKey hash)
             {
                 if (m_Assets.TryGetValue(hash, out Promise<UnityEngine.Object> promise))
                 {
@@ -739,8 +739,7 @@ namespace Point.Collections.ResourceControl
             }
             public Promise<UnityEngine.Object> LoadAsset(string key)
             {
-				key = key.ToLowerInvariant();
-                Hash hash = new Hash(key);
+                AssetRuntimeKey hash = new AssetRuntimeKey(key);
 
                 if (m_Assets.TryGetValue(hash, out Promise<UnityEngine.Object> promise))
                 {
@@ -754,8 +753,7 @@ namespace Point.Collections.ResourceControl
             }
             public Promise<UnityEngine.Object> LoadAssetAsync(string key)
             {
-				key = key.ToLowerInvariant();
-                Hash hash = new Hash(key);
+                AssetRuntimeKey hash = new AssetRuntimeKey(key);
 
                 if (m_Assets.TryGetValue(hash, out Promise<UnityEngine.Object> promise))
                 {
@@ -772,8 +770,7 @@ namespace Point.Collections.ResourceControl
             }
             public void UnloadAsset(string key)
             {
-                key = key.ToLowerInvariant();
-                Hash hash = new Hash(key);
+                AssetRuntimeKey hash = new AssetRuntimeKey(key);
 
                 if (!m_Assets.TryGetValue(hash, out Promise<UnityEngine.Object> promise))
                 {
@@ -992,12 +989,12 @@ namespace Point.Collections.ResourceControl
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static AssetBundleInfo GetAssetBundleWithAssetPath(in FixedString4096Bytes key)
+        public static AssetBundleInfo GetAssetBundleWithAssetPath(in FixedString512Bytes key)
         {
             PointHelper.AssertMainThread();
             Instance.m_MapingJobHandle.Complete();
 
-            Hash hash = new Hash(key.ToString().ToLowerInvariant());
+            AssetRuntimeKey hash = new AssetRuntimeKey(key);
             if (!Instance.m_MappedAssets.TryGetValue(hash, out Mapped index))
             {
 #if UNITY_EDITOR
@@ -1021,7 +1018,7 @@ namespace Point.Collections.ResourceControl
             PointHelper.AssertMainThread();
             Instance.m_MapingJobHandle.Complete();
 
-            Hash hash = new Hash(key.ToString().ToLowerInvariant());
+            AssetRuntimeKey hash = new AssetRuntimeKey(key);
             if (!Instance.m_MappedAssets.TryGetValue(hash, out Mapped index))
             {
 #if UNITY_EDITOR
@@ -1054,7 +1051,7 @@ namespace Point.Collections.ResourceControl
             PointHelper.AssertMainThread();
             Instance.m_MapingJobHandle.Complete();
 
-            Hash hash = new Hash(key.ToString().ToLowerInvariant());
+            AssetRuntimeKey hash = new AssetRuntimeKey(key);
             if (!Instance.m_MappedAssets.ContainsKey(hash))
             {
 #if UNITY_EDITOR

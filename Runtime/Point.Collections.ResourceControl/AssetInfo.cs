@@ -47,7 +47,8 @@ namespace Point.Collections.ResourceControl
         [NativeDisableUnsafePtrRestriction, NonSerialized]
         internal readonly UnsafeReference<UnsafeAssetBundleInfo> m_BundlePointer;
         [NonSerialized]
-        internal readonly Hash m_InstanceID, m_Key;
+        internal readonly Hash m_InstanceID;
+        internal readonly AssetRuntimeKey m_Key;
         private readonly Timer m_CreationTime;
 
         [NotBurstCompatible]
@@ -134,15 +135,15 @@ namespace Point.Collections.ResourceControl
         /// <summary>
         /// 에셋의 키 값입니다.
         /// </summary>
-        public Hash Key => m_Key;
+        public AssetRuntimeKey Key => m_Key;
 
-        public AssetInfo(Hash key)
+        public AssetInfo(AssetRuntimeKey key)
         {
             this = default(AssetInfo);
 
             m_Key = key;
         }
-        internal unsafe AssetInfo(UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash instanceID, Hash key)
+        internal unsafe AssetInfo(UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash instanceID, AssetRuntimeKey key)
         {
             this = default(AssetInfo);
 
@@ -222,7 +223,8 @@ namespace Point.Collections.ResourceControl
         [NativeDisableUnsafePtrRestriction, NonSerialized]
         internal readonly UnsafeReference<UnsafeAssetBundleInfo> m_BundlePointer;
         [NonSerialized]
-        internal readonly Hash m_InstanceID, m_Key;
+        internal readonly Hash m_InstanceID;
+        internal readonly AssetRuntimeKey m_Key;
         private readonly Timer m_CreationTime;
 
         [NotBurstCompatible]
@@ -315,9 +317,9 @@ namespace Point.Collections.ResourceControl
         /// <summary>
         /// 에셋의 키 값입니다.
         /// </summary>
-        public Hash Key => m_Key;
+        public AssetRuntimeKey Key => m_Key;
 
-        public AssetInfo(Hash key)
+        public AssetInfo(AssetRuntimeKey key)
         {
             this = default(AssetInfo<T>);
 
@@ -331,7 +333,7 @@ namespace Point.Collections.ResourceControl
 
             m_CreationTime = Timer.Start();
         }
-        internal unsafe AssetInfo(UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash instanceID, Hash key)
+        internal unsafe AssetInfo(UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash instanceID, AssetRuntimeKey key)
         {
             m_BundlePointer = bundle;
             m_InstanceID = instanceID;

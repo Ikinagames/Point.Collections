@@ -236,7 +236,7 @@ namespace Point.Collections.ResourceControl
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public bool HasAsset(in Hash key)
+        public bool HasAsset(in AssetRuntimeKey key)
         {
             this.ThrowIfIsNotValid();
 
@@ -259,7 +259,7 @@ namespace Point.Collections.ResourceControl
         /// </remarks>
         /// <param name="key"></param>
         /// <returns></returns>
-        public AssetInfo LoadAsset(in Hash key)
+        public AssetInfo LoadAsset(in AssetRuntimeKey key)
         {
             this.ThrowIfIsNotValid();
 
@@ -272,7 +272,7 @@ namespace Point.Collections.ResourceControl
         /// <inheritdoc cref="LoadAsset(in Hash)"/>
         /// <param name="key"></param>
         /// <returns></returns>
-        public AssetInfo LoadAssetAsync(in Hash key)
+        public AssetInfo LoadAssetAsync(in AssetRuntimeKey key)
         {
             this.ThrowIfIsNotValid();
 
@@ -312,7 +312,7 @@ namespace Point.Collections.ResourceControl
         /// <param name="key"></param>
         /// <param name="assetInfo"></param>
         /// <returns></returns>
-        public bool TryLoadAsset(in Hash key, out AssetInfo assetInfo)
+        public bool TryLoadAsset(in AssetRuntimeKey key, out AssetInfo assetInfo)
         {
             if (!HasAsset(in key))
             {
@@ -330,7 +330,7 @@ namespace Point.Collections.ResourceControl
         /// <param name="key"></param>
         /// <param name="assetInfo"></param>
         /// <returns></returns>
-        public bool TryLoadAssetAsync(in Hash key, out AssetInfo assetInfo)
+        public bool TryLoadAssetAsync(in AssetRuntimeKey key, out AssetInfo assetInfo)
         {
             if (!HasAsset(in key))
             {
@@ -349,7 +349,7 @@ namespace Point.Collections.ResourceControl
         /// <param name="key"></param>
         /// <param name="assetInfo"></param>
         /// <returns></returns>
-        public bool TryLoadAsset<T>(in Hash key, out AssetInfo<T> assetInfo)
+        public bool TryLoadAsset<T>(in AssetRuntimeKey key, out AssetInfo<T> assetInfo)
             where T : UnityEngine.Object
         {
             if (!HasAsset(in key))
@@ -375,7 +375,7 @@ namespace Point.Collections.ResourceControl
         /// <param name="key"></param>
         /// <param name="asset"></param>
         /// <returns></returns>
-        public bool TryLoadAssetAsync<T>(in Hash key, out AssetInfo<T> asset)
+        public bool TryLoadAssetAsync<T>(in AssetRuntimeKey key, out AssetInfo<T> asset)
             where T : UnityEngine.Object
         {
             if (!HasAsset(in key))

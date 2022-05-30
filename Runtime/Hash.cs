@@ -61,7 +61,7 @@ namespace Point.Collections
 #if UNITY_COLLECTIONS
         [NotBurstCompatible]
 #endif
-        public string Key => m_Key.ToString();
+        public string Key => m_Key.IsEmpty ? String.Empty : m_Key.ToString();
 #endif
 
         public Hash(uint hash)

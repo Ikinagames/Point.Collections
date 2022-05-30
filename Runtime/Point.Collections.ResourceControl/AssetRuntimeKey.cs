@@ -23,21 +23,46 @@
 #endif
 
 using System;
+using Unity.Collections;
 
 namespace Point.Collections.ResourceControl
 {
+    [BurstCompatible]
     public readonly struct AssetRuntimeKey : IEmpty, IEquatable<AssetRuntimeKey>
     {
-        private readonly uint m_Key;
+        public static AssetRuntimeKey Empty => new AssetRuntimeKey(0);
 
+        private readonly Hash m_Key;
+        public Hash Key => m_Key;
+
+        [NotBurstCompatible]
+        public AssetRuntimeKey(string path)
+        {
+            if (path.IsNullOrEmpty())
+            {
+                m_Key = Hash.Empty;
+                return;
+            }
+
+            m_Key = new Hash(path.ToLowerInvariant());
+        }
+        public AssetRuntimeKey(FixedString512Bytes path)
+        {
+            m_Key = new Hash(path.ToString().ToLowerInvariant());
+        }
+        public AssetRuntimeKey(Hash hash)
+        {
+            m_Key = hash;
+        }
         public AssetRuntimeKey(uint key)
         {
-            m_Key = key;
+            m_Key = new Hash(key);
         }
 
         public bool IsEmpty() => m_Key == 0;
 
         public bool Equals(AssetRuntimeKey other) => m_Key.Equals(other.m_Key);
+        [NotBurstCompatible]
         public override bool Equals(object obj)
         {
             if (!(obj is AssetRuntimeKey other)) return false;
@@ -45,7 +70,9 @@ namespace Point.Collections.ResourceControl
 
             return true;
         }
-        public override int GetHashCode() => unchecked((int)m_Key);
+        public override int GetHashCode() => unchecked((int)m_Key.Value);
+        [NotBurstCompatible]
+        public override string ToString() => m_Key.ToString();
     }
 }
 

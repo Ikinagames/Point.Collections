@@ -50,7 +50,6 @@ namespace Point.Collections.ResourceControl
         public UnityEngine.Object EditorAsset => m_AssetReference.editorAsset;
 #endif
 
-        public AddressableAsset() : base() { }
 #if UNITY_EDITOR
         public AddressableAsset(string name, UnityEditor.GUID guid) : this(name, guid.ToString()) { }
 #endif

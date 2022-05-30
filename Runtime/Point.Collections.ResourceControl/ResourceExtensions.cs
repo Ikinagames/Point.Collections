@@ -39,7 +39,7 @@ namespace Point.Collections.ResourceControl
 #if !UNITYENGINE_OLD
         #region Debug
 
-        private static readonly Dictionary<Hash, Dictionary<Hash, StackFrame>> s_AssetLoadCallFrames = new Dictionary<Hash, Dictionary<Hash, StackFrame>>();
+        private static readonly Dictionary<AssetRuntimeKey, Dictionary<Hash, StackFrame>> s_AssetLoadCallFrames = new Dictionary<AssetRuntimeKey, Dictionary<Hash, StackFrame>>();
         [Conditional("DEBUG_MODE")]
         public static void AddDebugger(this in AssetInfo assetInfo)
         {
@@ -106,7 +106,7 @@ namespace Point.Collections.ResourceControl
 
         internal static Dictionary<Hash, StackFrame> GetLoadedFrame(this in UnsafeAssetInfo t)
         {
-            if (!s_AssetLoadCallFrames.TryGetValue(new Hash(t.key), out var stackFrames))
+            if (!s_AssetLoadCallFrames.TryGetValue(new AssetRuntimeKey(t.key), out var stackFrames))
             {
                 $"{t.key} not found".ToLogError();
                 foreach (var item in s_AssetLoadCallFrames.Keys)
