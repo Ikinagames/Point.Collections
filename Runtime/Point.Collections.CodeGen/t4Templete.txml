@@ -1,0 +1,4 @@
+<import namespace = "System">
+<import namespace = "System.Collections">
+<import namespace = "System.Collections.Generic">
+<import namespace = "Point.Collections", "Test", "Asd">

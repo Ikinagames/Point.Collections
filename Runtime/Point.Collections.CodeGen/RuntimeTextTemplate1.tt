@@ -1,0 +1,11 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="Syadeu.Collections.CodeGen" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#+
+public void TestMethod()
+{
+	int a = 0;
+}
+#>

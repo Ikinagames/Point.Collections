@@ -27,6 +27,7 @@
 
 using Point.Collections.Native;
 using System;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -58,6 +59,21 @@ namespace Point.Collections.Editor
             PointHelper.Log(LogChannel.Editor, $"{guid} is copied to clipboard.");
         }
 
+        [MenuItem("Assets/Create/Point/Create T4")]
+        public static void CreateAsset()
+        {
+            string filePath;
+            if (Selection.assetGUIDs.Length == 0)
+                filePath = "Assets/New TMP Color Gradient.asset";
+            else
+                filePath = AssetDatabase.GUIDToAssetPath(Selection.assetGUIDs[0]);
+
+            $"{filePath}".ToLog();
+            filePath = Path.Combine(filePath, "t4Templete.txml");
+
+            File.WriteAllText(filePath, string.Empty);
+            AssetDatabase.ImportAsset(filePath);
+        }
     }
 }
 

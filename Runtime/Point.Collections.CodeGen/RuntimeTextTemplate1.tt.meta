@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: d5650df89bcb28e438346469f6272aad
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 9798f7ba9ad57fd48bf05f742a748c40, type: 3}
+  usings:
+  - System.Linq
+  - System.Text
+  - System.Collections.Generic
