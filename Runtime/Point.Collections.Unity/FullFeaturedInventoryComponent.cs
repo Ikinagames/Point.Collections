@@ -21,25 +21,17 @@
 #if UNITY_COLLECTIONS
 #endif
 
-using UnityEngine;
 using System;
 using System.Collections.Generic;
 
 namespace Point.Collections.Unity
 {
-    public class InventoryComponent : PointMonobehaviour, IInventory, ISerializationCallbackReceiver
+    public class FullFeaturedInventoryComponent : InventoryComponentBase
     {
-        [SerializeField] protected Vector2Int m_Size;
-        [SerializeField] protected float m_MaximumWeight = 100;
-        [SerializeField] protected float m_DefaultWeight;
-
-        [Space]
-        [SerializeField] protected List<ItemComponent> m_Items = new List<ItemComponent>();
-
         [NonSerialized] private FullFeaturedInventory m_Inventory;
 
-        public Hash Hash => m_Inventory.Hash;
-        public int Count => m_Inventory.Count;
+        public override Hash Hash => m_Inventory.Hash;
+        public override int Count => m_Inventory.Count;
 
         protected virtual void Awake()
         {
@@ -57,59 +49,24 @@ namespace Point.Collections.Unity
             {
                 if (item == null) continue;
 
-                //Add(item);
-                //if (item.transform.parent != transform)
-                //{
-                //    item.transform.parent = transform;
-                //    item.transform.localPosition = Vector3.zero;
-                //}
-
                 IItemCallbacks callbacks = item;
-                //m_Inventory.Add(new Item(item));
                 callbacks.OnItemAdded(this);
             }
         }
 #endif
 
-        #region ISerializationCallbackReceiver Implements
-
-        void ISerializationCallbackReceiver.OnBeforeSerialize()
-        {
-            if (m_Size.Equals(Vector2Int.zero))
-            {
-                m_Size = new Vector2Int(1, 1);
-            }
-            if (m_MaximumWeight <= 0) m_MaximumWeight = 100;
-
-            //if (m_Inventory != null)
-            //{
-            //    foreach (var item in m_Inventory.Items)
-            //    {
-            //        if (item is ItemComponent component)
-            //        {
-
-            //        }
-            //    }
-            //}
-        }
-        void ISerializationCallbackReceiver.OnAfterDeserialize()
-        {
-        }
-
-        #endregion
-
-        public void Add(IItem item)
+        public override void Add(IItem item)
         {
             m_Inventory.Add(item);
         }
-        public bool Remove(IItem item)
+        public override bool Remove(IItem item)
         {
             bool result = m_Inventory.Remove(item);
             return result;
         }
 
-        public IEnumerable<IItem> GetItems() => m_Inventory.GetItems();
-        public IEnumerable<IItem> GetItems(Predicate<IItem> predicate) => m_Inventory.GetItems(predicate);
+        public override IEnumerable<IItem> GetItems() => m_Inventory.GetItems();
+        public override IEnumerable<IItem> GetItems(Predicate<IItem> predicate) => m_Inventory.GetItems(predicate);
     }
 }
 

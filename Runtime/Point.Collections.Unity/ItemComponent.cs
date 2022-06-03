@@ -105,7 +105,7 @@ namespace Point.Collections.Unity
         {
             gameObject.SetActive(false);
 
-            if (inventory is InventoryComponent component)
+            if (inventory is FullFeaturedInventoryComponent component)
             {
                 transform.parent = component.transform;
             }
@@ -114,7 +114,7 @@ namespace Point.Collections.Unity
         {
             gameObject.SetActive(true);
 
-            if (inventory is InventoryComponent component)
+            if (inventory is FullFeaturedInventoryComponent component)
             {
                 transform.localPosition = Vector3.zero;
                 transform.parent = null;
