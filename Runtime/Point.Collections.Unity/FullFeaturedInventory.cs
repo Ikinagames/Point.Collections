@@ -26,7 +26,7 @@ using Unity.Mathematics;
 
 namespace Point.Collections.Unity
 {
-    public class Inventory
+    public class FullFeaturedInventory : IInventory
     {
         private readonly Hash m_Hash = Hash.NewHash();
         private Entry[,] m_Slots;
@@ -95,7 +95,7 @@ namespace Point.Collections.Unity
             }
         }
 
-        public Inventory(int x, int y, float maximumWeight, float defaultWeight) : base()
+        public FullFeaturedInventory(int x, int y, float maximumWeight, float defaultWeight) : base()
         {
             m_Slots = new Entry[x, y];
 
@@ -138,7 +138,7 @@ namespace Point.Collections.Unity
 
             return true;
         }
-        private static bool IsExceedingWeight(Inventory inventory, IItem item)
+        private static bool IsExceedingWeight(FullFeaturedInventory inventory, IItem item)
         {
             float sum = inventory.m_Weight + item.Weight;
 
@@ -146,7 +146,7 @@ namespace Point.Collections.Unity
             return false;
         }
 
-        private static void InsertItemAt(Inventory inventory, int2 coord, IItem item)
+        private static void InsertItemAt(FullFeaturedInventory inventory, int2 coord, IItem item)
         {
             int2 size = item.Size;
             for (int yy = 0; yy < size.y; yy++)
@@ -165,7 +165,7 @@ namespace Point.Collections.Unity
                 }
             }
         }
-        private static void RemoveItemAt(Inventory inventory, int2 coord, IItem item)
+        private static void RemoveItemAt(FullFeaturedInventory inventory, int2 coord, IItem item)
         {
             Entry entry = inventory.m_Slots[coord.x, coord.y];
             coord = entry.OriginCoordinate;

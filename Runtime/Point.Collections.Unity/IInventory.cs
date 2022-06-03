@@ -21,32 +21,16 @@
 #if UNITY_COLLECTIONS
 #endif
 
-using System;
-using Unity.Mathematics;
 
 namespace Point.Collections.Unity
 {
-    public interface IItem : IEquatable<IItem>
+    public interface IInventory
     {
-        string Name { get; }
-        /// <summary> 
-        /// 인스턴스 값이 아닌 아이템의 고유 키
-        /// </summary>
         Hash Hash { get; }
+        int Count { get; }
 
-        int2 Size { get; }
-        float Weight { get; }
-
-        int MaxDuplications { get; }
-
-        bool IsInInventory(Hash inventoryHash);
-        void SetInventoryCoordinate(Hash inventoryHash, int2 coord);
-        int2 GetInventoryCoordinate();
-    }
-    public interface IItemCallbacks
-    {
-        void OnItemAdded(IInventory inventory, int2 coord);
-        void OnItemRemove(IInventory inventory, int2 coord);
+        void Add(IItem item);
+        bool Remove(IItem item);
     }
 }
 

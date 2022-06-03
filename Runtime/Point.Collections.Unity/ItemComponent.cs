@@ -65,22 +65,22 @@ namespace Point.Collections.Unity
 
         #region IItemCallbacks Implements
 
-        void IItemCallbacks.OnItemAdded(Inventory inventory, int2 coord)
+        void IItemCallbacks.OnItemAdded(IInventory inventory, int2 coord)
         {
             OnItemAdded(inventory, coord);
         }
-        void IItemCallbacks.OnItemRemove(Inventory inventory, int2 coord)
+        void IItemCallbacks.OnItemRemove(IInventory inventory, int2 coord)
         {
             OnItemRemove(inventory, coord);
         }
 
         #endregion
 
-        protected virtual void OnItemAdded(Inventory inventory, int2 coord)
+        protected virtual void OnItemAdded(IInventory inventory, int2 coord)
         {
             gameObject.SetActive(false);
         }
-        protected virtual void OnItemRemove(Inventory inventory, int2 coord)
+        protected virtual void OnItemRemove(IInventory inventory, int2 coord)
         {
             gameObject.SetActive(true);
         }
