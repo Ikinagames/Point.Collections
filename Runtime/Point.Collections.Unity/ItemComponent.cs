@@ -29,6 +29,9 @@ namespace Point.Collections.Unity
 {
     public class ItemComponent : PointMonobehaviour, IItem, IItemCallbacks, ISerializationCallbackReceiver
     {
+        [SerializeField] protected ItemReference m_ItemReference = null;
+
+        [Space]
         [SerializeField] protected string m_ItemName = string.Empty;
         [SerializeField] protected Hash m_Hash;
 
@@ -40,12 +43,12 @@ namespace Point.Collections.Unity
         [NonSerialized] private Hash m_InventoryHash;
         [NonSerialized] private int2 m_Coordinate;
 
-        public string Name => m_ItemName;
-        public Hash Hash => m_Hash;
+        public string Name => m_ItemReference != null ? m_ItemReference.Name : m_ItemName;
+        public Hash Hash => m_ItemReference != null ? m_ItemReference.Hash : m_Hash;
 
-        public int2 Size => m_Size;
-        public float Weight => m_Weight;
-        public int MaxDuplications => m_MaxDuplications;
+        public int2 Size => m_ItemReference != null ? m_ItemReference.Size : m_Size;
+        public float Weight => m_ItemReference != null ? m_ItemReference.Weight : m_Weight;
+        public int MaxDuplications => m_ItemReference != null ? m_ItemReference.MaxDuplications : m_MaxDuplications;
 
         #region IItem Implements
 
@@ -118,7 +121,7 @@ namespace Point.Collections.Unity
             }
         }
 
-        public bool Equals(IItem other) => m_Hash.Equals(other.Hash);
+        public bool Equals(IItem other) => Hash.Equals(other.Hash);
     }
     public struct Item : IItem
     {
