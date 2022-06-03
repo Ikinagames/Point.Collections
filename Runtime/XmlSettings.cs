@@ -200,8 +200,16 @@ namespace Point.Collections
             if (s_CachedSettingFields.TryGetValue(t, out FieldInfo[] fields)) return fields;
 
             fields = t
-                .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                .Where(t => t.GetCustomAttribute<XmlFieldAttribute>() != null)
+                .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
+                .Where(t =>
+                {
+                    if (t.IsPrivate)
+                    {
+                        return t.GetCustomAttribute<SerializeField>() != null || t.GetCustomAttribute<XmlFieldAttribute>() != null;
+                    }
+
+                    return t.GetCustomAttribute<XmlFieldAttribute>() != null;
+                })
                 .ToArray();
             s_CachedSettingFields.Add(t, fields);
 
@@ -218,7 +226,16 @@ namespace Point.Collections
 
             XmlFieldAttribute fieldAtt = fieldInfo.GetCustomAttribute<XmlFieldAttribute>();
 
-            string elementName = fieldAtt.PropertyName.IsNullOrEmpty() ? fieldInfo.Name : fieldAtt.PropertyName;
+            string elementName;
+            if (fieldAtt == null)
+            {
+                elementName = fieldInfo.Name;
+            }
+            else
+            {
+                elementName = fieldAtt.PropertyName.IsNullOrEmpty() ? fieldInfo.Name : fieldAtt.PropertyName;
+            }
+            
             XElement element = objRoot.Element(elementName);
             if (element == null)
             {
@@ -244,7 +261,16 @@ namespace Point.Collections
 
             XmlFieldAttribute fieldAtt = fieldInfo.GetCustomAttribute<XmlFieldAttribute>();
 
-            string elementName = fieldAtt.PropertyName.IsNullOrEmpty() ? fieldInfo.Name : fieldAtt.PropertyName;
+            string elementName;
+            if (fieldAtt == null)
+            {
+                elementName = fieldInfo.Name;
+            }
+            else
+            {
+                elementName = fieldAtt.PropertyName.IsNullOrEmpty() ? fieldInfo.Name : fieldAtt.PropertyName;
+            }
+            
             XElement element = objRoot.Element(elementName);
             if (element == null)
             {
