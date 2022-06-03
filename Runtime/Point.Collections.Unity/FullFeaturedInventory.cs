@@ -29,6 +29,7 @@ namespace Point.Collections.Unity
     public class FullFeaturedInventory : IInventory
     {
         private readonly Hash m_Hash = Hash.NewHash();
+        private List<IItem> m_Items = new List<IItem>();
         private Entry[,] m_Slots;
 
         private float m_MaximumWeight, m_Weight;
@@ -36,6 +37,7 @@ namespace Point.Collections.Unity
 
         public Hash Hash => m_Hash;
         public int Count => m_Count;
+        public IReadOnlyList<IItem> Items => m_Items;
 
         private sealed class Entry
         {
@@ -182,8 +184,6 @@ namespace Point.Collections.Unity
             }
         }
 
-        #region List Overrides
-
         public void Add(IItem item)
         {
             if (IsExceedingWeight(this, item))
@@ -199,16 +199,17 @@ namespace Point.Collections.Unity
 
             InsertItemAt(this, coord, item);
             item.SetInventoryCoordinate(m_Hash, coord);
+            m_Items.Add(item);
 
             m_Weight += item.Weight;
             m_Count++;
 
             if (item is IItemCallbacks callbacks)
             {
-                callbacks.OnItemAdded(this, coord);
+                callbacks.OnItemAdded(this);
             }
+            OnItemAdded(item);
         }
-
         public bool Remove(IItem item)
         {
             if (!item.IsInInventory(m_Hash))
@@ -220,11 +221,13 @@ namespace Point.Collections.Unity
             int2 coord = item.GetInventoryCoordinate();
             if (item is IItemCallbacks callbacks)
             {
-                callbacks.OnItemRemove(this, coord);
+                callbacks.OnItemRemove(this);
             }
+            OnItemRemove(item);
 
             RemoveItemAt(this, coord, item);
             item.SetInventoryCoordinate(Hash.Empty, -1);
+            m_Items.Remove(item);
 
             m_Weight -= item.Weight;
             m_Count--;
@@ -232,7 +235,8 @@ namespace Point.Collections.Unity
             return true;
         }
 
-        #endregion
+        protected virtual void OnItemAdded(IItem item) { }
+        protected virtual void OnItemRemove(IItem item) { }
     }
 }
 

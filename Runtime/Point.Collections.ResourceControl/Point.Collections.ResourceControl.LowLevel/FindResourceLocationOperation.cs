@@ -58,6 +58,7 @@ namespace Point.Collections.ResourceControl.LowLevel
             }
             else
             {
+                // 경로 에러 뿐만아니라, 해당 경로에 있는 에셋과 타입이 맞지 않아 null 로 반환하는 경우가 있음.
                 Complete(location, false, new InvalidKeyException(RuntimeKey, Type), true);
                 ObjectPool<FindResourceLocationOperation>.Shared.Reserve(this);
             }

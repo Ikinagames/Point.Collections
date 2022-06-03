@@ -45,8 +45,8 @@ namespace Point.Collections.Unity
     }
     public interface IItemCallbacks
     {
-        void OnItemAdded(IInventory inventory, int2 coord);
-        void OnItemRemove(IInventory inventory, int2 coord);
+        void OnItemAdded(IInventory inventory);
+        void OnItemRemove(IInventory inventory);
     }
 }
 

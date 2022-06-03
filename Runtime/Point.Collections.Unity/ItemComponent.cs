@@ -29,13 +29,13 @@ namespace Point.Collections.Unity
 {
     public class ItemComponent : PointMonobehaviour, IItem, IItemCallbacks, ISerializationCallbackReceiver
     {
-        [SerializeField] private string m_ItemName = string.Empty;
-        [SerializeField] private Hash m_Hash;
+        [SerializeField] protected string m_ItemName = string.Empty;
+        [SerializeField] protected Hash m_Hash;
 
         [Space]
-        [SerializeField] private int2 m_Size = 1;
-        [SerializeField] private float m_Weight = 1;
-        [SerializeField] private int m_MaxDuplications = 1;
+        [SerializeField] protected int2 m_Size = 1;
+        [SerializeField] protected float m_Weight = 1;
+        [SerializeField] protected int m_MaxDuplications = 1;
 
         [NonSerialized] private Hash m_InventoryHash;
         [NonSerialized] private int2 m_Coordinate;
@@ -66,35 +66,105 @@ namespace Point.Collections.Unity
 
         #region IItemCallbacks Implements
 
-        void IItemCallbacks.OnItemAdded(IInventory inventory, int2 coord)
+        void IItemCallbacks.OnItemAdded(IInventory inventory)
         {
-            OnItemAdded(inventory, coord);
+            OnItemAdded(inventory);
         }
-        void IItemCallbacks.OnItemRemove(IInventory inventory, int2 coord)
+        void IItemCallbacks.OnItemRemove(IInventory inventory)
         {
-            OnItemRemove(inventory, coord);
+            OnItemRemove(inventory);
         }
 
         #endregion
 
-        protected virtual void OnItemAdded(IInventory inventory, int2 coord)
-        {
-            gameObject.SetActive(false);
-        }
-        protected virtual void OnItemRemove(IInventory inventory, int2 coord)
-        {
-            gameObject.SetActive(true);
-        }
-
-        public bool Equals(IItem other) => m_Hash.Equals(other.Hash);
+        #region ISerializationCallbackReceiver Implements
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
             if (m_Hash.IsEmpty()) m_Hash = Hash.NewHash();
+
+            if (m_Size.Equals(0)) m_Size = 1;
+
+            if (m_MaxDuplications <= 0) m_MaxDuplications = 1;
         }
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
         }
+
+        #endregion
+
+        public bool IsInInventory()
+        {
+            return !m_InventoryHash.IsEmpty();
+        }
+
+        protected virtual void OnItemAdded(IInventory inventory)
+        {
+            gameObject.SetActive(false);
+
+            if (inventory is InventoryComponent component)
+            {
+                transform.parent = component.transform;
+            }
+        }
+        protected virtual void OnItemRemove(IInventory inventory)
+        {
+            gameObject.SetActive(true);
+
+            if (inventory is InventoryComponent component)
+            {
+                transform.localPosition = Vector3.zero;
+                transform.parent = null;
+            }
+        }
+
+        public bool Equals(IItem other) => m_Hash.Equals(other.Hash);
+    }
+    public struct Item : IItem
+    {
+        public string name;
+        public Hash hash;
+        
+        public int2 size;
+        public float weight;
+        public int maxDuplications;
+
+        public Hash inventoryHash;
+        public int2 coordinate;
+
+        string IItem.Name => name;
+        Hash IItem.Hash => hash;
+
+        int2 IItem.Size => size;
+        float IItem.Weight => weight;
+        int IItem.MaxDuplications => maxDuplications;
+
+        public Item(ItemComponent component)
+        {
+            this = default(Item);
+
+            name = component.Name;
+            hash = component.Hash;
+
+            size = component.Size;
+            weight = component.Weight;
+            maxDuplications = component.MaxDuplications;
+        }
+
+        bool IItem.IsInInventory(Hash inventoryHash)
+        {
+            if (inventoryHash.IsEmpty()) return false;
+
+            return inventoryHash.Equals(inventoryHash);
+        }
+        void IItem.SetInventoryCoordinate(Hash inventoryHash, int2 coord)
+        {
+            this.inventoryHash = inventoryHash;
+            this.coordinate = coord;
+        }
+        int2 IItem.GetInventoryCoordinate() => coordinate;
+
+        public bool Equals(IItem other) => hash.Equals(other.Hash);
     }
 }
 
