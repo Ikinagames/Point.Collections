@@ -23,22 +23,26 @@
 
 #if UNITYENGINE
 
-using UnityEngine;
 using UnityEngine.Playables;
 
 namespace Point.Collections.Timeline
 {
     /// <summary>
-    /// 단순한 문자열을 담는 마커입니다.
+    /// <see cref="INotification"/> 을 가진 <see cref="PlayableAsset"/> 재생될 때, 부모의 오브젝트가 
+    /// <see cref="PlayableNotificationReceiver"/> 을 가지고 있으면 재생되는 구현부입니다.
     /// </summary>
-    public sealed class TextMarker : UnityEngine.Timeline.Marker, INotification
+    /// <remarks>
+    /// <seealso cref="INotification"/> 과 함께 사용합니다.
+    /// </remarks>
+    public interface INotificationExecute
     {
-        [SerializeField]
-        private string m_Title = string.Empty;
-        [SerializeField, TextArea]
-        private string m_Text = string.Empty;
-
-        public PropertyName id { get; }
+        /// <summary>
+        /// 조건(ex. <seealso cref="INotification"/>)을 만족하면 실행되는 메소드입니다.
+        /// </summary>
+        /// <param name="director"></param>
+        /// <param name="origin"></param>
+        /// <param name="context"></param>
+        void Execute(PlayableDirector director, Playable origin, object context);
     }
 }
 
