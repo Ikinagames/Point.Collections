@@ -73,7 +73,7 @@ namespace Point.Collections.Buffer.LowLevel
                 return;
             }
 
-            m_Ptr = (IntPtr)NativeUtility.Malloc(Marshal.SizeOf<T>(), TypeHelper.AlignOf<T>(), Unity.Collections.Allocator.Persistent);
+            m_Ptr = (IntPtr)NativeUtility.Malloc(Marshal.SizeOf<T>(), TypeHelper.AlignOf<T>(), global::Unity.Collections.Allocator.Persistent);
 
             m_IsUnmanaged = true;
             m_IsAllocated = true;
@@ -109,7 +109,7 @@ namespace Point.Collections.Buffer.LowLevel
         {
             if (m_IsAllocated)
             {
-                if (m_IsUnmanaged) NativeUtility.Free(m_Ptr.ToPointer(), Unity.Collections.Allocator.Persistent);
+                if (m_IsUnmanaged) NativeUtility.Free(m_Ptr.ToPointer(), global::Unity.Collections.Allocator.Persistent);
                 else
                 {
                     GCHandle.FromIntPtr((IntPtr)m_Ptr).Free();

@@ -42,7 +42,7 @@ namespace Point.Collections
 
 #if UNITYENGINE
         private bool m_MarkerSet = false;
-        private Unity.Profiling.ProfilerMarker m_Marker;
+        private global::Unity.Profiling.ProfilerMarker m_Marker;
 #endif
 
         static ActionWrapper()
@@ -74,7 +74,7 @@ namespace Point.Collections
         {
 #if UNITYENGINE
             m_MarkerSet = true;
-            m_Marker = new Unity.Profiling.ProfilerMarker(name);
+            m_Marker = new global::Unity.Profiling.ProfilerMarker(name);
 #endif
         }
         public void SetAction(Action action)
@@ -104,7 +104,7 @@ namespace Point.Collections
 
 #if UNITYENGINE
         private bool m_MarkerSet = false;
-        private Unity.Profiling.ProfilerMarker m_Marker;
+        private global::Unity.Profiling.ProfilerMarker m_Marker;
 #endif
 
         static ActionWrapper()
@@ -133,7 +133,7 @@ namespace Point.Collections
         {
 #if UNITYENGINE
             m_MarkerSet = true;
-            m_Marker = new Unity.Profiling.ProfilerMarker(name);
+            m_Marker = new global::Unity.Profiling.ProfilerMarker(name);
 #endif
         }
         public void SetAction(Action<T> action)

@@ -186,7 +186,7 @@ namespace Point.Collections
         /// </summary>
         /// <returns></returns>
 #if UNITYENGINE && UNITY_COLLECTIONS
-        [Unity.Collections.NotBurstCompatible]
+        [global::Unity.Collections.NotBurstCompatible]
 #endif
         public static bool AssertIsMainThread()
         {
@@ -199,7 +199,7 @@ namespace Point.Collections
         /// 만약 메인 스레드가 아닐 경우 에러 로그를 발생시킵니다.
         /// </remarks>
 #if UNITYENGINE && UNITY_COLLECTIONS
-        [Unity.Collections.NotBurstCompatible]
+        [global::Unity.Collections.NotBurstCompatible]
 #endif
         [System.Diagnostics.Conditional("DEBUG_MODE")]
         public static void AssertMainThread()
@@ -230,7 +230,7 @@ namespace Point.Collections
         /// </remarks>
         /// <param name="expectedAffinity"></param>
 #if UNITYENGINE && UNITY_COLLECTIONS
-        [Unity.Collections.NotBurstCompatible]
+        [global::Unity.Collections.NotBurstCompatible]
 #endif
         [System.Diagnostics.Conditional("DEBUG_MODE")]
         public static void AssertThreadAffinity(in Threading.ThreadInfo expectedAffinity)

@@ -131,20 +131,20 @@ namespace Point.Collections.ResourceControl
             return m_AssetList[index];
         }
 
-#if UNITY_ADDRESSABLES
-        public AsyncOperationHandle<IList<UnityEngine.Object>> LoadAssetsAsync(Action<UnityEngine.Object> callback)
-        {
-            if (m_AssetReferences.Count == 0)
-            {
-                IList<UnityEngine.Object> temp = Array.Empty<UnityEngine.Object>();
-                return ResourceManager.CreateCompletedOperation(temp);
-            }
+//#if UNITY_ADDRESSABLES
+//        public AsyncOperationHandle<IList<UnityEngine.Object>> LoadAssetsAsync(Action<UnityEngine.Object> callback)
+//        {
+//            if (m_AssetReferences.Count == 0)
+//            {
+//                IList<UnityEngine.Object> temp = Array.Empty<UnityEngine.Object>();
+//                return ResourceManager.CreateCompletedOperation(temp);
+//            }
 
-            var result = Addressables.LoadAssetsAsync<UnityEngine.Object>(m_AssetReferences, callback);
+//            var result = Addressables.LoadAssetsAsync<UnityEngine.Object>(m_AssetReferences, callback);
 
-            return result;
-        }
-#endif
+//            return result;
+//        }
+//#endif
     }
 }
 

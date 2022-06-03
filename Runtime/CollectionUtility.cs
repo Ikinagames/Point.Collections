@@ -39,7 +39,7 @@ namespace Point.Collections
     public sealed class CollectionUtility : CLRSingleTone<CollectionUtility>
     {
 #if UNITYENGINE && UNITY_MATHEMATICS
-        private Unity.Mathematics.Random m_Random;
+        private global::Unity.Mathematics.Random m_Random;
 #else
         private System.Random m_Random;
 #endif
@@ -64,7 +64,7 @@ namespace Point.Collections
 #endif
             m_Random = new System.Random();
 #else
-            Instance.m_Random = new Unity.Mathematics.Random();
+            Instance.m_Random = new global::Unity.Mathematics.Random();
             Instance.m_Random.InitState();
 #endif
 

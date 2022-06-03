@@ -44,7 +44,7 @@ namespace Point.Collections.Native
 
         public static void* Malloc(in long size, in int align
 #if UNITYENGINE
-            , Unity.Collections.Allocator allocator
+            , global::Unity.Collections.Allocator allocator
 #endif
             )
         {
@@ -57,7 +57,7 @@ namespace Point.Collections.Native
         }
         public static void Free(void* ptr
 #if UNITYENGINE
-            , Unity.Collections.Allocator allocator
+            , global::Unity.Collections.Allocator allocator
 #endif
             )
         {
