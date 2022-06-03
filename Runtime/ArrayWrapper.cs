@@ -36,6 +36,7 @@ namespace Point.Collections
         [UnityEngine.SerializeField]
         [JsonProperty]
         private T[] m_Array = Array.Empty<T>();
+        private int m_Count = 0;
 
         public T this[int index]
         {
@@ -47,7 +48,7 @@ namespace Point.Collections
         public bool IsFixedSize => false;
         public bool IsReadOnly => false;
 
-        public int Count => Length;
+        public int Count => m_Count;
         public bool IsSynchronized => true;
         public object SyncRoot => throw new NotImplementedException();
 
@@ -62,6 +63,7 @@ namespace Point.Collections
         public ArrayWrapper(IEnumerable<T> attributes)
         {
             m_Array = attributes.ToArray();
+            m_Count = m_Array.Length;
         }
 
         public object Clone()
@@ -83,17 +85,16 @@ namespace Point.Collections
             throw new NotImplementedException();
         }
 
-        public void RemoveAt(int index)
-        {
-            if (m_Array.RemoveAtSwapBack(index))
-            {
-                Array.Resize(ref m_Array, m_Array.Length - 1);
-            }
-        }
         public void Add(T item)
         {
-            Array.Resize(ref m_Array, m_Array.Length + 1);
-            m_Array[m_Array.Length - 1] = item;
+            if (m_Array.Length <= m_Count)
+            {
+                Array.Resize(ref m_Array, m_Array.Length + 1);
+            }
+
+            int index = m_Count;
+            m_Array[index] = item;
+            m_Count++;
         }
 
         public void Clear()
@@ -107,18 +108,28 @@ namespace Point.Collections
             throw new NotImplementedException();
         }
 
-        public bool Remove(T item)
+        public void RemoveAt(int index)
+        {
+            if (!m_Array.RemoveAtSwapBack(index))
+            {
+                return;
+                //Array.Resize(ref m_Array, m_Array.Length - 1);
+            }
+
+            m_Count--;
+        }
+        public bool Remove(T item) => RemoveSwapback(item, default(T));
+        public bool RemoveSwapback(T item, T defaultValue = default(T))
         {
             int index = IndexOf(item);
 
-            if (0 <= index)
-            {
-                m_Array.RemoveAtSwapBack(index);
-                Array.Resize(ref m_Array, m_Array.Length - 1);
+            if (index < 0) return false;
 
-                return true;
-            }
-            return false;
+            m_Array[index] = defaultValue;
+            UnsafeBufferUtility.RemoveAtSwapBack(m_Array, index);
+            m_Count--;
+
+            return true;
         }
 
         public IEnumerator<T> GetEnumerator() => ((IList<T>)m_Array).GetEnumerator();
