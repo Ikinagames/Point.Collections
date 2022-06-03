@@ -27,19 +27,8 @@ using Unity.Mathematics;
 
 namespace Point.Collections.Unity
 {
-    public class FullFeaturedInventory : IInventory
+    public class FullFeaturedInventory : InventoryBase
     {
-        private readonly Hash m_Hash = Hash.NewHash();
-        private List<IItem> m_Items = new List<IItem>();
-        private Entry[,] m_Slots;
-
-        private float m_MaximumWeight, m_Weight;
-        private int m_Count;
-
-        public Hash Hash => m_Hash;
-        public int Count => m_Count;
-        public IReadOnlyList<IItem> Items => m_Items;
-
         private sealed class Entry
         {
             private IItem m_Item;
@@ -97,6 +86,15 @@ namespace Point.Collections.Unity
                 m_Items.Remove(item);
             }
         }
+
+        private List<IItem> m_Items = new List<IItem>();
+        private Entry[,] m_Slots;
+
+        private float m_MaximumWeight, m_Weight;
+        private int m_Count;
+
+        public override int Count => m_Count;
+        public override IReadOnlyList<IItem> Items => m_Items;
 
         public FullFeaturedInventory(int x, int y, float maximumWeight, float defaultWeight) : base()
         {
@@ -185,7 +183,7 @@ namespace Point.Collections.Unity
             }
         }
 
-        public void Add(IItem item)
+        public override void Add(IItem item)
         {
             if (IsExceedingWeight(this, item))
             {
@@ -199,7 +197,7 @@ namespace Point.Collections.Unity
             }
 
             InsertItemAt(this, coord, item);
-            item.SetInventoryCoordinate(m_Hash, coord);
+            item.SetInventoryCoordinate(Hash, coord);
             m_Items.Add(item);
 
             m_Weight += item.Weight;
@@ -211,9 +209,9 @@ namespace Point.Collections.Unity
             }
             OnItemAdded(item);
         }
-        public bool Remove(IItem item)
+        public override bool Remove(IItem item)
         {
-            if (!item.IsInInventory(m_Hash))
+            if (!item.IsInInventory(Hash))
             {
                 "validate falid.".ToLog();
                 return false;
@@ -235,8 +233,8 @@ namespace Point.Collections.Unity
 
             return true;
         }
-        public IEnumerable<IItem> GetItems() => m_Items;
-        public IEnumerable<IItem> GetItems(Predicate<IItem> predicate)
+        public override IEnumerable<IItem> GetItems() => m_Items;
+        public override IEnumerable<IItem> GetItems(Predicate<IItem> predicate)
         {
             for (int i = 0; i < m_Items.Count; i++)
             {
