@@ -27,11 +27,12 @@ using System;
 
 namespace Point.Collections.Unity
 {
-    public class ItemComponent : PointMonobehaviour, IItem, IItemCallbacks
+    public class ItemComponent : PointMonobehaviour, IItem, IItemCallbacks, ISerializationCallbackReceiver
     {
-        [SerializeField] private string m_Name = string.Empty;
-        [SerializeField] private Hash m_Hash = Hash.NewHash();
+        [SerializeField] private string m_ItemName = string.Empty;
+        [SerializeField] private Hash m_Hash;
 
+        [Space]
         [SerializeField] private int2 m_Size = 1;
         [SerializeField] private float m_Weight = 1;
         [SerializeField] private int m_MaxDuplications = 1;
@@ -39,7 +40,7 @@ namespace Point.Collections.Unity
         [NonSerialized] private Hash m_InventoryHash;
         [NonSerialized] private int2 m_Coordinate;
 
-        public string Name => m_Name;
+        public string Name => m_ItemName;
         public Hash Hash => m_Hash;
 
         public int2 Size => m_Size;
@@ -86,6 +87,14 @@ namespace Point.Collections.Unity
         }
 
         public bool Equals(IItem other) => m_Hash.Equals(other.Hash);
+
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
+        {
+            if (m_Hash.IsEmpty()) m_Hash = Hash.NewHash();
+        }
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
+        {
+        }
     }
 }
 

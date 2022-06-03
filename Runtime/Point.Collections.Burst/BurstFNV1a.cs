@@ -26,7 +26,7 @@ using Unity.Collections;
 
 namespace Point.Collections.Burst
 {
-    [BurstCompile]
+    [BurstCompile(CompileSynchronously = true)]
     public static unsafe class BurstFNV1a
     {
         private const uint
