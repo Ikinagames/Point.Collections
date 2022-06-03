@@ -21,6 +21,9 @@
 #if UNITY_COLLECTIONS
 #endif
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Point.Collections.Unity
 {
@@ -31,6 +34,9 @@ namespace Point.Collections.Unity
 
         void Add(IItem item);
         bool Remove(IItem item);
+
+        IEnumerable<IItem> GetItems();
+        IEnumerable<IItem> GetItems(Predicate<IItem> predicate);
     }
 }
 

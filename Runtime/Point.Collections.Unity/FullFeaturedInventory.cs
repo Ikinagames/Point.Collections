@@ -21,6 +21,7 @@
 #if UNITY_COLLECTIONS
 #endif
 
+using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 
@@ -233,6 +234,14 @@ namespace Point.Collections.Unity
             m_Count--;
 
             return true;
+        }
+        public IEnumerable<IItem> GetItems() => m_Items;
+        public IEnumerable<IItem> GetItems(Predicate<IItem> predicate)
+        {
+            for (int i = 0; i < m_Items.Count; i++)
+            {
+                if (predicate.Invoke(m_Items[i])) yield return m_Items[i];
+            }
         }
 
         protected virtual void OnItemAdded(IItem item) { }

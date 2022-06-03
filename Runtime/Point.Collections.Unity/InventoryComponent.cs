@@ -71,15 +71,7 @@ namespace Point.Collections.Unity
         }
 #endif
 
-        public void Add(IItem item)
-        {
-            m_Inventory.Add(item);
-        }
-        public bool Remove(IItem item)
-        {
-            bool result = m_Inventory.Remove(item);
-            return result;
-        }
+        #region ISerializationCallbackReceiver Implements
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
@@ -103,6 +95,21 @@ namespace Point.Collections.Unity
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
         }
+
+        #endregion
+
+        public void Add(IItem item)
+        {
+            m_Inventory.Add(item);
+        }
+        public bool Remove(IItem item)
+        {
+            bool result = m_Inventory.Remove(item);
+            return result;
+        }
+
+        public IEnumerable<IItem> GetItems() => m_Inventory.GetItems();
+        public IEnumerable<IItem> GetItems(Predicate<IItem> predicate) => m_Inventory.GetItems(predicate);
     }
 }
 
