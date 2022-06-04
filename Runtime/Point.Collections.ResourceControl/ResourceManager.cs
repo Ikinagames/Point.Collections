@@ -1078,7 +1078,7 @@ namespace Point.Collections.ResourceControl
             return LoadAsset(p, in key);
         }
 #endif
-    }
+        }
 
     //////////////////////////////////////////////////////////////////////////////////////////
     /*                                End of Critical Section                               */

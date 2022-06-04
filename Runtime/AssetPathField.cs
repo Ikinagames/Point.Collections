@@ -32,13 +32,16 @@ namespace Point.Collections
     public class AssetPathField : IEmpty, IEquatable<AssetPathField>
     {
         [SerializeField] protected string p_AssetPath = string.Empty;
+        [SerializeField] protected string p_SubAssetName = string.Empty;
 
         public virtual System.Type TargetType => TypeHelper.TypeOf<UnityEngine.Object>.Type;
+        public bool IsSubAsset => !p_SubAssetName.IsNullOrEmpty();
         public string AssetPath
         {
             get => p_AssetPath;
             set => p_AssetPath = value;
         }
+        public string SubAssetName { get => p_SubAssetName; set => p_SubAssetName = value; }
 
 #if UNITY_EDITOR
         /// <summary>
@@ -111,6 +114,14 @@ namespace Point.Collections
 
         public bool IsEmpty() => p_AssetPath.IsNullOrEmpty();
         public bool Equals(AssetPathField other) => p_AssetPath.Equals(other.p_AssetPath);
+
+        public override string ToString()
+        {
+            const string c_Format = "{0}[{1}]";
+
+            if (IsSubAsset) return string.Format(c_Format, AssetPath, SubAssetName);
+            return AssetPath;
+        }
     }
     /// <inheritdoc cref="AssetPathField"/>
     /// <typeparam name="T"></typeparam>

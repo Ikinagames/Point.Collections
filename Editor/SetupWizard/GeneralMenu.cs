@@ -299,6 +299,46 @@ namespace Point.Collections.Editor
             }
         }
     }
+
+    internal sealed class AssetBundleMenu : SetupWizardMenuItem
+    {
+        public override string Name => "AssetBundle";
+        public override int Order => 0;
+
+        public override bool Predicate()
+        {
+            return true;
+        }
+        public override void OnGUI()
+        {
+            if (GUILayout.Button("Build"))
+            {
+                Build();
+            }
+        }
+        public void Build()
+        {
+            string[] bundleNames = AssetDatabase.GetAllAssetBundleNames();
+            AssetBundleBuild[] infos = new AssetBundleBuild[bundleNames.Length];
+            for (int i = 0; i < bundleNames.Length; i++)
+            {
+                string[] assetPaths = AssetDatabase.GetAssetPathsFromAssetBundle(bundleNames[i]);
+                AssetBundleBuild bundleBuild = new AssetBundleBuild
+                {
+                    assetBundleName = bundleNames[i],
+                    assetNames = assetPaths,
+                };
+                infos[i] = bundleBuild;
+            }
+
+            BuildPipeline.BuildAssetBundles(
+                Application.streamingAssetsPath, 
+                infos, 
+                BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows64);
+
+
+        }
+    }
 }
 
 #endif
