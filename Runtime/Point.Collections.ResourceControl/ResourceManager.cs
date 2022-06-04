@@ -61,7 +61,7 @@ namespace Point.Collections.ResourceControl
     //////////////////////////////////////////////////////////////////////////////////////////
 
     [AddComponentMenu("")]
-    public sealed class ResourceManager : StaticMonobehaviour<ResourceManager>
+    public sealed class ResourceManager : StaticMonobehaviour<ResourceManager>, IStaticInitializer
     {
         protected override bool EnableLog => false;
         protected override bool HideInInspector => true;
@@ -98,6 +98,11 @@ namespace Point.Collections.ResourceControl
 #if UNITY_ADDRESSABLES
             m_AddressableInitializeHandle = Addressables.InitializeAsync();
 #endif
+
+            foreach (var item in ResourceHashMap.Instance.StreamingAssetBundles)
+            {
+                RegisterAssetBundlePath(item.ToString()).Load();
+            }
         }
         protected override void OnShutdown()
         {
@@ -913,7 +918,7 @@ namespace Point.Collections.ResourceControl
             }
 
             //
-
+            PointHelper.Log(Channel.Collections, $"AssetBundle({uri}) Registered.");
             return GetAssetBundleInfo(in index);
         }
         /// <summary>
@@ -1052,18 +1057,38 @@ namespace Point.Collections.ResourceControl
             Instance.m_MapingJobHandle.Complete();
 
             AssetRuntimeKey hash = new AssetRuntimeKey(key);
+            Mapped index;
             if (!Instance.m_MappedAssets.ContainsKey(hash))
             {
 #if UNITY_EDITOR
                 string bundleName = UnityEditor.AssetDatabase.GetImplicitAssetBundleName(key.ToString());
+                int bundleIndex = Instance.m_AssetBundles.FindIndex(t => t.AssetBundle.name.ToLowerInvariant().Equals(bundleName.ToLowerInvariant()));
 
-                PointHelper.LogError(LogChannel.Collections,
-                    $"Asset({key}) is not registered. This asset is in the AssetBundle({bundleName}) but you didn\'t registered.");
-#endif
+                if (bundleIndex < 0)
+                {
+                    PointHelper.LogError(LogChannel.Collections,
+                        $"Asset({key}) is not registered. This asset is in the AssetBundle({bundleName}) but you didn\'t registered.");
+                    return AssetInfo.Invalid;
+                }
+
+                var bundleP = GetUnsafeAssetBundleInfo(bundleIndex);
+                AssetInfo asset = LoadAsset(bundleP, hash);
+                if (!asset.IsValid())
+                {
+                    $"Cannot found asset {hash} in bundle {bundleName}. This is not allowed at runtime.".ToLogError(LogChannel.Collections);
+
+                    asset = new AssetInfo(hash, true);
+                    return asset;
+                }
+
+                "loaded only in editor".ToLogError();
+                return asset;
+#else
                 return AssetInfo.Invalid;
+#endif
             }
 
-            Mapped index = Instance.m_MappedAssets[hash];
+            index = Instance.m_MappedAssets[hash];
 
             if (!Instance.m_AssetBundleInfos[index.bundleIndex].loaded)
             {

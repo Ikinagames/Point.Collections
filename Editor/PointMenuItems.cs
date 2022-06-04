@@ -26,10 +26,12 @@
 #if UNITYENGINE
 
 using Point.Collections.Native;
+using Point.Collections.ResourceControl;
 using System;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 
 namespace Point.Collections.Editor
 {
@@ -57,6 +59,14 @@ namespace Point.Collections.Editor
             EditorGUIUtility.systemCopyBuffer = guid.ToString();
 
             PointHelper.Log(LogChannel.Editor, $"{guid} is copied to clipboard.");
+        }
+        [MenuItem("Point/Locate Resource Hash Map")]
+        public static void LocateResourceHashMap()
+        {
+            ResourceHashMap hashMap = ResourceHashMap.Instance;
+
+            Selection.activeObject = hashMap;
+            EditorGUIUtility.PingObject(hashMap);
         }
 
         [MenuItem("Assets/Create/Point/Create T4")]

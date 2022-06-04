@@ -70,10 +70,19 @@ namespace Point.Collections
                         return s_Instance;
                     }
 
-                    UnityEngine.GameObject obj = new UnityEngine.GameObject();
-                    DontDestroyOnLoad(obj);
-                    T t = obj.AddComponent<T>();
-
+                    T t = FindObjectOfType<T>();
+                    UnityEngine.GameObject obj;
+                    if (t == null)
+                    {
+                        obj = new UnityEngine.GameObject();
+                        DontDestroyOnLoad(obj);
+                        t = obj.AddComponent<T>();
+                    }
+                    else
+                    {
+                        obj = t.gameObject;
+                        DontDestroyOnLoad(obj);
+                    }
 #if UNITY_EDITOR
                     DisplayNameAttribute nameAttribute = TypeHelper.TypeOf<T>.Type.GetCustomAttribute<DisplayNameAttribute>();
                     if (nameAttribute != null)

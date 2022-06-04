@@ -49,15 +49,17 @@ namespace Point.Collections.ResourceControl
         [NonSerialized]
         internal readonly Hash m_InstanceID;
         internal readonly AssetRuntimeKey m_Key;
-        private readonly Timer m_CreationTime;
+#if UNITY_EDITOR
+        private readonly bool m_EditorOnly;
+#endif
 
         [NotBurstCompatible]
-        internal ref UnsafeAssetInfo UnsafeInfo
+        internal UnsafeReference<UnsafeAssetInfo> UnsafeInfo
         {
             get
             {
                 var assetInfoPtr = ResourceManager.GetUnsafeAssetInfo(in m_Key);
-                return ref assetInfoPtr.Value;
+                return assetInfoPtr;
             }
         }
         /// <summary>
@@ -72,6 +74,9 @@ namespace Point.Collections.ResourceControl
         {
             get
             {
+#if UNITY_EDITOR
+                if (m_EditorOnly) return UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(m_Key.Key.Key);
+#endif
                 this.ThrowIfIsNotValid();
 
                 ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
@@ -79,7 +84,7 @@ namespace Point.Collections.ResourceControl
                 var asset = bundleInfo.GetAsset(m_Key)?.Value;
                 if (asset != null)
                 {
-                    UnsafeInfo.lastUsage = Timer.Start();
+                    UnsafeInfo.Value.lastUsage = Timer.Start();
                 }
 
                 return asset;
@@ -95,6 +100,9 @@ namespace Point.Collections.ResourceControl
         {
             get
             {
+#if UNITY_EDITOR
+                if (m_EditorOnly) return true;
+#endif
                 this.ThrowIfIsNotValid();
 
                 ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
@@ -113,21 +121,30 @@ namespace Point.Collections.ResourceControl
         {
             add
             {
+#if UNITY_EDITOR
+                if (m_EditorOnly)
+                {
+                    value.Invoke(Asset);
+                }
+#endif
                 this.ThrowIfIsNotValid();
 
                 ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
-                Promise<UnityEngine.Object> promise = bundleInfo.LoadAssetAsync(UnsafeInfo.key.ToString());
+                Promise<UnityEngine.Object> promise = bundleInfo.LoadAssetAsync(UnsafeInfo.Value.key.ToString());
 
                 promise.OnCompleted += value;
             }
             remove
             {
+#if UNITY_EDITOR
+                if (m_EditorOnly) return;
+#endif
                 this.ThrowIfIsNotValid();
 
                 ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
                 if (bundleInfo.GetAsset(m_Key) == null) return;
 
-                Promise<UnityEngine.Object> promise = bundleInfo.LoadAssetAsync(UnsafeInfo.key.ToString());
+                Promise<UnityEngine.Object> promise = bundleInfo.LoadAssetAsync(UnsafeInfo.Value.key.ToString());
                 promise.OnCompleted -= value;
             }
         }
@@ -150,14 +167,21 @@ namespace Point.Collections.ResourceControl
             m_BundlePointer = bundle;
             m_InstanceID = instanceID;
             this.m_Key = key;
-
-            m_CreationTime = Timer.Start();
         }
-
-        public float GetElapsedTimeSinceLastUsage()
+#if UNITY_EDITOR
+        internal unsafe AssetInfo(AssetRuntimeKey key, bool editorOnly)
         {
-            return UnsafeInfo.lastUsage.ElapsedTime;
+            if (!editorOnly)
+            {
+                this = new AssetInfo(key);
+                return;
+            }
+
+            this = default(AssetInfo);
+            m_Key = key;
+            m_EditorOnly = true;
         }
+#endif
 
         /// <summary>
         /// 에셋의 레퍼런스를 반환합니다.
@@ -173,6 +197,9 @@ namespace Point.Collections.ResourceControl
         [NotBurstCompatible]
         public bool IsValid()
         {
+#if UNITY_EDITOR
+            if (m_EditorOnly) return true;
+#endif
             ResourceManager.AssetContainer bundle;
             if (!m_BundlePointer.IsCreated) return false;
 
@@ -182,6 +209,9 @@ namespace Point.Collections.ResourceControl
         }
         void IDisposable.Dispose()
         {
+#if UNITY_EDITOR
+            if (m_EditorOnly) return;
+#endif
             this.ThrowIfIsNotValid();
 
             ResourceManager.Reserve(m_BundlePointer, in this);
@@ -225,7 +255,9 @@ namespace Point.Collections.ResourceControl
         [NonSerialized]
         internal readonly Hash m_InstanceID;
         internal readonly AssetRuntimeKey m_Key;
-        private readonly Timer m_CreationTime;
+#if UNITY_EDITOR
+        private readonly bool m_EditorOnly;
+#endif
 
         [NotBurstCompatible]
         internal ref UnsafeAssetInfo UnsafeInfo
@@ -248,6 +280,9 @@ namespace Point.Collections.ResourceControl
         {
             get
             {
+#if UNITY_EDITOR
+                if (m_EditorOnly) return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(m_Key.Key.Key);
+#endif
                 ((AssetInfo)this).ThrowIfIsNotValid();
 
                 ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
@@ -277,6 +312,9 @@ namespace Point.Collections.ResourceControl
         {
             get
             {
+#if UNITY_EDITOR
+                if (m_EditorOnly) return true;
+#endif
                 ((AssetInfo)this).ThrowIfIsNotValid();
 
                 ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
@@ -295,6 +333,12 @@ namespace Point.Collections.ResourceControl
         {
             add
             {
+#if UNITY_EDITOR
+                if (m_EditorOnly)
+                {
+                    value.Invoke(Asset);
+                }
+#endif
                 ((AssetInfo)this).ThrowIfIsNotValid();
 
                 ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
@@ -304,6 +348,9 @@ namespace Point.Collections.ResourceControl
             }
             remove
             {
+#if UNITY_EDITOR
+                if (m_EditorOnly) return;
+#endif
                 ((AssetInfo)this).ThrowIfIsNotValid();
 
                 ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
@@ -327,29 +374,34 @@ namespace Point.Collections.ResourceControl
         }
         public AssetInfo(AssetInfo assetInfo)
         {
+            this = default(AssetInfo<T>);
+
             m_BundlePointer = assetInfo.m_BundlePointer;
             m_InstanceID = assetInfo.InstanceID;
             this.m_Key = assetInfo.Key;
-
-            m_CreationTime = Timer.Start();
         }
         internal unsafe AssetInfo(UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash instanceID, AssetRuntimeKey key)
         {
+            this = default(AssetInfo<T>);
+
             m_BundlePointer = bundle;
             m_InstanceID = instanceID;
             this.m_Key = key;
-
-            m_CreationTime = Timer.Start();
         }
-
-        /// <summary>
-        /// 마지막으로 사용된(<seealso cref="Asset"/> 에 접근하면 초기화됨) 후, 경과된 시간(초) 를 반환합니다.
-        /// </summary>
-        /// <returns></returns>
-        public float GetElapsedTimeSinceLastUsage()
+#if UNITY_EDITOR
+        internal unsafe AssetInfo(AssetRuntimeKey key, bool editorOnly)
         {
-            return UnsafeInfo.lastUsage.ElapsedTime;
+            if (!editorOnly)
+            {
+                this = new AssetInfo<T>(key);
+                return;
+            }
+
+            this = default(AssetInfo<T>);
+            m_Key = key;
+            m_EditorOnly = true;
         }
+#endif
 
         /// <summary>
         /// 에셋의 레퍼런스를 반환합니다.
@@ -365,6 +417,9 @@ namespace Point.Collections.ResourceControl
         [NotBurstCompatible]
         public bool IsValid()
         {
+#if UNITY_EDITOR
+            if (m_EditorOnly) return true;
+#endif
             ResourceManager.AssetContainer bundle;
             if (!m_BundlePointer.IsCreated) return false;
 
@@ -374,6 +429,9 @@ namespace Point.Collections.ResourceControl
         }
         void IDisposable.Dispose()
         {
+#if UNITY_EDITOR
+            if (m_EditorOnly) return;
+#endif
             ((AssetInfo)this).ThrowIfIsNotValid();
 
             ResourceManager.Reserve(m_BundlePointer, this);

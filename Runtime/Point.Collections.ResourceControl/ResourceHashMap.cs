@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2019_1_OR_NEWER && UNITY_ADDRESSABLES
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
@@ -29,17 +29,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+#if UNITY_ADDRESSABLES
 using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.ResourceManagement.ResourceProviders;
-using UnityEngine.SceneManagement;
+#endif
 
 namespace Point.Collections.ResourceControl
 {
     public sealed class ResourceHashMap : StaticScriptableObject<ResourceHashMap>
     {
+        [SerializeField] private AssetPathField[] m_StreamingAssetBundles = Array.Empty<AssetPathField>();
+#if UNITY_ADDRESSABLES
         [Serializable]
         public sealed class SceneBindedLabel
         {
@@ -220,8 +224,10 @@ namespace Point.Collections.ResourceControl
         }
         
         [SerializeField] private List<SceneBindedLabel> m_SceneBindedLabels = new List<SceneBindedLabel>();
+#endif
         [SerializeField] private List<ResourceList> m_ResourceLists = new List<ResourceList>();
 
+        public IReadOnlyList<AssetPathField> StreamingAssetBundles => m_StreamingAssetBundles;
         public IReadOnlyList<ResourceList> ResourceLists => m_ResourceLists;
         public ResourceList this[int index]
         {
@@ -276,6 +282,7 @@ namespace Point.Collections.ResourceControl
             return !asset.IsEmpty();
         }
 
+#if UNITY_ADDRESSABLES
         internal void LoadSceneAssets(Scene scene, Action<UnityEngine.Object> onCompleted)
         {
             for (int i = 0; i < m_SceneBindedLabels.Count; i++)
@@ -296,6 +303,7 @@ namespace Point.Collections.ResourceControl
                 m_SceneBindedLabels[i].UnloadResources();
             }
         }
+#endif
     }
 }
 

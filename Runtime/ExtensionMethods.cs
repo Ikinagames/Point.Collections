@@ -107,6 +107,19 @@ namespace Point.Collections
         }
         public static T GetOrAddComponent<T>(this Transform t) where T : UnityEngine.Component => t.gameObject.GetOrAddComponent<T>();
 
+        public static TComponent[] GetComponentsInChildrenOnly<TComponent>(this UnityEngine.Component t) 
+        {
+            Transform tr = t.transform;
+            int count = tr.childCount;
+            List<TComponent> components = new List<TComponent>();
+            for (int i = 0; i < count; i++)
+            {
+                components.AddRange(tr.GetChild(i).GetComponentsInChildren<TComponent>());
+            }
+
+            return components.ToArray();
+        }
+
         #endregion
     }
 }

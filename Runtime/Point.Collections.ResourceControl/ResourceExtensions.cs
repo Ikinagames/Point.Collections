@@ -155,8 +155,6 @@ namespace Point.Collections.ResourceControl
                 //"? not valid".ToLogError();
                 return;
             }
-
-            t.UnsafeInfo.lastUsage = Timer.Start();
         }
         public static void NotifyHandle<T>(this AssetInfo<T> t)
             where T : UnityEngine.Object
@@ -178,7 +176,7 @@ namespace Point.Collections.ResourceControl
                 return;
             }
 
-            t.UnsafeInfo.assetHandleType = type;
+            t.UnsafeInfo.Value.assetHandleType = type;
         }
         public static void SetAssetHandle<T>(this in AssetInfo<T> t, AssetHandleType type)
             where T : UnityEngine.Object
