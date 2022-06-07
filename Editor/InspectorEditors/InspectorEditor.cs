@@ -19,56 +19,13 @@
 #endif
 #define UNITYENGINE
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using UnityEditor;
-using UnityEngine;
 
 namespace Point.Collections.Editor
 {
-    public abstract class InspectorEditor<T> : UnityEditor.Editor
+    public abstract class InspectorEditor<T> : InspectorEditorBase<T>
         where T : UnityEngine.Object
     {
-        /// <summary>
-        /// <inheritdoc cref="UnityEditor.Editor.target"/>
-        /// </summary>
-        public new T target => (T)base.target;
-        /// <summary>
-        /// <inheritdoc cref="UnityEditor.Editor.targets"/>
-        /// </summary>
-        public new T[] targets => base.targets.Select(t => (T)t).ToArray();
-
-        public string assetPath
-        {
-            get
-            {
-                if (!TypeHelper.InheritsFrom<ScriptableObject>(TypeHelper.TypeOf<T>.Type))
-                {
-                    return string.Empty;
-                }
-
-                return AssetDatabase.GetAssetPath(target);
-            }
-        }
-
-        protected override sealed void OnHeaderGUI()
-        {
-            EditorUtilities.StringRich("Copyright 2022 Ikinagames. All rights reserved.", 11, true);
-            EditorUtilities.StringRich("Point Framework®", 11, true);
-
-            base.OnHeaderGUI();
-        }
-
-        protected SerializedProperty GetSerializedProperty(string name)
-        {
-            return serializedObject.FindProperty(name);
-        }
-        protected SerializedProperty GetSerializedProperty(SerializedProperty property, string name)
-        {
-            return property.FindPropertyRelative(name);
-        }
-
         public virtual string GetHeaderName() => ObjectNames.NicifyVariableName(TypeHelper.ToString(target.GetType()));
         public override sealed void OnInspectorGUI()
         {
@@ -81,35 +38,11 @@ namespace Point.Collections.Editor
         /// <see cref="UnityEditor.Editor.OnInspectorGUI"/> 와 같습니다.
         /// </summary>
         protected virtual void OnInspectorGUIContents() { base.OnInspectorGUI(); }
-
-        #region Reflections
-
-        private Dictionary<string, MemberInfo> m_ParsedMemberInfos = new Dictionary<string, MemberInfo>();
-
-        protected FieldInfo GetFieldInfo(string fieldName, BindingFlags bindingFlags)
-        {
-            if (!m_ParsedMemberInfos.TryGetValue(fieldName, out MemberInfo fieldInfo))
-            {
-                fieldInfo = TypeHelper.TypeOf<T>.GetFieldInfo(fieldName, bindingFlags);
-                m_ParsedMemberInfos.Add(fieldName, fieldInfo);
-            }
-
-            return (FieldInfo)fieldInfo;
-        }
-        protected FieldInfo GetFieldInfo(string fieldName) => GetFieldInfo(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-        protected PropertyInfo GetPropertyInfo(string propertyName, BindingFlags bindingFlags)
-        {
-            if (!m_ParsedMemberInfos.TryGetValue(propertyName, out MemberInfo propertyInfo))
-            {
-                propertyInfo = TypeHelper.TypeOf<T>.GetPropertyInfo(propertyName, bindingFlags);
-                m_ParsedMemberInfos.Add(propertyName, propertyInfo);
-            }
-
-            return (PropertyInfo)propertyInfo;
-        }
-        protected PropertyInfo GetPropertyInfo(string propertyName) => GetPropertyInfo(propertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-
-        #endregion
+    }
+    public abstract class InspectorEditorUXML<T> : InspectorEditorBase<T>
+        where T : UnityEngine.Object
+    {
+        
     }
 }
 
