@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="default-uss.uss" />
+    <ui:Label text="Resource Hash Map" display-tooltip-when-elided="true" class="header-label" />
+    <ui:VisualElement name="ContentContainer">
+        <ui:VisualElement name="StreamingAssetBundleList" class="content-container">
+            <ui:IMGUIContainer name="StreamingAssetBundleGUI" />
+        </ui:VisualElement>
+        <uie:PropertyField name="SceneBindedLabels" binding-path="m_SceneBindedLabels" />
+        <ui:VisualElement name="ResourceList" class="content-container">
+            <ui:VisualElement name="HeaderContainer" style="flex-direction: row; align-items: center; justify-content: flex-end; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 4px;">
+                <ui:Label text="Resource Lists" display-tooltip-when-elided="true" style="-unity-text-align: middle-center; width: 75%; font-size: 15px;" />
+                <ui:Button text="+" display-tooltip-when-elided="true" name="RemoveResourceListBtt" style="width: 10%; border-top-left-radius: 1.5px; border-bottom-left-radius: 1.5px; border-top-right-radius: 1.5px; border-bottom-right-radius: 1.5px; margin-left: 1px; margin-right: 1px; margin-top: 0; margin-bottom: 0;" />
+                <ui:Button text="-" display-tooltip-when-elided="true" name="AddResourceListBtt" style="width: 10%; border-top-left-radius: 1.5px; border-bottom-left-radius: 1.5px; border-top-right-radius: 1.5px; border-bottom-right-radius: 1.5px; margin-left: 1px; margin-right: 1px; margin-top: 0; margin-bottom: 0;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="ResourceListContainer" class="content-container" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

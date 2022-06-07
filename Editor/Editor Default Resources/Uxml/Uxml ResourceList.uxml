@@ -4,7 +4,7 @@
     <ui:IMGUIContainer name="ObjectName" style="margin-left: 2px;" />
     <uie:PropertyField binding-path="m_Group" name="GroupName" />
     <ui:VisualElement name="Spacing" style="height: 5px;" />
-    <ui:VisualElement style="height: auto; background-color: rgb(72, 72, 72); padding-left: 4px; padding-right: 4px; padding-top: 4px; padding-bottom: 4px;">
+    <ui:VisualElement class="content-container">
         <uie:ToolbarSearchField focusable="true" name="SearchField" style="width: auto; margin-left: 4px;" />
         <ui:IMGUIContainer name="AssetLists" />
     </ui:VisualElement>

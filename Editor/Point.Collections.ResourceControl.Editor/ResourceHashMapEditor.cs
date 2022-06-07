@@ -24,58 +24,151 @@ using System.Linq;
 using Unity.Collections;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Point.Collections.ResourceControl.Editor
 {
     [CustomEditor(typeof(ResourceHashMap))]
-    internal sealed class ResourceHashMapEditor : InspectorEditor<ResourceHashMap>
+    internal sealed class ResourceHashMapEditor : InspectorEditorUXML<ResourceHashMap>
     {
-        private SerializedProperty m_SceneBindedLabelsProperty, m_ResourceListsProperty;
+        private SerializedProperty 
+            m_SceneBindedLabelsProperty, m_ResourceListsProperty,
+            m_StreamingAssetBundlesProperty;
+
+        VisualTreeAsset VisualTreeAsset { get; set; }
+        VisualElement ResourceListContainer { get; set; }
 
         private void OnEnable()
         {
             m_SceneBindedLabelsProperty = serializedObject.FindProperty("m_SceneBindedLabels");
             m_ResourceListsProperty = serializedObject.FindProperty("m_ResourceLists");
+            m_StreamingAssetBundlesProperty = serializedObject.FindProperty("m_StreamingAssetBundles");
+
+            VisualTreeAsset = AssetHelper.LoadAsset<VisualTreeAsset>("Uxml ResourceHashMap", "PointEditor");
         }
-        protected override void OnInspectorGUIContents()
+        protected override VisualElement CreateVisualElement()
         {
-            EditorGUILayout.PropertyField(m_SceneBindedLabelsProperty);
+            var tree = VisualTreeAsset.CloneTree();
+            tree.Bind(serializedObject);
 
-            EditorGUILayout.Space();
-            CoreGUI.Line();
+            IMGUIContainer streamingAssetBundleGUI = tree.Q<IMGUIContainer>("StreamingAssetBundleGUI");
+            streamingAssetBundleGUI.onGUIHandler += StreamingAssetBundleGUI;
 
-            using (new EditorGUILayout.HorizontalScope())
+            Button 
+                addResourceListBtt = tree.Q<Button>("AddResourceListBtt"),
+                removeResourceListBtt = tree.Q<Button>("RemoveResourceListBtt");
+            addResourceListBtt.clicked += ResourceListAddButton;
+            removeResourceListBtt.clicked += ResourceListRemoveButton;
+
+            //IMGUIContainer resourceListGUI = tree.Q<IMGUIContainer>("ResourceListGUI");
+            //resourceListGUI.onGUIHandler += ResourceListGUI;
+
+            ResourceListContainer = tree.Q<VisualElement>("ResourceListContainer");
+            for (int i = 0; i < m_ResourceListsProperty.arraySize; i++)
             {
-                if (CoreGUI.BoxButton("+", Color.gray))
-                {
-                    int index = m_ResourceListsProperty.arraySize;
-                    
-                    ResourceList list = CreateInstance<ResourceList>();
-                    list.name = "ResourceList " + index;
-                    AssetDatabase.AddObjectToAsset(list, assetPath);
-                    
-                    m_ResourceListsProperty.InsertArrayElementAtIndex(index);
-                    m_ResourceListsProperty.GetArrayElementAtIndex(index).objectReferenceValue = list;
-                }
-                if (CoreGUI.BoxButton("-", Color.gray))
-                {
-                    int index = m_ResourceListsProperty.arraySize - 1;
-                    ResourceList list = m_ResourceListsProperty.GetArrayElementAtIndex(index).objectReferenceValue as ResourceList;
-                    m_ResourceListsProperty.DeleteArrayElementAtIndex(index);
+                SerializedProperty element = m_ResourceListsProperty.GetArrayElementAtIndex(i);
+                
+                //VisualElement box = new VisualElement();
+                //box.name = $"{m_ResourceListsProperty.displayName}[{i}]";
+                //box.AddToClassList("row-align");
 
-                    AssetDatabase.RemoveObjectFromAsset(list);
-                }
+                PropertyField propertyField
+                    = new PropertyField(element, element.displayName);
+                propertyField.SetEnabled(false);
+                //box.Add(propertyField);
+
+                //int index = i;
+                //Button button = new Button(() =>
+                //{
+                //    $"clicked {index}".ToLog();
+                //})
+                //{
+                //    text = "-"
+                //};
+                //box.Add(button);
+
+                //ResourceListContainer.Add(box);
+                ResourceListContainer.Add(propertyField);
             }
+
+            return tree;
+        }
+        private void StreamingAssetBundleGUI()
+        {
+            EditorGUILayout.PropertyField(m_StreamingAssetBundlesProperty);
+        }
+
+        private void ResourceListAddButton()
+        {
+            int index = m_ResourceListsProperty.arraySize;
+
+            ResourceList list = CreateInstance<ResourceList>();
+            list.name = "ResourceList " + index;
+            AssetDatabase.AddObjectToAsset(list, assetPath);
+
+            m_ResourceListsProperty.InsertArrayElementAtIndex(index);
+            m_ResourceListsProperty.GetArrayElementAtIndex(index).objectReferenceValue = list;
+
+            "add".ToLog();
+        }
+        private void ResourceListRemoveButton()
+        {
+            int index = m_ResourceListsProperty.arraySize - 1;
+            ResourceList list = m_ResourceListsProperty.GetArrayElementAtIndex(index).objectReferenceValue as ResourceList;
+            m_ResourceListsProperty.DeleteArrayElementAtIndex(index);
+
+            AssetDatabase.RemoveObjectFromAsset(list);
+
+            "remove".ToLog();
+        }
+
+        private void ResourceListGUI()
+        {
             using (new EditorGUI.DisabledGroupScope(true))
             {
                 EditorGUILayout.PropertyField(m_ResourceListsProperty);
             }
-
-            serializedObject.ApplyModifiedProperties();
-            //base.OnInspectorGUIContents();
         }
+
+        //protected override void OnInspectorGUIContents()
+        //{
+        //    EditorGUILayout.PropertyField(m_SceneBindedLabelsProperty);
+
+        //    EditorGUILayout.Space();
+        //    CoreGUI.Line();
+
+        //    using (new EditorGUILayout.HorizontalScope())
+        //    {
+        //        if (CoreGUI.BoxButton("+", Color.gray))
+        //        {
+        //            int index = m_ResourceListsProperty.arraySize;
+
+        //            ResourceList list = CreateInstance<ResourceList>();
+        //            list.name = "ResourceList " + index;
+        //            AssetDatabase.AddObjectToAsset(list, assetPath);
+
+        //            m_ResourceListsProperty.InsertArrayElementAtIndex(index);
+        //            m_ResourceListsProperty.GetArrayElementAtIndex(index).objectReferenceValue = list;
+        //        }
+        //        if (CoreGUI.BoxButton("-", Color.gray))
+        //        {
+        //            int index = m_ResourceListsProperty.arraySize - 1;
+        //            ResourceList list = m_ResourceListsProperty.GetArrayElementAtIndex(index).objectReferenceValue as ResourceList;
+        //            m_ResourceListsProperty.DeleteArrayElementAtIndex(index);
+
+        //            AssetDatabase.RemoveObjectFromAsset(list);
+        //        }
+        //    }
+        //    using (new EditorGUI.DisabledGroupScope(true))
+        //    {
+        //        EditorGUILayout.PropertyField(m_ResourceListsProperty);
+        //    }
+
+        //    serializedObject.ApplyModifiedProperties();
+        //    //base.OnInspectorGUIContents();
+        //}
     }
 }
 

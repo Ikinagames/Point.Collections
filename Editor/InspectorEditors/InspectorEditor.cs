@@ -43,16 +43,16 @@ namespace Point.Collections.Editor
     public abstract class InspectorEditorUXML<T> : InspectorEditorBase<T>
         where T : UnityEngine.Object
     {
-        public VisualElement VisualElement { get; private set; }
+        public VisualElement RootVisualElement { get; private set; }
 
         public override sealed VisualElement CreateInspectorGUI()
         {
-            if (VisualElement == null)
+            if (RootVisualElement == null)
             {
-                VisualElement = CreateVisualElement();
+                RootVisualElement = CreateVisualElement();
             }
 
-            return VisualElement;
+            return RootVisualElement;
         }
 
         protected abstract VisualElement CreateVisualElement();
