@@ -20,6 +20,7 @@
 #define UNITYENGINE
 
 using UnityEditor;
+using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
 {
@@ -42,7 +43,19 @@ namespace Point.Collections.Editor
     public abstract class InspectorEditorUXML<T> : InspectorEditorBase<T>
         where T : UnityEngine.Object
     {
-        
+        public VisualElement VisualElement { get; private set; }
+
+        public override sealed VisualElement CreateInspectorGUI()
+        {
+            if (VisualElement == null)
+            {
+                VisualElement = CreateVisualElement();
+            }
+
+            return VisualElement;
+        }
+
+        protected abstract VisualElement CreateVisualElement();
     }
 }
 
