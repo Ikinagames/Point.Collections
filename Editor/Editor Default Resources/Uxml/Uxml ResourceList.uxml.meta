@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: e50f612277b3bb049a5e082d48b89a63
+labels:
+- PointEditor
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 13804, guid: 0000000000000000e000000000000000, type: 0}
