@@ -21,6 +21,7 @@
 
 using Point.Collections.Editor;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
@@ -31,9 +32,13 @@ using UnityEngine.UIElements;
 namespace Point.Collections.ResourceControl.Editor
 {
     [CustomEditor(typeof(ResourceList))]
-    //internal sealed class ResourceListEditor : InspectorEditor<ResourceList>
-    internal sealed class ResourceListEditor : UnityEditor.Editor
+    internal sealed class ResourceListEditor : InspectorEditorUXML<ResourceList>
     {
+        private static Regex s_PathRegex = new Regex(
+            @"[p P][a A][t T][h H]:(.+)");
+        //@"[p P][a A][t T][h H]:(?:(\s.+|.+\s|.+))\s*");
+        //@"[p P][a A][t T][h H]:(?:(\s.+|.+\s|.+)(?<!\1\s+))+$");
+
         private new ResourceList target => base.target as ResourceList;
 
         VisualTreeAsset VisualTreeAsset { get; set; }
@@ -43,6 +48,8 @@ namespace Point.Collections.ResourceControl.Editor
 
         private bool m_IsBindedToCatalog = false;
         private bool m_RequireRebuild = false;
+
+        private string m_SearchString;
 
         private void OnEnable()
         {
@@ -106,10 +113,13 @@ namespace Point.Collections.ResourceControl.Editor
             serializedObject.Update();
         }
 
-        public override VisualElement CreateInspectorGUI()
+        protected override VisualElement CreateVisualElement()
         {
             var tree = VisualTreeAsset.CloneTree();
             tree.Bind(serializedObject);
+
+            ToolbarSearchField toolbarSearchField = tree.Q<ToolbarSearchField>("SearchField");
+            toolbarSearchField.RegisterValueChangedCallback(OnSearchFieldStringChanged);
 
             IMGUIContainer objectName = tree.Q<IMGUIContainer>("ObjectName");
             objectName.onGUIHandler += ObjectNameFieldGUI;
@@ -117,17 +127,12 @@ namespace Point.Collections.ResourceControl.Editor
             IMGUIContainer iMGUIContainer = tree.Q<IMGUIContainer>("AssetLists");
             iMGUIContainer.onGUIHandler += GUI;
 
-            //ScrollView assetList = tree.Q<ScrollView>("AssetList");
-            //for (int i = 0; i < assetListProp.arraySize; i++)
-            //{
-            //    PropertyField propertyField = new PropertyField(
-            //        assetListProp.GetArrayElementAtIndex(i));
-            //    assetList.Add(propertyField);
-            //}
-
             return tree;
         }
-
+        private void OnSearchFieldStringChanged(ChangeEvent<string> value)
+        {
+            m_SearchString = value.newValue;
+        }
         private void ObjectNameFieldGUI()
         {
             using (var changed = new EditorGUI.ChangeCheckScope())
@@ -194,6 +199,11 @@ namespace Point.Collections.ResourceControl.Editor
                             else displayName = prop.displayName;
                         }
 
+                        if (!ElementCheck(prop.Copy(), displayName))
+                        {
+                            continue;
+                        }
+
                         prop.isExpanded = EditorGUILayout.Foldout(prop.isExpanded, displayName, true);
                         if (!prop.isExpanded) continue;
 
@@ -211,6 +221,28 @@ namespace Point.Collections.ResourceControl.Editor
                     }
                 }
             }
+        }
+
+        private bool ElementCheck(SerializedProperty prop, string displayName)
+        {
+            if (m_SearchString.IsNullOrEmpty()) return true;
+
+            var match = s_PathRegex.Match(m_SearchString);
+            if (match.Success)
+            {
+                string pathString = match.Groups[1].Value.Trim().Split(' ')[0].ToLowerInvariant();
+
+                prop.Next(true);
+                prop.Next(false);
+
+                var assetGUIDProp = prop.FindPropertyRelative("m_AssetGUID");
+                string assetPath = AssetDatabase.GUIDToAssetPath(assetGUIDProp.stringValue).ToLowerInvariant();
+                if (assetPath.Contains(pathString)) return true;
+            }
+
+            if (displayName.Contains(m_SearchString)) return true;
+
+            return false;
         }
 
         //protected override void OnInspectorGUIContents()
