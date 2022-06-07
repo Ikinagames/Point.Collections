@@ -1,0 +1,6 @@
+.header-label {
+    font-size: 20px;
+    -unity-text-align: middle-left;
+    margin-bottom: 4px;
+    margin-top: 4px;
+}

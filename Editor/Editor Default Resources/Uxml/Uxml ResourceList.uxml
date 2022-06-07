@@ -1,5 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
-    <ui:Label text="Resource List" display-tooltip-when-elided="true" style="font-size: 20px; -unity-text-align: middle-left;" />
+    <Style src="default-uss.uss" />
+    <ui:Label text="Resource List" display-tooltip-when-elided="true" class="header-label" />
     <ui:IMGUIContainer name="ObjectName" style="margin-left: 2px;" />
     <uie:PropertyField binding-path="m_Group" name="GroupName" />
     <ui:VisualElement name="Spacing" style="height: 5px;" />
