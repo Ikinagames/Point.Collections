@@ -42,18 +42,16 @@ namespace Point.Collections.Editor
                 if (s_Instance == null)
                 {
                     string filename = TypeHelper.TypeOf<T>.ToString();
-                    if (!Directory.Exists(c_DefaultPath))
-                    {
-                        Directory.CreateDirectory(c_DefaultPath);
-                    }
+                    T obj = AssetHelper.LoadAsset<T>(filename, "PointEditor");
+                    if (obj == null) obj = AssetHelper.LoadAsset<T>(filename);
 
-                    string path = Path.Combine(c_DefaultPath) + filename + ".asset";
-                    T obj = AssetDatabase.LoadAssetAtPath<T>(path);
                     if (obj == null)
                     {
                         obj = ScriptableObject.CreateInstance<T>();
 
-                        AssetDatabase.CreateAsset(obj, path);
+                        AssetDatabase.CreateAsset(obj, Path.Combine(c_DefaultPath) + filename + ".asset");
+                        AssetDatabase.SetLabels(obj, new string[] { "PointEditor" });
+
                         AssetDatabase.SaveAssets();
                     }
 

@@ -38,9 +38,14 @@ namespace Point.Collections
         #region String
 
         private const char c_StringLineSeperator = '\n';
+        private const string c_Space = " ";
         private static string[] s_StringLineSpliter = new[] { "\r\n", "\r", "\n" };
         private static char[] s_StringLineSpliterChar = new[] { '\r', '\n' };
 
+        public static string AddSpace(this string t)
+        {
+            return t + c_Space;
+        }
         /// <summary>
         /// 이 스트링이 null 혹은 비었는지 반환합니다.
         /// </summary>

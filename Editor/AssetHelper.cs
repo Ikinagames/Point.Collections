@@ -258,9 +258,53 @@ namespace Point.Collections.Editor
             s_AssetDatabase.Remove(path);
         }
 
+        public static T LoadEditorAsset<T>(string path)
+            where T : UnityEngine.Object
+        {
+            T obj = EditorGUIUtility.Load(path) as T;
+
+            return obj;
+        }
         public static T LoadAsset<T>(string name, string label) where T : UnityEngine.Object
         {
-            var assets = AssetDatabase.FindAssets($"{name} l:{label} t:{TypeHelper.TypeOf<T>.Name}");
+            const string c_Format = "{0} l:{1} t:{2}";
+            string context = string.Format(c_Format, name, label, TypeHelper.TypeOf<T>.Name);
+            var assets = AssetDatabase.FindAssets(context);
+            if (assets.Length == 0) return null;
+
+            string guid = assets[0];
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            return AssetDatabase.LoadAssetAtPath<T>(path);
+        }
+        public static T LoadAsset<T>(string name, params string[] labels) where T : UnityEngine.Object
+        {
+            const string
+                c_Format = "{0} {1} t:{2}",
+                c_LabelFormat = "l:{0}";
+            string labelContext = string.Empty;
+            for (int i = 0; i < labels.Length; i++)
+            {
+                if (!labelContext.IsNullOrEmpty())
+                {
+                    labelContext = labelContext.AddSpace();
+                }
+                labelContext += string.Format(c_LabelFormat, labels[i]);
+            }
+
+            string context = string.Format(c_Format, name,
+                labelContext,
+                TypeHelper.TypeOf<T>.Name);
+
+            var assets = AssetDatabase.FindAssets(context);
+            if (assets.Length == 0) return null;
+
+            string guid = assets[0];
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            return AssetDatabase.LoadAssetAtPath<T>(path);
+        }
+        public static T LoadAsset<T>(string name) where T : UnityEngine.Object
+        {
+            var assets = AssetDatabase.FindAssets($"{name} t:{TypeHelper.TypeOf<T>.Name}");
             if (assets.Length == 0) return null;
 
             string guid = assets[0];
