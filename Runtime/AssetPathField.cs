@@ -22,6 +22,9 @@
 using System;
 using System.IO;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Point.Collections
 {
@@ -30,7 +33,13 @@ namespace Point.Collections
     /// </summary>
     [System.Serializable]
     public class AssetPathField : IEmpty, IEquatable<AssetPathField>
+#if UNITY_EDITOR
+        , ISerializationCallbackReceiver
+#endif
     {
+#if UNITY_EDITOR
+        [SerializeField] protected string p_AssetGUID = string.Empty;
+#endif
         [SerializeField] protected string p_AssetPath = string.Empty;
         [SerializeField] protected string p_SubAssetName = string.Empty;
 
@@ -51,7 +60,7 @@ namespace Point.Collections
         {
             get
             {
-                if (string.IsNullOrEmpty(p_AssetPath))
+                if (p_AssetPath.IsNullOrEmpty())
                 {
                     return null;
                 }
@@ -122,6 +131,27 @@ namespace Point.Collections
             if (IsSubAsset) return string.Format(c_Format, AssetPath, SubAssetName);
             return AssetPath;
         }
+
+#if UNITY_EDITOR
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
+        {
+            if (!p_AssetGUID.IsNullOrEmpty())
+            {
+                p_AssetPath = AssetDatabase.GUIDToAssetPath(p_AssetGUID);
+                if (p_AssetPath.IsNullOrEmpty())
+                {
+                    p_AssetGUID = String.Empty;
+                }
+            }
+        }
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
+        {
+            //if (!p_AssetPath.IsNullOrEmpty())
+            //{
+            //    p_AssetGUID = AssetDatabase.AssetPathToGUID(p_AssetPath);
+            //}
+        }
+#endif
     }
     /// <inheritdoc cref="AssetPathField"/>
     /// <typeparam name="T"></typeparam>

@@ -34,7 +34,7 @@ namespace Point.Collections.Editor
     [CustomPropertyDrawer(typeof(AssetPathField), true)]
     public sealed class AssetPathFieldPropertyDrawer : PropertyDrawer<AssetPathField>
     {
-        private const string c_AssetPathField = "p_AssetPath";
+        private const string c_AssetPathField = "p_AssetPath", c_AssetGUIDField = "p_AssetGUID";
         private static Type s_GenericType = typeof(AssetPathField<>);
 
         protected override float PropertyHeight(SerializedProperty property, GUIContent label)
@@ -44,6 +44,7 @@ namespace Point.Collections.Editor
         protected override void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
         {
             SerializedProperty pathProperty = property.FindPropertyRelative(c_AssetPathField);
+            SerializedProperty guidProperty = property.FindPropertyRelative(c_AssetGUIDField);
 
             string assetPath = pathProperty.stringValue;
             UnityEngine.Object asset = GetObjectAtPath(in assetPath);
@@ -87,14 +88,19 @@ namespace Point.Collections.Editor
 
                     if (changeCheck.changed)
                     {
-                        pathProperty.stringValue
-                            = AssetDatabase.GetAssetPath(obj);
+                        pathProperty.stringValue = AssetDatabase.GetAssetPath(obj);
+                        guidProperty.stringValue = AssetDatabase.AssetPathToGUID(pathProperty.stringValue);
                     }
                 }
             }
             else
             {
+                EditorGUI.BeginChangeCheck();
                 pathProperty.stringValue = EditorGUI.TextField(pos[0], label, pathProperty.stringValue);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    guidProperty.stringValue = AssetDatabase.AssetPathToGUID(pathProperty.stringValue);
+                }
             }
 
             if (GUI.Button(pos[1], "Raw"))
