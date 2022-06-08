@@ -50,12 +50,28 @@ namespace Point.Collections.Editor
             if (RootVisualElement == null)
             {
                 RootVisualElement = CreateVisualElement();
+                SetupVisualElement(RootVisualElement);
             }
 
             return RootVisualElement;
         }
 
         protected abstract VisualElement CreateVisualElement();
+        protected virtual void SetupVisualElement(VisualElement root) { }
+
+        public TElement Q<TElement>(string name = null, string className = null)
+            where TElement : VisualElement
+        {
+            return RootVisualElement.Q<TElement>(name, className);
+        }
+        public VisualElement Q(string name = null, string className = null)
+        {
+            return RootVisualElement.Q(name, className);
+        }
+        public void RepaintVisualElement()
+        {
+            RootVisualElement.MarkDirtyRepaint();
+        }
     }
 }
 

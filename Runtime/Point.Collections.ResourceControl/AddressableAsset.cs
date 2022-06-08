@@ -39,7 +39,7 @@ namespace Point.Collections.ResourceControl
 #else
         [SerializeField] private AssetReference m_AssetReference;
 #endif
-
+        // TODO : ResourceManager 에서 이걸로 로드가능 하도록
         public string FriendlyName { get => m_FriendlyName; set => m_FriendlyName = value; }
 #if UNITY_ADDRESSABLES
         public AddressableReference AssetReference => m_AssetReference;

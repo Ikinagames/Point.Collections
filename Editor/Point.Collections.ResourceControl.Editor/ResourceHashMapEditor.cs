@@ -48,88 +48,138 @@ namespace Point.Collections.ResourceControl.Editor
 
             VisualTreeAsset = AssetHelper.LoadAsset<VisualTreeAsset>("Uxml ResourceHashMap", "PointEditor");
         }
+        protected override void SetupVisualElement(VisualElement root)
+        {
+            //Streaming AssetBundle
+            {
+                Button
+                    assetBundleAddBtt = root.Q<Button>("StreamingAssetBundleAddButton"),
+                    assetBundleRemoveBtt = root.Q<Button>("StreamingAssetBundleRemoveButton");
+                IMGUIContainer assetBundleGUI = root.Q<IMGUIContainer>("StreamingAssetBundleGUI");
+
+                assetBundleAddBtt.clicked += delegate
+                {
+                    int index = m_StreamingAssetBundlesProperty.arraySize;
+                    m_StreamingAssetBundlesProperty.InsertArrayElementAtIndex(index);
+
+                    serializedObject.ApplyModifiedProperties();
+                };
+                assetBundleRemoveBtt.clicked += delegate
+                {
+                    int index = m_StreamingAssetBundlesProperty.arraySize - 1;
+                    m_StreamingAssetBundlesProperty.DeleteArrayElementAtIndex(index);
+
+                    serializedObject.ApplyModifiedProperties();
+                };
+
+                assetBundleGUI.onGUIHandler += delegate
+                {
+                    for (int i = 0; i < m_StreamingAssetBundlesProperty.arraySize; i++)
+                    {
+                        var element = m_StreamingAssetBundlesProperty.GetArrayElementAtIndex(i);
+                        EditorGUILayout.PropertyField(element);
+                    }
+                };
+            }
+
+            // Scene Binded Labels
+            {
+#if UNITY_ADDRESSABLES
+                Button
+                    bindLabelAddBtt = root.Q<Button>("SceneBindedLabelAddButton"),
+                    bindLabelRemoveBtt = root.Q<Button>("SceneBindedLabelRemoveButton");
+                IMGUIContainer bindLabelGUI = root.Q<IMGUIContainer>("SceneBindedLabelsGUI");
+
+                bindLabelAddBtt.clicked += delegate
+                {
+                    int index = m_SceneBindedLabelsProperty.arraySize;
+                    m_SceneBindedLabelsProperty.InsertArrayElementAtIndex(index);
+
+                    serializedObject.ApplyModifiedProperties();
+                };
+                bindLabelRemoveBtt.clicked += delegate
+                {
+                    int index = m_SceneBindedLabelsProperty.arraySize - 1;
+                    m_SceneBindedLabelsProperty.DeleteArrayElementAtIndex(index);
+
+                    serializedObject.ApplyModifiedProperties();
+                };
+                bindLabelGUI.onGUIHandler += delegate
+                {
+                    for (int i = 0; i < m_SceneBindedLabelsProperty.arraySize; i++)
+                    {
+                        var element = m_SceneBindedLabelsProperty.GetArrayElementAtIndex(i);
+                        EditorGUILayout.PropertyField(element);
+                    }
+                };
+#else
+                VisualElement rootSceneBindedLabels = root.Q("SceneBindedLabels");
+
+                rootSceneBindedLabels.visible = false;
+                rootSceneBindedLabels.SetEnabled(false);
+#endif
+            }
+
+            // Resource Lists
+
+            Button
+                addResourceListBtt = root.Q<Button>("AddResourceListBtt"),
+                removeResourceListBtt = root.Q<Button>("RemoveResourceListBtt");
+            ResourceListContainer = root.Q<VisualElement>("ResourceListContainer");
+
+            addResourceListBtt.clicked += delegate
+            {
+                int index = m_ResourceListsProperty.arraySize;
+
+                ResourceList list = CreateInstance<ResourceList>();
+                list.name = "ResourceList " + index;
+                AssetDatabase.AddObjectToAsset(list, assetPath);
+
+                m_ResourceListsProperty.InsertArrayElementAtIndex(index);
+                var prop = m_ResourceListsProperty.GetArrayElementAtIndex(index);
+                prop.objectReferenceValue = list;
+
+                PropertyField element = new PropertyField(prop, prop.displayName);
+                element.SetEnabled(false);
+                ResourceListContainer.Add(element);
+
+                "add".ToLog();
+
+                ResourceListContainer.MarkDirtyRepaint();
+                serializedObject.ApplyModifiedProperties();
+            };
+            removeResourceListBtt.clicked += delegate
+            {
+                int index = m_ResourceListsProperty.arraySize - 1;
+
+                var ve = ResourceListContainer.ElementAt(index);
+                ve.RemoveFromHierarchy();
+
+                ResourceList list = m_ResourceListsProperty.GetArrayElementAtIndex(index).objectReferenceValue as ResourceList;
+                m_ResourceListsProperty.DeleteArrayElementAtIndex(index);
+                AssetDatabase.RemoveObjectFromAsset(list);
+
+                "remove".ToLog();
+                ResourceListContainer.MarkDirtyRepaint();
+                serializedObject.ApplyModifiedProperties();
+            };
+
+            for (int i = 0; i < m_ResourceListsProperty.arraySize; i++)
+            {
+                SerializedProperty element = m_ResourceListsProperty.GetArrayElementAtIndex(i);
+
+                PropertyField propertyField
+                    = new PropertyField(element, element.displayName);
+                propertyField.SetEnabled(false);
+                ResourceListContainer.Add(propertyField);
+            }
+        }
         protected override VisualElement CreateVisualElement()
         {
             var tree = VisualTreeAsset.CloneTree();
             tree.Bind(serializedObject);
 
-            IMGUIContainer streamingAssetBundleGUI = tree.Q<IMGUIContainer>("StreamingAssetBundleGUI");
-            streamingAssetBundleGUI.onGUIHandler += StreamingAssetBundleGUI;
-
-            Button 
-                addResourceListBtt = tree.Q<Button>("AddResourceListBtt"),
-                removeResourceListBtt = tree.Q<Button>("RemoveResourceListBtt");
-            addResourceListBtt.clicked += ResourceListAddButton;
-            removeResourceListBtt.clicked += ResourceListRemoveButton;
-
-            //IMGUIContainer resourceListGUI = tree.Q<IMGUIContainer>("ResourceListGUI");
-            //resourceListGUI.onGUIHandler += ResourceListGUI;
-
-            ResourceListContainer = tree.Q<VisualElement>("ResourceListContainer");
-            for (int i = 0; i < m_ResourceListsProperty.arraySize; i++)
-            {
-                SerializedProperty element = m_ResourceListsProperty.GetArrayElementAtIndex(i);
-                
-                //VisualElement box = new VisualElement();
-                //box.name = $"{m_ResourceListsProperty.displayName}[{i}]";
-                //box.AddToClassList("row-align");
-
-                PropertyField propertyField
-                    = new PropertyField(element, element.displayName);
-                propertyField.SetEnabled(false);
-                //box.Add(propertyField);
-
-                //int index = i;
-                //Button button = new Button(() =>
-                //{
-                //    $"clicked {index}".ToLog();
-                //})
-                //{
-                //    text = "-"
-                //};
-                //box.Add(button);
-
-                //ResourceListContainer.Add(box);
-                ResourceListContainer.Add(propertyField);
-            }
-
             return tree;
-        }
-        private void StreamingAssetBundleGUI()
-        {
-            EditorGUILayout.PropertyField(m_StreamingAssetBundlesProperty);
-        }
-
-        private void ResourceListAddButton()
-        {
-            int index = m_ResourceListsProperty.arraySize;
-
-            ResourceList list = CreateInstance<ResourceList>();
-            list.name = "ResourceList " + index;
-            AssetDatabase.AddObjectToAsset(list, assetPath);
-
-            m_ResourceListsProperty.InsertArrayElementAtIndex(index);
-            m_ResourceListsProperty.GetArrayElementAtIndex(index).objectReferenceValue = list;
-
-            "add".ToLog();
-        }
-        private void ResourceListRemoveButton()
-        {
-            int index = m_ResourceListsProperty.arraySize - 1;
-            ResourceList list = m_ResourceListsProperty.GetArrayElementAtIndex(index).objectReferenceValue as ResourceList;
-            m_ResourceListsProperty.DeleteArrayElementAtIndex(index);
-
-            AssetDatabase.RemoveObjectFromAsset(list);
-
-            "remove".ToLog();
-        }
-
-        private void ResourceListGUI()
-        {
-            using (new EditorGUI.DisabledGroupScope(true))
-            {
-                EditorGUILayout.PropertyField(m_ResourceListsProperty);
-            }
         }
 
         //protected override void OnInspectorGUIContents()

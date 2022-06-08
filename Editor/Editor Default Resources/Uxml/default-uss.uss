@@ -26,3 +26,33 @@
     flex-direction: row;
     justify-content: space-between;
 }
+
+.asd {
+    width: 10%;
+    border-top-left-radius: 1.5px;
+    border-bottom-left-radius: 1.5px;
+    border-top-right-radius: 1.5px;
+    border-bottom-right-radius: 1.5px;
+    margin-left: 1px;
+    margin-right: 1px;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.header-button-1 {
+    width: 10%;
+    border-top-left-radius: 1.5px;
+    border-bottom-left-radius: 1.5px;
+    border-top-right-radius: 1.5px;
+    border-bottom-right-radius: 1.5px;
+}
+
+.header-list-1 {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 4px;
+}
