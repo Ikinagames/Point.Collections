@@ -5,7 +5,9 @@
     <uie:PropertyField binding-path="m_Group" name="GroupName" />
     <ui:VisualElement name="Spacing" style="height: 5px;" />
     <ui:VisualElement class="content-container">
-        <uie:ToolbarSearchField focusable="true" name="SearchField" style="width: auto; margin-left: 4px;" />
+        <ui:VisualElement style="flex-direction: row;">
+            <uie:ToolbarSearchField focusable="true" name="SearchField" style="margin-left: 4px; width: 80%;" />
+        </ui:VisualElement>
         <ui:IMGUIContainer name="AssetLists" />
     </ui:VisualElement>
 </ui:UXML>
