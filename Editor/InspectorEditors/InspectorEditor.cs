@@ -20,6 +20,7 @@
 #define UNITYENGINE
 
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
@@ -43,6 +44,11 @@ namespace Point.Collections.Editor
     public abstract class InspectorEditorUXML<T> : InspectorEditorBase<T>
         where T : UnityEngine.Object
     {
+        // Animation Reference
+        // https://gamedev-resources.com/use-style-transitions-to-animate-a-menu/
+        // https://forum.unity.com/threads/announcing-uss-transition.1203832/
+        // https://forum.unity.com/threads/quick-transition-tutorial.1203841/
+
         public VisualElement RootVisualElement { get; private set; }
 
         public override sealed VisualElement CreateInspectorGUI()
@@ -51,6 +57,8 @@ namespace Point.Collections.Editor
             {
                 RootVisualElement = CreateVisualElement();
                 SetupVisualElement(RootVisualElement);
+
+                RootVisualElement.Bind(serializedObject);
             }
 
             return RootVisualElement;

@@ -1,7 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
     <Style src="default-uss.uss" />
     <ui:Label text="Resource List" display-tooltip-when-elided="true" class="header-label" />
-    <ui:IMGUIContainer name="ObjectName" style="margin-left: 2px;" />
+    <ui:TextField picking-mode="Ignore" label="Name" value="OBJECTNAME" text="OBJECTNAME" name="ObjectName" />
     <uie:PropertyField binding-path="m_Group" name="GroupName" />
     <ui:VisualElement name="Spacing" style="height: 5px;" />
     <ui:VisualElement class="content-container">

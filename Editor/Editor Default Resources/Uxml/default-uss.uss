@@ -47,7 +47,20 @@
     margin-bottom: 4px;
 }
 
-.dont-display {
+.hide {
     visibility: hidden;
     display: none;
+}
+
+#H2-Label {
+    font-size: 15px;
+    width: 75%;
+    -unity-text-align: middle-center;
+}
+
+#H2-Label:hover {
+    font-size: 15px;
+    color: var(--unity-colors-default-text-hover);
+    width: 75%;
+    -unity-text-align: middle-center;
 }

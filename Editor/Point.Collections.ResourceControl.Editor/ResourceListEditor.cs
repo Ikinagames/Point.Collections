@@ -116,13 +116,28 @@ namespace Point.Collections.ResourceControl.Editor
         protected override VisualElement CreateVisualElement()
         {
             var tree = VisualTreeAsset.CloneTree();
-            tree.Bind(serializedObject);
 
             ToolbarSearchField toolbarSearchField = tree.Q<ToolbarSearchField>("SearchField");
             toolbarSearchField.RegisterValueChangedCallback(OnSearchFieldStringChanged);
 
-            IMGUIContainer objectName = tree.Q<IMGUIContainer>("ObjectName");
-            objectName.onGUIHandler += ObjectNameFieldGUI;
+            TextField objectName = tree.Q<TextField>("ObjectName");
+            objectName.value = target.name;
+            objectName.RegisterValueChangedCallback(t =>
+            {
+                target.name = t.newValue;
+
+                EditorUtility.SetDirty(target);
+                EditorUtility.SetDirty(ResourceHashMap.Instance);
+                AssetDatabase.ImportAsset(
+                    AssetDatabase.GetAssetPath(ResourceHashMap.Instance),
+                    ImportAssetOptions.ForceUpdate);
+            });
+            PropertyField groupNameField = tree.Q<PropertyField>("GroupName");
+            groupNameField.RegisterValueChangeCallback(t =>
+            {
+                serializedObject.ApplyModifiedProperties();
+                Validate();
+            });
 
             IMGUIContainer iMGUIContainer = tree.Q<IMGUIContainer>("AssetLists");
             iMGUIContainer.onGUIHandler += GUI;
@@ -133,28 +148,65 @@ namespace Point.Collections.ResourceControl.Editor
         {
             m_SearchString = value.newValue;
         }
-        private void ObjectNameFieldGUI()
-        {
-            using (var changed = new EditorGUI.ChangeCheckScope())
-            {
-                target.name = EditorGUILayout.DelayedTextField("Name", target.name);
 
-                if (changed.changed)
+        private void NotBindedGUI()
+        {
+            using (new CoreGUI.BoxBlock(Color.gray))
+            {
+                m_AssetListProperty.isExpanded =
+                        CoreGUI.LabelToggle(m_AssetListProperty.isExpanded, m_AssetListProperty.displayName, 13, TextAnchor.MiddleLeft);
+
+                if (!m_AssetListProperty.isExpanded) return;
+
+                CoreGUI.Line();
+
+                using (new EditorGUI.IndentLevelScope())
                 {
-                    EditorUtility.SetDirty(target);
-                    EditorUtility.SetDirty(ResourceHashMap.Instance);
-                    AssetDatabase.ImportAsset(
-                        AssetDatabase.GetAssetPath(ResourceHashMap.Instance),
-                        ImportAssetOptions.ForceUpdate);
+                    for (int i = 0; i < m_AssetListProperty.arraySize; i++)
+                    {
+                        var prop = m_AssetListProperty.GetArrayElementAtIndex(i);
+                        string displayName;
+                        {
+                            var refAsset = target.GetAddressableAsset(i);
+
+                            if (refAsset.EditorAsset != null)
+                            {
+                                displayName = refAsset.FriendlyName.IsNullOrEmpty() ?
+                                    refAsset.EditorAsset.name : refAsset.FriendlyName;
+
+                                displayName += $" ({AssetDatabase.GetAssetPath(refAsset.EditorAsset)})";
+                            }
+                            else displayName = prop.displayName;
+                        }
+
+                        if (!ElementCheck(prop.Copy(), displayName))
+                        {
+                            continue;
+                        }
+
+                        prop.isExpanded = EditorGUILayout.Foldout(prop.isExpanded, displayName, true);
+                        if (!prop.isExpanded) continue;
+
+                        using (new EditorGUI.IndentLevelScope())
+                        {
+                            prop.Next(true);
+                            EditorGUILayout.PropertyField(prop);
+                            prop.Next(false);
+                            EditorGUILayout.PropertyField(prop);
+                        }
+                        //
+                    }
+
                 }
             }
-        }
 
+            //EditorGUILayout.PropertyField(m_AssetListProperty);
+        }
         private void GUI()
         {
             if (!m_IsBindedToCatalog)
             {
-                EditorGUILayout.PropertyField(m_AssetListProperty);
+                NotBindedGUI();
                 return;
             }
 

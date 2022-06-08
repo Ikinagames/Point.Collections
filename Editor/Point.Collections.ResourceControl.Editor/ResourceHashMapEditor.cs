@@ -60,7 +60,7 @@ namespace Point.Collections.ResourceControl.Editor
 
                 if (m_StreamingAssetBundlesProperty.arraySize == 0)
                 {
-                    assetBundleGUI.parent.AddToClassList("dont-display");
+                    assetBundleGUI.parent.AddToClassList("hide");
                     assetBundleRemoveBtt.SetEnabled(false);
                 }
 
@@ -73,7 +73,7 @@ namespace Point.Collections.ResourceControl.Editor
 
                     if (index == 0)
                     {
-                        assetBundleGUI.parent.RemoveFromClassList("dont-display");
+                        assetBundleGUI.parent.RemoveFromClassList("hide");
                         assetBundleRemoveBtt.SetEnabled(true);
                     }
                 };
@@ -88,7 +88,7 @@ namespace Point.Collections.ResourceControl.Editor
 
                     if (index == 0)
                     {
-                        assetBundleGUI.parent.AddToClassList("dont-display");
+                        assetBundleGUI.parent.AddToClassList("hide");
                         assetBundleRemoveBtt.SetEnabled(false);
                     }
                 };
@@ -113,7 +113,7 @@ namespace Point.Collections.ResourceControl.Editor
 
                 if (m_SceneBindedLabelsProperty.arraySize == 0)
                 {
-                    bindLabelGUI.parent.AddToClassList("dont-display");
+                    bindLabelGUI.parent.AddToClassList("hide");
                     bindLabelRemoveBtt.SetEnabled(false);
                 }
 
@@ -126,7 +126,7 @@ namespace Point.Collections.ResourceControl.Editor
 
                     if (index == 0)
                     {
-                        bindLabelGUI.parent.RemoveFromClassList("dont-display");
+                        bindLabelGUI.parent.RemoveFromClassList("hide");
                         bindLabelRemoveBtt.SetEnabled(true);
                     }
 
@@ -143,7 +143,7 @@ namespace Point.Collections.ResourceControl.Editor
 
                     if (index == 0)
                     {
-                        bindLabelGUI.parent.AddToClassList("dont-display");
+                        bindLabelGUI.parent.AddToClassList("hide");
                         bindLabelRemoveBtt.SetEnabled(false);
                     }
 
@@ -160,7 +160,7 @@ namespace Point.Collections.ResourceControl.Editor
 #else
                 VisualElement rootSceneBindedLabels = root.Q("SceneBindedLabels");
 
-                rootSceneBindedLabels.visible = false;
+                rootSceneBindedLabels.AddToClassList("hide");
                 rootSceneBindedLabels.SetEnabled(false);
 #endif
             }
@@ -173,7 +173,7 @@ namespace Point.Collections.ResourceControl.Editor
             ResourceListContainer = root.Q<VisualElement>("ResourceListContainer");
             if (m_ResourceListsProperty.arraySize == 0)
             {
-                ResourceListContainer.AddToClassList("dont-display");
+                ResourceListContainer.AddToClassList("hide");
                 removeResourceListBtt.SetEnabled(false);
             }
 
@@ -202,7 +202,7 @@ namespace Point.Collections.ResourceControl.Editor
                 // if was zero element
                 if (index == 0)
                 {
-                    ResourceListContainer.RemoveFromClassList("dont-display");
+                    ResourceListContainer.RemoveFromClassList("hide");
                     removeResourceListBtt.SetEnabled(true);
                 }
             };
@@ -223,7 +223,7 @@ namespace Point.Collections.ResourceControl.Editor
 
                 if (index == 0)
                 {
-                    ResourceListContainer.AddToClassList("dont-display");
+                    ResourceListContainer.AddToClassList("hide");
                     removeResourceListBtt.SetEnabled(false);
                 }
                 ResourceListContainer.MarkDirtyRepaint();
@@ -242,48 +242,9 @@ namespace Point.Collections.ResourceControl.Editor
         protected override VisualElement CreateVisualElement()
         {
             var tree = VisualTreeAsset.CloneTree();
-            tree.Bind(serializedObject);
-
+            
             return tree;
         }
-
-        //protected override void OnInspectorGUIContents()
-        //{
-        //    EditorGUILayout.PropertyField(m_SceneBindedLabelsProperty);
-
-        //    EditorGUILayout.Space();
-        //    CoreGUI.Line();
-
-        //    using (new EditorGUILayout.HorizontalScope())
-        //    {
-        //        if (CoreGUI.BoxButton("+", Color.gray))
-        //        {
-        //            int index = m_ResourceListsProperty.arraySize;
-
-        //            ResourceList list = CreateInstance<ResourceList>();
-        //            list.name = "ResourceList " + index;
-        //            AssetDatabase.AddObjectToAsset(list, assetPath);
-
-        //            m_ResourceListsProperty.InsertArrayElementAtIndex(index);
-        //            m_ResourceListsProperty.GetArrayElementAtIndex(index).objectReferenceValue = list;
-        //        }
-        //        if (CoreGUI.BoxButton("-", Color.gray))
-        //        {
-        //            int index = m_ResourceListsProperty.arraySize - 1;
-        //            ResourceList list = m_ResourceListsProperty.GetArrayElementAtIndex(index).objectReferenceValue as ResourceList;
-        //            m_ResourceListsProperty.DeleteArrayElementAtIndex(index);
-
-        //            AssetDatabase.RemoveObjectFromAsset(list);
-        //        }
-        //    }
-        //    using (new EditorGUI.DisabledGroupScope(true))
-        //    {
-        //        EditorGUILayout.PropertyField(m_ResourceListsProperty);
-        //    }
-
-        //    serializedObject.ApplyModifiedProperties();
-        //    //base.OnInspectorGUIContents();
-        //}
     }
 }
 
