@@ -39,6 +39,7 @@ namespace Point.Collections.ResourceControl.Editor
 
         VisualTreeAsset VisualTreeAsset { get; set; }
         VisualElement ResourceListContainer { get; set; }
+        protected override bool ShouldHideOpenButton() => true;
 
         private void OnEnable()
         {
@@ -57,19 +58,39 @@ namespace Point.Collections.ResourceControl.Editor
                     assetBundleRemoveBtt = root.Q<Button>("StreamingAssetBundleRemoveButton");
                 IMGUIContainer assetBundleGUI = root.Q<IMGUIContainer>("StreamingAssetBundleGUI");
 
+                if (m_StreamingAssetBundlesProperty.arraySize == 0)
+                {
+                    assetBundleGUI.parent.AddToClassList("dont-display");
+                    assetBundleRemoveBtt.SetEnabled(false);
+                }
+
                 assetBundleAddBtt.clicked += delegate
                 {
                     int index = m_StreamingAssetBundlesProperty.arraySize;
                     m_StreamingAssetBundlesProperty.InsertArrayElementAtIndex(index);
 
                     serializedObject.ApplyModifiedProperties();
+
+                    if (index == 0)
+                    {
+                        assetBundleGUI.parent.RemoveFromClassList("dont-display");
+                        assetBundleRemoveBtt.SetEnabled(true);
+                    }
                 };
                 assetBundleRemoveBtt.clicked += delegate
                 {
+                    if (m_StreamingAssetBundlesProperty.arraySize == 0) return;
+
                     int index = m_StreamingAssetBundlesProperty.arraySize - 1;
                     m_StreamingAssetBundlesProperty.DeleteArrayElementAtIndex(index);
 
                     serializedObject.ApplyModifiedProperties();
+
+                    if (index == 0)
+                    {
+                        assetBundleGUI.parent.AddToClassList("dont-display");
+                        assetBundleRemoveBtt.SetEnabled(false);
+                    }
                 };
 
                 assetBundleGUI.onGUIHandler += delegate
@@ -90,19 +111,43 @@ namespace Point.Collections.ResourceControl.Editor
                     bindLabelRemoveBtt = root.Q<Button>("SceneBindedLabelRemoveButton");
                 IMGUIContainer bindLabelGUI = root.Q<IMGUIContainer>("SceneBindedLabelsGUI");
 
+                if (m_SceneBindedLabelsProperty.arraySize == 0)
+                {
+                    bindLabelGUI.parent.AddToClassList("dont-display");
+                    bindLabelRemoveBtt.SetEnabled(false);
+                }
+
                 bindLabelAddBtt.clicked += delegate
                 {
                     int index = m_SceneBindedLabelsProperty.arraySize;
                     m_SceneBindedLabelsProperty.InsertArrayElementAtIndex(index);
 
                     serializedObject.ApplyModifiedProperties();
+
+                    if (index == 0)
+                    {
+                        bindLabelGUI.parent.RemoveFromClassList("dont-display");
+                        bindLabelRemoveBtt.SetEnabled(true);
+                    }
+
+                    bindLabelGUI.parent.MarkDirtyRepaint();
                 };
                 bindLabelRemoveBtt.clicked += delegate
                 {
+                    if (m_SceneBindedLabelsProperty.arraySize == 0) return;
+
                     int index = m_SceneBindedLabelsProperty.arraySize - 1;
                     m_SceneBindedLabelsProperty.DeleteArrayElementAtIndex(index);
 
                     serializedObject.ApplyModifiedProperties();
+
+                    if (index == 0)
+                    {
+                        bindLabelGUI.parent.AddToClassList("dont-display");
+                        bindLabelRemoveBtt.SetEnabled(false);
+                    }
+
+                    bindLabelGUI.parent.MarkDirtyRepaint();
                 };
                 bindLabelGUI.onGUIHandler += delegate
                 {
@@ -126,6 +171,11 @@ namespace Point.Collections.ResourceControl.Editor
                 addResourceListBtt = root.Q<Button>("AddResourceListBtt"),
                 removeResourceListBtt = root.Q<Button>("RemoveResourceListBtt");
             ResourceListContainer = root.Q<VisualElement>("ResourceListContainer");
+            if (m_ResourceListsProperty.arraySize == 0)
+            {
+                ResourceListContainer.AddToClassList("dont-display");
+                removeResourceListBtt.SetEnabled(false);
+            }
 
             addResourceListBtt.clicked += delegate
             {
@@ -140,16 +190,26 @@ namespace Point.Collections.ResourceControl.Editor
                 prop.objectReferenceValue = list;
 
                 PropertyField element = new PropertyField(prop, prop.displayName);
-                element.SetEnabled(false);
-                ResourceListContainer.Add(element);
+                element.RemoveFromHierarchy();
 
-                "add".ToLog();
+                ResourceListContainer.Add(element);
+                element.Bind(serializedObject);
+                element.SetEnabled(false);
 
                 ResourceListContainer.MarkDirtyRepaint();
                 serializedObject.ApplyModifiedProperties();
+
+                // if was zero element
+                if (index == 0)
+                {
+                    ResourceListContainer.RemoveFromClassList("dont-display");
+                    removeResourceListBtt.SetEnabled(true);
+                }
             };
             removeResourceListBtt.clicked += delegate
             {
+                if (m_ResourceListsProperty.arraySize == 0) return;
+
                 int index = m_ResourceListsProperty.arraySize - 1;
 
                 var ve = ResourceListContainer.ElementAt(index);
@@ -159,9 +219,14 @@ namespace Point.Collections.ResourceControl.Editor
                 m_ResourceListsProperty.DeleteArrayElementAtIndex(index);
                 AssetDatabase.RemoveObjectFromAsset(list);
 
-                "remove".ToLog();
-                ResourceListContainer.MarkDirtyRepaint();
                 serializedObject.ApplyModifiedProperties();
+
+                if (index == 0)
+                {
+                    ResourceListContainer.AddToClassList("dont-display");
+                    removeResourceListBtt.SetEnabled(false);
+                }
+                ResourceListContainer.MarkDirtyRepaint();
             };
 
             for (int i = 0; i < m_ResourceListsProperty.arraySize; i++)

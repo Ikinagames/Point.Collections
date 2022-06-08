@@ -20,23 +20,13 @@
     border-right-color: rgba(255, 255, 255, 0.19);
     border-top-color: rgba(255, 255, 255, 0.19);
     border-bottom-color: rgba(255, 255, 255, 0.19);
+    justify-content: center;
+    align-items: stretch;
 }
 
 .row-align {
     flex-direction: row;
     justify-content: space-between;
-}
-
-.asd {
-    width: 10%;
-    border-top-left-radius: 1.5px;
-    border-bottom-left-radius: 1.5px;
-    border-top-right-radius: 1.5px;
-    border-bottom-right-radius: 1.5px;
-    margin-left: 1px;
-    margin-right: 1px;
-    margin-top: 0;
-    margin-bottom: 0;
 }
 
 .header-button-1 {
@@ -55,4 +45,9 @@
     margin-right: 0;
     margin-top: 0;
     margin-bottom: 4px;
+}
+
+.dont-display {
+    visibility: hidden;
+    display: none;
 }
