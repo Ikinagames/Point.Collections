@@ -77,6 +77,11 @@ namespace Point.Collections
             m_OnCompleted = null;
         }
 
+        public void SetValue(object t)
+        {
+            OnCompleteMethod(t);
+        }
+
         protected virtual void OnCompleteMethod(object obj)
         {
             m_Value = obj;
@@ -115,6 +120,7 @@ namespace Point.Collections
             }
         }
 
+        public Promise() { }
         public Promise(T obj)
         {
             m_Value = obj;
@@ -141,6 +147,11 @@ namespace Point.Collections
             m_Value = default(T);
             m_IsCompleted = false;
             m_OnCompleted = null;
+        }
+
+        public void SetValue(T t)
+        {
+            OnCompleteMethod(t);
         }
 
         private void OnCompleteMethod(object obj) => OnCompleteMethod((T)obj);

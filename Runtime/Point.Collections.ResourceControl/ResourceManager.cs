@@ -37,6 +37,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using System.Text.RegularExpressions;
 #if UNITY_ADDRESSABLES
 using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
@@ -712,10 +713,14 @@ namespace Point.Collections.ResourceControl
 
         internal sealed class AssetContainer
         {
+            private static Regex s_SubAssetRegex = new Regex(@"(.+)" + Regex.Escape("[") + "(.+)" + Regex.Escape("]"));
+            const string c_KeyFormat = "{0}[{1}]";
+
             private AssetBundle m_AssetBundle;
             //public string[] m_Dependencies = Array.Empty<string>();
             // 현재 로드된 에셋들의 HashMap 입니다.
             private Dictionary<AssetRuntimeKey, Promise<UnityEngine.Object>> m_Assets;
+
 
             public AssetBundle AssetBundle
             {
@@ -728,6 +733,55 @@ namespace Point.Collections.ResourceControl
             {
                 m_AssetBundle = assetBundle;
                 m_Assets = new Dictionary<AssetRuntimeKey, Promise<UnityEngine.Object>>();
+            }
+
+            private bool IsSubAssetKey(string value, out string key, out string subAssetName)
+            {
+                var match = s_SubAssetRegex.Match(value);
+                if (match.Success)
+                {
+                    key = match.Groups[1].Value;
+                    subAssetName = match.Groups[2].Value;
+                    return true;
+                }
+
+                key = null;
+                subAssetName = null;
+                return false;
+            }
+            private void RegisterAllAssets(string key)
+            {
+                var objs = m_AssetBundle.LoadAssetWithSubAssets(key);
+                for (int i = 0; i < objs.Length; i++)
+                {
+                    var tempPromise = new Promise<UnityEngine.Object>(objs[i]);
+                    AssetRuntimeKey
+                        tempHash = new AssetRuntimeKey(
+                            string.Format(c_KeyFormat, key, objs[i].name));
+
+                    m_Assets[tempHash] = tempPromise;
+                }
+            }
+            private void RegisterAllAssetsAsync(string key)
+            {
+                var request = m_AssetBundle.LoadAssetWithSubAssetsAsync(key);
+                request.completed += delegate
+                {
+                    var objs = request.allAssets;
+
+                    for (int i = 0; i < objs.Length; i++)
+                    {
+                        AssetRuntimeKey
+                            tempHash = new AssetRuntimeKey(
+                                string.Format(c_KeyFormat, key, objs[i].name));
+                        if (!m_Assets.TryGetValue(tempHash, out var tempPromise))
+                        {
+                            tempPromise = new Promise<UnityEngine.Object>(objs[i]);
+                            m_Assets[tempHash] = tempPromise;
+                        }
+                        else tempPromise.SetValue(objs[i]);
+                    }
+                };
             }
 
             public bool IsLoadedAsset(AssetRuntimeKey hash)
@@ -751,10 +805,20 @@ namespace Point.Collections.ResourceControl
                     return promise;
                 }
 
-                promise = new Promise<UnityEngine.Object>(m_AssetBundle.LoadAsset(key));
-                m_Assets.Add(hash, promise);
+                if (IsSubAssetKey(key, out string mainKey, out _))
+                {
+                    RegisterAllAssets(mainKey);
+                }
+                else
+                {
+                    RegisterAllAssets(key);
+                }
 
-                return promise;
+                return m_Assets[hash];
+                //promise = new Promise<UnityEngine.Object>(m_AssetBundle.LoadAsset(key));
+                //m_Assets.Add(hash, promise);
+
+                //return promise;
             }
             public Promise<UnityEngine.Object> LoadAssetAsync(string key)
             {
@@ -765,13 +829,27 @@ namespace Point.Collections.ResourceControl
                     return promise;
                 }
 
-                var request = m_AssetBundle.LoadAssetAsync(key);
-                AssetRequest assetRequest = AssetRequest.Initialize(request);
-                promise = new Promise<UnityEngine.Object>(assetRequest);
-                
+                if (IsSubAssetKey(key, out string mainKey, out _))
+                {
+                    RegisterAllAssetsAsync(mainKey);
+                }
+                else
+                {
+                    RegisterAllAssetsAsync(key);
+                }
+
+                promise = new Promise<UnityEngine.Object>();
                 m_Assets.Add(hash, promise);
 
                 return promise;
+
+                //var request = m_AssetBundle.LoadAssetAsync(key);
+                //AssetRequest assetRequest = AssetRequest.Initialize(request);
+                //promise = new Promise<UnityEngine.Object>(assetRequest);
+                
+                //m_Assets.Add(hash, promise);
+
+                //return promise;
             }
             public void UnloadAsset(string key)
             {
