@@ -22,7 +22,9 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
 {
@@ -293,6 +295,24 @@ namespace Point.Collections.Editor
         }
 
         #endregion
+    }
+    public abstract class PropertyDrawerUXML<T> : PropertyDrawer
+    {
+        public VisualElement RootVisualElement { get; private set; }
+
+        public override sealed VisualElement CreatePropertyGUI(SerializedProperty property)
+        {
+            if (RootVisualElement == null)
+            {
+                RootVisualElement = CreateVisualElement(property);
+                SetupVisualElement(property, RootVisualElement);
+            }
+
+            return RootVisualElement;
+        }
+
+        protected abstract VisualElement CreateVisualElement(SerializedProperty property);
+        protected virtual void SetupVisualElement(SerializedProperty property, VisualElement root) { }
     }
 }
 
