@@ -151,10 +151,16 @@ namespace Point.Collections.ResourceControl.Editor
                 };
                 bindLabelGUI.onGUIHandler += delegate
                 {
-                    for (int i = 0; i < m_SceneBindedLabelsProperty.arraySize; i++)
+                    using (new EditorGUI.IndentLevelScope())
+                    using (var change = new EditorGUI.ChangeCheckScope())
                     {
-                        var element = m_SceneBindedLabelsProperty.GetArrayElementAtIndex(i);
-                        EditorGUILayout.PropertyField(element);
+                        for (int i = 0; i < m_SceneBindedLabelsProperty.arraySize; i++)
+                        {
+                            var element = m_SceneBindedLabelsProperty.GetArrayElementAtIndex(i);
+                            EditorGUILayout.PropertyField(element);
+                        }
+
+                        if (change.changed) serializedObject.ApplyModifiedProperties();
                     }
                 };
 #else

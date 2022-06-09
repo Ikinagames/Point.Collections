@@ -121,7 +121,7 @@ namespace Point.Collections.Editor
         {
             var sceneAssetProperty = GetSceneAssetProperty(property);
             // Add an additional line and check if property.isExpanded
-            var lines = property.isExpanded ? sceneAssetProperty.objectReferenceValue != null ? 2 : 2 : 1;
+            var lines = property.isExpanded ? sceneAssetProperty.objectReferenceValue != null ? 2 : 1 : 1;
             // If this oneliner is confusing you - it does the same as
             //var line = 3; // Fully expanded and with info
             //if(sceneAssetProperty.objectReferenceValue == null) line = 2;

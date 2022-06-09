@@ -29,7 +29,7 @@ using System;
 namespace Point.Collections
 {
     [Serializable]
-    public struct AssetBundleName : IEquatable<AssetBundleName>
+    public struct AssetBundleName : IEmpty, IEquatable<AssetBundleName>, IEquatable<string>
     {
         [UnityEngine.SerializeField]
         private UnityEngine.PropertyName m_Name;
@@ -39,6 +39,22 @@ namespace Point.Collections
             m_Name = new UnityEngine.PropertyName(name);
         }
 
+        public bool IsEmpty() => m_Name.Equals(string.Empty);
+
+        public override int GetHashCode() => m_Name.GetHashCode();
+        public override string ToString() => m_Name.ToString();
+
         public bool Equals(AssetBundleName other) => m_Name.Equals(other.m_Name);
+        public bool Equals(string other) => m_Name.Equals(other);
+        public override bool Equals(object obj)
+        {
+            if (obj is AssetBundleName t0)
+            {
+                return Equals(t0);
+            }
+            else if (obj is string t1) return Equals(t1);
+
+            return false;
+        }
     }
 }

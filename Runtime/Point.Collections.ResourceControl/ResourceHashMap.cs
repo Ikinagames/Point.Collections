@@ -47,8 +47,8 @@ namespace Point.Collections.ResourceControl
         [Serializable]
         public sealed class SceneBindedLabel
         {
-            [SerializeField] private SceneReference m_Scene;
             [SerializeField] private AssetLabelReference m_Label;
+            [SerializeField] private SceneReference m_Scene;
 
             [NonSerialized] private bool m_IsLoaded;
             [NonSerialized] AsyncOperationHandle<IList<IResourceLocation>> m_LocationOperation;
