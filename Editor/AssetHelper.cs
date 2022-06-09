@@ -311,6 +311,21 @@ namespace Point.Collections.Editor
             string path = AssetDatabase.GUIDToAssetPath(guid);
             return AssetDatabase.LoadAssetAtPath<T>(path);
         }
+
+        public static string GetSelectionFolderPath()
+        {
+            string path = AssetDatabase.GetAssetPath(Selection.activeObject);
+            if (path.IsNullOrEmpty())
+            {
+                path = "Assets/";
+            }
+            else if (!AssetDatabase.IsValidFolder(path))
+            {
+                path = path.Replace(Path.GetFileName(path), string.Empty);
+            }
+
+            return path;
+        }
     }
 
     public enum BuildStatus
