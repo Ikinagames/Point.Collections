@@ -6,8 +6,16 @@
     <ui:VisualElement name="Spacing" style="height: 5px;" />
     <ui:VisualElement class="content-container">
         <ui:VisualElement style="flex-direction: row;">
-            <uie:ToolbarSearchField focusable="true" name="SearchField" style="margin-left: 4px; width: 80%;" />
+            <uie:ToolbarSearchField focusable="true" name="SearchField" style="margin-left: 4px; width: 98%;" />
         </ui:VisualElement>
-        <ui:IMGUIContainer name="AssetLists" />
+        <ui:VisualElement name="AssetContainer" class="content-container">
+            <ui:VisualElement name="HeaderContainer" class="header-list-1" style="flex-direction: row; align-items: center; justify-content: flex-end; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(118, 118, 118); border-right-color: rgb(118, 118, 118); border-top-color: rgb(118, 118, 118); border-bottom-color: rgb(118, 118, 118);">
+                <ui:Label text="Binded to {0}" display-tooltip-when-elided="true" name="Label" style="font-size: 15px; -unity-text-align: middle-center; width: 76%;" />
+                <ui:Button text="+" display-tooltip-when-elided="true" name="AddBtt" class="header-button-1" style="width: 10%;" />
+                <ui:Button text="-" display-tooltip-when-elided="true" name="RemoveBtt" class="header-button-1" />
+            </ui:VisualElement>
+            <ui:Button text="Rebuild" display-tooltip-when-elided="true" name="RebuildBtt" />
+            <ui:VisualElement name="Contents" style="padding-left: 12px;" />
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

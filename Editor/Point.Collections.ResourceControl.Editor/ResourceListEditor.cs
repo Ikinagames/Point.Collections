@@ -20,6 +20,7 @@
 #define UNITYENGINE
 
 using Point.Collections.Editor;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEditor;
@@ -42,11 +43,20 @@ namespace Point.Collections.ResourceControl.Editor
         private new ResourceList target => base.target as ResourceList;
 
         VisualTreeAsset VisualTreeAsset { get; set; }
+        bool IsBindedToCatalog
+        {
+            get
+            {
+                AddressableAssetGroup addressableAssetGroup = GetGroup(m_GroupNameProperty);
+                if (addressableAssetGroup == null) return false;
+                return true;
+            }
+        }
 
         private SerializedProperty m_GroupProperty, m_GroupNameProperty;
         private SerializedProperty m_AssetListProperty;
 
-        private bool m_IsBindedToCatalog = false;
+        //private bool m_IsBindedToCatalog = false;
         private bool m_RequireRebuild = false;
 
         private string m_SearchString;
@@ -66,13 +76,13 @@ namespace Point.Collections.ResourceControl.Editor
             AddressableAssetGroup addressableAssetGroup = GetGroup(m_GroupNameProperty);
             if (addressableAssetGroup == null)
             {
-                m_IsBindedToCatalog = false;
+                //m_IsBindedToCatalog = false;
                 m_RequireRebuild = false;
 
                 return;
             }
 
-            m_IsBindedToCatalog = true;
+            //m_IsBindedToCatalog = true;
             if (!Validate(target))
             {
                 m_RequireRebuild = true;
@@ -139,138 +149,129 @@ namespace Point.Collections.ResourceControl.Editor
                 Validate();
             });
 
-            IMGUIContainer iMGUIContainer = tree.Q<IMGUIContainer>("AssetLists");
-            iMGUIContainer.onGUIHandler += GUI;
-
             return tree;
         }
+        protected override void SetupVisualElement(VisualElement root)
+        {
+            PropertyField groupField = root.Q<PropertyField>("GroupName");
+            VisualElement 
+                assetContainer = root.Q("AssetContainer"),
+                headerContainer = assetContainer.Q("HeaderContainer"),
+                contents = assetContainer.Q("Contents");
+            Label headerLabel = headerContainer.Q<Label>("Label");
+            Button rebuildBtt = assetContainer.Q<Button>("RebuildBtt");
+            Button
+                addBtt = headerContainer.Q<Button>("AddBtt"),
+                removeBtt = headerContainer.Q<Button>("RemoveBtt");
+
+            Action onGroupValueChanged = delegate
+            {
+                if (IsBindedToCatalog)
+                {
+                    var groupName = SerializedPropertyHelper.ReadFixedString128Bytes(m_GroupNameProperty);
+                    headerLabel.text = $"Binded to {groupName}";
+
+                    rebuildBtt.RemoveFromClassList("hide");
+                    addBtt.SetEnabled(false);
+                    removeBtt.SetEnabled(false);
+                }
+                else
+                {
+                    headerLabel.text = "Assets";
+
+                    rebuildBtt.AddToClassList("hide");
+                    addBtt.SetEnabled(true);
+                    removeBtt.SetEnabled(true);
+                }
+            };
+            onGroupValueChanged.Invoke();
+
+            groupField.RegisterValueChangeCallback(t => onGroupValueChanged.Invoke());
+            rebuildBtt.clicked += Rebuild;
+
+            addBtt.clicked += delegate
+            {
+                int index = m_AssetListProperty.arraySize;
+                m_AssetListProperty.InsertArrayElementAtIndex(index);
+
+                var prop = m_AssetListProperty.GetArrayElementAtIndex(index);
+                PropertyField field = new PropertyField(prop);
+                contents.Add(field);
+                field.BindProperty(prop);
+
+                m_AssetListProperty.serializedObject.ApplyModifiedProperties();
+
+                if (index == 0)
+                {
+                    removeBtt.SetEnabled(true);
+                }
+            };
+            removeBtt.clicked += delegate
+            {
+                int index = m_AssetListProperty.arraySize - 1;
+                m_AssetListProperty.DeleteArrayElementAtIndex(index);
+
+                var ve = contents.ElementAt(index);
+                ve.RemoveFromHierarchy();
+
+                m_AssetListProperty.serializedObject.ApplyModifiedProperties();
+
+                if (index == 0)
+                {
+                    removeBtt.SetEnabled(false);
+                }
+            };
+
+            for (int i = 0; i < m_AssetListProperty.arraySize; i++)
+            {
+                PropertyField propertyField
+                    = new PropertyField(m_AssetListProperty.GetArrayElementAtIndex(i));
+                //propertyField.userData = new ElementData
+                //{
+
+                //};
+
+                contents.Add(propertyField);
+            }
+        }
+
+        //private struct ElementData
+        //{
+        //    public string bin
+        //}
+
         private void OnSearchFieldStringChanged(ChangeEvent<string> value)
         {
             m_SearchString = value.newValue;
-        }
 
-        private void NotBindedGUI()
-        {
-            using (new CoreGUI.BoxBlock(Color.gray))
+            VisualElement
+                assetContainer = RootVisualElement.Q("AssetContainer"),
+                contents = assetContainer.Q("Contents");
+
+            if (m_SearchString.IsNullOrEmpty())
             {
-                m_AssetListProperty.isExpanded =
-                        CoreGUI.LabelToggle(m_AssetListProperty.isExpanded, m_AssetListProperty.displayName, 13, TextAnchor.MiddleLeft);
-
-                if (!m_AssetListProperty.isExpanded) return;
-
-                CoreGUI.Line();
-
-                using (new EditorGUI.IndentLevelScope())
+                for (int i = 0; i < contents.childCount; i++)
                 {
-                    for (int i = 0; i < m_AssetListProperty.arraySize; i++)
-                    {
-                        var prop = m_AssetListProperty.GetArrayElementAtIndex(i);
-                        string displayName;
-                        {
-                            var refAsset = target.GetAddressableAsset(i);
-
-                            if (refAsset.EditorAsset != null)
-                            {
-                                displayName = refAsset.FriendlyName.IsNullOrEmpty() ?
-                                    refAsset.EditorAsset.name : refAsset.FriendlyName;
-
-                                displayName += $" ({AssetDatabase.GetAssetPath(refAsset.EditorAsset)})";
-                            }
-                            else displayName = prop.displayName;
-                        }
-
-                        if (!ElementCheck(prop.Copy(), displayName))
-                        {
-                            continue;
-                        }
-
-                        prop.isExpanded = EditorGUILayout.Foldout(prop.isExpanded, displayName, true);
-                        if (!prop.isExpanded) continue;
-
-                        using (new EditorGUI.IndentLevelScope())
-                        {
-                            prop.Next(true);
-                            EditorGUILayout.PropertyField(prop);
-                            prop.Next(false);
-                            EditorGUILayout.PropertyField(prop);
-                        }
-                        //
-                    }
-
+                    var element = contents.ElementAt(i) as PropertyField;
+                    element.RemoveFromClassList("hide");
                 }
-            }
-
-            //EditorGUILayout.PropertyField(m_AssetListProperty);
-        }
-        private void GUI()
-        {
-            if (!m_IsBindedToCatalog)
-            {
-                NotBindedGUI();
                 return;
             }
 
-            var groupName = SerializedPropertyHelper.ReadFixedString128Bytes(m_GroupNameProperty);
-            CoreGUI.Label($"Binded to {groupName}", 15, TextAnchor.MiddleCenter);
-
-            using (new CoreGUI.BoxBlock(Color.gray))
+            for (int i = 0; i < contents.childCount; i++)
             {
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    m_AssetListProperty.isExpanded =
-                        CoreGUI.LabelToggle(m_AssetListProperty.isExpanded, m_AssetListProperty.displayName, 13, TextAnchor.MiddleLeft);
-                    //CoreGUI.Label(m_AssetListProperty.displayName, 13, TextAnchor.MiddleLeft);
+                var element = contents.ElementAt(i) as PropertyField;
+                var prop = serializedObject.FindProperty(element.bindingPath);
 
-                    if (GUILayout.Button("Rebuild", GUILayout.Width(100)))
-                    {
-                        Rebuild();
-                        m_RequireRebuild = false;
-                    }
+                prop.Next(true);
+                string friendlyName = prop.stringValue;
+                if (!friendlyName.ToLowerInvariant().Contains(m_SearchString.ToLowerInvariant()))
+                {
+                    element.AddToClassList("hide");
                 }
-
-                if (!m_AssetListProperty.isExpanded) return;
-
-                CoreGUI.Line();
-
-                using (new EditorGUI.IndentLevelScope())
+                else
                 {
-                    for (int i = 0; i < m_AssetListProperty.arraySize; i++)
-                    {
-                        var prop = m_AssetListProperty.GetArrayElementAtIndex(i);
-                        string displayName;
-                        {
-                            var refAsset = target.GetAddressableAsset(i);
-
-                            if (refAsset.EditorAsset != null)
-                            {
-                                displayName = refAsset.FriendlyName.IsNullOrEmpty() ?
-                                    refAsset.EditorAsset.name : refAsset.FriendlyName;
-
-                                displayName += $" ({AssetDatabase.GetAssetPath(refAsset.EditorAsset)})";
-                            }
-                            else displayName = prop.displayName;
-                        }
-
-                        if (!ElementCheck(prop.Copy(), displayName))
-                        {
-                            continue;
-                        }
-
-                        prop.isExpanded = EditorGUILayout.Foldout(prop.isExpanded, displayName, true);
-                        if (!prop.isExpanded) continue;
-
-                        using (new EditorGUI.IndentLevelScope())
-                        {
-                            prop.Next(true);
-                            EditorGUILayout.PropertyField(prop);
-                            prop.Next(false);
-                            using (new EditorGUI.DisabledGroupScope(true))
-                            {
-                                EditorGUILayout.PropertyField(prop);
-                            }
-                        }
-                        //
-                    }
+                    element.RemoveFromClassList("hide");
                 }
             }
         }
@@ -296,108 +297,6 @@ namespace Point.Collections.ResourceControl.Editor
 
             return false;
         }
-
-        //protected override void OnInspectorGUIContents()
-        //{
-        //    bool catalogChanged = false;
-        //    using (var changed = new EditorGUI.ChangeCheckScope())
-        //    {
-        //        EditorGUILayout.PropertyField(m_GroupProperty);
-        //        catalogChanged = changed.changed;
-
-        //        if (catalogChanged) Validate();
-        //    }
-
-        //    using (var changed = new EditorGUI.ChangeCheckScope())
-        //    {
-        //        target.name = EditorGUILayout.DelayedTextField("Name", target.name);
-
-        //        if (changed.changed)
-        //        {
-        //            EditorUtility.SetDirty(target);
-        //            EditorUtility.SetDirty(ResourceHashMap.Instance);
-        //            AssetDatabase.ImportAsset(
-        //                AssetDatabase.GetAssetPath(ResourceHashMap.Instance), 
-        //                ImportAssetOptions.ForceUpdate);
-        //        }
-        //    }
-
-        //    if (m_RequireRebuild)
-        //    {
-        //        EditorGUILayout.Space();
-        //        if (GUILayout.Button("!! Require Rebuild !!"))
-        //        {
-        //             Rebuild();
-        //             m_RequireRebuild = false;
-        //        }
-        //    }
-
-        //    EditorGUILayout.Space();
-        //    if (m_IsBindedToCatalog)
-        //    {
-        //        var groupName = SerializedPropertyHelper.ReadFixedString128Bytes(m_GroupNameProperty);
-        //        CoreGUI.Label($"Binded to {groupName}", 15, TextAnchor.MiddleCenter);
-
-        //        using (new CoreGUI.BoxBlock(Color.gray))
-        //        {
-        //            using (new EditorGUILayout.HorizontalScope())
-        //            {
-        //                CoreGUI.Label(m_AssetListProperty.displayName, 13, TextAnchor.MiddleLeft);
-
-        //                if (GUILayout.Button("Rebuild", GUILayout.Width(100)))
-        //                {
-        //                    Rebuild();
-        //                    m_RequireRebuild = false;
-        //                }
-        //            }
-
-        //            CoreGUI.Line();
-
-        //            using (new EditorGUI.IndentLevelScope())
-        //            {
-        //                for (int i = 0; i < m_AssetListProperty.arraySize; i++)
-        //                {
-        //                    var prop = m_AssetListProperty.GetArrayElementAtIndex(i);
-        //                    string displayName;
-        //                    {
-        //                        var refAsset = target.GetAddressableAsset(i);
-
-        //                        if (refAsset.EditorAsset != null)
-        //                        {
-        //                            displayName = refAsset.FriendlyName.IsNullOrEmpty() ?
-        //                                refAsset.EditorAsset.name : refAsset.FriendlyName;
-
-        //                            displayName += $" ({AssetDatabase.GetAssetPath(refAsset.EditorAsset)})";
-        //                        }
-        //                        else displayName = prop.displayName;
-        //                    }
-
-        //                    prop.isExpanded = EditorGUILayout.Foldout(prop.isExpanded, displayName, true);
-        //                    if (!prop.isExpanded) continue;
-
-        //                    using (new EditorGUI.IndentLevelScope())
-        //                    {
-        //                        prop.Next(true);
-        //                        EditorGUILayout.PropertyField(prop);
-        //                        prop.Next(false);
-        //                        using (new EditorGUI.DisabledGroupScope(true))
-        //                        {
-        //                            EditorGUILayout.PropertyField(prop);
-        //                        }
-        //                    }
-        //                    //
-        //                }
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-        //        EditorGUILayout.PropertyField(m_AssetListProperty);
-        //    }
-
-        //    serializedObject.ApplyModifiedProperties();
-        //    //base.OnInspectorGUIContents();
-        //}
 
         #region Utils
 
