@@ -24,6 +24,7 @@ using System.IO;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
+using System.Text.RegularExpressions;
 #endif
 
 namespace Point.Collections
@@ -74,9 +75,11 @@ namespace Point.Collections
         }
 #endif
 
-        public AssetPathField(string path)
+        public AssetPathField(string path) : this(path, string.Empty) { }
+        public AssetPathField(string path, string subAssetName)
         {
             p_AssetPath = path;
+            p_SubAssetName = subAssetName;
         }
 
 #if UNITY_EDITOR
@@ -124,6 +127,15 @@ namespace Point.Collections
         public bool IsEmpty() => p_AssetPath.IsNullOrEmpty();
         public bool Equals(AssetPathField other) => p_AssetPath.Equals(other.p_AssetPath);
 
+        public static AssetPathField Parse(string value)
+        {
+            var match = Regex.Match(value, @"(.+)" + Regex.Escape("[") + @"(.+)" + Regex.Escape("]"));
+            if (match.Success)
+            {
+                return new AssetPathField(match.Groups[1].Value, match.Groups[2].Value);
+            }
+            return new AssetPathField(string.Empty);
+        }
         public override string ToString()
         {
             const string c_Format = "{0}[{1}]";

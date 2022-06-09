@@ -27,6 +27,7 @@ using System.Runtime.InteropServices;
 using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
+using System.Text.RegularExpressions;
 
 namespace Point.Collections.Editor
 {
@@ -519,7 +520,26 @@ namespace Point.Collections.Editor
         }
         public static bool IsInArray(this SerializedProperty t)
         {
-            return PropertyDrawerHelper.IsPropertyInArray(t);
+            if (t == null) return false;
+
+            return t.propertyPath.Contains(".Array.data[");
+        }
+        public static int GetArrayIndex(this SerializedProperty t)
+        {
+            if (!IsInArray(t)) return -1;
+
+            var match 
+                = Regex.Match(t.propertyPath, @".+data" + Regex.Escape("[") + @"(.+)" + Regex.Escape("]"));
+            if (!match.Success)
+            {
+                return -1;
+            }
+
+            if (!int.TryParse(match.Groups[1].Value, out int index))
+            {
+                return -1;
+            }
+            return index;
         }
 
         public static SerializedProperty GetParent(this SerializedProperty t)

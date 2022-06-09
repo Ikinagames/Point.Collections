@@ -241,7 +241,7 @@ namespace Point.Collections
             {
                 objRoot.Add(
                     new XElement(
-                        ConvertToXml(elementName, fieldInfo.GetValue(obj))
+                        XmlParser.ConvertToXml(elementName, fieldInfo.GetValue(obj))
                         //elementName,
                         //fieldInfo.GetValue(obj).ToString()
                         )
@@ -249,7 +249,7 @@ namespace Point.Collections
                 return;
             }
 
-            element.Value = ConvertToXml(elementName, fieldInfo.GetValue(obj)).Value;
+            element.Value = XmlParser.ConvertToXml(elementName, fieldInfo.GetValue(obj)).Value;
         }
         private static void SetValue(XElement objRoot, FieldInfo fieldInfo, object obj)
         {
@@ -275,7 +275,7 @@ namespace Point.Collections
             if (element == null)
             {
                 objRoot.Add(
-                    ConvertToXml(elementName, fieldInfo.GetValue(obj))
+                    XmlParser.ConvertToXml(elementName, fieldInfo.GetValue(obj))
 
                     //new XElement(
                     //    elementName,
@@ -287,7 +287,7 @@ namespace Point.Collections
                 return;
             }
 
-            object value = ConvertToObject(fieldInfo.FieldType, element);
+            object value = XmlParser.ConvertToObject(fieldInfo.FieldType, element);
             //Debug.Log($"{fieldInfo.Name}={value} :: loaded");
 
             fieldInfo.SetValue(obj, value);
@@ -350,7 +350,7 @@ namespace Point.Collections
             if (value == null)
             {
                 //value = new XElement(name, defaultValue.ToString());
-                value = ConvertToXml(name, defaultValue);
+                value = XmlParser.ConvertToXml(name, defaultValue);
                 element.Add(value);
                 isModified = true;
 
@@ -362,7 +362,7 @@ namespace Point.Collections
                 SaveDocument(doc, true);
             }
 
-            T result = (T)ConvertToObject(TypeHelper.TypeOf<T>.Type, value);
+            T result = (T)XmlParser.ConvertToObject(TypeHelper.TypeOf<T>.Type, value);
             //Debug.Log($"loaded result {result}");
             return result;
         }
@@ -382,7 +382,7 @@ namespace Point.Collections
             if (value == null)
             {
                 //value = new XElement(name, defaultValue.ToString());
-                value = ConvertToXml(name, defaultValue);
+                value = XmlParser.ConvertToXml(name, defaultValue);
                 element.Add(value);
                 isModified = true;
 
@@ -394,7 +394,7 @@ namespace Point.Collections
                 SaveDocument(doc, false);
             }
 
-            T result = (T)ConvertToObject(TypeHelper.TypeOf<T>.Type, value);
+            T result = (T)XmlParser.ConvertToObject(TypeHelper.TypeOf<T>.Type, value);
             //Debug.Log($"loaded result {result}");
             return result;
         }
@@ -415,47 +415,8 @@ namespace Point.Collections
             }
             return false;
         }
-        private static XElement ConvertToXml(string elementName, object obj)
-        {
-            if (obj is IDictionary dictionary)
-            {
-                XElement root = new XElement(elementName);
-                var iter = dictionary.GetEnumerator();
-                while (iter.MoveNext())
-                {
-                    XElement item = new XElement(iter.Key.ToString(), iter.Value.ToString());
-                    root.Add(item);
-                }
-
-                return root;
-            }
-
-            return new XElement(elementName, obj.ToString());
-        }
-        private static object ConvertToObject(Type type, XElement xml)
-        {
-            if (TypeHelper.InheritsFrom(type, TypeHelper.TypeOf<IDictionary>.Type))
-            {
-                IDictionary dictionary = (IDictionary)Activator.CreateInstance(type);
-                Type 
-                    keyType = type.GenericTypeArguments[0],
-                    valueType = type.GenericTypeArguments[1];
-
-                foreach (var item in xml.Elements())
-                {
-                    object 
-                        key = Convert.ChangeType(item.Name.ToString(), keyType),
-                        value = Convert.ChangeType(item.Value, valueType);
-
-                    dictionary.Add(key, value);
-                }
-
-                return dictionary;
-            }
-
-            return Convert.ChangeType(xml.Value, type);
-        }
     }
+
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public sealed class XmlSettingsAttribute : Attribute
     {

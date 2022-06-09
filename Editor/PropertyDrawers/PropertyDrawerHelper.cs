@@ -33,12 +33,6 @@ namespace Point.Collections.Editor
         public static readonly float lineHeight = EditorGUIUtility.singleLineHeight;
         public static readonly float paddedLine = lineHeight + PAD_SIZE;
 
-        public static bool IsPropertyInArray(SerializedProperty prop)
-        {
-            if (prop == null) return false;
-
-            return prop.propertyPath.Contains(".Array.data[");
-        }
         public static SerializedProperty GetParentArrayOfProperty(SerializedProperty prop, out int index)
         {
             index = -1;
