@@ -26,7 +26,10 @@ using UnityEditor.AnimatedValues;
 using UnityEngine;
 #if UNITY_MATHEMATICS
 using Unity.Mathematics;
+using UnityEngine.UIElements;
 #endif
+
+using VE = UnityEngine.UIElements.VisualElement;
 
 namespace Point.Collections.Editor
 {
@@ -696,6 +699,31 @@ namespace Point.Collections.Editor
         }
 
         #endregion
+
+        public struct VisualElement
+        {
+            public static VE Space(float value, LengthUnit lengthUnit)
+            {
+                VE v = new VE();
+                v.style.height = new StyleLength(new Length(value, lengthUnit));
+
+                return v;
+            }
+
+            public static Label Label(string text, float size)
+            {
+                Label v = new Label(text);
+                v.style.fontSize = size;
+
+                return v;
+            }
+            public static Label Label(string text)
+            {
+                Label v = new Label(text);
+
+                return v;
+            }
+        }
     }
 }
 

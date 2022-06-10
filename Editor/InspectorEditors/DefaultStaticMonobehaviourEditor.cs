@@ -24,7 +24,7 @@ using UnityEditor;
 namespace Point.Collections.Editor
 {
     [CustomEditor(typeof(StaticMonobehaviour<>), true)]
-    internal sealed class DefaultStaticMonobehaviourEditor : InspectorEditor<UnityEngine.MonoBehaviour>
+    internal sealed class DefaultStaticMonobehaviourEditor : InspectorEditorUXML<UnityEngine.MonoBehaviour>
     {
     }
 }

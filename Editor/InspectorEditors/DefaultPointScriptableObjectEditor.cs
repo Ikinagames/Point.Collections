@@ -24,7 +24,7 @@ using UnityEditor;
 namespace Point.Collections.Editor
 {
     [CustomEditor(typeof(PointScriptableObject), true)]
-    internal sealed class DefaultPointScriptableObjectEditor : InspectorEditor<PointScriptableObject>
+    internal sealed class DefaultPointScriptableObjectEditor : InspectorEditorUXML<PointScriptableObject>
     {
     }
 }

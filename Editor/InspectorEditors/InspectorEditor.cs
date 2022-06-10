@@ -28,7 +28,6 @@ namespace Point.Collections.Editor
     public abstract class InspectorEditor<T> : InspectorEditorBase<T>
         where T : UnityEngine.Object
     {
-        public virtual string GetHeaderName() => ObjectNames.NicifyVariableName(TypeHelper.ToString(target.GetType()));
         public override sealed void OnInspectorGUI()
         {
             EditorUtilities.StringHeader(GetHeaderName());
@@ -50,6 +49,7 @@ namespace Point.Collections.Editor
         // https://forum.unity.com/threads/quick-transition-tutorial.1203841/
 
         public VisualElement RootVisualElement { get; private set; }
+        protected virtual bool ShowEditorScript => false;
 
         public override sealed VisualElement CreateInspectorGUI()
         {
@@ -64,7 +64,39 @@ namespace Point.Collections.Editor
             return RootVisualElement;
         }
 
-        protected abstract VisualElement CreateVisualElement();
+        protected virtual VisualElement CreateVisualElement()
+        {
+            VisualElement root = new VisualElement();
+            var prop = serializedObject.GetIterator();
+            prop.NextVisible(true);
+
+            root.Add(CoreGUI.VisualElement.Label(GetHeaderName(), 20));
+
+            var scriptProp = prop.Copy();
+            PropertyField field = new PropertyField(scriptProp);
+            root.Add(field);
+
+            if (ShowEditorScript)
+            {
+                ObjectField objectField = new ObjectField("Editor Script");
+                objectField.objectType = TypeHelper.TypeOf<MonoScript>.Type;
+
+                objectField.value = ScriptUtilities.FindEditorScriptFromClassName<T>();
+                root.Add(objectField);
+            }
+
+            root.Add(CoreGUI.VisualElement.Space(10, LengthUnit.Pixel));
+
+            while (prop.NextVisible(false))
+            {
+                var element = prop.Copy();
+                field = new PropertyField(element);
+
+                root.Add(field);
+            }
+
+            return root;
+        }
         protected virtual void SetupVisualElement(VisualElement root) { }
 
         public TElement Q<TElement>(string name = null, string className = null)

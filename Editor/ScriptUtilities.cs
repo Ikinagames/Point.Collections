@@ -103,7 +103,10 @@ namespace Point.Collections.Editor
 
         public static MonoScript FindScriptFromClassName(string className)
         {
-            var scriptGUIDs = AssetDatabase.FindAssets($"t:script {className}");
+            const string c_FindFormat = "t:script {0}";
+
+            var scriptGUIDs = AssetDatabase.FindAssets(
+                string.Format(c_FindFormat, className));
 
             if (scriptGUIDs.Length == 0)
                 return null;
@@ -118,6 +121,28 @@ namespace Point.Collections.Editor
             }
 
             return null;
+        }
+        public static MonoScript FindEditorScriptFromClassName(string className)
+        {
+            const string c_EditorNameFormat = "{0}Editor";
+
+            string name = string.Format(c_EditorNameFormat, className);
+            return FindScriptFromClassName(name);
+        }
+        public static MonoScript FindEditorScriptFromClassName<T>()
+        {
+            const string c_EditorNameFormat = "{0}Editor";
+
+            string name = string.Format(c_EditorNameFormat, TypeHelper.TypeOf<T>.Name);
+            return FindScriptFromClassName(name);
+        }
+        public static MonoScript FindPropertyDrawerScriptFromClassName<T>()
+        {
+            const string 
+                c_PropertyNameFormat = "{0}PropertyDrawer";
+
+            string name = string.Format(c_PropertyNameFormat, TypeHelper.TypeOf<T>.Name);
+            return FindScriptFromClassName(name);
         }
     }
 }

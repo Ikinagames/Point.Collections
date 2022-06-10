@@ -52,6 +52,7 @@ namespace Point.Collections.Editor
             }
         }
 
+        public virtual string GetHeaderName() => ObjectNames.NicifyVariableName(TypeHelper.ToString(target.GetType()));
         protected override sealed void OnHeaderGUI()
         {
             EditorUtilities.StringRich("Copyright 2022 Ikinagames. All rights reserved.", 11, true);

@@ -24,12 +24,11 @@ using UnityEditor;
 namespace Point.Collections.Editor
 {
     [CustomEditor(typeof(PointSettings))]
-    public sealed class PointSettingsEditor : InspectorEditor<PointSettings>
+    public sealed class PointSettingsEditor : InspectorEditorUXML<PointSettings>
     {
-        protected override void OnInspectorGUIContents()
-        {
-            base.OnInspectorGUIContents();
-        }
+        protected override bool ShowEditorScript => true;
+
+        protected override bool ShouldHideOpenButton() => true;
     }
 }
 

@@ -20,11 +20,13 @@
 #define UNITYENGINE
 
 using UnityEditor;
+using UnityEditor.UIElements;
+using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
 {
     [CustomEditor(typeof(PointMonobehaviour), true)]
-    internal sealed class DefaultPointMonobehaviourEditor : InspectorEditor<PointMonobehaviour>
+    internal sealed class DefaultPointMonobehaviourEditor : InspectorEditorUXML<PointMonobehaviour>
     {
     }
 }

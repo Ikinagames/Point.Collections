@@ -33,6 +33,9 @@ using UnityEditor;
 
 namespace Point.Collections.Editor
 {
+    /// <summary>
+    /// <seealso cref="EditorPrefs"/>
+    /// </summary>
     public static class EditorValues
     {
         private const string
