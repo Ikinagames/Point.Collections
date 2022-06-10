@@ -824,13 +824,34 @@ namespace Point.Collections.Editor
                     t.managedReferenceValue = Activator.CreateInstance(t.GetFieldInfo().FieldType);
                     break;
                 case SerializedPropertyType.Generic:
+                    if (t.IsInArray())
+                    {
+                        int index = t.GetArrayIndex();
+                        FieldInfo fieldInfo = t.GetFieldInfo();
+                        Type elementType = fieldInfo.FieldType.GetElementType();
+                        
+                        Array array = t.GetParent().GetTargetObject() as Array;
+                        
+                        if (array.Length <= index)
+                        {
+                            t.serializedObject.ApplyModifiedProperties();
+
+                            array = t.GetParent().GetTargetObject() as Array;
+                        }
+                        object defaultValue = Activator.CreateInstance(elementType);
+                        array.SetValue(defaultValue, index);
+
+                        //$"{index} :: {elementType.Name} :: {t.GetParent().propertyPath} :: {index} : {array.Length}".ToLog();
+                        break;
+                    }
+
                     //FieldInfo field = t.GetFieldInfo();
                     //object defaultObj = Activator.CreateInstance(field.FieldType.GetElementType());
 
                     ////var parent = t.GetParent().GetTargetObject();
                     //field.SetValue(parent, Activator.CreateInstance(field.FieldType.GetElementType()));
                     //break;
-
+                    throw new NotImplementedException($"{t.propertyType}");
                 case SerializedPropertyType.LayerMask:
                 case SerializedPropertyType.ArraySize:
                 case SerializedPropertyType.Character:

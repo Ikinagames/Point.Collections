@@ -24,8 +24,9 @@ using UnityEditor;
 namespace Point.Collections.Editor
 {
     [CustomEditor(typeof(AnimationEventBinder), true)]
-    internal sealed class AnimationEventBinderEditor : InspectorEditor<AnimationEventBinder>
+    internal sealed class AnimationEventBinderEditor : InspectorEditorUXML<AnimationEventBinder>
     {
+        protected override bool ShouldHideOpenButton() => true;
     }
 }
 

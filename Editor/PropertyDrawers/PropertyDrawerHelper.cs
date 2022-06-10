@@ -91,8 +91,14 @@ namespace Point.Collections.Editor
             string path = prop.propertyPath;
             string[] elements = path.Split('.');
 
+            int reduceCount = 1;
+            if (elements[elements.Length - 1].StartsWith("data["))
+            {
+                reduceCount = 2;
+            }
+
             string parentPath = string.Empty;
-            for (int i = 0; i < elements.Length - 1; i++)
+            for (int i = 0; i < elements.Length - reduceCount; i++)
             {
                 if (!string.IsNullOrEmpty(parentPath))
                 {

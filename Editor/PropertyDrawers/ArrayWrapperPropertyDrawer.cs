@@ -65,6 +65,8 @@ namespace Point.Collections.Editor
                 property.InsertArrayElementAtIndex(index);
                 var prop = property.GetArrayElementAtIndex(index);
 
+                prop.SetDefaultValue();
+
                 PropertyField field = new PropertyField(prop);
                 field.BindProperty(prop);
                 contentContainer.Add(field);

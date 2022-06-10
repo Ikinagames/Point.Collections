@@ -757,6 +757,7 @@ namespace Point.Collections.Editor
 
                 contentContainer = new VE();
                 contentContainer.AddToClassList("content-container");
+                contentContainer.style.paddingLeft = 17;
                 {
 
                 }
