@@ -27,21 +27,19 @@
 
 using System;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
 {
     [CustomPropertyDrawer(typeof(AssetPathField), true)]
-    public sealed class AssetPathFieldPropertyDrawer : PropertyDrawer<AssetPathField>
+    public sealed class AssetPathFieldPropertyDrawer : PropertyDrawerUXML<AssetPathField>
     {
         private const string c_AssetPathField = "p_AssetPath", c_AssetGUIDField = "p_AssetGUID";
         private static Type s_GenericType = typeof(AssetPathField<>);
 
-        protected override float PropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            return CoreGUI.GetLineHeight(1);
-        }
-        protected override void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
+        protected override VisualElement CreateVisualElement(SerializedProperty property)
         {
             SerializedProperty pathProperty = property.FindPropertyRelative(c_AssetPathField);
             SerializedProperty guidProperty = property.FindPropertyRelative(c_AssetGUIDField);
@@ -56,7 +54,7 @@ namespace Point.Collections.Editor
             Type targetType;
             if (TypeHelper.InheritsFrom(fieldType, s_GenericType))
             {
-                if (fieldType.IsGenericType && 
+                if (fieldType.IsGenericType &&
                     s_GenericType.Equals(fieldType.GetGenericTypeDefinition()))
                 {
                     targetType = fieldType.GenericTypeArguments[0];
@@ -72,41 +70,85 @@ namespace Point.Collections.Editor
                 targetType = TypeHelper.TypeOf<UnityEngine.Object>.Type;
             }
 
-            Rect[] pos = AutoRect.DivideWithRatio(rect.Pop(), .9f, .1f);
+            VisualElement element = new VisualElement();
+            element.styleSheets.Add(CoreGUI.VisualElement.DefaultStyleSheet);
+            element.style.flexDirection = FlexDirection.Row;
+            element.style.flexGrow = 1;
+
+            ObjectField objectfield = new ObjectField();
+            objectfield.style.flexGrow = 1;
+            objectfield.objectType = targetType;
+            objectfield.value = asset;
+            {
+                objectfield.RegisterValueChangedCallback(t =>
+                {
+                    pathProperty.stringValue = AssetDatabase.GetAssetPath(t.newValue);
+                    guidProperty.stringValue = AssetDatabase.AssetPathToGUID(pathProperty.stringValue);
+
+                    pathProperty.serializedObject.ApplyModifiedProperties();
+                });
+            }
+            element.Add(objectfield);
+
+            TextField textField = new TextField();
+            textField.style.flexGrow = 1;
+            textField.value = pathProperty.stringValue;
+            {
+                textField.RegisterValueChangedCallback(t =>
+                {
+                    pathProperty.stringValue = t.newValue;
+                    guidProperty.stringValue = AssetDatabase.AssetPathToGUID(pathProperty.stringValue);
+
+                    pathProperty.serializedObject.ApplyModifiedProperties();
+                });
+            }
+            element.Add(textField);
 
             if (property.IsInArray() && property.GetParent().ChildCount() == 1)
             {
-                label = GUIContent.none;
-            }
-            //label = property.IsInArray() ? GUIContent.none : label;
-            if (!property.isExpanded)
-            {
-                using (var changeCheck = new EditorGUI.ChangeCheckScope())
-                {
-                    UnityEngine.Object obj
-                        = EditorGUI.ObjectField(pos[0], label, asset, targetType, false);
-
-                    if (changeCheck.changed)
-                    {
-                        pathProperty.stringValue = AssetDatabase.GetAssetPath(obj);
-                        guidProperty.stringValue = AssetDatabase.AssetPathToGUID(pathProperty.stringValue);
-                    }
-                }
+                //label = GUIContent.none;
+                objectfield.label = String.Empty;
+                textField.label = String.Empty;
             }
             else
             {
-                EditorGUI.BeginChangeCheck();
-                pathProperty.stringValue = EditorGUI.TextField(pos[0], label, pathProperty.stringValue);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    guidProperty.stringValue = AssetDatabase.AssetPathToGUID(pathProperty.stringValue);
-                }
+                objectfield.label = property.displayName;
+                textField.label = property.displayName;
             }
 
-            if (GUI.Button(pos[1], "Raw"))
+            if (!property.isExpanded)
             {
-                property.isExpanded = !property.isExpanded;
+                textField.AddToClassList("hide");
             }
+            else
+            {
+                objectfield.AddToClassList("hide");
+            }
+
+            Button btt = new Button();
+            btt.style.width = 60;
+            btt.text = "Raw";
+            {
+                btt.clicked += delegate
+                {
+                    property.isExpanded = !property.isExpanded;
+                    property.serializedObject.ApplyModifiedProperties();
+
+                    if (!property.isExpanded)
+                    {
+                        textField.AddToClassList("hide");
+                        objectfield.RemoveFromClassList("hide");
+                    }
+                    else
+                    {
+                        textField.RemoveFromClassList("hide");
+                        objectfield.AddToClassList("hide");
+                    }
+                };
+            }
+            element.Add(btt);
+
+            return element;
         }
 
         private static UnityEngine.Object GetObjectAtPath(in string path)
