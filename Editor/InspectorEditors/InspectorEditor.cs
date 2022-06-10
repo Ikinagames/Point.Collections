@@ -74,6 +74,7 @@ namespace Point.Collections.Editor
 
             var scriptProp = prop.Copy();
             PropertyField field = new PropertyField(scriptProp);
+            field.SetEnabled(false);
             root.Add(field);
 
             if (ShowEditorScript)
@@ -112,6 +113,17 @@ namespace Point.Collections.Editor
         {
             RootVisualElement.MarkDirtyRepaint();
         }
+
+        #region Utils
+
+        protected PropertyField PropertyField(string bindingPath)
+        {
+            PropertyField propertyField = new PropertyField(serializedObject.FindProperty(bindingPath));
+
+            return propertyField;
+        }
+
+        #endregion
     }
 }
 
