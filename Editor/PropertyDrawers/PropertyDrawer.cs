@@ -298,20 +298,27 @@ namespace Point.Collections.Editor
     }
     public abstract class PropertyDrawerUXML<T> : PropertyDrawer
     {
-        public VisualElement RootVisualElement { get; private set; }
-
         public override sealed VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            if (RootVisualElement == null)
-            {
-                RootVisualElement = CreateVisualElement(property);
-                SetupVisualElement(property, RootVisualElement);
-            }
+            var ve = CreateVisualElement(property);
+            SetupVisualElement(property, ve);
 
-            return RootVisualElement;
+            return ve;
         }
 
-        protected abstract VisualElement CreateVisualElement(SerializedProperty property);
+        protected virtual VisualElement CreateVisualElement(SerializedProperty property)
+        {
+            Foldout root = new Foldout();
+            root.text = property.displayName;
+
+            foreach (var item in property.ForEachVisibleChild())
+            {
+                PropertyField field = new PropertyField(item);
+                root.contentContainer.Add(field);
+            }
+
+            return root;
+        }
         protected virtual void SetupVisualElement(SerializedProperty property, VisualElement root) { }
     }
 }

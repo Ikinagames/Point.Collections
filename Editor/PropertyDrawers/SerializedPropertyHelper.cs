@@ -563,7 +563,7 @@ namespace Point.Collections.Editor
 
             return count;
         }
-        public static IEnumerable<SerializedProperty> ForEachChild(this SerializedProperty t)
+        public static IEnumerable<SerializedProperty> ForEachChild(this SerializedProperty t, bool enterChildren = false)
         {
             var temp = t.Copy();
             if (!temp.Next(true))
@@ -574,7 +574,20 @@ namespace Point.Collections.Editor
             do
             {
                 yield return temp.Copy();
-            } while (temp.Next(false) && temp.depth > t.depth);
+            } while (temp.Next(enterChildren) && temp.depth > t.depth);
+        }
+        public static IEnumerable<SerializedProperty> ForEachVisibleChild(this SerializedProperty t, bool enterChildren = false)
+        {
+            var temp = t.Copy();
+            if (!temp.NextVisible(true))
+            {
+                yield break;
+            }
+
+            do
+            {
+                yield return temp.Copy();
+            } while (temp.NextVisible(enterChildren) && temp.depth > t.depth);
         }
 
         #region Draw Method

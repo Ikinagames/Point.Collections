@@ -33,21 +33,21 @@ using VE = UnityEngine.UIElements.VisualElement;
 
 namespace Point.Collections.Editor
 {
-    public sealed class CoreGUI : CLRSingleTone<CoreGUI>
+    public static class CoreGUI
     {
-        private Texture2D m_EmptyIcon;
+        private static Texture2D s_EmptyIcon;
         public static Texture2D EmptyIcon
         {
             get
             {
-                if (Instance.m_EmptyIcon == null)
+                if (s_EmptyIcon == null)
                 {
                     Texture2D temp = new Texture2D(1, 1);
                     temp.SetPixel(0, 0, new Color(0, 0, 0, 0));
 
-                    Instance.m_EmptyIcon = temp;
+                    s_EmptyIcon = temp;
                 }
-                return Instance.m_EmptyIcon;
+                return s_EmptyIcon;
             }
         }
 
@@ -702,17 +702,73 @@ namespace Point.Collections.Editor
 
         public struct VisualElement
         {
+            private static StyleSheet s_DefaultStyleSheet;
+            public static StyleSheet DefaultStyleSheet
+            {
+                get
+                {
+                    if (s_DefaultStyleSheet == null)
+                    {
+                        s_DefaultStyleSheet = AssetHelper.LoadAsset<StyleSheet>("default-uss", "PointEditor");
+                    }
+                    return s_DefaultStyleSheet;
+                }
+            }
+
             public static VE Space(float value, LengthUnit lengthUnit)
             {
                 VE v = new VE();
+                v.styleSheets.Add(DefaultStyleSheet);
+
                 v.style.height = new StyleLength(new Length(value, lengthUnit));
 
                 return v;
             }
 
+            public static VE ListContainer(string name,
+                out Button addButton, out Button removeButton, out VE contentContainer)
+            {
+                VE root = new VE();
+                root.styleSheets.Add(DefaultStyleSheet);
+                root.AddToClassList("content-container");
+
+                VE headerContainer = new VE();
+                headerContainer.AddToClassList("header-list-1");
+                {
+                    Label label = new Label(name);
+                    label.name = "H2-Label";
+                    headerContainer.Add(label);
+
+                    addButton = new Button();
+                    removeButton = new Button();
+                    headerContainer.Add(addButton);
+                    headerContainer.Add(removeButton);
+
+                    addButton.name = "AddButton";
+                    addButton.text = "+";
+                    addButton.AddToClassList("header-button-1");
+
+                    removeButton.name = "RemoveButton";
+                    removeButton.text = "-";
+                    removeButton.AddToClassList("header-button-1");
+                }
+                root.Add(headerContainer);
+
+                contentContainer = new VE();
+                contentContainer.AddToClassList("content-container");
+                {
+
+                }
+                root.Add(contentContainer);
+
+                return root;
+            }
+
             public static Label Label(string text, float size)
             {
                 Label v = new Label(text);
+                v.styleSheets.Add(DefaultStyleSheet);
+
                 v.style.fontSize = size;
 
                 return v;
@@ -720,9 +776,32 @@ namespace Point.Collections.Editor
             public static Label Label(string text)
             {
                 Label v = new Label(text);
+                v.styleSheets.Add(DefaultStyleSheet);
 
                 return v;
             }
+        }
+
+        public static void SetBorderWidth(this IStyle t, StyleFloat value)
+        {
+            t.borderRightWidth = value;
+            t.borderLeftWidth = value;
+            t.borderTopWidth = value;
+            t.borderBottomWidth = value;
+        }
+        public static void SetBorderColor(this IStyle t, StyleColor color)
+        {
+            t.borderRightColor = color;
+            t.borderLeftColor = color;
+            t.borderTopColor = color;
+            t.borderBottomColor = color;
+        }
+        public static void SetBorderRadius(this IStyle t, StyleLength value)
+        {
+            t.borderTopLeftRadius = value;
+            t.borderTopRightRadius = value;
+            t.borderBottomLeftRadius = value;
+            t.borderBottomRightRadius = value;
         }
     }
 }
