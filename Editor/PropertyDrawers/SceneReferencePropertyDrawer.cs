@@ -35,7 +35,7 @@ namespace Point.Collections.Editor
         // The exact name of the scene Path variable in the SceneReference object
         private const string scenePathPropertyString = "scenePath";
 
-        private static readonly RectOffset boxPadding = EditorStyles.helpBox.padding;
+        private readonly RectOffset boxPadding = EditorStyles.helpBox.padding;
 
 
         // Made these two const btw

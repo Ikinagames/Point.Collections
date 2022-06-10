@@ -735,6 +735,7 @@ namespace Point.Collections.Editor
 
                 VE headerContainer = new VE();
                 headerContainer.AddToClassList("header-list-2");
+                headerContainer.style.SetMargin(1.5f);
                 {
                     headerLabel = new Label(name);
                     headerLabel.name = "H3-Label";
@@ -757,6 +758,7 @@ namespace Point.Collections.Editor
 
                 contentContainer = new VE();
                 contentContainer.AddToClassList("content-container");
+                contentContainer.style.SetMargin(4);
                 contentContainer.style.paddingLeft = 17;
                 {
 
@@ -784,6 +786,13 @@ namespace Point.Collections.Editor
             }
         }
 
+        public static void SetMargin(this IStyle t, StyleLength value)
+        {
+            t.marginLeft = value;
+            t.marginRight = value;
+            t.marginTop = value;
+            t.marginBottom = value;
+        }
         public static void SetBorderWidth(this IStyle t, StyleFloat value)
         {
             t.borderRightWidth = value;
