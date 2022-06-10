@@ -32,6 +32,7 @@ namespace Point.Collections.Editor
         protected override VisualElement CreateVisualElement(SerializedProperty property)
         {
             VisualElement root = CoreGUI.VisualElement.ListContainer(property.displayName,
+                out Label headerLabel,
                 out Button addBtt, out Button removeBtt, out var contentContainer);
 
             property.Next(true);
@@ -41,6 +42,22 @@ namespace Point.Collections.Editor
                 contentContainer.AddToClassList("hide");
                 removeBtt.SetEnabled(false);
             }
+
+            headerLabel.RegisterCallback<MouseDownEvent>(t =>
+            {
+                property.isExpanded = !property.isExpanded;
+
+                if (property.arraySize == 0) return;
+
+                if (!property.isExpanded)
+                {
+                    if (!contentContainer.ClassListContains("hide"))
+                    {
+                        contentContainer.AddToClassList("hide");
+                    }
+                }
+                else contentContainer.RemoveFromClassList("hide");
+            });
 
             addBtt.clicked += delegate
             {

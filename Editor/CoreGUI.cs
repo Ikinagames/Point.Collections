@@ -726,18 +726,19 @@ namespace Point.Collections.Editor
             }
 
             public static VE ListContainer(string name,
+                out Label headerLabel,
                 out Button addButton, out Button removeButton, out VE contentContainer)
             {
                 VE root = new VE();
                 root.styleSheets.Add(DefaultStyleSheet);
-                root.AddToClassList("content-container");
+                root.AddToClassList("content-border");
 
                 VE headerContainer = new VE();
-                headerContainer.AddToClassList("header-list-1");
+                headerContainer.AddToClassList("header-list-2");
                 {
-                    Label label = new Label(name);
-                    label.name = "H2-Label";
-                    headerContainer.Add(label);
+                    headerLabel = new Label(name);
+                    headerLabel.name = "H3-Label";
+                    headerContainer.Add(headerLabel);
 
                     addButton = new Button();
                     removeButton = new Button();
