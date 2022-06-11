@@ -29,7 +29,7 @@ using System.Linq;
 namespace Point.Collections
 {
     [Serializable, JsonArray]
-    public class ArrayWrapper<T> : ICloneable, IList<T>
+    public class ArrayWrapper<T> : ICloneable, IList<T>, IReadOnlyList<T>
     {
         public static ArrayWrapper<T> Empty => Array.Empty<T>();
 
