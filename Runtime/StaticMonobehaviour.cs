@@ -69,6 +69,15 @@ namespace Point.Collections
 #endif
                         return s_Instance;
                     }
+#if UNITY_EDITOR
+                    else if (!Application.isPlaying)
+                    {
+                        PointHelper.LogError(Channel.Collections,
+                            $"You\'re trying to call {TypeHelper.TypeOf<T>.ToString()} before playing application. This is not allowed.");
+
+                        return s_Instance;
+                    }
+#endif
 
                     T t = FindObjectOfType<T>();
                     UnityEngine.GameObject obj;

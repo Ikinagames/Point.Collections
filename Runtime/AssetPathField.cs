@@ -25,6 +25,7 @@ using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 using System.Text.RegularExpressions;
+using Point.Collections.ResourceControl;
 #endif
 
 namespace Point.Collections
@@ -43,6 +44,8 @@ namespace Point.Collections
 #endif
         [SerializeField] protected string p_AssetPath = string.Empty;
         [SerializeField] protected string p_SubAssetName = string.Empty;
+
+        [NonSerialized] protected AssetInfo p_AssetInfo;
 
         public virtual System.Type TargetType => TypeHelper.TypeOf<UnityEngine.Object>.Type;
         public bool IsSubAsset => !p_SubAssetName.IsNullOrEmpty();
@@ -74,6 +77,7 @@ namespace Point.Collections
             }
         }
 #endif
+        public AssetInfo Asset => p_AssetInfo;
 
         public AssetPathField(string path) : this(path, string.Empty) { }
         public AssetPathField(string path, string subAssetName)
@@ -123,6 +127,13 @@ namespace Point.Collections
             return UnityEditor.AssetDatabase.GetDependencies(p_AssetPath);
         }
 #endif
+        public AssetInfo LoadAsset()
+        {
+            if (p_AssetInfo.IsValid()) return p_AssetInfo;
+
+            p_AssetInfo = ResourceManager.LoadAsset(this.ToString());
+            return p_AssetInfo;
+        }
 
         public bool IsEmpty() => p_AssetPath.IsNullOrEmpty();
         public bool Equals(AssetPathField other) => p_AssetPath.Equals(other.p_AssetPath);

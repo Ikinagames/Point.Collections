@@ -1139,27 +1139,37 @@ namespace Point.Collections.ResourceControl
             if (!Instance.m_MappedAssets.ContainsKey(hash))
             {
 #if UNITY_EDITOR
-                string bundleName = UnityEditor.AssetDatabase.GetImplicitAssetBundleName(key.ToString());
-                int bundleIndex = Instance.m_AssetBundles.FindIndex(t => t.AssetBundle.name.ToLowerInvariant().Equals(bundleName.ToLowerInvariant()));
-
-                if (bundleIndex < 0)
+                string bundleName;
+                AssetInfo asset;
+                try
                 {
-                    PointHelper.LogError(LogChannel.Collections,
-                        $"Asset({key}) is not registered. This asset is in the AssetBundle({bundleName}) but you didn\'t registered.");
-                    return AssetInfo.Invalid;
+                    bundleName = UnityEditor.AssetDatabase.GetImplicitAssetBundleName(key.ToString());
+                    int bundleIndex = Instance.m_AssetBundles.FindIndex(t => t.AssetBundle.name.ToLowerInvariant().Equals(bundleName.ToLowerInvariant()));
+
+                    if (bundleIndex < 0)
+                    {
+                        PointHelper.LogError(LogChannel.Collections,
+                            $"Asset({key}) is not registered. This asset is in the AssetBundle({bundleName}) but you didn\'t registered.");
+                        return AssetInfo.Invalid;
+                    }
+
+                    var bundleP = GetUnsafeAssetBundleInfo(bundleIndex);
+                    asset = LoadAsset(bundleP, hash);
+                    if (asset.IsValid())
+                    {
+                        "loaded only in editor".ToLogError();
+
+                        return asset;
+                    }
+                }
+                catch (Exception)
+                {
+                    bundleName = "ERROR, Unknown";
                 }
 
-                var bundleP = GetUnsafeAssetBundleInfo(bundleIndex);
-                AssetInfo asset = LoadAsset(bundleP, hash);
-                if (!asset.IsValid())
-                {
-                    $"Cannot found asset {hash} in bundle {bundleName}. This is not allowed at runtime.".ToLogError(LogChannel.Collections);
+                $"Cannot found asset {hash} at AssetBundle({bundleName}). This is not allowed at runtime.".ToLogError(LogChannel.Collections);
 
-                    asset = new AssetInfo(hash, true);
-                    return asset;
-                }
-
-                "loaded only in editor".ToLogError();
+                asset = new AssetInfo(hash, true);
                 return asset;
 #else
                 return AssetInfo.Invalid;
