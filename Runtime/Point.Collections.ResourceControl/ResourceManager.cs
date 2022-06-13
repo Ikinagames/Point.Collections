@@ -1150,7 +1150,9 @@ namespace Point.Collections.ResourceControl
                     {
                         PointHelper.LogError(LogChannel.Collections,
                             $"Asset({key}) is not registered. This asset is in the AssetBundle({bundleName}) but you didn\'t registered.");
-                        return AssetInfo.Invalid;
+
+                        return new AssetInfo(hash, true);
+                        //return AssetInfo.Invalid;
                     }
 
                     var bundleP = GetUnsafeAssetBundleInfo(bundleIndex);

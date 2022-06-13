@@ -77,7 +77,17 @@ namespace Point.Collections
             }
         }
 #endif
-        public AssetInfo Asset => p_AssetInfo;
+        public AssetInfo Asset
+        {
+            get
+            {
+                if (!p_AssetInfo.IsValid() && !IsEmpty())
+                {
+                    p_AssetInfo = ResourceManager.LoadAsset(this.ToString());
+                }
+                return p_AssetInfo;
+            }
+        }
 
         public AssetPathField(string path) : this(path, string.Empty) { }
         public AssetPathField(string path, string subAssetName)

@@ -102,6 +102,19 @@ namespace Point.Collections
             m_Array[index] = item;
             m_Count++;
         }
+        public void AddRange(IList<T> items)
+        {
+            if (m_Array.Length <= m_Count)
+            {
+                Array.Resize(ref m_Array, m_Array.Length + items.Count);
+            }
+
+            for (int i = m_Count, j = 0; j < items.Count; i++, j++)
+            {
+                m_Array[i] = items[j];
+                m_Count++;
+            }
+        }
 
         public void Clear()
         {
@@ -148,6 +161,7 @@ namespace Point.Collections
         }
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
+            m_Count = m_Array.Length;
         }
 
         #endregion

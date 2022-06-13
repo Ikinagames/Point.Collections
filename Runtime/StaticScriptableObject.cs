@@ -105,9 +105,9 @@ namespace Point.Collections
 #endif
                     {
                         if (!(s_Instance as StaticScriptableObject<T>).RuntimeModifiable) s_Instance = Instantiate(s_Instance);
-                    }
 
-                    (s_Instance as StaticScriptableObject<T>).OnInitialize();
+                        (s_Instance as StaticScriptableObject<T>).OnInitialize();
+                    }
                 }
 
                 return s_Instance;
