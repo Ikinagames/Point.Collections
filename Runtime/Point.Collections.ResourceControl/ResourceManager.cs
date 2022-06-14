@@ -102,7 +102,16 @@ namespace Point.Collections.ResourceControl
 
             foreach (var item in ResourceHashMap.Instance.StreamingAssetBundles)
             {
-                RegisterAssetBundlePath(item.ToString()).Load();
+                string name = item.ToString();
+#if DEBUG_MODE
+                if (name.IsNullOrEmpty())
+                {
+                    PointHelper.LogError(Channel.Collections,
+                        $"Cannot load an empty named AssetBundle. This is not allowed.");
+                    continue;
+                }
+#endif
+                RegisterAssetBundlePath(name).Load();
             }
         }
         protected override void OnShutdown()
