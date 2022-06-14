@@ -25,6 +25,13 @@
 
 #if UNITYENGINE
 
+using System.Threading.Tasks;
+using UnityEditor;
+using UnityEditor.PackageManager;
+using UnityEditor.PackageManager.Requests;
+using UnityEditor.PackageManager.UI;
+using UnityEditorInternal;
+using UnityEngine;
 
 namespace Point.Collections.Editor
 {
@@ -33,9 +40,120 @@ namespace Point.Collections.Editor
         public override string Name => "Package Manager";
         public override int Order => 0;
 
+        private PackageCollection m_Packages;
+        private ListRequest m_Request;
+        private bool m_OpenAllPackages = false;
+
+        private Vector2 m_Scroll;
+
+        public PackageManagerMenu()
+        {
+            m_Request = UnityEditor.PackageManager.Client.List();
+        }
+
         public override bool Predicate() => true;
         public override void OnGUI()
         {
+            if (!m_Request.IsCompleted)
+            {
+                EditorGUILayout.LabelField($"Retriving package infomations .. {m_Request.Status}");
+                return;
+            }
+            if (m_Packages == null)
+            {
+                m_Packages = m_Request.Result;
+                OnPackageLoaded();
+            }
+
+            DrawGUI();
+
+            m_OpenAllPackages = EditorGUILayout.Foldout(m_OpenAllPackages, "Open All Packages", true);
+            if (m_OpenAllPackages)
+            {
+                using (var scroll = new EditorGUILayout.ScrollViewScope(m_Scroll))
+                {
+                    foreach (var item in m_Packages)
+                    {
+                        EditorGUILayout.LabelField(item.packageId);
+                    }
+
+                    m_Scroll = scroll.scrollPosition;
+                }
+            }
+        }
+
+        const string
+            c_Json = "com.unity.nuget.newtonsoft-json",
+            c_InputSystem = "com.unity.inputsystem",
+            c_Burst = "com.unity.burst",
+            c_Collections = "com.unity.collections",
+            c_Mathematics = "com.unity.mathematics";
+        private bool
+            m_JsonInstalled,
+            m_InputSystemInstalled,
+            m_BurstInstalled,
+            m_CollectionsInstalled,
+            m_MathematicsInstalled;
+
+        private void OnPackageLoaded()
+        {
+            m_JsonInstalled = HasPackage(c_Json);
+            m_InputSystemInstalled = HasPackage(c_InputSystem);
+            m_BurstInstalled = HasPackage(c_Burst);
+            m_CollectionsInstalled = HasPackage(c_Collections);
+            m_MathematicsInstalled = HasPackage(c_Mathematics);
+        }
+        private void DrawGUI()
+        {
+            DrawPackageField(ref m_JsonInstalled, c_Json);
+            DrawPackageField(ref m_InputSystemInstalled, c_InputSystem);
+            DrawPackageField(ref m_BurstInstalled, c_Burst);
+            DrawPackageField(ref m_CollectionsInstalled, c_Collections);
+            DrawPackageField(ref m_MathematicsInstalled, c_Mathematics);
+        }
+
+        private static void DrawPackageField(ref bool installed, in string id)
+        {
+            string text;
+            if (installed)
+            {
+                text = $"Installed {id}";
+            }
+            else
+            {
+                text = $"Install {id}";
+            }
+
+            using (new EditorGUI.DisabledGroupScope(installed))
+            using (var changed = new EditorGUI.ChangeCheckScope())
+            {
+                installed = EditorGUILayout.ToggleLeft(text, installed);
+
+                if (changed.changed)
+                {
+                    if (installed)
+                    {
+                        AddPackage(id);
+                    }
+                }
+            }
+        }
+
+        // https://forum.unity.com/threads/is-there-a-scripting-api-to-view-installed-projects.536908/
+        private bool HasPackage(string id)
+        {
+            foreach (var item in m_Packages)
+            {
+                if (item.packageId.Contains(id))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        private static void AddPackage(string id)
+        {
+            UnityEditor.PackageManager.Client.Add(id);
         }
     }
 }
