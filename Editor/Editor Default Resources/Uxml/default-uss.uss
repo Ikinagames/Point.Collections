@@ -46,11 +46,11 @@
 }
 
 .header-button-1 {
-    width: 10%;
     border-top-left-radius: 1.5px;
     border-bottom-left-radius: 1.5px;
     border-top-right-radius: 1.5px;
     border-bottom-right-radius: 1.5px;
+    min-width: 10%;
 }
 
 .header-list-1 {
@@ -110,4 +110,8 @@
 
 .inner-container {
     background-color: rgb(58, 58, 58);
+}
+
+.inner-inner-container {
+    background-color: rgba(77, 77, 77, 255);
 }

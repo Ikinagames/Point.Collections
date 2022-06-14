@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2019_1_OR_NEWER && UNITY_ADDRESSABLES
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
@@ -24,11 +24,13 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEditor;
-using UnityEditor.AddressableAssets;
-using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+#if UNITY_ADDRESSABLES
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
+#endif
 
 namespace Point.Collections.ResourceControl.Editor
 {
@@ -37,12 +39,11 @@ namespace Point.Collections.ResourceControl.Editor
     {
         private static Regex s_PathRegex = new Regex(
             @"[p P][a A][t T][h H]:(.+)");
-        //@"[p P][a A][t T][h H]:(?:(\s.+|.+\s|.+))\s*");
-        //@"[p P][a A][t T][h H]:(?:(\s.+|.+\s|.+)(?<!\1\s+))+$");
 
         private new ResourceList target => base.target as ResourceList;
 
         VisualTreeAsset VisualTreeAsset { get; set; }
+#if UNITY_ADDRESSABLES
         bool IsBindedToCatalog
         {
             get
@@ -52,11 +53,14 @@ namespace Point.Collections.ResourceControl.Editor
                 return true;
             }
         }
+#endif
 
-        private SerializedProperty m_GroupProperty, m_GroupNameProperty;
+        private SerializedProperty m_GroupProperty;
+#if UNITY_ADDRESSABLES
+        private SerializedProperty m_GroupNameProperty;
+#endif
         private SerializedProperty m_AssetListProperty;
 
-        //private bool m_IsBindedToCatalog = false;
         private bool m_RequireRebuild = false;
 
         private string m_SearchString;
@@ -64,7 +68,9 @@ namespace Point.Collections.ResourceControl.Editor
         private void OnEnable()
         {
             m_GroupProperty = serializedObject.FindProperty("m_Group");
+#if UNITY_ADDRESSABLES
             m_GroupNameProperty = GroupReferencePropertyDrawer.Helper.GetCatalogName(m_GroupProperty);
+#endif
             m_AssetListProperty = serializedObject.FindProperty("m_AssetList");
 
             Validate();
@@ -73,6 +79,7 @@ namespace Point.Collections.ResourceControl.Editor
         }
         private void Validate()
         {
+#if UNITY_ADDRESSABLES
             AddressableAssetGroup addressableAssetGroup = GetGroup(m_GroupNameProperty);
             if (addressableAssetGroup == null)
             {
@@ -89,9 +96,11 @@ namespace Point.Collections.ResourceControl.Editor
                 return;
             }
             m_RequireRebuild = false;
+#endif
         }
         public static void Rebuild(ResourceList list)
         {
+#if UNITY_ADDRESSABLES
             AddressableAssetGroup addressableAssetGroup = GetGroup(list.Group);
             List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
             addressableAssetGroup.GatherAllAssets(entries, true, true, true);
@@ -101,10 +110,12 @@ namespace Point.Collections.ResourceControl.Editor
             {
                 list.AddAsset(string.Empty, entries[i].TargetAsset);
             }
+#endif
             EditorUtility.SetDirty(list);
         }
         private void Rebuild()
         {
+#if UNITY_ADDRESSABLES
             AddressableAssetGroup addressableAssetGroup = GetGroup(m_GroupNameProperty);
             List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
             addressableAssetGroup.GatherAllAssets(entries, true, true, true);
@@ -117,7 +128,7 @@ namespace Point.Collections.ResourceControl.Editor
             {
                 target.AddAsset(string.Empty, entries[i].TargetAsset);
             }
-
+#endif
             EditorUtility.SetDirty(target);
             serializedObject.ApplyModifiedProperties();
             serializedObject.Update();
@@ -166,20 +177,22 @@ namespace Point.Collections.ResourceControl.Editor
 
             Action onGroupValueChanged = delegate
             {
+#if UNITY_ADDRESSABLES
                 if (IsBindedToCatalog)
                 {
                     var groupName = SerializedPropertyHelper.ReadFixedString128Bytes(m_GroupNameProperty);
                     headerLabel.text = $"Binded to {groupName}";
 
-                    rebuildBtt.RemoveFromClassList("hide");
+                    rebuildBtt.style.Hide(false);
                     addBtt.SetEnabled(false);
                     removeBtt.SetEnabled(false);
                 }
                 else
+#endif
                 {
                     headerLabel.text = "Assets";
 
-                    rebuildBtt.AddToClassList("hide");
+                    rebuildBtt.style.Hide(true);
                     addBtt.SetEnabled(true);
                     removeBtt.SetEnabled(true);
                 }
@@ -234,12 +247,6 @@ namespace Point.Collections.ResourceControl.Editor
                 contents.Add(propertyField);
             }
         }
-
-        //private struct ElementData
-        //{
-        //    public string bin
-        //}
-
         private void OnSearchFieldStringChanged(ChangeEvent<string> value)
         {
             m_SearchString = value.newValue;
@@ -299,6 +306,7 @@ namespace Point.Collections.ResourceControl.Editor
         }
 
         #region Utils
+#if UNITY_ADDRESSABLES
 
         private static AddressableAssetGroup GetGroup(SerializedProperty groupNameProperty)
         {
@@ -335,6 +343,7 @@ namespace Point.Collections.ResourceControl.Editor
 
             return true;
         }
+#endif
 
         #endregion
     }

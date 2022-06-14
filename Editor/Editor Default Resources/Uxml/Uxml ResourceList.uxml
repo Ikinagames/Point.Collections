@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
-    <Style src="default-uss.uss" />
+    <Style src="project://database/Assets/Plugins/Point/Point.Collections/Editor/Editor%20Default%20Resources/Uxml/default-uss.uss?fileID=7433441132597879392&amp;guid=c2e1af765731c5e4d830f487d77eacbf&amp;type=3#default-uss" />
     <ui:Label text="Resource List" display-tooltip-when-elided="true" class="header-label" />
     <ui:TextField picking-mode="Ignore" label="Name" value="OBJECTNAME" text="OBJECTNAME" name="ObjectName" />
     <uie:PropertyField binding-path="m_Group" name="GroupName" />
@@ -8,14 +8,14 @@
         <ui:VisualElement style="flex-direction: row;">
             <uie:ToolbarSearchField focusable="true" name="SearchField" style="margin-left: 4px; width: 98%;" />
         </ui:VisualElement>
-        <ui:VisualElement name="AssetContainer" class="content-container">
-            <ui:VisualElement name="HeaderContainer" class="header-list-1" style="flex-direction: row; align-items: center; justify-content: flex-end; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(118, 118, 118); border-right-color: rgb(118, 118, 118); border-top-color: rgb(118, 118, 118); border-bottom-color: rgb(118, 118, 118); flex-grow: 1;">
+        <ui:VisualElement name="AssetContainer" class="content-container inner-container">
+            <ui:VisualElement name="HeaderContainer" class="header-list-2" style="flex-direction: row; align-items: center; justify-content: flex-end; flex-grow: 1;">
                 <ui:Label text="Binded to {0}" display-tooltip-when-elided="true" name="Label" style="font-size: 15px; -unity-text-align: middle-center; flex-grow: 1;" />
-                <ui:Button text="+" display-tooltip-when-elided="true" name="AddBtt" class="header-button-1" style="width: 10%;" />
+                <ui:Button text="+" display-tooltip-when-elided="true" name="AddBtt" class="header-button-1" />
                 <ui:Button text="-" display-tooltip-when-elided="true" name="RemoveBtt" class="header-button-1" />
             </ui:VisualElement>
             <ui:Button text="Rebuild" display-tooltip-when-elided="true" name="RebuildBtt" />
-            <ui:VisualElement name="Contents" style="padding-left: 12px;" />
+            <ui:VisualElement name="Contents" class="content-container inner-inner-container" style="padding-left: 17px;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
