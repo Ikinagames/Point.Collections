@@ -3,6 +3,7 @@
     -unity-text-align: middle-left;
     margin-bottom: 4px;
     margin-top: 4px;
+    -unity-font-style: bold;
 }
 
 .content-container {
@@ -23,6 +24,7 @@
     justify-content: center;
     align-items: stretch;
 }
+
 .content-border {
     height: auto;
     background-color: rgb(72, 72, 72);
@@ -102,4 +104,8 @@
     margin-top: 0;
     margin-bottom: 4px;
     height: 20px;
+}
+
+.inner-container {
+    background-color: rgb(58, 58, 58);
 }
