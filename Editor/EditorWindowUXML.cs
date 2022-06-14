@@ -39,13 +39,24 @@ namespace Point.Collections.Editor
 
         private void CreateGUI()
         {
-            UserVisualElement = CreateVisualElement();
-            SetupVisualElement(UserVisualElement);
+            var asset = GetVisualTreeAsset();
+            if (asset == null)
+            {
+                UserVisualElement = CreateVisualElement();
+                rootVisualElement.Add(UserVisualElement);
+            }
+            else
+            {
+                asset.CloneTree(rootVisualElement);
+                UserVisualElement = rootVisualElement;
+            }
 
-            rootVisualElement.Add(UserVisualElement);
+            SetupVisualElement(UserVisualElement);
         }
 
-        protected abstract VisualElement CreateVisualElement();
+        protected virtual VisualElement CreateVisualElement() => new VisualElement();
+        protected virtual VisualTreeAsset GetVisualTreeAsset() { return null; }
+
         protected virtual void SetupVisualElement(VisualElement root) { }
     }
 }

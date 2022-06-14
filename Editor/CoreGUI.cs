@@ -793,6 +793,13 @@ namespace Point.Collections.Editor
             t.marginTop = value;
             t.marginBottom = value;
         }
+        public static void SetPadding(this IStyle t, StyleLength value)
+        {
+            t.paddingLeft = value;
+            t.paddingRight = value;
+            t.paddingTop = value;
+            t.paddingBottom = value;
+        }
         public static void SetBorderWidth(this IStyle t, StyleFloat value)
         {
             t.borderRightWidth = value;
