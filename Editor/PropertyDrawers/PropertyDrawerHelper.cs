@@ -19,20 +19,16 @@
 #endif
 #define UNITYENGINE
 
+using System;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
 namespace Point.Collections.Editor
 {
+    [Obsolete]
     public static class PropertyDrawerHelper
     {
-        public static readonly RectOffset boxPadding = EditorStyles.helpBox.padding;
-        public const float PAD_SIZE = 2f;
-        public const float FOOTER_HEIGHT = 10f;
-        public static readonly float lineHeight = EditorGUIUtility.singleLineHeight;
-        public static readonly float paddedLine = lineHeight + PAD_SIZE;
-
         public static SerializedProperty GetParentArrayOfProperty(SerializedProperty prop, out int index)
         {
             index = -1;
@@ -187,11 +183,6 @@ namespace Point.Collections.Editor
             return GetPropertyHeight(count);
         }
 
-        public static void Space(ref Rect rect)
-        {
-            rect.y += lineHeight;
-        }
-
         public static Rect FixedIndentForList(Rect rect)
         {
             rect.x += 15;
@@ -216,12 +207,6 @@ namespace Point.Collections.Editor
         {
             rect.x += pixel;
             rect.width -= pixel;
-        }
-
-        public static Rect GetRect(Rect position, int count = 1)
-        {
-            Rect rect = GUILayoutUtility.GetRect(position.width, PropertyDrawerHelper.lineHeight * count);
-            return rect;
         }
 
         public static void DrawBlock(Rect rect, Color color)

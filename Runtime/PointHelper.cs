@@ -165,6 +165,16 @@ namespace Point.Collections
 
             Log(channel, in msg);
         }
+        /// <summary><inheritdoc cref="Log(Channel, in string)"/>></summary>
+        /// <param name="msg"></param>
+        /// <param name="channel"></param>
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+        public static void ToLog(this string msg, UnityEngine.Object context, LogChannel channel = LogChannel.Core)
+        {
+            if ((LogChannel & channel) != channel) return;
+
+            Log(channel, in msg, context);
+        }
         /// <summary><inheritdoc cref="LogWarning(Channel, in string)"/></summary>
         /// <param name="msg"></param>
         /// <param name="channel"></param>

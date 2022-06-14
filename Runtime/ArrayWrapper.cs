@@ -25,16 +25,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Point.Collections
 {
     [Serializable, JsonArray]
-    public class ArrayWrapper<T> : ICloneable, IList<T>, IReadOnlyList<T>
+    public class ArrayWrapper<T> : ICloneable, IList<T>, IReadOnlyList<T>, ISerializationCallbackReceiver
     {
         public static ArrayWrapper<T> Empty => Array.Empty<T>();
 
-        [UnityEngine.SerializeField]
-        [JsonProperty]
+        [SerializeField, JsonProperty]
         private T[] m_Array = Array.Empty<T>();
         private int m_Count = 0;
 
@@ -48,6 +48,12 @@ namespace Point.Collections
         public bool IsFixedSize => false;
         public bool IsReadOnly => false;
 
+        /// <summary>
+        /// 데이터가 남긴 자식의 갯수입니다.
+        /// </summary>
+        /// <remarks>
+        /// 배열의 총 길이는 <seealso cref="Length"/>를 참조하세요.
+        /// </remarks>
         public int Count => m_Count;
         public bool IsSynchronized => true;
         public object SyncRoot => throw new NotImplementedException();
@@ -96,6 +102,19 @@ namespace Point.Collections
             m_Array[index] = item;
             m_Count++;
         }
+        public void AddRange(IList<T> items)
+        {
+            if (m_Array.Length <= m_Count)
+            {
+                Array.Resize(ref m_Array, m_Array.Length + items.Count);
+            }
+
+            for (int i = m_Count, j = 0; j < items.Count; i++, j++)
+            {
+                m_Array[i] = items[j];
+                m_Count++;
+            }
+        }
 
         public void Clear()
         {
@@ -134,6 +153,18 @@ namespace Point.Collections
 
         public IEnumerator<T> GetEnumerator() => ((IList<T>)m_Array).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => m_Array.GetEnumerator();
+
+        #region ISerializationCallbackReceiver Implements
+
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
+        {
+        }
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
+        {
+            m_Count = m_Array.Length;
+        }
+
+        #endregion
 
         public static implicit operator T[](ArrayWrapper<T> t) => t.m_Array;
         public static implicit operator ArrayWrapper<T>(T[] t) => new ArrayWrapper<T>(t);
