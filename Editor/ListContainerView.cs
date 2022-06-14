@@ -105,8 +105,7 @@ namespace Point.Collections.Editor
             remove => m_RemoveButton.clicked -= value;
         }
 
-        public ListContainerView() : this(string.Empty, null) { }
-        public ListContainerView(string text, SerializedProperty array)
+        public ListContainerView()
         {
             styleSheets.Add(CoreGUI.VisualElement.DefaultStyleSheet);
             AddToClassList("content-border");
@@ -117,7 +116,6 @@ namespace Point.Collections.Editor
             {
                 m_HeaderLabel = new Label(name);
                 m_HeaderLabel.name = "H3-Label";
-                if (!text.IsNullOrEmpty()) m_HeaderLabel.text = text;
                 m_HeaderLabel.RegisterCallback<MouseDownEvent>(OnExpand);
                 headerContainer.Add(m_HeaderLabel);
 
@@ -148,6 +146,18 @@ namespace Point.Collections.Editor
                 m_ContentContainer.style.Hide(true);
             }
             hierarchy.Add(m_ContentContainer);
+        }
+        public ListContainerView(string text, string tooltip, SerializedProperty array) : this()
+        {
+            if (!text.IsNullOrEmpty())
+            {
+                m_HeaderLabel.text = text;
+                if (!tooltip.IsNullOrEmpty())
+                {
+                    m_HeaderLabel.tooltip = tooltip;
+                    m_HeaderLabel.displayTooltipWhenElided = true;
+                }
+            }
 
             if (array != null && array.isArray)
             {
@@ -164,6 +174,13 @@ namespace Point.Collections.Editor
 
                 isExpanded = m_BindedArrayProperty.isExpanded;
             }
+        }
+        public ListContainerView(string text, SerializedProperty array) : this(text, string.Empty, array)
+        {
+        }
+        public ListContainerView(SerializedProperty array)
+            : this(array.displayName, array.tooltip, array)
+        {
         }
 
         private void OnExpandProperty(MouseDownEvent t)

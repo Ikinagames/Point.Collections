@@ -32,8 +32,9 @@ namespace Point.Collections.Editor
         protected override VisualElement CreateVisualElement(SerializedProperty property)
         {
             string displayName = property.displayName;
+            string tooltip = property.tooltip;
             property.Next(true);
-            ListContainerView list = new ListContainerView(displayName, property);
+            ListContainerView list = new ListContainerView(displayName, tooltip, property);
 
             return list;
         }
