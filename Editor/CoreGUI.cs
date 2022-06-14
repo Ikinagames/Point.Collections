@@ -51,6 +51,16 @@ namespace Point.Collections.Editor
             }
         }
 
+        // https://rito15.github.io/posts/unity-editor-built-in-icons/
+        public static Texture2D GetEditorDefaultIcon(string name)
+        {
+            return EditorGUIUtility.FindTexture(name);
+        }
+        public static GUIContent GetEditorDefaultIconContent(string name)
+        {
+            return EditorGUIUtility.IconContent(name);
+        }
+
         #region GUI Styles
 
         private static GUIStyle s_BoxButtonStyle = null;

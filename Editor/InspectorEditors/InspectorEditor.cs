@@ -19,6 +19,7 @@
 #endif
 #define UNITYENGINE
 
+using System.Linq;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -95,6 +96,15 @@ namespace Point.Collections.Editor
             {
                 var element = prop.Copy();
                 var field = new PropertyField(element);
+
+                string[] sp = element.propertyPath.Split('.');
+                string fieldName = sp.Last();
+                if (fieldName.Contains("data["))
+                {
+                    fieldName = sp[sp.Length - 3];
+                }
+
+                field.name = fieldName;
 
                 root.Add(field);
             }

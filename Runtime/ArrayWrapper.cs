@@ -132,12 +132,29 @@ namespace Point.Collections
             if (!m_Array.RemoveAtSwapBack(index))
             {
                 return;
-                //Array.Resize(ref m_Array, m_Array.Length - 1);
             }
 
+            Array.Resize(ref m_Array, m_Array.Length - 1);
             m_Count--;
         }
-        public bool Remove(T item) => RemoveSwapback(item, default(T));
+        public bool Remove(T item)
+        {
+            if (!RemoveSwapback(item, default(T)))
+            {
+                return false;
+            }
+
+            Array.Resize(ref m_Array, m_Array.Length - 1);
+            return true;
+        }
+        public bool RemoveAtSwapback(int index, T defaultValue = default(T))
+        {
+            m_Array[index] = defaultValue;
+            UnsafeBufferUtility.RemoveAtSwapBack(m_Array, index);
+            m_Count--;
+
+            return true;
+        }
         public bool RemoveSwapback(T item, T defaultValue = default(T))
         {
             int index = IndexOf(item);

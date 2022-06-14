@@ -312,6 +312,31 @@ namespace Point.Collections.Editor
             return AssetDatabase.LoadAssetAtPath<T>(path);
         }
 
+        public static T AddSubAssetAt<T>(UnityEngine.Object target, string subAssetName)
+            where T : ScriptableObject
+        {
+            if (AssetDatabase.GetAssetPath(target).IsNullOrEmpty()) return null;
+
+            T t = ScriptableObject.CreateInstance<T>();
+            t.name = subAssetName;
+            AssetDatabase.AddObjectToAsset(t, target);
+
+            EditorUtility.SetDirty(target);
+            return t;
+        }
+        public static T AddSubAssetAt<T>(string targetAssetPath, string subAssetName)
+            where T : ScriptableObject
+        {
+            if (targetAssetPath.IsNullOrEmpty()) return null;
+
+            T t = ScriptableObject.CreateInstance<T>();
+            t.name = subAssetName;
+            AssetDatabase.AddObjectToAsset(t, targetAssetPath);
+
+            //EditorUtility.SetDirty(target);
+            return t;
+        }
+
         public static string GetSelectionFolderPath()
         {
             string path = AssetDatabase.GetAssetPath(Selection.activeObject);

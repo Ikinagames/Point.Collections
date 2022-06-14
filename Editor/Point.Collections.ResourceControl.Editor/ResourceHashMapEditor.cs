@@ -187,9 +187,10 @@ namespace Point.Collections.ResourceControl.Editor
             {
                 int index = m_ResourceListsProperty.arraySize;
 
-                ResourceList list = CreateInstance<ResourceList>();
-                list.name = "ResourceList " + index;
-                AssetDatabase.AddObjectToAsset(list, assetPath);
+                ResourceList list = AssetHelper.AddSubAssetAt<ResourceList>(
+                    assetPath, "ResourceList " + index);
+                //list.name = ;
+                //AssetDatabase.AddObjectToAsset(list, assetPath);
 
                 m_ResourceListsProperty.InsertArrayElementAtIndex(index);
                 var prop = m_ResourceListsProperty.GetArrayElementAtIndex(index);
