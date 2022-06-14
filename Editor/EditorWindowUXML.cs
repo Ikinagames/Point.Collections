@@ -37,7 +37,7 @@ namespace Point.Collections.Editor
     {
         public VisualElement UserVisualElement { get; private set; }
 
-        private void CreateGUI()
+        protected void CreateGUI()
         {
             var asset = GetVisualTreeAsset();
             if (asset == null)
