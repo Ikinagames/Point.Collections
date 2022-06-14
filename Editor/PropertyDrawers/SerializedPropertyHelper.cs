@@ -563,6 +563,24 @@ namespace Point.Collections.Editor
 
             return count;
         }
+        /// <summary>
+        /// 자식 <paramref name="t"/> 의 부모 프로퍼티의 마지막까지 (<paramref name="t"/>와 depth 가 같은) 반환합니다.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static IEnumerable<SerializedProperty> UntilEndOfProperty(this SerializedProperty t)
+        {
+            var temp = t.Copy();
+            if (!temp.Next(false))
+            {
+                yield break;
+            }
+
+            do
+            {
+                yield return temp.Copy();
+            } while (temp.Next(false) && temp.depth == t.depth);
+        }
         public static IEnumerable<SerializedProperty> ForEachChild(this SerializedProperty t, bool enterChildren = false)
         {
             var temp = t.Copy();
