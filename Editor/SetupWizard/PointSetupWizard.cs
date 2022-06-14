@@ -63,9 +63,6 @@ namespace Point.Collections.Editor
         private Texture2D m_EnableTexture;
         private Texture2D m_DisableTexture;
 
-        private GUIStyle titleStyle;
-        private GUIStyle iconStyle;
-
         private SetupWizardMenuItem[] m_MenuItems;
 
         private SetupWizardMenuItem m_SelectedToolbar;
@@ -76,15 +73,6 @@ namespace Point.Collections.Editor
             m_DisableTexture = AssetHelper.LoadAsset<Texture2D>("CrossYellow", "PointEditor");
             m_EnableTexture = AssetHelper.LoadAsset<Texture2D>("TickGreen", "PointEditor");
 
-            titleStyle = new GUIStyle();
-            titleStyle.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
-            titleStyle.wordWrap = true;
-            titleStyle.fontStyle = FontStyle.Bold;
-            titleStyle.alignment = TextAnchor.MiddleCenter;
-
-            iconStyle = new GUIStyle();
-            iconStyle.alignment = TextAnchor.MiddleCenter;
-
             Type[] menuItemTypes = TypeHelper.GetTypes(t => !t.IsAbstract && TypeHelper.TypeOf<SetupWizardMenuItem>.Type.IsAssignableFrom(t));
             m_MenuItems = new SetupWizardMenuItem[menuItemTypes.Length];
             for (int i = 0; i < menuItemTypes.Length; i++)
@@ -92,19 +80,12 @@ namespace Point.Collections.Editor
                 m_MenuItems[i] = (SetupWizardMenuItem)Activator.CreateInstance(menuItemTypes[i]);
             }
             Array.Sort(m_MenuItems);
-
-            
-
-            //CoreSystemSettings.Instance.m_HideSetupWizard = true;
-            //EditorUtility.SetDirty(CoreSystemSettings.Instance);
         }
 
-        protected override VisualElement CreateVisualElement()
+        protected override VisualTreeAsset GetVisualTreeAsset()
         {
             VisualTreeAsset asset = AssetHelper.LoadAsset<VisualTreeAsset>("Uxml SetupWizard", "PointEditor");
-            var root = asset.CloneTree();
-
-            return root;
+            return asset;
         }
         protected override void SetupVisualElement(VisualElement root)
         {
