@@ -29,10 +29,11 @@ using System.Collections;
 using UnityEngine;
 using UnityEditor;
 using System;
+using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
 {
-    public sealed class PointSetupWizard : EditorWindow, IStaticInitializer
+    public sealed class PointSetupWizard : EditorWindowUXML, IStaticInitializer
     {
         static PointSetupWizard()
         {
@@ -89,35 +90,91 @@ namespace Point.Collections.Editor
             }
             Array.Sort(m_MenuItems);
 
-            if (m_MenuItems.Length > 0) m_SelectedToolbar = m_MenuItems[0];
+            
 
             //CoreSystemSettings.Instance.m_HideSetupWizard = true;
             //EditorUtility.SetDirty(CoreSystemSettings.Instance);
         }
-        private void OnGUI()
+
+        protected override VisualElement CreateVisualElement()
         {
-            const string c_Copyrights = "Copyright 2021 Ikinagames. All rights reserved.";
+            VisualTreeAsset asset = AssetHelper.LoadAsset<VisualTreeAsset>("Uxml SetupWizard", "PointEditor");
+            var root = asset.CloneTree();
 
-            GUILayout.Space(20);
-            EditorUtilities.StringHeader("Point Framework¢ç", 30, true);
-            GUILayout.Space(10);
-            EditorUtilities.Line();
-            GUILayout.Space(10);
+            return root;
+        }
+        protected override void SetupVisualElement(VisualElement root)
+        {
+            SetupMenuItems(root);
 
-            DrawToolbar();
+            SetupGUI(root);
+        }
+        private void SetupMenuItems(VisualElement root)
+        {
+            VisualElement container = root.Q("MenuItemContainer").Q("Container");
+            Label menuItemLabel = root.Q("Bottom").Q<Label>("MenuItemLabel");
 
-            EditorUtilities.Line();
-
-            using (new EditorUtilities.BoxBlock(Color.black))
+            for (int i = 0; i < m_MenuItems.Length; i++)
             {
-                if (m_SelectedToolbar != null)
+                SetupWizardMenuItem menuItem = m_MenuItems[i];
+                Button button = new Button();
+                button.text = menuItem.Name;
+                button.AddToClassList("menuitem-button");
+
+                button.clicked += delegate
                 {
-                    m_SelectedToolbar.OnGUI();
-                }
+                    m_SelectedToolbar = menuItem;
+
+                    menuItemLabel.text = menuItem.Name;
+                };
+
+                container.Add(button);
             }
 
-            EditorGUI.LabelField(m_CopyrightRect, EditorUtilities.String(c_Copyrights, 11), EditorStyleUtilities.CenterStyle);
+            if (m_MenuItems.Length > 0)
+            {
+                m_SelectedToolbar = m_MenuItems[0];
+                menuItemLabel.text = m_SelectedToolbar.Name;
+            }
         }
+        private void SetupGUI(VisualElement root)
+        {
+            IMGUIContainer gui = root.Q("Bottom").Q<IMGUIContainer>("MenuItemGUI");
+
+            gui.onGUIHandler += MenuItemGUI;
+        }
+        private void MenuItemGUI()
+        {
+            if (m_SelectedToolbar != null)
+            {
+                m_SelectedToolbar.OnGUI();
+            }
+        }
+
+        //private void OnGUI()
+        //{
+        //    const string c_Copyrights = "Copyright 2021 Ikinagames. All rights reserved.";
+
+        //    GUILayout.Space(20);
+        //    EditorUtilities.StringHeader("Point Framework¢ç", 30, true);
+        //    GUILayout.Space(10);
+        //    EditorUtilities.Line();
+        //    GUILayout.Space(10);
+
+        //    DrawToolbar();
+
+        //    EditorUtilities.Line();
+
+        //    using (new EditorUtilities.BoxBlock(Color.black))
+        //    {
+        //        if (m_SelectedToolbar != null)
+        //        {
+        //            m_SelectedToolbar.OnGUI();
+        //        }
+        //    }
+
+        //    EditorGUI.LabelField(m_CopyrightRect, EditorUtilities.String(c_Copyrights, 11), EditorStyleUtilities.CenterStyle);
+        //}
 
         public SetupWizardMenuItem SelectedToolbar => m_SelectedToolbar;
 

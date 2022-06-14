@@ -1,0 +1,23 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="setupwizard-uss.uss" />
+    <Style src="default-uss.uss" />
+    <ui:VisualElement style="width: 600px; height: 500px; flex-grow: 1;">
+        <ui:VisualElement name="Top">
+            <ui:Label text="Point &lt;size=15&gt;framework®&lt;/size&gt;" display-tooltip-when-elided="true" style="font-size: 28px; -unity-text-align: middle-center; padding-bottom: 5px; padding-top: 5px; -unity-font-style: bold;" />
+            <ui:VisualElement name="MenuItemContainer">
+                <ui:VisualElement style="height: 30px; border-bottom-color: rgb(100, 100, 100); border-bottom-width: 1px; border-top-color: rgb(100, 100, 100); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; align-items: center; flex-direction: row; justify-content: center;">
+                    <ui:VisualElement name="Container" style="border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; height: 22px; max-width: 596px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; align-items: center; justify-content: center; flex-direction: row; flex-grow: 1;">
+                        <ui:Button text="Button" display-tooltip-when-elided="true" class="menuitem-button" style="display: none;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="Bottom" style="flex-grow: 1; padding-left: 4px; padding-right: 4px; padding-top: 4px; padding-bottom: 4px;">
+            <ui:VisualElement style="flex-grow: 1; background-color: rgb(50, 50, 50); padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px;">
+                <ui:Label text="Label" display-tooltip-when-elided="true" name="MenuItemLabel" style="-unity-text-align: middle-left; -unity-font-style: bold; font-size: 16px; padding-bottom: 4px;" />
+                <ui:IMGUIContainer name="MenuItemGUI" style="flex-grow: 1;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:Label text="Copyright 2022 Ikinagames. All rights reserved." display-tooltip-when-elided="true" style="-unity-text-align: middle-center; font-size: 10px; -unity-font-style: italic; padding-bottom: 2px;" />
+    </ui:VisualElement>
+</ui:UXML>
