@@ -787,6 +787,19 @@ namespace Point.Collections.Editor
             }
         }
 
+        public static void Hide(this IStyle t, bool hide)
+        {
+            if (hide)
+            {
+                t.display = DisplayStyle.None;
+                t.visibility = Visibility.Hidden;
+                return;
+            }
+
+            t.display = DisplayStyle.Flex;
+            t.visibility = Visibility.Visible;
+        }
+
         public static void SetMargin(this IStyle t, StyleLength value)
         {
             t.marginLeft = value;

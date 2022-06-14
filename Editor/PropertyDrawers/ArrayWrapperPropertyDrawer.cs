@@ -31,93 +31,11 @@ namespace Point.Collections.Editor
     {
         protected override VisualElement CreateVisualElement(SerializedProperty property)
         {
-            VisualElement root = CoreGUI.VisualElement.ListContainer(property.displayName,
-                out Label headerLabel,
-                out Button addBtt, out Button removeBtt, out var contentContainer);
-
+            string displayName = property.displayName;
             property.Next(true);
+            ListContainerView list = new ListContainerView(displayName, property);
 
-            if (property.arraySize == 0)
-            {
-                contentContainer.AddToClassList("hide");
-                removeBtt.SetEnabled(false);
-            }
-            else
-            {
-                if (!property.isExpanded)
-                {
-                    contentContainer.AddToClassList("hide");
-                }
-                else contentContainer.RemoveFromClassList("hide");
-            }
-
-            headerLabel.RegisterCallback<MouseDownEvent>(t =>
-            {
-                property.isExpanded = !property.isExpanded;
-
-                if (property.arraySize == 0) return;
-
-                if (!property.isExpanded)
-                {
-                    if (!contentContainer.ClassListContains("hide"))
-                    {
-                        contentContainer.AddToClassList("hide");
-                    }
-                }
-                else contentContainer.RemoveFromClassList("hide");
-
-                property.serializedObject.ApplyModifiedProperties();
-            });
-
-            addBtt.clicked += delegate
-            {
-                int index = property.arraySize;
-                property.InsertArrayElementAtIndex(index);
-                var prop = property.GetArrayElementAtIndex(index);
-
-                prop.SetDefaultValue();
-
-                PropertyField field = new PropertyField(prop);
-                field.BindProperty(prop);
-                contentContainer.Add(field);
-
-                if (index == 0)
-                {
-                    contentContainer.RemoveFromClassList("hide");
-                    removeBtt.SetEnabled(true);
-                }
-
-                property.serializedObject.ApplyModifiedProperties();
-            };
-            removeBtt.clicked += delegate
-            {
-                int index = property.arraySize - 1;
-
-                property.DeleteArrayElementAtIndex(index);
-                contentContainer.ElementAt(index).RemoveFromHierarchy();
-
-                if (index == 0)
-                {
-                    contentContainer.AddToClassList("hide");
-                    removeBtt.SetEnabled(false);
-                }
-
-                property.serializedObject.ApplyModifiedProperties();
-            };
-
-            for (int i = 0; i < property.arraySize; i++)
-            {
-                var prop = property.GetArrayElementAtIndex(i);
-                PropertyField field = new PropertyField(prop);
-
-                contentContainer.Add(field);
-            }
-
-            return root;
-        }
-        protected override void SetupVisualElement(SerializedProperty property, VisualElement root)
-        {
-
+            return list;
         }
     }
 }
