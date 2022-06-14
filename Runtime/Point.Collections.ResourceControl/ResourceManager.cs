@@ -761,12 +761,20 @@ namespace Point.Collections.ResourceControl
             private void RegisterAllAssets(string key)
             {
                 var objs = m_AssetBundle.LoadAssetWithSubAssets(key);
+                AssetRuntimeKey tempHash;
                 for (int i = 0; i < objs.Length; i++)
                 {
                     var tempPromise = new Promise<UnityEngine.Object>(objs[i]);
-                    AssetRuntimeKey
+                    // If main asset
+                    if (Path.GetFileNameWithoutExtension(key).ToLowerInvariant().Equals(objs[i].name.ToLowerInvariant()))
+                    {
+                        tempHash = new AssetRuntimeKey(key);
+                    }
+                    else
+                    {
                         tempHash = new AssetRuntimeKey(
                             string.Format(c_KeyFormat, key, objs[i].name));
+                    }
 
                     m_Assets[tempHash] = tempPromise;
                 }
@@ -777,12 +785,21 @@ namespace Point.Collections.ResourceControl
                 request.completed += delegate
                 {
                     var objs = request.allAssets;
+                    AssetRuntimeKey tempHash;
 
                     for (int i = 0; i < objs.Length; i++)
                     {
-                        AssetRuntimeKey
+                        // If main asset
+                        if (Path.GetFileNameWithoutExtension(key).ToLowerInvariant().Equals(objs[i].name.ToLowerInvariant()))
+                        {
+                            tempHash = new AssetRuntimeKey(key);
+                        }
+                        else
+                        {
                             tempHash = new AssetRuntimeKey(
                                 string.Format(c_KeyFormat, key, objs[i].name));
+                        }
+
                         if (!m_Assets.TryGetValue(tempHash, out var tempPromise))
                         {
                             tempPromise = new Promise<UnityEngine.Object>(objs[i]);
@@ -851,14 +868,6 @@ namespace Point.Collections.ResourceControl
                 m_Assets.Add(hash, promise);
 
                 return promise;
-
-                //var request = m_AssetBundle.LoadAssetAsync(key);
-                //AssetRequest assetRequest = AssetRequest.Initialize(request);
-                //promise = new Promise<UnityEngine.Object>(assetRequest);
-                
-                //m_Assets.Add(hash, promise);
-
-                //return promise;
             }
             public void UnloadAsset(string key)
             {

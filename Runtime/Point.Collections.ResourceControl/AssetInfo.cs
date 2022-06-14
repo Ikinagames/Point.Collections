@@ -125,6 +125,7 @@ namespace Point.Collections.ResourceControl
                 if (m_EditorOnly)
                 {
                     value.Invoke(Asset);
+                    return;
                 }
 #endif
                 this.ThrowIfIsNotValid();
