@@ -42,6 +42,14 @@ namespace Point.Collections.Editor
                 contentContainer.AddToClassList("hide");
                 removeBtt.SetEnabled(false);
             }
+            else
+            {
+                if (!property.isExpanded)
+                {
+                    contentContainer.AddToClassList("hide");
+                }
+                else contentContainer.RemoveFromClassList("hide");
+            }
 
             headerLabel.RegisterCallback<MouseDownEvent>(t =>
             {
@@ -57,6 +65,8 @@ namespace Point.Collections.Editor
                     }
                 }
                 else contentContainer.RemoveFromClassList("hide");
+
+                property.serializedObject.ApplyModifiedProperties();
             });
 
             addBtt.clicked += delegate
@@ -107,7 +117,7 @@ namespace Point.Collections.Editor
         }
         protected override void SetupVisualElement(SerializedProperty property, VisualElement root)
         {
-            base.SetupVisualElement(property, root);
+
         }
     }
 }
