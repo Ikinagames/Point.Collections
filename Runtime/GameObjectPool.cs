@@ -149,9 +149,12 @@ namespace Point.Collections
             }
         }
 
-        public void Register(IList<PoolReferece> pools)
+        public int Register(IList<PoolReferece> pools)
         {
+            int count = m_References.Count;
             m_References.AddRange(pools);
+
+            return count;
         }
 
         public GameObject FindObject(string friendlyName)
@@ -170,6 +173,15 @@ namespace Point.Collections
             m_HashMap.TryGetValue(new Hash(friendlyName), out var value);
 
             return value.Get();
+        }
+        public GameObject Spawn(int index)
+        {
+            return m_References[index].Get();
+        }
+
+        public void Reserve(int index, GameObject obj)
+        {
+            m_References[index].Reserve(obj);
         }
     }
 }
