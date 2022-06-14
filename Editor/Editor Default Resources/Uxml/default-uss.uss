@@ -86,6 +86,7 @@
     font-size: 13px;
     width: 75%;
     -unity-text-align: middle-center;
+    -unity-font-style: bold;
 }
 
 #H3-Label:hover {
@@ -93,6 +94,7 @@
     color: var(--unity-colors-default-text-hover);
     width: 75%;
     -unity-text-align: middle-center;
+    -unity-font-style: bold;
 }
 
 .header-list-2 {
