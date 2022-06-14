@@ -21,6 +21,7 @@
 
 using UnityEditor;
 using UnityEditor.UIElements;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
@@ -70,12 +71,14 @@ namespace Point.Collections.Editor
             var prop = serializedObject.GetIterator();
             prop.NextVisible(true);
 
-            root.Add(CoreGUI.VisualElement.Label(GetHeaderName(), 20));
+            var label = CoreGUI.VisualElement.Label(GetHeaderName(), 20);
+            label.style.unityFontStyleAndWeight = FontStyle.Bold;
+            root.Add(label);
 
-            var scriptProp = prop.Copy();
-            PropertyField field = new PropertyField(scriptProp);
-            field.SetEnabled(false);
-            root.Add(field);
+            //var scriptProp = prop.Copy();
+            //PropertyField field = new PropertyField(scriptProp);
+            //field.SetEnabled(false);
+            //root.Add(field);
 
             if (ShowEditorScript)
             {
@@ -91,7 +94,7 @@ namespace Point.Collections.Editor
             while (prop.NextVisible(false))
             {
                 var element = prop.Copy();
-                field = new PropertyField(element);
+                var field = new PropertyField(element);
 
                 root.Add(field);
             }

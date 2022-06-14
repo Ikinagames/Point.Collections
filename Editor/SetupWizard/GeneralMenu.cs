@@ -26,8 +26,8 @@
 #if UNITYENGINE
 
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace Point.Collections.Editor
 {
@@ -61,7 +61,7 @@ namespace Point.Collections.Editor
             SerializedProperty m_TagProperty, m_LayerProperty;
 
             static string[] c_RequireTags = new string[] { };
-            static string[] c_RequireLayers = new string[] {  };
+            static string[] c_RequireLayers = new string[] { };
 
             List<string> m_MissingTags, m_MissingLayers;
 

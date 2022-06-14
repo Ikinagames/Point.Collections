@@ -3,7 +3,10 @@
     <Style src="project://database/Assets/Plugins/Point/Point.Collections/Editor/Editor%20Default%20Resources/Uxml/default-uss.uss?fileID=7433441132597879392&amp;guid=c2e1af765731c5e4d830f487d77eacbf&amp;type=3#default-uss" />
     <ui:VisualElement style="flex-grow: 1;">
         <ui:VisualElement name="Top">
-            <ui:Label text="Point &lt;size=15&gt;framework®&lt;/size&gt;" display-tooltip-when-elided="true" style="font-size: 28px; -unity-text-align: middle-center; padding-bottom: 5px; padding-top: 5px; -unity-font-style: bold;" />
+            <ui:VisualElement style="flex-direction: row; justify-content: center; align-items: flex-end; padding-top: 5px; padding-bottom: 5px;">
+                <ui:Label text="Point" display-tooltip-when-elided="true" style="font-size: 28px; -unity-text-align: lower-center; -unity-font-style: bold;" />
+                <ui:Label text="framework®" display-tooltip-when-elided="true" style="font-size: 15px; -unity-text-align: lower-center; -unity-font-style: bold; margin-bottom: 2px;" />
+            </ui:VisualElement>
             <ui:VisualElement name="MenuItemContainer">
                 <ui:VisualElement style="height: 30px; border-bottom-color: rgb(100, 100, 100); border-bottom-width: 1px; border-top-color: rgb(100, 100, 100); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; align-items: center; flex-direction: row; justify-content: center;">
                     <ui:VisualElement name="Container" style="border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; height: 22px; max-width: 596px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; align-items: center; justify-content: center; flex-direction: row; flex-grow: 1;">
