@@ -68,6 +68,9 @@ namespace Point.Collections.Editor
 
         private SetupWizardMenuItem[] m_MenuItems;
 
+        private SetupWizardMenuItem m_SelectedToolbar;
+        public SetupWizardMenuItem SelectedToolbar => m_SelectedToolbar;
+
         private void OnEnable()
         {
             m_DisableTexture = AssetHelper.LoadAsset<Texture2D>("CrossYellow", "PointEditor");
@@ -150,68 +153,6 @@ namespace Point.Collections.Editor
                 m_SelectedToolbar.OnGUI();
             }
         }
-
-        //private void OnGUI()
-        //{
-        //    const string c_Copyrights = "Copyright 2021 Ikinagames. All rights reserved.";
-
-        //    GUILayout.Space(20);
-        //    EditorUtilities.StringHeader("Point Framework¢ç", 30, true);
-        //    GUILayout.Space(10);
-        //    EditorUtilities.Line();
-        //    GUILayout.Space(10);
-
-        //    DrawToolbar();
-
-        //    EditorUtilities.Line();
-
-        //    using (new EditorUtilities.BoxBlock(Color.black))
-        //    {
-        //        if (m_SelectedToolbar != null)
-        //        {
-        //            m_SelectedToolbar.OnGUI();
-        //        }
-        //    }
-
-        //    EditorGUI.LabelField(m_CopyrightRect, EditorUtilities.String(c_Copyrights, 11), EditorStyleUtilities.CenterStyle);
-        //}
-
-        public SetupWizardMenuItem SelectedToolbar => m_SelectedToolbar;
-
-        #region Toolbar
-
-        private SetupWizardMenuItem m_SelectedToolbar;
-
-        private void DrawToolbar()
-        {
-            const float spacing = 50;
-
-            EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-            GUILayout.Space(spacing);
-
-            for (int i = 0; i < m_MenuItems.Length; i++)
-            {
-                DrawToolbarButton(i, m_MenuItems[i].Name, m_MenuItems[i].Predicate());
-            }
-
-            GUILayout.Space(spacing);
-            EditorGUILayout.EndHorizontal();
-        }
-        private void DrawToolbarButton(int i, string name, bool enable)
-        {
-            using (new EditorUtilities.BoxBlock(i.Equals(m_SelectedToolbar) ? Color.black : Color.gray))
-            {
-                EditorGUILayout.BeginHorizontal(GUILayout.Height(22));
-                if (GUILayout.Button(name, titleStyle))
-                {
-                    m_SelectedToolbar = m_MenuItems[i];
-                }
-                GUILayout.Label(enable ? m_EnableTexture : m_DisableTexture, iconStyle);
-                EditorGUILayout.EndHorizontal();
-            }
-        }
-
-        #endregion
     }
 }
 

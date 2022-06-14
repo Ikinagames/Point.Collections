@@ -29,6 +29,7 @@ using UnityEngine;
 
 namespace Point.Collections.Editor
 {
+    [Obsolete("Use CoreGUI")]
     public sealed class EditorUtilities
     {
         #region Strings

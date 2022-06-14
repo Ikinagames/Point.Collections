@@ -38,14 +38,19 @@ namespace Point.Collections.Editor
 
         LayerNTagSetups layerNTagSetups = new LayerNTagSetups();
         UnityAudioSetups unityAudioSetups = new UnityAudioSetups();
+        SymbolSetups symbolSetups = new SymbolSetups();
 
         public override void OnGUI()
         {
             layerNTagSetups.DrawTagManager();
 
-            EditorUtilities.Line();
+            EditorGUILayout.Space();
 
             unityAudioSetups.DrawUnityAudio();
+
+            EditorGUILayout.Space();
+
+            symbolSetups.OnGUI();
         }
         public override bool Predicate() 
             => layerNTagSetups.TagManagerPredicate();
@@ -298,45 +303,57 @@ namespace Point.Collections.Editor
                 EditorGUI.indentLevel--;
             }
         }
-    }
 
-    internal sealed class AssetBundleMenu : SetupWizardMenuItem
-    {
-        public override string Name => "AssetBundle";
-        public override int Order => 0;
-
-        public override bool Predicate()
+        internal sealed class SymbolSetups
         {
-            return true;
-        }
-        public override void OnGUI()
-        {
-            if (GUILayout.Button("Build"))
+            private static void CheckSymbol(ref bool defined, in string symbol)
             {
-                Build();
+                defined = ScriptUtilities.IsDefinedSymbol(symbol);
             }
-        }
-        public void Build()
-        {
-            string[] bundleNames = AssetDatabase.GetAllAssetBundleNames();
-            AssetBundleBuild[] infos = new AssetBundleBuild[bundleNames.Length];
-            for (int i = 0; i < bundleNames.Length; i++)
+            private static void DrawSymbol(ref bool defined, in string symbol)
             {
-                string[] assetPaths = AssetDatabase.GetAssetPathsFromAssetBundle(bundleNames[i]);
-                AssetBundleBuild bundleBuild = new AssetBundleBuild
+                const string c_Label = "Define {0}";
+                using (var check = new EditorGUI.ChangeCheckScope())
                 {
-                    assetBundleName = bundleNames[i],
-                    assetNames = assetPaths,
-                };
-                infos[i] = bundleBuild;
+                    defined =
+                        EditorGUILayout.ToggleLeft(string.Format(c_Label, symbol), defined);
+
+                    if (check.changed)
+                    {
+                        if (defined) ScriptUtilities.DefineSymbol(symbol);
+                        else ScriptUtilities.UndefSymbol(symbol);
+                    }
+                }
             }
 
-            BuildPipeline.BuildAssetBundles(
-                Application.streamingAssetsPath, 
-                infos, 
-                BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows64);
+            private bool
+                m_Opened,
 
+                unityCollectionsCheck;
 
+            private bool
+                behaviorTree;
+            private const string
+                unityCollectionsCheckSymbol = "ENABLE_UNITY_COLLECTIONS_CHECKS",
+                behaviorTreeSymbol = "POINT_BEHAVIORTREE";
+
+            public SymbolSetups()
+            {
+                CheckSymbol(ref unityCollectionsCheck, unityCollectionsCheckSymbol);
+                CheckSymbol(ref behaviorTree, behaviorTreeSymbol);
+            }
+
+            public void OnGUI()
+            {
+                m_Opened = EditorGUILayout.Foldout(m_Opened, "Symbols", true);
+                if (!m_Opened) return;
+
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    DrawSymbol(ref unityCollectionsCheck, unityCollectionsCheckSymbol);
+                    DrawSymbol(ref behaviorTree, behaviorTreeSymbol);
+                }
+            }
         }
     }
 }

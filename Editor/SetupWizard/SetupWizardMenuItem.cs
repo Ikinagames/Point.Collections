@@ -19,8 +19,15 @@ namespace Point.Collections.Editor
 {
     public abstract class SetupWizardMenuItem : IComparable<SetupWizardMenuItem>
     {
+        public enum GUIType
+        {
+            IMGUI,
+            VisualElement
+        }
+
         public abstract string Name { get; }
         public abstract int Order { get; }
+        public virtual GUIType Type => GUIType.IMGUI;
 
         public abstract void OnGUI();
         public abstract bool Predicate();
