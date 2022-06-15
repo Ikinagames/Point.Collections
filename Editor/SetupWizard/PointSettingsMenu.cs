@@ -67,8 +67,10 @@ namespace Point.Collections.Editor
         protected override VisualElement CreateVisualElement()
         {
             ScrollView root = new ScrollView();
+#if UNITY_2021_1_OR_NEWER
             root.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
             root.verticalScrollerVisibility = ScrollerVisibility.Auto;
+#endif
             root.style.flexGrow = 1;
 
             PropertyField field = CoreGUI.VisualElement.PropertyField(m_LogChannel);

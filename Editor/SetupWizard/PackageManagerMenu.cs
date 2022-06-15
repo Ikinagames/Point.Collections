@@ -84,12 +84,16 @@ namespace Point.Collections.Editor
 
         const string
             c_Json = "com.unity.nuget.newtonsoft-json",
+            c_UI = "com.unity.ui",
+            c_UIBuilder = "com.unity.ui.builder",
             c_InputSystem = "com.unity.inputsystem",
             c_Burst = "com.unity.burst",
             c_Collections = "com.unity.collections",
             c_Mathematics = "com.unity.mathematics";
         private bool
             m_JsonInstalled,
+            m_UIInstalled,
+            m_UIBuilderInstalled,
             m_InputSystemInstalled,
             m_BurstInstalled,
             m_CollectionsInstalled,
@@ -98,6 +102,8 @@ namespace Point.Collections.Editor
         private void OnPackageLoaded()
         {
             m_JsonInstalled = HasPackage(c_Json);
+            m_UIInstalled = HasPackage(c_UI);
+            m_UIBuilderInstalled = HasPackage(c_UIBuilder);
             m_InputSystemInstalled = HasPackage(c_InputSystem);
             m_BurstInstalled = HasPackage(c_Burst);
             m_CollectionsInstalled = HasPackage(c_Collections);
@@ -106,13 +112,17 @@ namespace Point.Collections.Editor
         private void DrawGUI()
         {
             DrawPackageField(ref m_JsonInstalled, c_Json);
+            DrawPackageField(ref m_UIInstalled, c_UI);
+            DrawPackageField(ref m_UIBuilderInstalled, c_UIBuilder);
             DrawPackageField(ref m_InputSystemInstalled, c_InputSystem);
             DrawPackageField(ref m_BurstInstalled, c_Burst);
             DrawPackageField(ref m_CollectionsInstalled, c_Collections);
             DrawPackageField(ref m_MathematicsInstalled, c_Mathematics);
         }
 
-        private static void DrawPackageField(ref bool installed, in string id)
+        private AddRequest m_AddRequest;
+
+        private void DrawPackageField(ref bool installed, in string id)
         {
             string text;
             if (installed)
@@ -133,7 +143,7 @@ namespace Point.Collections.Editor
                 {
                     if (installed)
                     {
-                        AddPackage(id);
+                        m_AddRequest = AddPackage(id);
                     }
                 }
             }
@@ -151,9 +161,11 @@ namespace Point.Collections.Editor
             }
             return false;
         }
-        private static void AddPackage(string id)
+        private static AddRequest AddPackage(string id)
         {
-            UnityEditor.PackageManager.Client.Add(id);
+            var request = UnityEditor.PackageManager.Client.Add(id);
+
+            return request;
         }
     }
 }

@@ -96,7 +96,13 @@ namespace Point.Collections.Editor
                 m_SelectedToolbar.OnLostFocus();
             }
         }
-
+        private void Update()
+        {
+            if (m_SelectedToolbar != null)
+            {
+                m_SelectedToolbar.OnUpdate();
+            }
+        }
         protected override VisualTreeAsset GetVisualTreeAsset()
         {
             VisualTreeAsset asset = AssetHelper.LoadAsset<VisualTreeAsset>("Uxml SetupWizard", "PointEditor");

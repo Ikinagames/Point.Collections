@@ -41,6 +41,8 @@ namespace Point.Collections.Editor
         public virtual void OnFocus() { }
         public virtual void OnLostFocus() { }
 
+        public virtual void OnUpdate() { }
+
         public abstract bool Predicate();
 
         protected virtual VisualElement CreateVisualElement() => null;
