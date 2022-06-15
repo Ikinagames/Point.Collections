@@ -34,6 +34,13 @@ using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
 {
+    /// <summary>
+    /// <inheritdoc cref="UnityEditor.EditorWindow"/>
+    /// </summary>
+    /// <remarks>
+    /// Uxml 전용 에디터 윈도우, <see cref="GetVisualTreeAsset"/> 가 null 을 반환하면,
+    /// 코드로 생성하는 <see cref="CreateVisualElement"/> 를 사용합니다.
+    /// </remarks>
     public abstract class EditorWindowUXML : EditorWindow
     {
         public VisualElement UserVisualElement { get; private set; }
@@ -75,7 +82,15 @@ namespace Point.Collections.Editor
             }
         }
 
+        /// <summary>
+        /// 사용자가 직접 VisualElement 를 구성합니다.
+        /// </summary>
+        /// <returns></returns>
         protected virtual VisualElement CreateVisualElement() => new VisualElement();
+        /// <summary>
+        /// 미리 만들어진 <see cref="VisualTreeAsset"/> 을 통해 UI 를 구성합니다.
+        /// </summary>
+        /// <returns></returns>
         protected virtual VisualTreeAsset GetVisualTreeAsset() => null;
 
         protected virtual void SetupVisualElement(VisualElement root) { }
