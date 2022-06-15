@@ -844,7 +844,7 @@ namespace Point.Collections.Editor
             public static T OpenWindowAtCenterSafe<T>(string title, bool utility)
                 where T : UnityEditor.EditorWindow
             {
-                var window = OpenWindowSafe<T>(title, utility);
+                var window = (T)UnityEditor.EditorWindow.GetWindow(TypeHelper.TypeOf<T>.Type, utility, title);
 
                 window.minSize = new Vector2(600, 500);
                 window.maxSize = window.minSize;
