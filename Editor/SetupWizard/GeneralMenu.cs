@@ -27,9 +27,7 @@
 
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
 {
@@ -368,85 +366,6 @@ namespace Point.Collections.Editor
                     DrawSymbol(ref behaviorTree, behaviorTreeSymbol);
                 }
             }
-        }
-    }
-    internal sealed class PointSettingsMenu : SetupWizardMenuItem
-    {
-        public override string Name => "Settings";
-        public override int Order => -10000;
-
-        SerializedObject serializedObject;
-        SerializedProperty
-            m_LogChannel, m_UserChannelNames,
-            m_EnableLogFile, m_LogFilePath, m_LogDisplayLines,
-            m_DisplayMainApplication,
-            m_InActiveTime;
-
-        public PointSettingsMenu()
-        {
-            serializedObject = new SerializedObject(PointSettings.Instance);
-
-            m_LogChannel = serializedObject.FindProperty(nameof(m_LogChannel));
-            m_UserChannelNames = serializedObject.FindProperty(nameof(m_UserChannelNames));
-            m_EnableLogFile = serializedObject.FindProperty(nameof(m_EnableLogFile));
-            m_LogFilePath = serializedObject.FindProperty(nameof(m_LogFilePath));
-            m_LogDisplayLines = serializedObject.FindProperty(nameof(m_LogDisplayLines));
-            m_DisplayMainApplication = serializedObject.FindProperty(nameof(m_DisplayMainApplication));
-            m_InActiveTime = serializedObject.FindProperty(nameof(m_InActiveTime));
-        }
-        public override void OnFocus()
-        {
-            serializedObject.Update();
-        }
-
-        public override bool Predicate()
-        {
-            return true;
-        }
-        protected override VisualElement CreateVisualElement()
-        {
-            VisualElement root = new VisualElement();
-            root.style.flexGrow = 1;
-
-            PropertyField field = CoreGUI.VisualElement.PropertyField(m_LogChannel);
-            field.RegisterValueChangeCallback(OnValueChanged);
-            root.Add(field);
-
-            field = CoreGUI.VisualElement.PropertyField(m_UserChannelNames);
-            field.RegisterValueChangeCallback(OnValueChanged);
-            root.Add(field);
-
-            root.Add(CoreGUI.VisualElement.Space());
-
-            field = CoreGUI.VisualElement.PropertyField(m_EnableLogFile);
-            field.RegisterValueChangeCallback(OnValueChanged);
-            root.Add(field);
-
-            field = CoreGUI.VisualElement.PropertyField(m_LogFilePath);
-            field.RegisterValueChangeCallback(OnValueChanged);
-            root.Add(field);
-
-            field = CoreGUI.VisualElement.PropertyField(m_LogDisplayLines);
-            field.RegisterValueChangeCallback(OnValueChanged);
-            root.Add(field);
-
-            root.Add(CoreGUI.VisualElement.Space());
-
-            field = CoreGUI.VisualElement.PropertyField(m_DisplayMainApplication);
-            field.RegisterValueChangeCallback(OnValueChanged);
-            root.Add(field);
-
-#if ENABLE_INPUT_SYSTEM
-            field = CoreGUI.VisualElement.PropertyField(m_InActiveTime);
-            field.RegisterValueChangeCallback(OnValueChanged);
-            root.Add(field);
-#endif
-
-            return root;
-        }
-        private void OnValueChanged(SerializedPropertyChangeEvent ev)
-        {
-            EditorUtility.SetDirty(PointSettings.Instance);
         }
     }
 }
