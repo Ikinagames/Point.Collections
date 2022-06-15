@@ -823,6 +823,22 @@ namespace Point.Collections.Editor
             {
                 var window = (T)UnityEditor.EditorWindow.GetWindow(TypeHelper.TypeOf<T>.Type, utility, title);
 
+                try
+                {
+                    var pos = window.position;
+                    window.position = pos;
+                }
+                catch (Exception)
+                {
+                    UnityEngine.Object[] array = Resources.FindObjectsOfTypeAll(TypeHelper.TypeOf<PointSetupWizard>.Type);
+                    foreach (var item in array)
+                    {
+                        UnityEngine.Object.DestroyImmediate(item);
+                    }
+
+                    return OpenWindowSafe<T>(title, utility);
+                }
+
                 return window;
             }
             public static T OpenWindowAtCenterSafe<T>(string title, bool utility)
