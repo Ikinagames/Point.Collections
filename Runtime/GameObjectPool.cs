@@ -152,6 +152,16 @@ namespace Point.Collections
         public int Register(IList<PoolReferece> pools)
         {
             int count = m_References.Count;
+            for (int i = 0; i < pools.Count; i++)
+            {
+                pools[i].Initialize(this);
+
+                Hash friendlyName = pools[i].FriendlyName;
+                if (!friendlyName.IsEmpty())
+                {
+                    m_HashMap[friendlyName] = pools[i];
+                }
+            }
             m_References.AddRange(pools);
 
             return count;
@@ -176,6 +186,12 @@ namespace Point.Collections
         }
         public GameObject Spawn(int index)
         {
+            if (index >= m_References.Count || index < 0)
+            {
+                $"Cannot spawn index {index} it\'s out of range".ToLogError();
+                return null;
+            }
+
             return m_References[index].Get();
         }
 

@@ -97,9 +97,9 @@ namespace Point.Collections.Editor
             while (prop.NextVisible(false))
             {
                 var element = prop.Copy();
-                if (element.GetFieldInfo().GetCustomAttribute<SpaceAttribute>() != null)
+                foreach (var customAttr in element.GetFieldInfo().GetCustomAttributes())
                 {
-                    root.Add(CoreGUI.VisualElement.Space());
+                    AttributeResolver(root, customAttr);
                 }
 
                 var field = new PropertyField(element);
@@ -141,6 +141,18 @@ namespace Point.Collections.Editor
             PropertyField propertyField = new PropertyField(serializedObject.FindProperty(bindingPath));
 
             return propertyField;
+        }
+        protected static void AttributeResolver(VisualElement root, System.Attribute attribute)
+        {
+            if (attribute is SpaceAttribute)
+            {
+                root.Add(CoreGUI.VisualElement.Space());
+            }
+            else if (attribute is HelpBoxAttribute helpBoxAttribute)
+            {
+                HelpBox helpBox = new HelpBox(helpBoxAttribute.Text, helpBoxAttribute.Type);
+                root.Add(helpBox);
+            }
         }
 
         #endregion
