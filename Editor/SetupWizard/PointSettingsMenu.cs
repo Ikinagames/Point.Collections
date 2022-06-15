@@ -67,7 +67,7 @@ namespace Point.Collections.Editor
         protected override VisualElement CreateVisualElement()
         {
             ScrollView root = new ScrollView();
-#if UNITY_2021_1_OR_NEWER
+#if UNITY_UI || UNITY_2021_1_OR_NEWER
             root.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
             root.verticalScrollerVisibility = ScrollerVisibility.Auto;
 #endif

@@ -121,6 +121,7 @@ namespace Point.Collections.Editor
         }
 
         private AddRequest m_AddRequest;
+        private string m_AddPackageID;
 
         private void DrawPackageField(ref bool installed, in string id)
         {
@@ -143,8 +144,34 @@ namespace Point.Collections.Editor
                 {
                     if (installed)
                     {
-                        m_AddRequest = AddPackage(id);
+                        m_AddPackageID = id;
+                        m_AddRequest = AddPackage(m_AddPackageID);
+
+                        EditorUtility.DisplayProgressBar($"Add package {m_AddPackageID}", "Downloading package data ...", 0);
                     }
+                }
+            }
+        }
+        public override void OnUpdate()
+        {
+            if (m_AddRequest != null)
+            {
+                if (m_AddRequest.Status == StatusCode.InProgress)
+                {
+                    EditorUtility.DisplayProgressBar($"Add package {m_AddPackageID}", "Downloading package data ...", 50);
+                }
+                else
+                {
+                    EditorUtility.ClearProgressBar();
+
+                    if (m_AddRequest.Status == StatusCode.Failure)
+                    {
+                        ShowNotification(
+                            new GUIContent($"Add package {m_AddPackageID} request has been failed."));
+                    }
+
+                    m_AddPackageID = null;
+                    m_AddRequest = null;
                 }
             }
         }

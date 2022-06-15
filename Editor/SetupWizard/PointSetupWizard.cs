@@ -78,7 +78,7 @@ namespace Point.Collections.Editor
             for (int i = 0; i < menuItemTypes.Length; i++)
             {
                 m_MenuItems[i] = (SetupWizardMenuItem)Activator.CreateInstance(menuItemTypes[i]);
-                m_MenuItems[i].Initialize();
+                m_MenuItems[i].Initialize(this);
             }
             Array.Sort(m_MenuItems);
         }

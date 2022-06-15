@@ -14,6 +14,7 @@
 // limitations under the License.
 
 using System;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
@@ -26,25 +27,32 @@ namespace Point.Collections.Editor
             VisualElement
         }
 
+        private Action<GUIContent> showNotificationDelegate;
+        private Action removeNotificationDelegate;
+
         public abstract string Name { get; }
         public abstract int Order { get; }
         public virtual GUIType Type => GUIType.IMGUI;
 
         public VisualElement Root { get; private set; }
 
-        internal void Initialize()
+        internal void Initialize(PointSetupWizard setupWizard)
         {
             Root = CreateVisualElement();
+
+            showNotificationDelegate = setupWizard.ShowNotification;
+            removeNotificationDelegate = setupWizard.RemoveNotification;
         }
 
         public virtual void OnVisible() { }
         public virtual void OnFocus() { }
         public virtual void OnLostFocus() { }
-
         public virtual void OnUpdate() { }
 
-        public abstract bool Predicate();
+        protected virtual void ShowNotification(GUIContent content) => showNotificationDelegate.Invoke(content);
+        protected virtual void RemoveNotification() => removeNotificationDelegate.Invoke();
 
+        public abstract bool Predicate();
         protected virtual VisualElement CreateVisualElement() => null;
         public virtual void OnGUI() { }
 
