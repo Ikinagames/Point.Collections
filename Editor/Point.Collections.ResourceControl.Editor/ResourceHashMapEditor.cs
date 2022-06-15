@@ -60,7 +60,7 @@ namespace Point.Collections.ResourceControl.Editor
 
                 if (m_StreamingAssetBundlesProperty.arraySize == 0)
                 {
-                    assetBundleGUI.parent.AddToClassList("hide");
+                    assetBundleGUI.parent.style.Hide(true);
                     assetBundleRemoveBtt.SetEnabled(false);
                 }
 
@@ -71,11 +71,17 @@ namespace Point.Collections.ResourceControl.Editor
 
                     serializedObject.ApplyModifiedProperties();
 
+                    var prop = m_StreamingAssetBundlesProperty.GetArrayElementAtIndex(index);
+                    var ve = CoreGUI.VisualElement.PropertyField(prop);
+                    assetBundleGUI.Add(ve);
+
                     if (index == 0)
                     {
-                        assetBundleGUI.parent.RemoveFromClassList("hide");
+                        assetBundleGUI.parent.style.Hide(false);
                         assetBundleRemoveBtt.SetEnabled(true);
                     }
+
+                    assetBundleGUI.MarkDirtyRepaint();
                 };
                 assetBundleRemoveBtt.clicked += delegate
                 {
@@ -86,21 +92,32 @@ namespace Point.Collections.ResourceControl.Editor
 
                     serializedObject.ApplyModifiedProperties();
 
+                    assetBundleGUI.RemoveAt(index);
+
                     if (index == 0)
                     {
-                        assetBundleGUI.parent.AddToClassList("hide");
+                        assetBundleGUI.parent.style.Hide(true);
                         assetBundleRemoveBtt.SetEnabled(false);
                     }
+
+                    assetBundleGUI.MarkDirtyRepaint();
                 };
 
-                assetBundleGUI.onGUIHandler += delegate
+                for (int i = 0; i < m_StreamingAssetBundlesProperty.arraySize; i++)
                 {
-                    for (int i = 0; i < m_StreamingAssetBundlesProperty.arraySize; i++)
-                    {
-                        var element = m_StreamingAssetBundlesProperty.GetArrayElementAtIndex(i);
-                        EditorGUILayout.PropertyField(element);
-                    }
-                };
+                    var prop = m_StreamingAssetBundlesProperty.GetArrayElementAtIndex(i);
+                    var ve = CoreGUI.VisualElement.PropertyField(prop);
+
+                    assetBundleGUI.Add(ve);
+                }
+                //assetBundleGUI.onGUIHandler += delegate
+                //{
+                //    for (int i = 0; i < m_StreamingAssetBundlesProperty.arraySize; i++)
+                //    {
+                //        var element = m_StreamingAssetBundlesProperty.GetArrayElementAtIndex(i);
+                //        EditorGUILayout.PropertyField(element);
+                //    }
+                //};
             }
 
             // Scene Binded Labels
@@ -166,7 +183,7 @@ namespace Point.Collections.ResourceControl.Editor
 #else
                 VisualElement rootSceneBindedLabels = root.Q("SceneBindedLabels");
 
-                rootSceneBindedLabels.AddToClassList("hide");
+                rootSceneBindedLabels.style.Hide(true);
                 rootSceneBindedLabels.SetEnabled(false);
 #endif
             }
