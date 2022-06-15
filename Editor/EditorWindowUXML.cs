@@ -29,6 +29,7 @@
 #if UNITYENGINE
 
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
@@ -42,7 +43,20 @@ namespace Point.Collections.Editor
             var asset = GetVisualTreeAsset();
             if (asset == null)
             {
-                UserVisualElement = CreateVisualElement();
+                try
+                {
+                    UserVisualElement = CreateVisualElement();
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
+                if (UserVisualElement == null)
+                {
+                    UserVisualElement = new VisualElement();
+                    UserVisualElement.Add(new Label($"No VisualElement Implement"));
+                }
+                
                 rootVisualElement.Add(UserVisualElement);
             }
             else
@@ -51,11 +65,18 @@ namespace Point.Collections.Editor
                 UserVisualElement = rootVisualElement;
             }
 
-            SetupVisualElement(UserVisualElement);
+            try
+            {
+                SetupVisualElement(UserVisualElement);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogException(ex);
+            }
         }
 
         protected virtual VisualElement CreateVisualElement() => new VisualElement();
-        protected virtual VisualTreeAsset GetVisualTreeAsset() { return null; }
+        protected virtual VisualTreeAsset GetVisualTreeAsset() => null;
 
         protected virtual void SetupVisualElement(VisualElement root) { }
     }
