@@ -38,7 +38,6 @@ namespace Point.Collections.Actions
     /// 레퍼런스 될 수 있습니다.
     /// </remarks>
     /// <typeparam name="TResult">
-    /// 의미있는 값을 반환하지 않는다면 int 를 사용하세요
     /// </typeparam>
     [Serializable]
     public abstract class ConstAction<TResult> : ConstActionBase<TResult>
@@ -48,6 +47,10 @@ namespace Point.Collections.Actions
             return Execute();
         }
         protected abstract TResult Execute();
+    }
+    [Serializable]
+    public abstract class ConstAction : ConstAction<Void>
+    {
     }
     [Serializable]
     public abstract class ConstAction<TResult, T> : ConstActionBase<TResult>
@@ -89,9 +92,18 @@ namespace Point.Collections.Actions
         protected virtual void OnShutdown() { }
         protected virtual void OnDispose() { }
     }
-
     public abstract class ConstActionBase<TResult> : ConstActionBase
     {
         protected override sealed Type ReturnType => TypeHelper.TypeOf<TResult>.Type;
+    }
+
+    public struct Void
+    {
+        public static implicit operator Void(int _) => new Void();
+        public static implicit operator Void(bool _) => new Void();
+        public static implicit operator Void(float _) => new Void();
+        public static implicit operator Void(double _) => new Void();
+        public static implicit operator Void(long _) => new Void();
+        public static implicit operator Void(string _) => new Void();
     }
 }

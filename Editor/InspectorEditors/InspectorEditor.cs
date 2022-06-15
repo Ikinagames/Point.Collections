@@ -38,8 +38,9 @@ namespace Point.Collections.Editor
             OnInspectorGUIContents();
         }
         /// <summary>
-        /// <see cref="UnityEditor.Editor.OnInspectorGUI"/> 와 같습니다.
+        /// <inheritdoc cref="OnInspectorGUI"/>
         /// </summary>
+        /// <see cref="UnityEditor.Editor.OnInspectorGUI"/> 와 같습니다.
         protected virtual void OnInspectorGUIContents() { base.OnInspectorGUI(); }
     }
     public abstract class InspectorEditorUXML<T> : InspectorEditorBase<T>

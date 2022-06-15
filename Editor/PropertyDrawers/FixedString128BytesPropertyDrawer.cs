@@ -19,21 +19,36 @@
 using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 #endif
 
 
 namespace Point.Collections.Editor
 {
     [CustomPropertyDrawer(typeof(FixedString128Bytes))]
-    internal sealed class FixedString128BytesPropertyDrawer : PropertyDrawer<FixedString128Bytes>
+    internal sealed class FixedString128BytesPropertyDrawer : PropertyDrawerUXML<FixedString128Bytes>
     {
-        protected override void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
-        {
-            string str = SerializedPropertyHelper.ReadFixedString128Bytes(property).ToString();
-            str = TextField(ref rect, label, str);
-            SerializedPropertyHelper.SetFixedString128Bytes(property, str);
+        //protected override void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
+        //{
+        //    string str = SerializedPropertyHelper.ReadFixedString128Bytes(property).ToString();
+        //    str = TextField(ref rect, label, str);
+        //    SerializedPropertyHelper.SetFixedString128Bytes(property, str);
 
-            //base.OnPropertyGUI(ref rect, property, label);
+        //    //base.OnPropertyGUI(ref rect, property, label);
+        //}
+        protected override VisualElement CreateVisualElement(SerializedProperty property)
+        {
+            property = property.Copy();
+            string str = SerializedPropertyHelper.ReadFixedString128Bytes(property).ToString();
+
+            TextField field = new TextField(property.displayName);
+            field.value = str;
+            field.RegisterValueChangedCallback(t =>
+            {
+                SerializedPropertyHelper.SetFixedString128Bytes(property, t.newValue);
+            });
+
+            return field;
         }
     }
 }

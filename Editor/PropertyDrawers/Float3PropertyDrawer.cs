@@ -20,12 +20,14 @@
 using Unity.Mathematics;
 #endif
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
 {
     [CustomPropertyDrawer(typeof(float3))]
-    internal sealed class Float3PropertyDrawer : PropertyDrawer<float3>
+    internal sealed class Float3PropertyDrawer : PropertyDrawerUXML<float3>
     {
         private static GUIContent[] s_ElementContents = new GUIContent[]
         {
@@ -63,10 +65,32 @@ namespace Point.Collections.Editor
             z.floatValue = EditorGUI.FloatField(elementRaws[1], z.floatValue);
         }
 
-        protected override void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
+        //protected override void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
+        //{
+        //    Rect elementRect = rect.Pop();
+        //    Draw(elementRect, property, label);
+        //}
+
+        protected override VisualElement CreateVisualElement(SerializedProperty property)
         {
-            Rect elementRect = rect.Pop();
-            Draw(elementRect, property, label);
+            SerializedProperty
+                x = property.FindPropertyRelative("x"),
+                y = property.FindPropertyRelative("y"),
+                z = property.FindPropertyRelative("z");
+
+            Vector3Field field = new Vector3Field(property.displayName);
+            field.value = new Vector3(x.floatValue, y.floatValue, z.floatValue);
+            field.RegisterValueChangedCallback(t =>
+            {
+                var value = t.newValue;
+                x.floatValue = value.x;
+                y.floatValue = value.y;
+                z.floatValue = value.z;
+
+                x.serializedObject.ApplyModifiedProperties();
+            });
+
+            return field;
         }
     }
 }

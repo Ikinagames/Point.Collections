@@ -34,7 +34,7 @@ using UnityEditor;
 namespace Point.Collections.Editor
 {
     /// <summary>
-    /// <seealso cref="EditorPrefs"/>
+    /// <seealso cref="EditorPrefs"/> 를 기반으로 에디터내 값을 저장하거나 불러올 수 있습니다.
     /// </summary>
     public static class EditorValues
     {

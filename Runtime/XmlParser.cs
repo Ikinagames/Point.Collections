@@ -34,6 +34,12 @@ namespace Point.Collections
         {
             return new XElement(name);
         }
+        /// <summary>
+        /// <paramref name="obj"/> 를 <paramref name="elementName"/> 이름의 XML 필드로 바꾸어 반환합니다.
+        /// </summary>
+        /// <param name="elementName"></param>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public static XElement ConvertToXml(string elementName, object obj)
         {
             if (obj is IDictionary dictionary)
@@ -52,7 +58,21 @@ namespace Point.Collections
             return new XElement(elementName, obj.ToString());
         }
 
+        /// <summary>
+        /// <see cref="ConvertToXml(string, object)"/> 을 통해 변환된 XML 을 
+        /// 다시 오브젝트(<typeparamref name="T"/>) 로 변환하여 반환합니다.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="xml"></param>
+        /// <returns></returns>
         public static T ConvertToObject<T>(XElement xml) => (T)ConvertToObject(TypeHelper.TypeOf<T>.Type, xml);
+        /// <summary>
+        /// <see cref="ConvertToXml(string, object)"/> 을 통해 변환된 XML 을 
+        /// 다시 오브젝트로 변환하여 반환합니다.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="xml"></param>
+        /// <returns></returns>
         public static object ConvertToObject(Type type, XElement xml)
         {
             if (TypeHelper.InheritsFrom(type, TypeHelper.TypeOf<IDictionary>.Type))

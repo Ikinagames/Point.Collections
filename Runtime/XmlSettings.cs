@@ -293,6 +293,13 @@ namespace Point.Collections
             fieldInfo.SetValue(obj, value);
         }
 
+        /// <summary>
+        /// <paramref name="obj"/> 의 설정 값을 저장합니다.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="obj"/> 는 <see cref="XmlSettingsAttribute"/> 를 가지고 있어야합니다.
+        /// </remarks>
+        /// <param name="obj"></param>
         public static void SaveSettings(object obj)
         {
             Type t = obj.GetType();
@@ -417,9 +424,16 @@ namespace Point.Collections
         }
     }
 
+    /// <summary>
+    /// XML 타입을 선언합니다.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public sealed class XmlSettingsAttribute : Attribute
     {
+        /// <summary>
+        /// 사용자가 지정한 이름으로 최상단 XML 구조를 만듭니다. 
+        /// <see langword="null"/> 이거나 아무것도 없으면 타입의 이름을 대신 사용합니다.
+        /// </summary>
         public string PropertyName;
         /// <summary>
         /// <see langword="true"/> 일 경우, <see cref="PlayerPrefs"/> 를 사용하여 레지스트리에 저장합니다. 
@@ -427,9 +441,16 @@ namespace Point.Collections
         /// </summary>
         public bool SaveToDisk;
     }
+    /// <summary>
+    /// XML 필드를 선언합니다.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
     public sealed class XmlFieldAttribute : Attribute
     {
+        /// <summary>
+        /// 사용자가 지정한 이름으로 XML 구조를 만듭니다. 
+        /// <see langword="null"/> 이거나 아무것도 없으면 필드의 이름을 대신 사용합니다.
+        /// </summary>
         public string PropertyName;
     }
 }

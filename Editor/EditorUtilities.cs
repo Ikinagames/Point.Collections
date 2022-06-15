@@ -29,6 +29,9 @@ using UnityEngine;
 
 namespace Point.Collections.Editor
 {
+    /// <summary>
+    /// 더 이상 사용되지 않습니다. <see cref="CoreGUI"/> 를 사용하세요.
+    /// </summary>
     [Obsolete("Use CoreGUI")]
     public sealed class EditorUtilities
     {

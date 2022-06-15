@@ -40,6 +40,10 @@ namespace Point.Collections.Editor
         private float m_AutoHeight = 0;
         private AnimFloat m_Height;
 
+        public override sealed VisualElement CreatePropertyGUI(SerializedProperty property)
+        {
+            return base.CreatePropertyGUI(property);
+        }
         public override sealed float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             float height = PropertyHeight(property, label);
@@ -295,9 +299,41 @@ namespace Point.Collections.Editor
         }
 
         #endregion
+
+        #region Base Sealed
+
+        public override sealed bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+        public override sealed int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+        public override sealed string ToString()
+        {
+            return base.ToString();
+        }
+
+        #endregion
     }
+    /// <summary>
+    /// <inheritdoc cref="PropertyDrawer"/>
+    /// </summary>
+    /// <remarks>
+    /// UXML 전용
+    /// </remarks>
+    /// <typeparam name="T"></typeparam>
     public abstract class PropertyDrawerUXML<T> : PropertyDrawer
     {
+        public override sealed void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            base.OnGUI(position, property, label);
+        }
+        public override sealed float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return base.GetPropertyHeight(property, label);
+        }
         public override sealed VisualElement CreatePropertyGUI(SerializedProperty property)
         {
             var ve = CreateVisualElement(property);
@@ -320,6 +356,23 @@ namespace Point.Collections.Editor
             return root;
         }
         protected virtual void SetupVisualElement(SerializedProperty property, VisualElement root) { }
+
+        #region Base Sealed
+
+        public override sealed bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+        public override sealed int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+        public override sealed string ToString()
+        {
+            return base.ToString();
+        }
+
+        #endregion
     }
 }
 

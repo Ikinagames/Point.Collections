@@ -26,8 +26,6 @@ namespace Point.Collections.Editor
     [CustomEditor(typeof(PointSettings))]
     public sealed class PointSettingsEditor : InspectorEditorUXML<PointSettings>
     {
-        protected override bool ShowEditorScript => true;
-
         protected override bool ShouldHideOpenButton() => true;
     }
 }

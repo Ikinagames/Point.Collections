@@ -17,17 +17,25 @@
 #define DEBUG_MODE
 
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
 {
     [CustomPropertyDrawer(typeof(Hash))]
-    internal sealed class HashPropertyDrawer : PropertyDrawer<Hash>
+    internal sealed class HashPropertyDrawer : PropertyDrawerUXML<Hash>
     {
-        protected override void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
+        protected override VisualElement CreateVisualElement(SerializedProperty property)
         {
-            SerializedProperty valueProp = property.FindPropertyRelative("m_Value");
-            EditorGUI.PropertyField(rect.Pop(), valueProp, new GUIContent("Hash"));
+            PropertyField field = new PropertyField(
+                property.FindPropertyRelative("m_Value"), property.displayName);
+            
+            return field;
+        }
+        protected override void SetupVisualElement(SerializedProperty property, VisualElement root)
+        {
+            base.SetupVisualElement(property, root);
         }
     }
 }
