@@ -85,7 +85,9 @@ namespace Point.Collections.Editor
         const string
             c_Json = "com.unity.nuget.newtonsoft-json",
             c_UI = "com.unity.ui",
+#if !UNITY_2021_1_OR_NEWER
             c_UIBuilder = "com.unity.ui.builder",
+#endif
             c_InputSystem = "com.unity.inputsystem",
             c_Burst = "com.unity.burst",
             c_Collections = "com.unity.collections",
@@ -103,7 +105,9 @@ namespace Point.Collections.Editor
         {
             m_JsonInstalled = HasPackage(c_Json);
             m_UIInstalled = HasPackage(c_UI);
+#if !UNITY_2021_1_OR_NEWER
             m_UIBuilderInstalled = HasPackage(c_UIBuilder);
+#endif
             m_InputSystemInstalled = HasPackage(c_InputSystem);
             m_BurstInstalled = HasPackage(c_Burst);
             m_CollectionsInstalled = HasPackage(c_Collections);
@@ -113,7 +117,9 @@ namespace Point.Collections.Editor
         {
             DrawPackageField(ref m_JsonInstalled, c_Json);
             DrawPackageField(ref m_UIInstalled, c_UI);
+#if !UNITY_2021_1_OR_NEWER
             DrawPackageField(ref m_UIBuilderInstalled, c_UIBuilder);
+#endif
             DrawPackageField(ref m_InputSystemInstalled, c_InputSystem);
             DrawPackageField(ref m_BurstInstalled, c_Burst);
             DrawPackageField(ref m_CollectionsInstalled, c_Collections);
