@@ -42,14 +42,9 @@ namespace Point.Collections.Editor
         [MenuItem("Point/Setup Wizard")]
         public static void CoreSystemSetupWizard()
         {
-            m_SetupWizard = (PointSetupWizard)GetWindow(TypeHelper.TypeOf<PointSetupWizard>.Type, true, "Point Framework Setup Wizard");
-            //m_SetupWizard.ShowUtility();
-            m_SetupWizard.minSize = new Vector2(600, 500);
-            m_SetupWizard.maxSize = m_SetupWizard.minSize;
-            var position = new Rect(Vector2.zero, m_SetupWizard.minSize);
-            Vector2 screenCenter = new Vector2(Screen.currentResolution.width, Screen.currentResolution.height) / 2;
-            position.center = screenCenter / EditorGUIUtility.pixelsPerPoint;
-            m_SetupWizard.position = position;
+            const string title = "Point Framework Setup Wizard";
+
+            CoreGUI.EditorWindow.OpenWindowAtCenterSafe<PointSetupWizard>(title, true);
         }
 
         [MenuItem("Point/Utils/Generate Guid")]

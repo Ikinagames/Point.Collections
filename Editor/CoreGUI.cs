@@ -711,6 +711,8 @@ namespace Point.Collections.Editor
 
         #endregion
 
+        #region Visual Element
+
         public struct VisualElement
         {
             private static StyleSheet s_DefaultStyleSheet;
@@ -810,6 +812,47 @@ namespace Point.Collections.Editor
             t.borderTopRightRadius = value;
             t.borderBottomLeftRadius = value;
             t.borderBottomRightRadius = value;
+        }
+
+        #endregion
+
+        public struct EditorWindow
+        {
+            public static T OpenWindowSafe<T>(string title, bool utility)
+                where T : UnityEditor.EditorWindow
+            {
+                var window = (T)UnityEditor.EditorWindow.GetWindow(TypeHelper.TypeOf<T>.Type, utility, title);
+
+                return window;
+            }
+            public static T OpenWindowAtCenterSafe<T>(string title, bool utility)
+                where T : UnityEditor.EditorWindow
+            {
+                var window = OpenWindowSafe<T>(title, utility);
+
+                window.minSize = new Vector2(600, 500);
+                window.maxSize = window.minSize;
+                var position = new Rect(Vector2.zero, window.minSize);
+                Vector2 screenCenter = new Vector2(Screen.currentResolution.width, Screen.currentResolution.height) / 2;
+                position.center = screenCenter / EditorGUIUtility.pixelsPerPoint;
+
+                try
+                {
+                    window.position = position;
+                }
+                catch (Exception)
+                {
+                    UnityEngine.Object[] array = Resources.FindObjectsOfTypeAll(TypeHelper.TypeOf<PointSetupWizard>.Type);
+                    foreach (var item in array)
+                    {
+                        UnityEngine.Object.DestroyImmediate(item);
+                    }
+
+                    return OpenWindowAtCenterSafe<T>(title, utility);
+                }
+
+                return window;
+            }
         }
     }
 }
