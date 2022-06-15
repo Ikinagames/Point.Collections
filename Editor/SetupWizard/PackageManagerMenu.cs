@@ -153,7 +153,7 @@ namespace Point.Collections.Editor
                         m_AddPackageID = id;
                         m_AddRequest = AddPackage(m_AddPackageID);
 
-                        EditorUtility.DisplayProgressBar($"Add package {m_AddPackageID}", "Downloading package data ...", 0);
+                        EditorUtility.DisplayProgressBar($"Add package {m_AddPackageID}", "Requesting package data ...", 0);
                     }
                 }
             }
@@ -164,7 +164,7 @@ namespace Point.Collections.Editor
             {
                 if (m_AddRequest.Status == StatusCode.InProgress)
                 {
-                    EditorUtility.DisplayProgressBar($"Add package {m_AddPackageID}", "Downloading package data ...", 50);
+                    EditorUtility.DisplayProgressBar($"Add package {m_AddPackageID}", "Downloading package data ...", .5f);
                 }
                 else
                 {
