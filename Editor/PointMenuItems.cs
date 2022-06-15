@@ -43,7 +43,7 @@ namespace Point.Collections.Editor
         public static void CoreSystemSetupWizard()
         {
             m_SetupWizard = (PointSetupWizard)GetWindow(TypeHelper.TypeOf<PointSetupWizard>.Type, true, "Point Framework Setup Wizard");
-            m_SetupWizard.ShowUtility();
+            //m_SetupWizard.ShowUtility();
             m_SetupWizard.minSize = new Vector2(600, 500);
             m_SetupWizard.maxSize = m_SetupWizard.minSize;
             var position = new Rect(Vector2.zero, m_SetupWizard.minSize);

@@ -436,9 +436,11 @@ namespace Point.Collections.Editor
             field.RegisterValueChangeCallback(OnValueChanged);
             root.Add(field);
 
+#if ENABLE_INPUT_SYSTEM
             field = CoreGUI.VisualElement.PropertyField(m_InActiveTime);
             field.RegisterValueChangeCallback(OnValueChanged);
             root.Add(field);
+#endif
 
             return root;
         }
