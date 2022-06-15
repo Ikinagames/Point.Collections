@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEngine;
+using UnityEditor.UIElements;
 #if UNITY_MATHEMATICS
 using Unity.Mathematics;
 using UnityEngine.UIElements;
@@ -734,49 +735,14 @@ namespace Point.Collections.Editor
 
                 return v;
             }
+            public static VE Space() => Space(14, LengthUnit.Pixel);
 
-            public static VE ListContainer(string name,
-                out Label headerLabel,
-                out Button addButton, out Button removeButton, out VE contentContainer)
+            public static PropertyField PropertyField(SerializedProperty property)
             {
-                VE root = new VE();
-                root.styleSheets.Add(DefaultStyleSheet);
-                root.AddToClassList("content-border");
+                PropertyField field = new PropertyField(property);
+                field.BindProperty(property);
 
-                VE headerContainer = new VE();
-                headerContainer.AddToClassList("header-list-2");
-                headerContainer.style.SetMargin(1.5f);
-                {
-                    headerLabel = new Label(name);
-                    headerLabel.name = "H3-Label";
-                    headerContainer.Add(headerLabel);
-
-                    addButton = new Button();
-                    removeButton = new Button();
-                    headerContainer.Add(addButton);
-                    headerContainer.Add(removeButton);
-
-                    addButton.name = "AddButton";
-                    addButton.text = "+";
-                    addButton.AddToClassList("header-button-1");
-
-                    removeButton.name = "RemoveButton";
-                    removeButton.text = "-";
-                    removeButton.AddToClassList("header-button-1");
-                }
-                root.Add(headerContainer);
-
-                contentContainer = new VE();
-                contentContainer.AddToClassList("content-container");
-                contentContainer.AddToClassList("inner-container");
-                contentContainer.style.SetMargin(4);
-                contentContainer.style.paddingLeft = 17;
-                {
-
-                }
-                root.Add(contentContainer);
-
-                return root;
+                return field;
             }
 
             public static Label Label(string text, float size)

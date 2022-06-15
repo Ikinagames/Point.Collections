@@ -78,8 +78,23 @@ namespace Point.Collections.Editor
             for (int i = 0; i < menuItemTypes.Length; i++)
             {
                 m_MenuItems[i] = (SetupWizardMenuItem)Activator.CreateInstance(menuItemTypes[i]);
+                m_MenuItems[i].Initialize();
             }
             Array.Sort(m_MenuItems);
+        }
+        private void OnFocus()
+        {
+            if (m_SelectedToolbar != null)
+            {
+                m_SelectedToolbar.OnFocus();
+            }
+        }
+        private void OnLostFocus()
+        {
+            if (m_SelectedToolbar != null)
+            {
+                m_SelectedToolbar.OnLostFocus();
+            }
         }
 
         protected override VisualTreeAsset GetVisualTreeAsset()
@@ -97,6 +112,7 @@ namespace Point.Collections.Editor
         {
             VisualElement container = root.Q("MenuItemContainer").Q("Container");
             Label menuItemLabel = root.Q("Bottom").Q<Label>("MenuItemLabel");
+            IMGUIContainer gui = root.Q("Bottom").Q<IMGUIContainer>("MenuItemGUI");
 
             for (int i = 0; i < m_MenuItems.Length; i++)
             {
@@ -107,9 +123,20 @@ namespace Point.Collections.Editor
 
                 button.clicked += delegate
                 {
-                    m_SelectedToolbar = menuItem;
+                    if (m_SelectedToolbar != null && m_SelectedToolbar.Root != null)
+                    {
+                        m_SelectedToolbar.Root.RemoveFromHierarchy();
+                    }
 
-                    menuItemLabel.text = menuItem.Name;
+                    m_SelectedToolbar = menuItem;
+                    menuItemLabel.text = m_SelectedToolbar.Name;
+
+                    m_SelectedToolbar.OnVisible();
+                    if (m_SelectedToolbar.Root != null)
+                    {
+                        gui.Add(m_SelectedToolbar.Root);
+                        gui.MarkDirtyRepaint();
+                    }
                 };
 
                 container.Add(button);
@@ -119,6 +146,13 @@ namespace Point.Collections.Editor
             {
                 m_SelectedToolbar = m_MenuItems[0];
                 menuItemLabel.text = m_SelectedToolbar.Name;
+
+                m_SelectedToolbar.OnVisible();
+                if (m_SelectedToolbar.Root != null)
+                {
+                    gui.Add(m_SelectedToolbar.Root);
+                    gui.MarkDirtyRepaint();
+                }
             }
         }
         private void SetupGUI(VisualElement root)
@@ -129,7 +163,9 @@ namespace Point.Collections.Editor
         }
         private void MenuItemGUI()
         {
-            if (m_SelectedToolbar != null)
+            if (m_SelectedToolbar == null) return;
+
+            if (m_SelectedToolbar.Root == null)
             {
                 m_SelectedToolbar.OnGUI();
             }

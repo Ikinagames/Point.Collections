@@ -14,6 +14,7 @@
 // limitations under the License.
 
 using System;
+using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
 {
@@ -29,8 +30,21 @@ namespace Point.Collections.Editor
         public abstract int Order { get; }
         public virtual GUIType Type => GUIType.IMGUI;
 
-        public abstract void OnGUI();
+        public VisualElement Root { get; private set; }
+
+        internal void Initialize()
+        {
+            Root = CreateVisualElement();
+        }
+
+        public virtual void OnVisible() { }
+        public virtual void OnFocus() { }
+        public virtual void OnLostFocus() { }
+
         public abstract bool Predicate();
+
+        protected virtual VisualElement CreateVisualElement() => null;
+        public virtual void OnGUI() { }
 
         int IComparable<SetupWizardMenuItem>.CompareTo(SetupWizardMenuItem other)
         {

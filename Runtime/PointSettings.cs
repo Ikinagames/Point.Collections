@@ -45,7 +45,7 @@ namespace Point.Collections
         [Tooltip("Point Application 객체를 Hierarchy 에 표시할지 결정합니다.")]
         [SerializeField] internal bool m_DisplayMainApplication = false; 
 #if ENABLE_INPUT_SYSTEM
-        [Tooltip("해당 시간(초) 만큼 인풋이 없을 경우 이벤트를 발생합니다.")]
+        [Tooltip("해당 시간(초) 만큼 인풋이 없을 경우 이벤트(ApplicationInActiveEvent)를 발생합니다.")]
         [SerializeField] private float m_InActiveTime = 120f;
 #endif
 
