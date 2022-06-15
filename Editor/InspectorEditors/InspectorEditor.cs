@@ -20,6 +20,7 @@
 #define UNITYENGINE
 
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -96,6 +97,11 @@ namespace Point.Collections.Editor
             while (prop.NextVisible(false))
             {
                 var element = prop.Copy();
+                if (element.GetFieldInfo().GetCustomAttribute<SpaceAttribute>() != null)
+                {
+                    root.Add(CoreGUI.VisualElement.Space());
+                }
+
                 var field = new PropertyField(element);
 
                 string[] sp = element.propertyPath.Split('.');
