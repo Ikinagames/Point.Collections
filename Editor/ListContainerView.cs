@@ -230,6 +230,8 @@ namespace Point.Collections.Editor
             }
 
             base.Add(item);
+
+            item.AddToClassList("list-content-margin");
         }
 
         public new void Remove(VisualElement item)
@@ -241,9 +243,12 @@ namespace Point.Collections.Editor
                 m_ContentContainer.style.Hide(true);
                 m_RemoveButton.SetEnabled(false);
             }
+
+            item.RemoveFromClassList("list-content-margin");
         }
         public new void RemoveAt(int index)
         {
+            VisualElement item = this[index];
             base.RemoveAt(index);
 
             if (contentContainer.childCount == 0)
@@ -251,6 +256,8 @@ namespace Point.Collections.Editor
                 m_ContentContainer.style.Hide(true);
                 m_RemoveButton.SetEnabled(false);
             }
+
+            item.RemoveFromClassList("list-content-margin");
         }
     }
 }
