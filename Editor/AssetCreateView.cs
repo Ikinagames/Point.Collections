@@ -63,6 +63,7 @@ namespace Point.Collections.Editor
                 AssetCreateView ate = ve as AssetCreateView;
 
                 ate.text = m_Text.GetValueFromBag(bag, cc);
+                ate.showTemplete = m_ShowTemplete.GetValueFromBag(bag, cc);
                 ate.templeteFieldName = m_TempleteFieldName.GetValueFromBag(bag, cc);
                 ate.templeteFieldType = m_TempleteFieldType.GetValueFromBag(bag, cc);
             }
