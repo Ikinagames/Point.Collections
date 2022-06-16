@@ -12,8 +12,8 @@
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
                     <ui:Button text="Remove" display-tooltip-when-elided="true" name="RemoveButton" style="margin-right: 0; margin-left: 0;" />
-                    <ui:Button text="Settings" display-tooltip-when-elided="true" name="SettingsButton" style="margin-left: 0; margin-right: 0;" />
                     <ui:Button text="Disable" display-tooltip-when-elided="true" name="DisableButton" class="header-button-1" style="margin-right: 0; margin-left: 0;" />
+                    <ui:Button text="Settings" display-tooltip-when-elided="true" name="SettingsButton" style="margin-left: 0; margin-right: 0;" />
                     <ui:Button text="Add" display-tooltip-when-elided="true" name="AddButton" class="header-button-1" style="margin-right: 0; margin-left: 0; width: 100px; display: none;" />
                 </ui:VisualElement>
             </ui:VisualElement>

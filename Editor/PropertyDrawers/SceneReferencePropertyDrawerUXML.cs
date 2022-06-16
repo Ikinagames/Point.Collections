@@ -30,7 +30,7 @@ namespace Point.Collections.Editor
     /// If scene is valid, provides basic buttons to interact with the scene's role in Build Settings.
     /// </summary>
     //[CustomPropertyDrawer(typeof(SceneReference))]
-    public class SceneReferencePropertyDrawer : PropertyDrawerUXML<SceneReference>
+    public class SceneReferencePropertyDrawerUXML : PropertyDrawerUXML<SceneReference>
     {
         // The exact name of the asset Object variable in the SceneReference object
         private const string sceneAssetPropertyString = "sceneAsset";
