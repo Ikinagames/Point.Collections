@@ -243,6 +243,7 @@ namespace Point.Collections.Editor
             button.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
             button.style.flexShrink = 1;
             button.text = "-";
+            button.style.SetBorderRadius(0);
             button.clicked += delegate
             {
                 Remove(item);
