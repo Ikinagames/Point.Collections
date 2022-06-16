@@ -1,0 +1,22 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" MemoryProfiler="Unity.MemoryProfiler.Editor" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/Plugins/Point/Point.Collections/Editor/Editor%20Default%20Resources/Uxml/default-uss.uss?fileID=7433441132597879392&amp;guid=c2e1af765731c5e4d830f487d77eacbf&amp;type=3#default-uss" />
+    <ui:VisualElement class="content-border" style="flex-direction: column;">
+        <ui:Label text="NAME" display-tooltip-when-elided="true" name="PropertyName" style="margin-right: 5px; margin-left: 5px; -unity-text-align: middle-center;" />
+        <ui:VisualElement name="ContentContainer" class="content-border" style="flex-grow: 1;">
+            <uie:ObjectField type="UnityEditor.SceneAsset, UnityEditor" name="SceneField" />
+            <ui:VisualElement name="Details" style="flex-direction: row; height: 24px; align-items: center; padding-left: 4px; padding-right: 4px; padding-top: 2px; padding-bottom: 2px; display: flex;">
+                <ui:VisualElement name="Icon" />
+                <ui:VisualElement name="BuildIndexLabel" style="flex-direction: row; flex-grow: 1;">
+                    <ui:Label text="Build Index:" display-tooltip-when-elided="true" />
+                    <ui:Label text="0" display-tooltip-when-elided="true" name="IndexLabel" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                    <ui:Button text="Remove" display-tooltip-when-elided="true" name="RemoveButton" style="margin-right: 0; margin-left: 0;" />
+                    <ui:Button text="Settings" display-tooltip-when-elided="true" name="SettingsButton" style="margin-left: 0; margin-right: 0;" />
+                    <ui:Button text="Disable" display-tooltip-when-elided="true" name="DisableButton" class="header-button-1" style="margin-right: 0; margin-left: 0;" />
+                    <ui:Button text="Add" display-tooltip-when-elided="true" name="AddButton" class="header-button-1" style="margin-right: 0; margin-left: 0; width: 100px; display: none;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
