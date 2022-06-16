@@ -44,6 +44,8 @@ namespace Point.Collections.ResourceControl
     {
         public static AssetInfo Invalid => default(AssetInfo);
 
+        #region Fields
+
         [NativeDisableUnsafePtrRestriction, NonSerialized]
         internal readonly UnsafeReference<UnsafeAssetBundleInfo> m_BundlePointer;
         [NonSerialized]
@@ -52,6 +54,8 @@ namespace Point.Collections.ResourceControl
 #if UNITY_EDITOR
         private readonly bool m_EditorOnly;
 #endif
+
+        #endregion
 
         [NotBurstCompatible]
         internal UnsafeReference<UnsafeAssetInfo> UnsafeInfo
@@ -155,6 +159,8 @@ namespace Point.Collections.ResourceControl
         /// </summary>
         public AssetRuntimeKey Key => m_Key;
 
+        #region Constructors
+
         public AssetInfo(AssetRuntimeKey key)
         {
             this = default(AssetInfo);
@@ -183,6 +189,10 @@ namespace Point.Collections.ResourceControl
             m_EditorOnly = true;
         }
 #endif
+
+        #endregion
+
+        #region Concrete Methods
 
         /// <summary>
         /// 에셋의 레퍼런스를 반환합니다.
@@ -239,6 +249,8 @@ namespace Point.Collections.ResourceControl
                 m_Key.Equals(other.m_Key);
         }
 
+        #endregion
+
         public static implicit operator UnityEngine.Object(AssetInfo t) => t.Asset;
     }
 
@@ -251,6 +263,8 @@ namespace Point.Collections.ResourceControl
     {
         public static AssetInfo<T> Invalid => default(AssetInfo<T>);
 
+        #region Fields
+
         [NativeDisableUnsafePtrRestriction, NonSerialized]
         internal readonly UnsafeReference<UnsafeAssetBundleInfo> m_BundlePointer;
         [NonSerialized]
@@ -259,6 +273,8 @@ namespace Point.Collections.ResourceControl
 #if UNITY_EDITOR
         private readonly bool m_EditorOnly;
 #endif
+
+        #endregion
 
         [NotBurstCompatible]
         internal ref UnsafeAssetInfo UnsafeInfo
@@ -367,6 +383,8 @@ namespace Point.Collections.ResourceControl
         /// </summary>
         public AssetRuntimeKey Key => m_Key;
 
+        #region Constructors
+
         public AssetInfo(AssetRuntimeKey key)
         {
             this = default(AssetInfo<T>);
@@ -403,6 +421,10 @@ namespace Point.Collections.ResourceControl
             m_EditorOnly = true;
         }
 #endif
+
+        #endregion
+
+        #region Concrete Methods
 
         /// <summary>
         /// 에셋의 레퍼런스를 반환합니다.
@@ -458,6 +480,8 @@ namespace Point.Collections.ResourceControl
                 m_InstanceID.Equals(other.m_InstanceID) &&
                 m_Key.Equals(other.m_Key);
         }
+
+        #endregion
 
         public static explicit operator AssetInfo<T>(AssetInfo t)
         {

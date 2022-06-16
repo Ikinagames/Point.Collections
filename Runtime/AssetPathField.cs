@@ -95,6 +95,13 @@ namespace Point.Collections
             p_AssetPath = path;
             p_SubAssetName = subAssetName;
         }
+        ~AssetPathField()
+        {
+            if (p_AssetInfo.IsValid())
+            {
+                p_AssetInfo.Reserve();
+            }
+        }
 
 #if UNITY_EDITOR
         /// <summary>
