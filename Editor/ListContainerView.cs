@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.UIElements;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
@@ -142,6 +143,7 @@ namespace Point.Collections.Editor
             m_ContentContainer.AddToClassList("inner-container");
             m_ContentContainer.style.SetMargin(4);
             m_ContentContainer.style.paddingLeft = 17;
+            m_ContentContainer.style.flexGrow = 1;
             {
                 m_ContentContainer.style.Hide(true);
             }
@@ -220,6 +222,8 @@ namespace Point.Collections.Editor
             m_BindedArrayProperty.serializedObject.ApplyModifiedProperties();
         }
 
+        private List<VisualElement> m_Childs = new List<VisualElement>();
+
         /// <inheritdoc cref="VisualElement.Add(VisualElement)"/>
         public new void Add(VisualElement item)
         {
@@ -229,14 +233,38 @@ namespace Point.Collections.Editor
                 m_RemoveButton.SetEnabled(true);
             }
 
-            base.Add(item);
+            VisualElement element = new VisualElement();
+            element.AddToClassList("list-content");
+            //element.style.SetBorderColor(Color.white);
+            //element.style.SetBorderWidth(1);
 
-            item.AddToClassList("list-content-margin");
+            Button button = new Button();
+            button.style.width = 30;
+            button.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
+            button.style.flexShrink = 1;
+            button.text = "-";
+            button.clicked += delegate
+            {
+                Remove(item);
+            };
+
+            item.AddToClassList("list-content-item");
+
+            element.Add(button);
+            element.Add(item);
+
+            base.Add(element);
+            m_Childs.Add(item);
         }
 
         public new void Remove(VisualElement item)
         {
+            item.RemoveFromClassList("list-content-item");
+
+            int index = m_Childs.IndexOf(item);
+            item = this[index];
             base.Remove(item);
+            m_Childs.RemoveAt(index);
 
             if (contentContainer.childCount == 0)
             {
@@ -244,12 +272,15 @@ namespace Point.Collections.Editor
                 m_RemoveButton.SetEnabled(false);
             }
 
-            item.RemoveFromClassList("list-content-margin");
+            //item.RemoveFromClassList("list-content-margin");
         }
         public new void RemoveAt(int index)
         {
             VisualElement item = this[index];
+            item.ElementAt(1).RemoveFromClassList("list-content-item");
+
             base.RemoveAt(index);
+            m_Childs.RemoveAt(index);
 
             if (contentContainer.childCount == 0)
             {
@@ -257,7 +288,7 @@ namespace Point.Collections.Editor
                 m_RemoveButton.SetEnabled(false);
             }
 
-            item.RemoveFromClassList("list-content-margin");
+            //item.RemoveFromClassList("list-content-margin");
         }
     }
 }
