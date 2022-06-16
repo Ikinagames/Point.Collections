@@ -2,17 +2,9 @@
     <Style src="project://database/Assets/Plugins/Point/Point.Collections/Editor/Editor%20Default%20Resources/Uxml/default-uss.uss?fileID=7433441132597879392&amp;guid=c2e1af765731c5e4d830f487d77eacbf&amp;type=3#default-uss" />
     <ui:Label text="Resource Hash Map" display-tooltip-when-elided="true" class="header-label" />
     <ui:VisualElement name="ContentContainer">
-        <ui:VisualElement name="StreamingAssetBundleList" class="content-container" style="padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px;">
-            <ui:VisualElement class="header-list-1">
-                <ui:Label text="Streaming Asset Bundles &lt;size=10&gt;Preload list&lt;/size&gt;" display-tooltip-when-elided="true" tooltip="등록된 에셋 번들은 시작시 자동으로 로드되어 등록됩니다." name="H2-Label" />
-                <ui:Button text="+" display-tooltip-when-elided="true" name="StreamingAssetBundleAddButton" class="header-button-1" />
-                <ui:Button text="-" display-tooltip-when-elided="true" name="StreamingAssetBundleRemoveButton" class="header-button-1" style="width: 10%;" />
-            </ui:VisualElement>
-            <ui:VisualElement class="content-container" style="padding-left: 4px; padding-right: 4px; padding-top: 4px; padding-bottom: 4px;">
-                <ui:IMGUIContainer name="StreamingAssetBundleGUI" />
-            </ui:VisualElement>
-        </ui:VisualElement>
-        <ui:VisualElement name="SceneBindedLabels" class="content-container" style="padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px;">
+        <Point.Collections.Editor.ListContainerView name="StreamingAssetBundleList" text="Streaming Asset Bundles" />
+        <Point.Collections.Editor.ListContainerView text="Scene Binded Labels" name="SceneBindedLabelList" />
+        <ui:VisualElement name="SceneBindedLabels" class="content-container" style="padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; display: none;">
             <ui:VisualElement class="header-list-1">
                 <ui:Label text="Scene Binded Labels" display-tooltip-when-elided="true" name="H2-Label" />
                 <ui:Button text="+" display-tooltip-when-elided="true" name="SceneBindedLabelAddButton" class="header-button-1" />
@@ -22,13 +14,6 @@
                 <ui:IMGUIContainer name="SceneBindedLabelsGUI" />
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="ResourceList" class="content-container" style="padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px;">
-            <ui:VisualElement name="HeaderContainer" class="header-list-1">
-                <ui:Label text="Resource Lists" display-tooltip-when-elided="true" name="H2-Label" class="asd" />
-                <ui:Button text="+" display-tooltip-when-elided="true" name="AddResourceListBtt" class="header-button-1" />
-                <ui:Button text="-" display-tooltip-when-elided="true" name="RemoveResourceListBtt" class="header-button-1" />
-            </ui:VisualElement>
-            <ui:VisualElement name="ResourceListContainer" class="content-container" />
-        </ui:VisualElement>
+        <Point.Collections.Editor.ListContainerView name="ResourceList" text="Resource List" />
     </ui:VisualElement>
 </ui:UXML>

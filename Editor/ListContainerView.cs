@@ -29,7 +29,7 @@ namespace Point.Collections.Editor
 {
     public class ListContainerView : VisualElement
     {
-        public new class UxmlFactory : UxmlFactory<StatusBar, UxmlTraits> { }
+        public new class UxmlFactory : UxmlFactory<ListContainerView, UxmlTraits> { }
         public new class UxmlTraits : VisualElement.UxmlTraits
         {
             UxmlStringAttributeDescription m_Text = new UxmlStringAttributeDescription

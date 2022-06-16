@@ -184,11 +184,6 @@ namespace Point.Collections.Editor
             // Unlock now that we're done
             EditorApplication.UnlockReloadAssemblies();
         }
-        [MenuItem("Point/Unlock Assemblies")]
-        public static void Unlock()
-        {
-            EditorApplication.UnlockReloadAssemblies();
-        }
 
         #endregion
 

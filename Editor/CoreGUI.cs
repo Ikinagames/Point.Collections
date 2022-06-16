@@ -818,6 +818,55 @@ namespace Point.Collections.Editor
 
         public struct EditorWindow
         {
+            public enum WindowType
+            {
+                InspectorWindow,
+                ConsoleWindow,
+                SceneViewWindow,
+            }
+
+            private static Type GetTypeFrom(WindowType type)
+            {
+                Type t = null;
+                if (type == WindowType.InspectorWindow)
+                {
+                    t = Type.GetType("UnityEditor.InspectorWindow,UnityEditor.dll");
+                }
+                else if (type == WindowType.ConsoleWindow)
+                {
+                    t = Type.GetType("UnityEditor.ConsoleWindow,UnityEditor.dll");
+                }
+                else if (type == WindowType.SceneViewWindow)
+                {
+                    t = TypeHelper.TypeOf<SceneView>.Type;
+                }
+
+                return t;
+            }
+            public static T OpenWindowSafe<T>(string title, WindowType desireDocking)
+                where T : UnityEditor.EditorWindow
+            {
+                Type type = GetTypeFrom(desireDocking);
+                var window = UnityEditor.EditorWindow.GetWindow<T>(title, type);
+
+                try
+                {
+                    var pos = window.position;
+                    window.position = pos;
+                }
+                catch (Exception)
+                {
+                    UnityEngine.Object[] array = Resources.FindObjectsOfTypeAll(TypeHelper.TypeOf<PointSetupWizard>.Type);
+                    foreach (var item in array)
+                    {
+                        UnityEngine.Object.DestroyImmediate(item);
+                    }
+
+                    return OpenWindowSafe<T>(title, desireDocking);
+                }
+
+                return window;
+            }
             public static T OpenWindowSafe<T>(string title, bool utility)
                 where T : UnityEditor.EditorWindow
             {
@@ -841,13 +890,12 @@ namespace Point.Collections.Editor
 
                 return window;
             }
-            public static T OpenWindowAtCenterSafe<T>(string title, bool utility)
+            public static T OpenWindowAtCenterSafe<T>(string title, bool utility, Vector2 size)
                 where T : UnityEditor.EditorWindow
             {
                 var window = (T)UnityEditor.EditorWindow.GetWindow(TypeHelper.TypeOf<T>.Type, utility, title);
 
-                window.minSize = new Vector2(600, 500);
-                window.maxSize = window.minSize;
+                window.minSize = window.maxSize = size;
                 var position = new Rect(Vector2.zero, window.minSize);
                 Vector2 screenCenter = new Vector2(Screen.currentResolution.width, Screen.currentResolution.height) / 2;
                 position.center = screenCenter / EditorGUIUtility.pixelsPerPoint;
@@ -864,7 +912,7 @@ namespace Point.Collections.Editor
                         UnityEngine.Object.DestroyImmediate(item);
                     }
 
-                    return OpenWindowAtCenterSafe<T>(title, utility);
+                    return OpenWindowAtCenterSafe<T>(title, utility, size);
                 }
 
                 return window;

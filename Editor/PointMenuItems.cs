@@ -37,17 +37,15 @@ namespace Point.Collections.Editor
 {
     public sealed class PointMenuItems : EditorWindow
     {
-        static PointSetupWizard m_SetupWizard;
-
-        [MenuItem("Point/Setup Wizard")]
+        [MenuItem("Point/Setup Wizard", priority = -10000)]
         public static void CoreSystemSetupWizard()
         {
             const string title = "Point Framework Setup Wizard";
 
-            CoreGUI.EditorWindow.OpenWindowAtCenterSafe<PointSetupWizard>(title, true);
+            CoreGUI.EditorWindow.OpenWindowAtCenterSafe<PointSetupWizard>(title, true, new Vector2(600, 500));
         }
 
-        [MenuItem("Point/Utils/Generate Guid")]
+        [MenuItem("Point/Utils/Generate Guid", priority = 1000)]
         public static void GenerateGUID()
         {
             Guid guid = Guid.NewGuid();
@@ -55,7 +53,12 @@ namespace Point.Collections.Editor
 
             PointHelper.Log(LogChannel.Editor, $"{guid} is copied to clipboard.");
         }
-        [MenuItem("Point/Locate Resource Hash Map")]
+        [MenuItem("Point/Utils/Unlock Assemblies", priority = 1001)]
+        public static void Unlock()
+        {
+            EditorApplication.UnlockReloadAssemblies();
+        }
+        [MenuItem("Point/Utils/Locate Resource Hash Map", priority = 1002)]
         public static void LocateResourceHashMap()
         {
             ResourceHashMap hashMap = ResourceHashMap.Instance;
