@@ -71,30 +71,30 @@
 
 #H2-Label {
     font-size: 15px;
-    width: 75%;
     -unity-text-align: middle-center;
+    flex-grow: 1;
 }
 
 #H2-Label:hover {
     font-size: 15px;
     color: var(--unity-colors-default-text-hover);
-    width: 75%;
     -unity-text-align: middle-center;
+    flex-grow: 1;
 }
 
 #H3-Label {
     font-size: 13px;
-    width: 75%;
     -unity-text-align: middle-center;
     -unity-font-style: bold;
+    flex-grow: 1;
 }
 
 #H3-Label:hover {
     font-size: 13px;
     color: var(--unity-colors-default-text-hover);
-    width: 75%;
     -unity-text-align: middle-center;
     -unity-font-style: bold;
+    flex-grow: 1;
 }
 
 .header-list-2 {
@@ -113,5 +113,5 @@
 }
 
 .inner-inner-container {
-    background-color: rgba(77, 77, 77, 255);
+    background-color: rgb(77, 77, 77);
 }
