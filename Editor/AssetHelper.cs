@@ -382,6 +382,7 @@ namespace Point.Collections.Editor
             m_References = Array.Empty<string>(),
             m_Dependencies = Array.Empty<string>();
 
+        public AssetPathField Asset => m_Asset;
         public HashSet<string> References => m_ReferenceSet;
         public HashSet<string> Dependencies => m_DependencySet;
 
