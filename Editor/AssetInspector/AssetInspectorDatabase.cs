@@ -101,16 +101,32 @@ namespace Point.Collections.Editor
             "Build Start".ToLog();
             "Gather All Assets".ToLog();
             Progress.Report(task, 0, "Gather All Assets");
+            float totalProgress = 0;
             yield return null;
             {
                 if (m_Assets == null || m_Assets.Length == 0)
                 {
+                    totalProgress = .25f;
                     string[] allAssetPaths = AssetDatabase.GetAllAssetPaths();
-                    m_Assets = allAssetPaths.Select(t => new AssetInfo(t)).ToArray();
+                    m_Assets = new AssetInfo[allAssetPaths.Length];
+
+                    int gatherAllAssetID = Progress.Start("Gather All Assets", parentId: task);
+                    for (int i = 0; i < allAssetPaths.Length; i++)
+                    {
+                        m_Assets[i] = new AssetInfo(allAssetPaths[i]);
+
+                        float progress = i / (float)allAssetPaths.Length;
+                        Progress.Report(gatherAllAssetID, progress);
+                        Progress.Report(task, totalProgress * progress, "Gather All Assets");
+
+                        yield return null;
+                    }
+                    Progress.Remove(gatherAllAssetID);
                 }
             }
 
-            Progress.Report(task, 2/4f, "Update Hashmap");
+            Progress.Report(task, .25f, "Update Hashmap");
+            totalProgress = .25f;
             yield return null;
             {
                 int updateHashmapID = Progress.Start("Update Hashmap", parentId: task);
@@ -118,14 +134,19 @@ namespace Point.Collections.Editor
                 for (int i = 0; i < m_Assets.Length; i++)
                 {
                     m_Database[m_Assets[i].Asset.AssetPath] = m_Assets[i];
+
+                    float progress = i / (float)m_Assets.Length;
                     Progress.Report(updateHashmapID, i / (float)m_Assets.Length);
+                    Progress.Report(task, totalProgress + (.25f * progress), "Update Hashmap");
+
                     yield return null;
                 }
                 Progress.Remove(updateHashmapID);
                 yield return null;
             }
 
-            Progress.Report(task, 3/4f, "Build Hashmap");
+            Progress.Report(task, .5f, "Build Hashmap");
+            totalProgress = .5f;
             yield return null;
             {
                 int buildHashmapID = Progress.Start("Build Hashmap", parentId: task);
@@ -133,8 +154,11 @@ namespace Point.Collections.Editor
                 for (int i = 0; i < m_Assets.Length; i++)
                 {
                     m_Assets[i].BuildReferenceSet(m_Database);
+
+                    float progress = i / (float)m_Assets.Length;
                     Progress.Report(buildHashmapID, i / (float)m_Assets.Length);
-                    
+                    Progress.Report(task, totalProgress + (.5f * progress), "Build Hashmap");
+
                     yield return null;
                 }
                 Progress.Remove(buildHashmapID);
