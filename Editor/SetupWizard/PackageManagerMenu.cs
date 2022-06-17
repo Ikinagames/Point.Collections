@@ -25,6 +25,7 @@
 
 #if UNITYENGINE
 
+using System;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.PackageManager;
@@ -84,9 +85,12 @@ namespace Point.Collections.Editor
 
         const string
             c_Json = "com.unity.nuget.newtonsoft-json",
-            c_UI = "com.unity.ui",
 #if !UNITY_2021_1_OR_NEWER
+            c_UI = "com.unity.ui",
             c_UIBuilder = "com.unity.ui.builder",
+            c_DeviceSim = "com.unity.device-simulator",
+#else
+            c_CodeCoverage = "com.unity.testtools.codecoverage",
 #endif
             c_InputSystem = "com.unity.inputsystem",
             c_Burst = "com.unity.burst",
@@ -94,8 +98,13 @@ namespace Point.Collections.Editor
             c_Mathematics = "com.unity.mathematics";
         private bool
             m_JsonInstalled,
+#if !UNITY_2021_1_OR_NEWER
             m_UIInstalled,
             m_UIBuilderInstalled,
+            m_DeviceSimInstalled,
+#else
+            m_CodeCoverageInstalled,
+#endif
             m_InputSystemInstalled,
             m_BurstInstalled,
             m_CollectionsInstalled,
@@ -104,9 +113,12 @@ namespace Point.Collections.Editor
         private void OnPackageLoaded()
         {
             m_JsonInstalled = HasPackage(c_Json);
-            m_UIInstalled = HasPackage(c_UI);
 #if !UNITY_2021_1_OR_NEWER
+            m_UIInstalled = HasPackage(c_UI);
             m_UIBuilderInstalled = HasPackage(c_UIBuilder);
+            m_DeviceSimInstalled = HasPackage(c_DeviceSim);
+#else
+            m_CodeCoverageInstalled = HasPackage(c_CodeCoverage);
 #endif
             m_InputSystemInstalled = HasPackage(c_InputSystem);
             m_BurstInstalled = HasPackage(c_Burst);
@@ -116,9 +128,12 @@ namespace Point.Collections.Editor
         private void DrawGUI()
         {
             DrawPackageField(ref m_JsonInstalled, c_Json);
-            DrawPackageField(ref m_UIInstalled, c_UI);
 #if !UNITY_2021_1_OR_NEWER
-            DrawPackageField(ref m_UIBuilderInstalled, c_UIBuilder);
+            DrawPackageField(ref m_UIInstalled, c_UI);
+            DrawPackageFie1ld(ref m_UIBuilderInstalled, c_UIBuilder);
+            DrawPackageField(ref m_DeviceSimInstalled, c_DeviceSim);
+#else
+            DrawPackageField(ref m_CodeCoverageInstalled, c_CodeCoverage);
 #endif
             DrawPackageField(ref m_InputSystemInstalled, c_InputSystem);
             DrawPackageField(ref m_BurstInstalled, c_Burst);
@@ -128,6 +143,7 @@ namespace Point.Collections.Editor
 
         private AddRequest m_AddRequest;
         private string m_AddPackageID;
+        private Action m_RevertDelegate;
 
         private void DrawPackageField(ref bool installed, in string id)
         {
@@ -174,6 +190,7 @@ namespace Point.Collections.Editor
                     {
                         ShowNotification(
                             new GUIContent($"Add package {m_AddPackageID} request has been failed."));
+                        OnPackageLoaded();
                     }
 
                     m_AddPackageID = null;

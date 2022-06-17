@@ -80,9 +80,9 @@ namespace Point.Collections
         public ThreadInfo MainThread => m_MainThread;
 
 #if UNITYENGINE
-        public event Action OnFrameUpdate;
-        public event Action OnLateUpdate;
-        public event Action OnApplicationShutdown;
+        public static event Action OnFrameUpdate;
+        public static event Action OnLateUpdate;
+        public static event Action OnApplicationShutdown;
 #endif
 
         protected override void OnInitialize()

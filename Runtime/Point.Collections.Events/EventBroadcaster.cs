@@ -44,16 +44,16 @@ namespace Point.Collections.Events
             m_EventActions = new Dictionary<Type, EventDescriptionBase>();
 
 #if DEBUG_MODE
-            PointApplication.Instance.OnFrameUpdate -= OnFrameUpdate;
-            PointApplication.Instance.OnApplicationShutdown -= Instance_OnApplicationShutdown;
+            PointApplication.OnFrameUpdate -= OnFrameUpdate;
+            PointApplication.OnApplicationShutdown -= Instance_OnApplicationShutdown;
 #endif
-            PointApplication.Instance.OnFrameUpdate += OnFrameUpdate;
-            PointApplication.Instance.OnApplicationShutdown += Instance_OnApplicationShutdown;
+            PointApplication.OnFrameUpdate += OnFrameUpdate;
+            PointApplication.OnApplicationShutdown += Instance_OnApplicationShutdown;
         }
         private void Instance_OnApplicationShutdown()
         {
-            PointApplication.Instance.OnFrameUpdate -= OnFrameUpdate;
-            PointApplication.Instance.OnApplicationShutdown -= Instance_OnApplicationShutdown;
+            PointApplication.OnFrameUpdate -= OnFrameUpdate;
+            PointApplication.OnApplicationShutdown -= Instance_OnApplicationShutdown;
 
             ((IDisposable)this).Dispose();
         }

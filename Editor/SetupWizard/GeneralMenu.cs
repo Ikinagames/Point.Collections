@@ -337,20 +337,21 @@ namespace Point.Collections.Editor
                 }
             }
 
-            private bool
-                m_Opened,
-
-                unityCollectionsCheck;
+            private bool m_Opened;
 
             private bool
+                unityEnhancedTouch,
+                unityCollectionsCheck,
                 behaviorTree;
             private const string
+                unityEnhancedTouchSymbol = "POINT_ENHANCEDTOUCH",
                 unityCollectionsCheckSymbol = "ENABLE_UNITY_COLLECTIONS_CHECKS",
                 behaviorTreeSymbol = "POINT_BEHAVIORTREE";
 
             public SymbolSetups()
             {
                 CheckSymbol(ref unityCollectionsCheck, unityCollectionsCheckSymbol);
+                CheckSymbol(ref unityEnhancedTouch, unityEnhancedTouchSymbol);
                 CheckSymbol(ref behaviorTree, behaviorTreeSymbol);
             }
 
@@ -363,6 +364,7 @@ namespace Point.Collections.Editor
                 using (new CoreGUI.BoxBlock(Color.white))
                 {
                     DrawSymbol(ref unityCollectionsCheck, unityCollectionsCheckSymbol);
+                    DrawSymbol(ref unityEnhancedTouch, unityEnhancedTouchSymbol);
                     DrawSymbol(ref behaviorTree, behaviorTreeSymbol);
                 }
             }
