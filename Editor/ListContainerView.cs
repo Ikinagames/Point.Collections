@@ -239,11 +239,12 @@ namespace Point.Collections.Editor
             //element.style.SetBorderWidth(1);
 
             Button button = new Button();
-            button.style.width = 30;
-            button.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
-            button.style.flexShrink = 1;
+            button.AddToClassList("list-remove-button");
+            //button.style.width = 30;
+            //button.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
+            //button.style.flexShrink = 1;
             button.text = "-";
-            button.style.SetBorderRadius(0);
+            //button.style.SetBorderRadius(0);
             button.clicked += delegate
             {
                 Remove(item);

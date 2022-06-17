@@ -122,6 +122,24 @@
     flex-grow: 1;
 }
 
+.list-remove-button {
+    flex-shrink: 1;
+    width: 25px;
+    height: 100%;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(255, 255, 255, 0.19);
+    border-right-color: rgba(255, 255, 255, 0.19);
+    border-top-color: rgba(255, 255, 255, 0.19);
+    border-bottom-color: rgba(255, 255, 255, 0.19);
+}
+
 .inner-container {
     background-color: rgb(58, 58, 58);
 }
