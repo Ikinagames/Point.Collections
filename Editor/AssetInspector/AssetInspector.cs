@@ -111,13 +111,19 @@ namespace Point.Collections.Editor
                 }
             }
 
+            string assetPath = GetAssetPath(editor.target);
+            if (assetPath.IsNullOrEmpty())
+            {
+                return;
+            }
+
             using (new CoreGUI.BoxBlock(Color.black, GUILayout.ExpandWidth(false)))
             {
                 DrawHeader();
 
                 if (!AssetInspectorDatabase.Builded) return;
 
-                DrawItems(editor);
+                DrawItems(editor, assetPath);
             }
         }
 
@@ -152,11 +158,10 @@ namespace Point.Collections.Editor
                 }
             }
         }
-        private static void DrawItems(UnityEditor.Editor editor)
+        private static void DrawItems(UnityEditor.Editor editor, string assetPath)
         {
             #region Top
 
-            string assetPath = GetAssetPath(editor.target);
             if (assetPath.IsNullOrEmpty())
             {
                 using (new EditorGUILayout.HorizontalScope())
