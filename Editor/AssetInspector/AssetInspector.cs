@@ -238,6 +238,7 @@ namespace Point.Collections.Editor
                                 using (var scroll = new EditorGUILayout.ScrollViewScope(
                                     m_ReferenceScroll, false, true,
                                     GUILayout.Height(300)))
+                                using (new EditorGUI.DisabledGroupScope(true))
                                 {
                                     foreach (var referencer in assetInfo.References)
                                     {
@@ -284,6 +285,7 @@ namespace Point.Collections.Editor
                                 using (var scroll = new EditorGUILayout.ScrollViewScope(
                                     m_DependenciesScroll, false, true,
                                     GUILayout.Height(300)))
+                                using (new EditorGUI.DisabledGroupScope(true))
                                 {
                                     foreach (var dependency in assetInfo.Dependencies)
                                     {

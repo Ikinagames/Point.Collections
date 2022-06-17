@@ -19,14 +19,14 @@
 #endif
 #define UNITYENGINE
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using System;
 using System.IO;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
 using System.Text.RegularExpressions;
 using Point.Collections.ResourceControl;
-#endif
 
 namespace Point.Collections
 {
@@ -40,6 +40,7 @@ namespace Point.Collections
 #endif
     {
 #if UNITY_EDITOR
+        [NonSerialized] private UnityEngine.Object m_EditorAsset;
         [SerializeField] protected string p_AssetGUID = string.Empty;
 #endif
         [SerializeField] protected string p_AssetPath = string.Empty;
@@ -52,7 +53,13 @@ namespace Point.Collections
         public string AssetPath
         {
             get => p_AssetPath;
-            set => p_AssetPath = value;
+            set
+            {
+                p_AssetPath = value;
+#if UNITY_EDITOR
+                m_EditorAsset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(value);
+#endif
+            }
         }
         public string SubAssetName { get => p_SubAssetName; set => p_SubAssetName = value; }
 
@@ -64,16 +71,22 @@ namespace Point.Collections
         {
             get
             {
-                if (p_AssetPath.IsNullOrEmpty())
+                if (m_EditorAsset == null)
                 {
-                    return null;
+                    if (p_AssetPath.IsNullOrEmpty())
+                    {
+                        return null;
+                    }
+
+                    m_EditorAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(p_AssetPath);
                 }
 
-                return UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(p_AssetPath);
+                return m_EditorAsset;
             }
             set
             {
                 p_AssetPath = UnityEditor.AssetDatabase.GetAssetPath(value);
+                m_EditorAsset = value;
             }
         }
 #endif
@@ -81,6 +94,15 @@ namespace Point.Collections
         {
             get
             {
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    PointHelper.LogError(Channel.Collections,
+                        $"You cannot load AssetInfo from editor.");
+
+                    return AssetInfo.Invalid;
+                }
+#endif
                 if (!p_AssetInfo.IsValid() && !IsEmpty())
                 {
                     p_AssetInfo = ResourceManager.LoadAsset(this.ToString());
