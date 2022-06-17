@@ -41,6 +41,11 @@ namespace Point.Collections.Editor
             {
                 if (s_Instance == null)
                 {
+                    if (!Directory.Exists(c_DefaultPath))
+                    {
+                        Directory.CreateDirectory(c_DefaultPath);
+                    }
+
                     string filename = TypeHelper.TypeOf<T>.ToString();
                     T obj = AssetHelper.LoadAsset<T>(filename, "PointEditor");
                     if (obj == null) obj = AssetHelper.LoadAsset<T>(filename);
@@ -49,7 +54,7 @@ namespace Point.Collections.Editor
                     {
                         obj = ScriptableObject.CreateInstance<T>();
 
-                        AssetDatabase.CreateAsset(obj, Path.Combine(c_DefaultPath) + filename + ".asset");
+                        AssetDatabase.CreateAsset(obj, c_DefaultPath + filename + ".asset");
                         AssetDatabase.SetLabels(obj, new string[] { "PointEditor" });
 
                         AssetDatabase.SaveAssets();

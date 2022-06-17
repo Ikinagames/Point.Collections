@@ -41,30 +41,30 @@ namespace Point.Collections.Editor
     [InitializeOnLoad]
     public static class AssetHelper
     {
-        private const string
-            c_CachedDataPath = "ProjectSettings/AssetHelperCachedData.json";
+        //private const string
+        //    c_CachedDataPath = "ProjectSettings/AssetHelperCachedData.json";
 
-        // https://docs.unity3d.com/ScriptReference/AssetModificationProcessor.html
-        private sealed class AssetHelperAssetProcessor : AssetPostprocessor
-        {
-            public static void OnPostprocessAllAssets(
-                string[] importedAssets,
-                string[] deletedAssets,
-                string[] movedAssets,
-                string[] movedFromAssetPaths)
-            {
-                if (!UtilityMenu.EnableAssetInspector) return;
+        //// https://docs.unity3d.com/ScriptReference/AssetModificationProcessor.html
+        //private sealed class AssetHelperAssetProcessor : AssetPostprocessor
+        //{
+        //    public static void OnPostprocessAllAssets(
+        //        string[] importedAssets,
+        //        string[] deletedAssets,
+        //        string[] movedAssets,
+        //        string[] movedFromAssetPaths)
+        //    {
+        //        if (!UtilityMenu.EnableAssetInspector) return;
 
-                foreach (string importedAsset in importedAssets)
-                {
-                    AddAssetDatabase(importedAsset);
-                }
-                foreach (string deletedAsset in deletedAssets)
-                {
-                    RemoveAssetDatabase(deletedAsset);
-                }
-            }
-        }
+        //        foreach (string importedAsset in importedAssets)
+        //        {
+        //            AddAssetDatabase(importedAsset);
+        //        }
+        //        foreach (string deletedAsset in deletedAssets)
+        //        {
+        //            RemoveAssetDatabase(deletedAsset);
+        //        }
+        //    }
+        //}
         //[Serializable]
         //private sealed class CachedData
         //{
@@ -72,191 +72,189 @@ namespace Point.Collections.Editor
         //    private AssetInfo[] m_AssetInfos;
         //}
 
-        private static readonly Dictionary<string, AssetInfo> s_AssetDatabase = new Dictionary<string, AssetInfo>();
-        private static Texture2D
-            s_LinkBlack, s_LinkWhite, s_LinkBlue;
-        private static GUIContent
-            s_DisplayReferencesContent = new GUIContent(
-                "Display References", "이 에셋을 참조하는 에셋입니다."),
-            s_DisplayDependenciesContent = new GUIContent(
-                "Display Dependencies", "이 에셋이 참조하는 에셋입니다.");
+        //private static readonly Dictionary<string, AssetInfo> s_AssetDatabase = new Dictionary<string, AssetInfo>();
+        //private static Texture2D
+        //    s_LinkBlack, s_LinkWhite, s_LinkBlue;
+        //private static GUIContent
+        //    s_DisplayReferencesContent = new GUIContent(
+        //        "Display References", "이 에셋을 참조하는 에셋입니다."),
+        //    s_DisplayDependenciesContent = new GUIContent(
+        //        "Display Dependencies", "이 에셋이 참조하는 에셋입니다.");
 
-        private static bool 
-            s_AssetDatabaseBuilded = false,
-            s_DisplayAssetInspector = false,
-            s_DisplayReferences, s_DisplayDependencies;
+//        private static bool 
+//            s_AssetDatabaseBuilded = false,
+//            s_DisplayAssetInspector = false,
+//            s_DisplayReferences, s_DisplayDependencies;
 
-        static AssetHelper()
-        {
-            LoadResources();
+//        static AssetHelper()
+//        {
+//            LoadResources();
             
-            UnityEditor.Editor.finishedDefaultHeaderGUI += OnPostHeaderGUI;
-        }
-        private static void OnPostHeaderGUI(UnityEditor.Editor obj)
-        {
-            if (!UtilityMenu.EnableAssetInspector) return;
+//            UnityEditor.Editor.finishedDefaultHeaderGUI += OnPostHeaderGUI;
+//        }
+//        private static void OnPostHeaderGUI(UnityEditor.Editor obj)
+//        {
+//            return;
 
-            bool isPrefab = PrefabUtility.IsPartOfAnyPrefab(obj.target);
+//            if (!UtilityMenu.EnableAssetInspector) return;
 
-            if (obj.target is AssetImporter || obj.target is MonoScript)
-            {
-                return;
-            }
-            // 프리팹 오브젝트이지만, 루트가 아닌 자식 오브젝트일 경우 무시
-            else if (isPrefab && !PrefabUtility.IsAnyPrefabInstanceRoot(obj.target as GameObject))
-            {
-                return;
-            }
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                s_DisplayAssetInspector = 
-                    CoreGUI.LabelToggle(s_DisplayAssetInspector, "Asset Inspector", 15, TextAnchor.MiddleCenter);
+//            bool isPrefab = PrefabUtility.IsPartOfAnyPrefab(obj.target);
 
-                using (new EditorGUI.DisabledGroupScope(s_AssetDatabaseBuilded))
-                {
-                    if (GUILayout.Button("Build", GUILayout.Width(45)))
-                    {
-                        RebuildAssetDatabase();
-                    }
-                }
-            }
+//            if (obj.target is AssetImporter || obj.target is MonoScript)
+//            {
+//                return;
+//            }
+//            // 프리팹 오브젝트이지만, 루트가 아닌 자식 오브젝트일 경우 무시
+//            else if (isPrefab && !PrefabUtility.IsAnyPrefabInstanceRoot(obj.target as GameObject))
+//            {
+//                return;
+//            }
+//            using (new EditorGUILayout.HorizontalScope())
+//            {
+//                s_DisplayAssetInspector = 
+//                    CoreGUI.LabelToggle(s_DisplayAssetInspector, "Asset Inspector", 15, TextAnchor.MiddleCenter);
 
-            if (!s_AssetDatabaseBuilded || !s_DisplayAssetInspector)
-            {
-                CoreGUI.Line();
-                return;
-            }
+//                using (new EditorGUI.DisabledGroupScope(s_AssetDatabaseBuilded))
+//                {
+//                    if (GUILayout.Button("Build", GUILayout.Width(45)))
+//                    {
+//                        RebuildAssetDatabase();
+//                    }
+//                }
+//            }
 
-            string assetPath;
-            if (isPrefab)
-            {
-                assetPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(obj.target);
-            }
-            else assetPath = AssetDatabase.GetAssetPath(obj.target);
+//            if (!s_AssetDatabaseBuilded || !s_DisplayAssetInspector)
+//            {
+//                CoreGUI.Line();
+//                return;
+//            }
 
-            if (assetPath.IsNullOrEmpty() || 
-                !s_AssetDatabase.TryGetValue(assetPath, out AssetInfo info))
-            {
-                return;
-            }
+//            string assetPath;
+//            if (isPrefab)
+//            {
+//                assetPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(obj.target);
+//            }
+//            else assetPath = AssetDatabase.GetAssetPath(obj.target);
 
-            //EditorGUILayout.Space(2);
+//            if (assetPath.IsNullOrEmpty() || 
+//                !s_AssetDatabase.TryGetValue(assetPath, out AssetInfo info))
+//            {
+//                return;
+//            }
 
-            //CoreGUI.Label("Asset Inspector", 20, TextAnchor.MiddleCenter);
-            //EditorGUILayout.Space(5);
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                GUILayout.Label(AssetDatabase.GetCachedIcon(assetPath), GUILayout.Width(36), GUILayout.Height(36));
-                using (new EditorGUILayout.VerticalScope())
-                {
-                    GUILayout.Label(Path.GetFileName(assetPath));
-                    // Display directory (without "Assets/" prefix)
-                    GUILayout.Label(Regex.Match(Path.GetDirectoryName(assetPath), "(\\\\.*)$").Value);
-                }
-            }
+//            using (new EditorGUILayout.HorizontalScope())
+//            {
+//                GUILayout.Label(AssetDatabase.GetCachedIcon(assetPath), GUILayout.Width(36), GUILayout.Height(36));
+//                using (new EditorGUILayout.VerticalScope())
+//                {
+//                    GUILayout.Label(Path.GetFileName(assetPath));
+//                    // Display directory (without "Assets/" prefix)
+//                    GUILayout.Label(Regex.Match(Path.GetDirectoryName(assetPath), "(\\\\.*)$").Value);
+//                }
+//            }
 
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                using (new EditorGUILayout.VerticalScope())
-                {
-                    s_DisplayReferences = EditorGUILayout.ToggleLeft(s_DisplayReferencesContent, s_DisplayReferences);
+//            using (new EditorGUILayout.HorizontalScope())
+//            {
+//                using (new EditorGUILayout.VerticalScope())
+//                {
+//                    s_DisplayReferences = EditorGUILayout.ToggleLeft(s_DisplayReferencesContent, s_DisplayReferences);
 
-                    if (s_DisplayReferences)
-                    {
-                        foreach (var referencer in info.References)
-                        {
-                            EditorGUILayout.ObjectField(
-                                GUIContent.none,
-                                AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(referencer),
-                                TypeHelper.TypeOf<UnityEngine.Object>.Type, true);
-                        }
-                    }
-                }
-                using (new EditorGUILayout.VerticalScope())
-                {
-                    s_DisplayDependencies = EditorGUILayout.ToggleLeft(s_DisplayDependenciesContent, s_DisplayDependencies);
+//                    if (s_DisplayReferences)
+//                    {
+//                        foreach (var referencer in info.References)
+//                        {
+//                            EditorGUILayout.ObjectField(
+//                                GUIContent.none,
+//                                AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(referencer),
+//                                TypeHelper.TypeOf<UnityEngine.Object>.Type, true);
+//                        }
+//                    }
+//                }
+//                using (new EditorGUILayout.VerticalScope())
+//                {
+//                    s_DisplayDependencies = EditorGUILayout.ToggleLeft(s_DisplayDependenciesContent, s_DisplayDependencies);
 
-                    if (s_DisplayDependencies)
-                    {
-                        foreach (var dependency in info.Dependencies)
-                        {
-                            EditorGUILayout.ObjectField(
-                                GUIContent.none,
-                                AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(dependency),
-                                TypeHelper.TypeOf<UnityEngine.Object>.Type, true);
-                        }
-                    }
-                }
-            }
+//                    if (s_DisplayDependencies)
+//                    {
+//                        foreach (var dependency in info.Dependencies)
+//                        {
+//                            EditorGUILayout.ObjectField(
+//                                GUIContent.none,
+//                                AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(dependency),
+//                                TypeHelper.TypeOf<UnityEngine.Object>.Type, true);
+//                        }
+//                    }
+//                }
+//            }
             
-            CoreGUI.Line();
-        }
-        private static void LoadResources()
-        {
-            s_LinkBlack = LoadAsset<Texture2D>("link_block", "PointEditor");
-            s_LinkWhite = LoadAsset<Texture2D>("link_white", "PointEditor");
-            s_LinkBlue = LoadAsset<Texture2D>("link_blue", "PointEditor");
-        }
-        private static void RebuildAssetDatabase()
-        {
-            const string c_Header = "Building Dependency Database";
+//            CoreGUI.Line();
+//        }
+//        private static void LoadResources()
+//        {
+//            s_LinkBlack = LoadAsset<Texture2D>("link_block", "PointEditor");
+//            s_LinkWhite = LoadAsset<Texture2D>("link_white", "PointEditor");
+//            s_LinkBlue = LoadAsset<Texture2D>("link_blue", "PointEditor");
+//        }
+//        private static void RebuildAssetDatabase()
+//        {
+//            const string c_Header = "Building Dependency Database";
 
-            PointHelper.Log(Channel.Editor, c_Header);
+//            PointHelper.Log(Channel.Editor, c_Header);
 
-            s_AssetDatabase.Clear();
+//            s_AssetDatabase.Clear();
 
-#if UNITY_2020_1_OR_NEWER
-            int id = Progress.Start(c_Header, "Gathering All Assets...", Progress.Options.None);
-#endif
-            string[] allAssetPaths = AssetDatabase.GetAllAssetPaths();
-            for (int i = 0; i < allAssetPaths.Length; i++)
-            {
-                AssetInfo info = new AssetInfo(allAssetPaths[i]);
-                s_AssetDatabase.Add(allAssetPaths[i], info);
+//#if UNITY_2020_1_OR_NEWER
+//            int id = Progress.Start(c_Header, "Gathering All Assets...", Progress.Options.None);
+//#endif
+//            string[] allAssetPaths = AssetDatabase.GetAllAssetPaths();
+//            for (int i = 0; i < allAssetPaths.Length; i++)
+//            {
+//                AssetInfo info = new AssetInfo(allAssetPaths[i]);
+//                s_AssetDatabase.Add(allAssetPaths[i], info);
 
-#if UNITY_2020_1_OR_NEWER
-                Progress.Report(id, i / allAssetPaths.Length);
-#endif
-            }
+//#if UNITY_2020_1_OR_NEWER
+//                Progress.Report(id, i / allAssetPaths.Length);
+//#endif
+//            }
 
-#if UNITY_2020_1_OR_NEWER
-            int subId = Progress.Start(c_Header, "Authoring All Assets...", parentId: id);
-#endif
+//#if UNITY_2020_1_OR_NEWER
+//            int subId = Progress.Start(c_Header, "Authoring All Assets...", parentId: id);
+//#endif
 
-            for (int i = 0; i < allAssetPaths.Length; i++)
-            {
-                AssetInfo info = s_AssetDatabase[allAssetPaths[i]];
-                info.BuildReferenceSet(s_AssetDatabase);
+//            for (int i = 0; i < allAssetPaths.Length; i++)
+//            {
+//                AssetInfo info = s_AssetDatabase[allAssetPaths[i]];
+//                info.BuildReferenceSet(s_AssetDatabase);
 
-#if UNITY_2020_1_OR_NEWER
-                Progress.Report(subId, i / allAssetPaths.Length);
-#endif
-                //bool cancel = EditorUtility.DisplayCancelableProgressBar(c_Header, "Authoring All Assets...", i / allAssetPaths.Length);
-                //if (cancel) break;
-            }
-#if UNITY_2020_1_OR_NEWER
-            Progress.Remove(subId);
-            Progress.Remove(id);
-#endif
-            //EditorUtility.ClearProgressBar();
-            s_AssetDatabaseBuilded = true;
-        }
-        private static void AddAssetDatabase(string path)
-        {
-            AssetInfo info = new AssetInfo(path);
-            s_AssetDatabase[path] = info;
+//#if UNITY_2020_1_OR_NEWER
+//                Progress.Report(subId, i / allAssetPaths.Length);
+//#endif
+//                //bool cancel = EditorUtility.DisplayCancelableProgressBar(c_Header, "Authoring All Assets...", i / allAssetPaths.Length);
+//                //if (cancel) break;
+//            }
+//#if UNITY_2020_1_OR_NEWER
+//            Progress.Remove(subId);
+//            Progress.Remove(id);
+//#endif
+//            //EditorUtility.ClearProgressBar();
+//            s_AssetDatabaseBuilded = true;
+//        }
+//        private static void AddAssetDatabase(string path)
+//        {
+//            AssetInfo info = new AssetInfo(path);
+//            s_AssetDatabase[path] = info;
 
-            info.BuildReferenceSet(s_AssetDatabase);
-        }
-        private static void RemoveAssetDatabase(string path)
-        {
-            if (!s_AssetDatabase.ContainsKey(path)) return;
+//            info.BuildReferenceSet(s_AssetDatabase);
+//        }
+//        private static void RemoveAssetDatabase(string path)
+//        {
+//            if (!s_AssetDatabase.ContainsKey(path)) return;
 
-            AssetInfo info = s_AssetDatabase[path];
-            info.RemoveReferenceSet(s_AssetDatabase);
+//            AssetInfo info = s_AssetDatabase[path];
+//            info.RemoveReferenceSet(s_AssetDatabase);
 
-            s_AssetDatabase.Remove(path);
-        }
+//            s_AssetDatabase.Remove(path);
+//        }
 
         public static T LoadEditorAsset<T>(string path)
             where T : UnityEngine.Object
