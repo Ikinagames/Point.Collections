@@ -326,13 +326,46 @@ namespace Point.Collections.Editor
     /// <typeparam name="T"></typeparam>
     public abstract class PropertyDrawerUXML<T> : PropertyDrawer
     {
-        public override sealed void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            base.OnGUI(position, property, label);
-        }
+        private float m_AutoHeight = 0;
+
         public override sealed float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return base.GetPropertyHeight(property, label);
+            //return base.GetPropertyHeight(property, label);
+            return m_AutoHeight;
+        }
+        public override sealed void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            //base.OnGUI(position, property, label);
+            AutoRect rect = new AutoRect(position);
+            if (Event.current.type == EventType.Layout)
+            {
+                m_AutoHeight = 0;
+            }
+
+            float height = EditorGUI.GetPropertyHeight(property, label, false);
+            property.isExpanded = EditorGUI.Foldout(rect.Pop(height), property.isExpanded, label, true);
+            if (Event.current.type == EventType.Layout)
+            {
+                m_AutoHeight += height;
+            }
+
+            if (!property.isExpanded) return;
+
+            rect.Indent(10);
+            float boxHeight = 0;
+            foreach (var item in property.ForEachVisibleChild())
+            {
+                height = EditorGUI.GetPropertyHeight(item);
+
+                if (Event.current.type == EventType.Layout)
+                {
+                    m_AutoHeight += height;
+                    boxHeight += height;
+                }
+
+                EditorGUI.PropertyField(rect.Pop(height), item);
+            }
+            rect.Indent(-10);
         }
         public override sealed VisualElement CreatePropertyGUI(SerializedProperty property)
         {
