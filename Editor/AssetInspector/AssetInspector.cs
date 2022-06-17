@@ -24,6 +24,7 @@ using System.Collections;
 using System.IO;
 using System.Text.RegularExpressions;
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -45,6 +46,14 @@ namespace Point.Collections.Editor
             s_DisplayReferences, s_DisplayDependencies;
         private static BackgroundTask
             s_Cor;
+
+        private static Vector2
+            m_ReferenceScroll, m_DependenciesScroll;
+        private static SearchField
+            m_ReferenceSearch = new SearchField(),
+            m_DependenciesSearch = new SearchField();
+        private static string
+            m_ReferenceSearchText = string.Empty, m_DependenciesSearchText = string.Empty;
 
         static AssetInspector()
         {
@@ -102,89 +111,212 @@ namespace Point.Collections.Editor
                 }
             }
 
+            using (new CoreGUI.BoxBlock(Color.black, GUILayout.ExpandWidth(false)))
+            {
+                DrawHeader();
+
+                if (!AssetInspectorDatabase.Builded) return;
+
+                DrawItems(editor);
+            }
+        }
+
+        private static void DrawHeader()
+        {
+            string headerText;
+            if (s_Cor != null && s_Cor.IsRunning)
+            {
+                headerText = $"Assetdatabase is now building .. {s_Cor.Percent}";
+            }
+            else if (!AssetInspectorDatabase.Builded)
+            {
+                headerText = "Asset Inspector (Require Build)";
+            }
+            else
+            {
+                return;
+            }
+
             using (new EditorGUILayout.HorizontalScope())
             {
-                s_DisplayAssetInspector =
-                    CoreGUI.LabelToggle(s_DisplayAssetInspector, "Asset Inspector", 13, TextAnchor.MiddleCenter);
-
+                CoreGUI.Label(headerText, 11, TextAnchor.MiddleCenter);
+                
                 using (new EditorGUI.DisabledGroupScope(s_Cor != null && s_Cor.IsRunning))
                 {
-                    if (GUILayout.Button("Build", GUILayout.Width(45)))
+                    if (GUILayout.Button(
+                        AssetInspectorDatabase.Builded ? "Rebuild" : "Build",
+                        GUILayout.Width(80)))
                     {
                         s_Cor = AssetInspectorDatabase.Build();
-
-                        return;
                     }
                 }
             }
-
-            if (s_Cor != null && s_Cor.IsRunning)
-            {
-                CoreGUI.Label("Assetdatabase is now building ..", 11, TextAnchor.MiddleCenter);
-            }
-
-            if (!AssetInspectorDatabase.Builded) return;
+        }
+        private static void DrawItems(UnityEditor.Editor editor)
+        {
+            #region Top
 
             string assetPath = GetAssetPath(editor.target);
             if (assetPath.IsNullOrEmpty())
             {
-                EditorGUILayout.LabelField("asset path null");
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    CoreGUI.Label("!! Asset path null !!", 13, TextAnchor.MiddleCenter);
+
+                    if (GUILayout.Button("Rebuild", GUILayout.Width(80)))
+                    {
+                        s_Cor = AssetInspectorDatabase.Build();
+                    }
+                }
+
                 return;
             }
 
             var assetInfo = AssetInspectorDatabase.Instance[assetPath];
             if (assetInfo == null)
             {
-                EditorGUILayout.LabelField("database not found");
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    CoreGUI.Label("!! Database not found !!", 13, TextAnchor.MiddleCenter);
+                    
+                    if (GUILayout.Button("Rebuild", GUILayout.Width(80)))
+                    {
+                        s_Cor = AssetInspectorDatabase.Build();
+                    }
+                }
+                
                 return;
             }
 
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                GUILayout.Label(AssetDatabase.GetCachedIcon(assetPath), GUILayout.Width(36), GUILayout.Height(36));
-                using (new EditorGUILayout.VerticalScope())
-                {
-                    GUILayout.Label(Path.GetFileName(assetPath));
-                    // Display directory (without "Assets/" prefix)
-                    GUILayout.Label(Regex.Match(Path.GetDirectoryName(assetPath), "(\\\\.*)$").Value);
-                }
-            }
+            #endregion
 
-            using (new EditorGUILayout.HorizontalScope())
+            using (new EditorGUILayout.VerticalScope())
             {
-                using (new EditorGUILayout.VerticalScope())
+                using (new EditorGUILayout.HorizontalScope())
                 {
-                    s_DisplayReferences = EditorGUILayout.ToggleLeft(s_DisplayReferencesContent, s_DisplayReferences);
-
-                    if (s_DisplayReferences)
+                    GUILayout.Label(AssetDatabase.GetCachedIcon(assetPath), GUILayout.Width(36), GUILayout.Height(36));
+                    using (new EditorGUILayout.VerticalScope())
                     {
-                        foreach (var referencer in assetInfo.References)
+                        GUILayout.Label(Path.GetFileName(assetPath));
+                        // Display directory (without "Assets/" prefix)
+                        GUILayout.Label(Regex.Match(Path.GetDirectoryName(assetPath), "(\\\\.*)$").Value);
+                    }
+                    using (new EditorGUILayout.VerticalScope(GUILayout.Width(80)))
+                    {
+                        if (GUILayout.Button(s_DisplayAssetInspector ? "Close" : "Open"))
                         {
-                            EditorGUILayout.ObjectField(
-                                GUIContent.none,
-                                AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(referencer),
-                                TypeHelper.TypeOf<UnityEngine.Object>.Type, true);
+                            s_DisplayAssetInspector = !s_DisplayAssetInspector;
+                        }
+
+                        using (new EditorGUI.DisabledGroupScope(s_Cor != null && s_Cor.IsRunning))
+                        {
+                            if (GUILayout.Button("Rebuild"))
+                            {
+                                s_Cor = AssetInspectorDatabase.Build();
+                            }
                         }
                     }
                 }
-                using (new EditorGUILayout.VerticalScope())
-                {
-                    s_DisplayDependencies = EditorGUILayout.ToggleLeft(s_DisplayDependenciesContent, s_DisplayDependencies);
 
-                    if (s_DisplayDependencies)
+                if (!s_DisplayAssetInspector) return;
+
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    using (new EditorGUILayout.VerticalScope())
                     {
-                        foreach (var dependency in assetInfo.Dependencies)
+                        using (new CoreGUI.BoxBlock(Color.gray))
                         {
-                            EditorGUILayout.ObjectField(
-                                GUIContent.none,
-                                AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(dependency),
-                                TypeHelper.TypeOf<UnityEngine.Object>.Type, true);
+                            s_DisplayReferences = EditorGUILayout.ToggleLeft(s_DisplayReferencesContent, s_DisplayReferences);
+                            Rect lastRect = GUILayoutUtility.GetLastRect();
+
+                            if (s_DisplayReferences)
+                            {
+                                Rect searchRect = GUILayoutUtility.GetRect(lastRect.width, 30);
+                                m_ReferenceSearchText = m_ReferenceSearch.OnGUI(
+                                    searchRect, m_ReferenceSearchText);
+
+                                using (var scroll = new EditorGUILayout.ScrollViewScope(
+                                    m_ReferenceScroll, false, true,
+                                    GUILayout.Height(300)))
+                                {
+                                    foreach (var referencer in assetInfo.References)
+                                    {
+                                        if (!m_ReferenceSearchText.IsNullOrEmpty())
+                                        {
+                                            try
+                                            {
+                                                if (!Regex.Match(referencer, m_ReferenceSearchText).Success)
+                                                {
+                                                    continue;
+                                                }
+                                            }
+                                            catch (System.Exception)
+                                            {
+                                                continue;
+                                            }
+                                        }
+
+                                        EditorGUILayout.ObjectField(
+                                            GUIContent.none,
+                                            AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(referencer),
+                                            TypeHelper.TypeOf<UnityEngine.Object>.Type, true);
+                                    }
+
+                                    m_ReferenceScroll = scroll.scrollPosition;
+                                }
+                            }
                         }
                     }
-                }
-            }
+                    //
+                    using (new EditorGUILayout.VerticalScope())
+                    {
+                        using (new CoreGUI.BoxBlock(Color.gray))
+                        {
+                            s_DisplayDependencies = EditorGUILayout.ToggleLeft(s_DisplayDependenciesContent, s_DisplayDependencies);
+                            Rect lastRect = GUILayoutUtility.GetLastRect();
 
-            CoreGUI.Line();
+                            if (s_DisplayDependencies)
+                            {
+                                Rect searchRect = GUILayoutUtility.GetRect(lastRect.width, 30);
+                                m_DependenciesSearchText = m_DependenciesSearch.OnGUI(
+                                     searchRect, m_DependenciesSearchText);
+
+                                using (var scroll = new EditorGUILayout.ScrollViewScope(
+                                    m_DependenciesScroll, false, true,
+                                    GUILayout.Height(300)))
+                                {
+                                    foreach (var dependency in assetInfo.Dependencies)
+                                    {
+                                        if (!m_DependenciesSearchText.IsNullOrEmpty())
+                                        {
+                                            try
+                                            {
+                                                if (!Regex.Match(dependency, m_DependenciesSearchText).Success)
+                                                {
+                                                    continue;
+                                                }
+                                            }
+                                            catch (System.Exception)
+                                            {
+                                                continue;
+                                            }
+                                        }
+
+                                        EditorGUILayout.ObjectField(
+                                            GUIContent.none,
+                                            AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(dependency),
+                                            TypeHelper.TypeOf<UnityEngine.Object>.Type, true);
+                                    }
+
+                                    m_DependenciesScroll = scroll.scrollPosition;
+                                }
+                            }
+                        }
+                    }
+                    //
+                }
+                //
+            }
         }
 
         private static string GetAssetPath(UnityEngine.Object obj)

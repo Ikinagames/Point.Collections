@@ -25,7 +25,9 @@
 
 #if UNITYENGINE
 
+using Point.Collections.Threading;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -380,6 +382,8 @@ namespace Point.Collections.Editor
             m_References = Array.Empty<string>(),
             m_Dependencies = Array.Empty<string>();
 
+        private AtomicOperator m_Op = new AtomicOperator();
+
         public AssetPathField Asset => m_Asset;
         public HashSet<string> References => m_ReferenceSet;
         public HashSet<string> Dependencies => m_DependencySet;
@@ -416,13 +420,9 @@ namespace Point.Collections.Editor
             m_Asset = new AssetPathField(assetPath);
             
             string[] dependencies = m_Asset.GetDependencies();
-            m_DependencySet = new HashSet<string>(dependencies.Where(t => !t.Equals(assetPath)).ToArray());
-
-            //if (m_Asset.EditorAsset is MonoScript script)
-            //{
-            //}
+            m_DependencySet = new HashSet<string>(dependencies.Where(t => !t.Equals(assetPath)));
         }
-        internal void BuildReferenceSet(Dictionary<string, AssetInfo> assetDatabase)
+        internal void BuildReferenceSet(ConcurrentDictionary<string, AssetInfo> assetDatabase)
         {
             foreach (var item in m_DependencySet)
             {
@@ -431,10 +431,10 @@ namespace Point.Collections.Editor
                     continue;
                 }
 
-                dep.m_ReferenceSet.Add(m_Asset.AssetPath);
+                dep.AddToReferenceSet(m_Asset.AssetPath);
             }
         }
-        internal void RemoveReferenceSet(Dictionary<string, AssetInfo> assetDatabase)
+        internal void RemoveReferenceSet(ConcurrentDictionary<string, AssetInfo> assetDatabase)
         {
             foreach (var item in m_DependencySet)
             {
@@ -443,8 +443,25 @@ namespace Point.Collections.Editor
                     continue;
                 }
 
-                dep.m_ReferenceSet.Remove(m_Asset.AssetPath);
+                dep.RemoveFromReferenceSet(m_Asset.AssetPath);
             }
+        }
+
+        private void AddToReferenceSet(string assetPath)
+        {
+            m_Op.Enter();
+
+            m_ReferenceSet.Add(assetPath);
+
+            m_Op.Exit();
+        }
+        private void RemoveFromReferenceSet(string assetPath)
+        {
+            m_Op.Enter();
+
+            m_ReferenceSet.Remove(assetPath);
+
+            m_Op.Exit();
         }
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()

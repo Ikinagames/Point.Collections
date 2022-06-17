@@ -402,9 +402,10 @@ namespace Point.Collections.Editor
         public static bool LabelToggle(bool value, string text, int size, TextAnchor textAnchor)
         {
             text = HTMLString.String(text, size);
-            return GUILayout.Toggle(value, 
-                (value ? EditorStyleUtilities.FoldoutOpendString : EditorStyleUtilities.FoldoutClosedString) +
-                text, 
+            //return GUILayout.Toggle(value, 
+            //    (value ? EditorStyleUtilities.FoldoutOpendString : EditorStyleUtilities.FoldoutClosedString) +
+            //    text, 
+            return GUILayout.Toggle(value, text, 
                 
                 GetLabelStyle(textAnchor));
         }

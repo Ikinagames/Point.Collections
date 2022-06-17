@@ -23,6 +23,7 @@
 using Point.Collections.Threading;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -32,16 +33,15 @@ using UnityEngine;
 
 namespace Point.Collections.Editor
 {
-    [PreferBinarySerialization]
-    internal sealed class AssetInspectorDatabase : EditorStaticScriptableObject<AssetInspectorDatabase>,
-        ISerializationCallbackReceiver
+    internal sealed class AssetInspectorDatabase : EditorStaticScriptableObject<AssetInspectorDatabase>
     {
-        [SerializeField]
         private AssetInfo[] m_Assets = Array.Empty<AssetInfo>();
 
+        AtomicSafeInteger m_CurrentIndex = 0;
         private AtomicSafeBoolen m_Builded = false;
+
         private AtomicOperator m_Op = new AtomicOperator();
-        private Dictionary<string, AssetInfo> m_Database = new Dictionary<string, AssetInfo>();
+        private ConcurrentDictionary<string, AssetInfo> m_Database = new ConcurrentDictionary<string, AssetInfo>();
 
         public AssetInfo this[string key]
         {
@@ -94,12 +94,13 @@ namespace Point.Collections.Editor
 
             return BuildDatabase(task);
         }
+
         public IEnumerator BuildDatabase(BackgroundTask task)
         {
             m_Op.Enter();
 
-            "Build Start".ToLog();
-            "Gather All Assets".ToLog();
+            //"Build Start".ToLog();
+            //"Gather All Assets".ToLog();
             Progress.Report(task, 0, "Gather All Assets");
             float totalProgress = 0;
             yield return null;
@@ -111,12 +112,13 @@ namespace Point.Collections.Editor
                     m_Assets = new AssetInfo[allAssetPaths.Length];
 
                     int gatherAllAssetID = Progress.Start("Gather All Assets", parentId: task);
+
                     for (int i = 0; i < allAssetPaths.Length; i++)
                     {
                         m_Assets[i] = new AssetInfo(allAssetPaths[i]);
 
                         float progress = i / (float)allAssetPaths.Length;
-                        Progress.Report(gatherAllAssetID, progress);
+                        Progress.Report(gatherAllAssetID, progress, allAssetPaths[i]);
                         Progress.Report(task, totalProgress * progress, "Gather All Assets");
 
                         yield return null;
@@ -130,17 +132,23 @@ namespace Point.Collections.Editor
             yield return null;
             {
                 int updateHashmapID = Progress.Start("Update Hashmap", parentId: task);
-                $"Update Hashmap 0 / {m_Assets.Length}".ToLog();
-                for (int i = 0; i < m_Assets.Length; i++)
+                //$"Update Hashmap 0 / {m_Assets.Length}".ToLog();
+
+                m_CurrentIndex = 0;
+                var result = Parallel.For(0, m_Assets.Length, i =>
                 {
                     m_Database[m_Assets[i].Asset.AssetPath] = m_Assets[i];
-
-                    float progress = i / (float)m_Assets.Length;
-                    Progress.Report(updateHashmapID, i / (float)m_Assets.Length);
+                    m_CurrentIndex.Increment();
+                });
+                while (!result.IsCompleted || m_CurrentIndex.Value != m_Assets.Length)
+                {
+                    float progress = m_CurrentIndex / (float)m_Assets.Length;
+                    Progress.Report(updateHashmapID, progress, $"{m_CurrentIndex.Value} / {m_Assets.Length}");
                     Progress.Report(task, totalProgress + (.25f * progress), "Update Hashmap");
 
                     yield return null;
                 }
+
                 Progress.Remove(updateHashmapID);
                 yield return null;
             }
@@ -150,17 +158,23 @@ namespace Point.Collections.Editor
             yield return null;
             {
                 int buildHashmapID = Progress.Start("Build Hashmap", parentId: task);
-                $"Build Hashmap 0 / {m_Assets.Length}".ToLog();
-                for (int i = 0; i < m_Assets.Length; i++)
+                //$"Build Hashmap 0 / {m_Assets.Length}".ToLog();
+
+                m_CurrentIndex = 0;
+                var result = Parallel.For(0, m_Assets.Length, i =>
                 {
                     m_Assets[i].BuildReferenceSet(m_Database);
-
-                    float progress = i / (float)m_Assets.Length;
-                    Progress.Report(buildHashmapID, i / (float)m_Assets.Length);
+                    m_CurrentIndex.Increment();
+                });
+                while (!result.IsCompleted || m_CurrentIndex.Value != m_Assets.Length)
+                {
+                    float progress = m_CurrentIndex / (float)m_Assets.Length;
+                    Progress.Report(buildHashmapID, progress, $"{m_CurrentIndex.Value} / {m_Assets.Length}");
                     Progress.Report(task, totalProgress + (.5f * progress), "Build Hashmap");
 
                     yield return null;
                 }
+
                 Progress.Remove(buildHashmapID);
                 yield return null;
             }
@@ -170,6 +184,7 @@ namespace Point.Collections.Editor
             m_Builded.Value = true;
 
             "Build Finished".ToLog();
+            //EditorUtility.SetDirty(this);
         }
 
         public static BackgroundTask Build()
@@ -178,13 +193,12 @@ namespace Point.Collections.Editor
             var temp = new BackgroundTask("Build AssetDatabase");
             if (Builded)
             {
-                "rebuild btt".ToLog();
-
+                //"rebuild btt".ToLog();
                 task = Instance.RebuildDatabase(temp);
             }
             else
             {
-                "build btt".ToLog();
+                //"build btt".ToLog();
                 task = Instance.BuildDatabase(temp);
             }
 
@@ -207,22 +221,10 @@ namespace Point.Collections.Editor
             if (Instance.m_Database.ContainsKey(path))
             {
                 Instance.m_Database[path].RemoveReferenceSet(Instance.m_Database);
-                Instance.m_Database.Remove(path);
+                Instance.m_Database.TryRemove(path, out _);
             }
 
             Instance.m_Op.Exit();
-        }
-
-        void ISerializationCallbackReceiver.OnBeforeSerialize()
-        {
-            m_Op.Enter();
-
-            m_Assets = m_Database.Values.ToArray();
-
-            m_Op.Exit();
-        }
-        void ISerializationCallbackReceiver.OnAfterDeserialize()
-        {
         }
     }
 }

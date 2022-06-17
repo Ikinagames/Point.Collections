@@ -25,6 +25,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Compilation;
+using UnityEngine;
 
 namespace Point.Collections.Editor
 {
@@ -75,6 +76,17 @@ namespace Point.Collections.Editor
 
         public int ProgressID => m_ProgressID;
         public bool IsRunning => !m_Disposed;
+        public float Percent
+        {
+            get
+            {
+                float temp = Progress.GetProgress(ProgressID) * 1000;
+
+                temp = Mathf.RoundToInt(temp) * .1f;
+
+                return temp;
+            }
+        }
 
         public BackgroundTask(string name)
         {
@@ -91,6 +103,8 @@ namespace Point.Collections.Editor
         }
         public void Dispose()
         {
+            if (m_Disposed) return;
+
             Progress.Remove(m_ProgressID);
             m_Task = null;
             m_Disposed = true;
