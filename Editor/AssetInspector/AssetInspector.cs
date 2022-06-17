@@ -20,13 +20,9 @@
 #define UNITYENGINE
 
 
-using Point.Collections.Threading;
-using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -47,6 +43,8 @@ namespace Point.Collections.Editor
         private static bool
             s_DisplayAssetInspector = false,
             s_DisplayReferences, s_DisplayDependencies;
+        private static BackgroundTask
+            s_Cor;
 
         static AssetInspector()
         {
@@ -109,14 +107,22 @@ namespace Point.Collections.Editor
                 s_DisplayAssetInspector =
                     CoreGUI.LabelToggle(s_DisplayAssetInspector, "Asset Inspector", 13, TextAnchor.MiddleCenter);
 
-                //using (new EditorGUI.DisabledGroupScope(s_AssetDatabaseBuilded))
+                using (new EditorGUI.DisabledGroupScope(s_Cor != null && s_Cor.IsRunning))
                 {
                     if (GUILayout.Button("Build", GUILayout.Width(45)))
                     {
-                        AssetInspectorDatabase.Build();
+                        s_Cor = AssetInspectorDatabase.Build();
+
+                        return;
                     }
                 }
             }
+
+            if (s_Cor != null && s_Cor.IsRunning)
+            {
+                CoreGUI.Label("Assetdatabase is now building ..", 11, TextAnchor.MiddleCenter);
+            }
+
             if (!AssetInspectorDatabase.Builded) return;
 
             string assetPath = GetAssetPath(editor.target);
@@ -198,131 +204,6 @@ namespace Point.Collections.Editor
             else assetPath = AssetDatabase.GetAssetPath(obj);
 
             return assetPath;
-        }
-    }
-
-    [PreferBinarySerialization]
-    internal sealed class AssetInspectorDatabase : EditorStaticScriptableObject<AssetInspectorDatabase>,
-        ISerializationCallbackReceiver
-    {
-        [SerializeField]
-        private AssetInfo[] m_Assets = Array.Empty<AssetInfo>();
-
-        private AtomicSafeBoolen m_Builded = false;
-        private AtomicOperator m_Op = new AtomicOperator();
-        private Dictionary<string, AssetInfo> m_Database = new Dictionary<string, AssetInfo>();
-
-        public AssetInfo this[string key]
-        {
-            get
-            {
-                AssetInfo result;
-                m_Op.Enter();
-                {
-                    m_Database.TryGetValue(key, out result);
-                }
-                m_Op.Exit();
-
-                return result;
-            }
-        }
-        public static bool Builded => Instance.m_Builded;
-
-        private async Task<Dictionary<string, AssetInfo>> BuildDatabaseAsync()
-        {
-            var result = await Task.Run(BuildDatabase);
-
-            return result;
-        }
-        private async Task<Dictionary<string, AssetInfo>> RebuildDatabaseAsync()
-        {
-            var result = await Task.Run(RebuildDatabase);
-
-            return result;
-        }
-        private Dictionary<string, AssetInfo> RebuildDatabase()
-        {
-            m_Op.Enter();
-            m_Assets = null;
-            m_Op.Exit();
-
-            return BuildDatabase();
-        }
-        private Dictionary<string, AssetInfo> BuildDatabase()
-        {
-            m_Op.Enter();
-
-            "Build Start".ToLog();
-            "Gather All Assets".ToLog();
-
-            if (m_Assets == null || m_Assets.Length == 0)
-            {
-                string[] allAssetPaths = AssetDatabase.GetAllAssetPaths();
-                m_Assets = allAssetPaths.Select(t => new AssetInfo(t)).ToArray();
-            }
-
-            $"Update Hashmap 0 / {m_Assets.Length}".ToLog();
-            for (int i = 0; i < m_Assets.Length; i++)
-            {
-                m_Database.Add(m_Assets[i].Asset.AssetPath, m_Assets[i]);
-            }
-
-            $"Build Hashmap 0 / {m_Assets.Length}".ToLog();
-
-            for (int i = 0; i < m_Assets.Length; i++)
-            {
-                m_Assets[i].BuildReferenceSet(m_Database);
-            }
-
-            m_Op.Exit();
-
-            m_Builded.Value = true;
-
-            "Build Finished".ToLog();
-
-            return m_Database;
-        }
-
-        public static Task<Dictionary<string, AssetInfo>> Build()
-        {
-            if (Builded)
-            {
-                return Instance.RebuildDatabaseAsync();
-            }
-            return Instance.BuildDatabaseAsync();
-        }
-        public static void Add(string path)
-        {
-            Instance.m_Op.Enter();
-
-            Instance.m_Database[path] = new AssetInfo(path);
-            Instance.m_Database[path].BuildReferenceSet(Instance.m_Database);
-
-            Instance.m_Op.Exit();
-        }
-        public static void Remove(string path)
-        {
-            Instance.m_Op.Enter();
-
-            if (Instance.m_Database.ContainsKey(path))
-            {
-                Instance.m_Database[path].RemoveReferenceSet(Instance.m_Database);
-                Instance.m_Database.Remove(path);
-            }
-
-            Instance.m_Op.Exit();
-        }
-
-        void ISerializationCallbackReceiver.OnBeforeSerialize()
-        {
-            m_Op.Enter();
-
-            m_Assets = m_Database.Values.ToArray();
-
-            m_Op.Exit();
-        }
-        void ISerializationCallbackReceiver.OnAfterDeserialize()
-        {
         }
     }
 }
