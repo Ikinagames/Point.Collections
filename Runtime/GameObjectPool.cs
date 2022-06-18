@@ -36,8 +36,10 @@ namespace Point.Collections
         public abstract class Pool
         {
             [SerializeField] private string m_FriendlyName = string.Empty;
-            //[SerializeField] private GameObject m_Object;
             [SerializeField] private bool m_SpawnAtWorld = false;
+            [PositionHandle(Local = true)]
+            [SerializeField] private Vector3 m_LocalPosition;
+            [SerializeField] private Vector3 m_LocalRotation;
 
             private GameObjectPool m_Parent;
             private ObjectPool<GameObject> m_ObjectPool;
@@ -77,7 +79,8 @@ namespace Point.Collections
                 GameObjectPoolReceiver receiver = obj.GetComponent<GameObjectPoolReceiver>();
                 receiver.Reserved = false;
 
-                obj.transform.position = m_Parent.transform.position + Object.transform.localPosition;
+                obj.transform.position = m_Parent.transform.position + m_LocalPosition;
+                obj.transform.eulerAngles += m_LocalRotation;
                 obj.SetActive(true);
             }
             private void OnReserve(GameObject obj)

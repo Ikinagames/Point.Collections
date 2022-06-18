@@ -47,7 +47,7 @@ namespace Point.Collections.Editor
         {
             if (!m_Opened)
             {
-                Popup.Instance.SetProperty(property);
+                Popup.Instance.SetProperty(property, attribute as PositionHandleAttribute);
                 Popup.Instance.Open();
 
                 m_Opened = true;
@@ -61,6 +61,8 @@ namespace Point.Collections.Editor
 
         private sealed class Popup : CLRSingleTone<Popup>
         {
+            private PositionHandleAttribute m_Attribute;
+            private Transform m_Tr;
             private SerializedProperty
                 m_Property,
                 m_X, m_Y, m_Z;
@@ -94,13 +96,26 @@ namespace Point.Collections.Editor
                 SceneView.RepaintAll();
                 IsOpened = false;
             }
-            public void SetProperty(SerializedProperty property)
+            public void SetProperty(SerializedProperty property, PositionHandleAttribute attribute)
             {
+                m_Attribute = attribute;
                 m_Property = property;
 
                 m_X = m_Property.FindPropertyRelative("x");
                 m_Y = m_Property.FindPropertyRelative("y");
                 m_Z = m_Property.FindPropertyRelative("z");
+
+                if (m_Attribute.Local)
+                {
+                    if (property.serializedObject.targetObject is GameObject obj)
+                    {
+                        m_Tr = obj.transform;
+                    }
+                    else if (property.serializedObject.targetObject is UnityEngine.Component com)
+                    {
+                        m_Tr = com.transform;
+                    }
+                }
             }
 
             private void OnSceneGUI(SceneView sceneView)
@@ -128,12 +143,22 @@ namespace Point.Collections.Editor
 
                 //const float size = 1, arrowSize = 2, centerOffset = .5f;
                 Vector3 position = new Vector3(m_X.floatValue, m_Y.floatValue, m_Z.floatValue);
+                if (m_Tr != null)
+                {
+                    position = Handles.DoPositionHandle(position + m_Tr.position, quaternion.identity);
 
-                position = Handles.DoPositionHandle(position, quaternion.identity);
+                    position -= m_Tr.position;
+                }
+                else
+                {
+                    position = Handles.DoPositionHandle(position, quaternion.identity);
+                }
 
                 m_X.floatValue = position.x;
                 m_Y.floatValue = position.y;
                 m_Z.floatValue = position.z;
+
+                m_Property.serializedObject.ApplyModifiedProperties();
 
                 // https://gamedev.stackexchange.com/questions/149514/use-unity-handles-for-interaction-in-the-scene-view
 

@@ -25,7 +25,10 @@ using UnityEngine;
 namespace Point.Collections
 {
     [Conditional("UNITY_EDITOR")]
-    public sealed class PositionHandleAttribute : PropertyAttribute { }
+    public sealed class PositionHandleAttribute : PropertyAttribute
+    {
+        public bool Local { get; set; } = false;
+    }
 }
 
 #endif

@@ -148,6 +148,13 @@ namespace Point.Collections.Editor
             {
                 root.Add(CoreGUI.VisualElement.Space());
             }
+            else if (attribute is HeaderAttribute headerAttribute)
+            {
+                var header = CoreGUI.VisualElement.Label(headerAttribute.header, 13);
+                header.style.unityFontStyleAndWeight = FontStyle.Bold;
+
+                root.Add(header);
+            }
             else if (attribute is HelpBoxAttribute helpBoxAttribute)
             {
                 HelpBox helpBox = new HelpBox(helpBoxAttribute.Text, helpBoxAttribute.Type);
