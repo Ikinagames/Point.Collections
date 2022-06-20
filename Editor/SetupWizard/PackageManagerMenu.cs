@@ -130,7 +130,7 @@ namespace Point.Collections.Editor
             DrawPackageField(ref m_JsonInstalled, c_Json);
 #if !UNITY_2021_1_OR_NEWER
             DrawPackageField(ref m_UIInstalled, c_UI);
-            DrawPackageFie1ld(ref m_UIBuilderInstalled, c_UIBuilder);
+            DrawPackageField(ref m_UIBuilderInstalled, c_UIBuilder);
             DrawPackageField(ref m_DeviceSimInstalled, c_DeviceSim);
 #else
             DrawPackageField(ref m_CodeCoverageInstalled, c_CodeCoverage);
