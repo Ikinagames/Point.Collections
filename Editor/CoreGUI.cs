@@ -51,6 +51,7 @@ namespace Point.Collections.Editor
                 return s_EmptyIcon;
             }
         }
+        public static GUIContent EmptyContent => new GUIContent("None", EmptyIcon);
 
         // https://rito15.github.io/posts/unity-editor-built-in-icons/
         public static Texture2D GetEditorDefaultIcon(string name)

@@ -79,20 +79,15 @@ namespace Point.Collections.Editor
             objectfield.style.flexGrow = 1;
             objectfield.objectType = targetType;
             objectfield.value = asset;
-            {
-                objectfield.RegisterValueChangedCallback(t =>
-                {
-                    pathProperty.stringValue = AssetDatabase.GetAssetPath(t.newValue);
-                    guidProperty.stringValue = AssetDatabase.AssetPathToGUID(pathProperty.stringValue);
-
-                    pathProperty.serializedObject.ApplyModifiedProperties();
-                });
-            }
+            objectfield.allowSceneObjects = false;
             element.Add(objectfield);
 
             TextField textField = new TextField();
             textField.style.flexGrow = 1;
             textField.value = pathProperty.stringValue;
+            textField.style.overflow = Overflow.Hidden;
+            textField.style.textOverflow = TextOverflow.Ellipsis;
+            textField.style.maxWidth = new StyleLength(new Length(81, LengthUnit.Percent));
             {
                 textField.RegisterValueChangedCallback(t =>
                 {
@@ -100,6 +95,40 @@ namespace Point.Collections.Editor
                     guidProperty.stringValue = AssetDatabase.AssetPathToGUID(pathProperty.stringValue);
 
                     pathProperty.serializedObject.ApplyModifiedProperties();
+
+                    if (pathProperty.stringValue.IsNullOrEmpty())
+                    {
+                        objectfield.SetValueWithoutNotify(null);
+                    }
+                    else
+                    {
+                        objectfield.SetValueWithoutNotify(
+                            AssetDatabase.LoadAssetAtPath(pathProperty.stringValue, 
+                            TypeHelper.TypeOf<UnityEngine.Object>.Type)
+                            );
+                    }
+                });
+                objectfield.RegisterValueChangedCallback(t =>
+                {
+                    UnityEngine.Object target = t.newValue;
+                    if (target == null)
+                    {
+                        pathProperty.stringValue = string.Empty;
+                    }
+                    else if (PrefabUtility.IsPartOfPrefabInstance(target))
+                    {
+                        pathProperty.stringValue =
+                            PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(target);
+                    }
+                    else
+                    {
+                        pathProperty.stringValue = AssetDatabase.GetAssetPath(target);
+                    }
+                    guidProperty.stringValue = AssetDatabase.AssetPathToGUID(pathProperty.stringValue);
+
+                    pathProperty.serializedObject.ApplyModifiedProperties();
+
+                    textField.SetValueWithoutNotify(pathProperty.stringValue);
                 });
             }
             element.Add(textField);
@@ -118,11 +147,11 @@ namespace Point.Collections.Editor
 
             if (!property.isExpanded)
             {
-                textField.AddToClassList("hide");
+                textField.style.Hide(true);
             }
             else
             {
-                objectfield.AddToClassList("hide");
+                objectfield.style.Hide(true);
             }
 
             Button btt = new Button();
@@ -136,13 +165,13 @@ namespace Point.Collections.Editor
 
                     if (!property.isExpanded)
                     {
-                        textField.AddToClassList("hide");
-                        objectfield.RemoveFromClassList("hide");
+                        textField.style.Hide(true);
+                        objectfield.style.Hide(false);
                     }
                     else
                     {
-                        textField.RemoveFromClassList("hide");
-                        objectfield.AddToClassList("hide");
+                        textField.style.Hide(false);
+                        objectfield.style.Hide(true);
                     }
                 };
             }

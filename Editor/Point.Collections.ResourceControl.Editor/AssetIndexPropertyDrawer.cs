@@ -169,14 +169,14 @@ namespace Point.Collections.ResourceControl.Editor
         {
             public Action<int2> m_OnClick;
 
+            protected override string DisplayName => "Assets";
+
             public AssetIndexSearchProvider(Action<int2> onClick)
             {
                 m_OnClick = onClick;
             }
-            public override List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
+            protected override void BuildSearchTree(in SearchWindowContext ctx, in List<SearchTreeEntry> list)
             {
-                List<SearchTreeEntry> list = new List<SearchTreeEntry>();
-                list.Add(new SearchTreeGroupEntry(new GUIContent("Assets")));
                 list.Add(new SearchTreeEntry(new GUIContent("None", CoreGUI.EmptyIcon))
                 {
                     userData = new int2(-1),
@@ -206,14 +206,12 @@ namespace Point.Collections.ResourceControl.Editor
                         list.Add(entry);
                     }
                 }
-
-                return list;
             }
-            public override bool OnSelectEntry(SearchTreeEntry SearchTreeEntry, SearchWindowContext context)
+            protected override bool OnSelectEntry(in SearchWindowContext ctx, in SearchTreeEntry entry)
             {
-                if (SearchTreeEntry is SearchTreeGroupEntry) return true;
+                if (entry is SearchTreeGroupEntry) return true;
 
-                m_OnClick?.Invoke((int2)SearchTreeEntry.userData);
+                m_OnClick?.Invoke((int2)entry.userData);
                 return true;
             }
         }

@@ -19,6 +19,7 @@
 #endif
 #define UNITYENGINE
 
+using System;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -30,8 +31,84 @@ namespace Point.Collections.Editor
     /// </summary>
     public abstract class SearchProviderBase : ScriptableObject, ISearchWindowProvider
     {
-        public abstract List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context);
-        public abstract bool OnSelectEntry(SearchTreeEntry SearchTreeEntry, SearchWindowContext context);
+        public event Action<SearchTreeEntry, SearchWindowContext> OnSelected;
+
+        protected abstract string DisplayName { get; }
+
+        List<SearchTreeEntry> ISearchWindowProvider.CreateSearchTree(SearchWindowContext context)
+        {
+            List<SearchTreeEntry> list = new List<SearchTreeEntry>();
+            list.Add(new SearchTreeGroupEntry(new GUIContent(DisplayName)));
+
+            BuildSearchTree(context, list);
+
+            return list;
+        }
+        bool ISearchWindowProvider.OnSelectEntry(SearchTreeEntry SearchTreeEntry, SearchWindowContext context)
+        {
+            if (OnSelectEntry(context, SearchTreeEntry))
+            {
+                OnSelected?.Invoke(SearchTreeEntry, context);
+                return true;
+            }
+            return false;
+        }
+
+        protected virtual void BuildSearchTree(in SearchWindowContext ctx, in List<SearchTreeEntry> list)
+        {
+        }
+        protected virtual bool OnSelectEntry(in SearchWindowContext ctx, in SearchTreeEntry entry)
+        {
+            return true;
+        }
+    }
+    public abstract class SearchProviderBase<TTarget> : ScriptableObject, ISearchWindowProvider
+    {
+        public event Action<Entry, SearchWindowContext> OnSelected;
+
+        protected abstract string DisplayName { get; }
+
+        public sealed class Entry : SearchTreeEntry
+        {
+            public new TTarget userData
+            {
+                get => (TTarget)base.userData;
+                set => base.userData = value;
+            }
+
+            public Entry(GUIContent content) : base(content)
+            {
+            }
+        }
+
+        List<SearchTreeEntry> ISearchWindowProvider.CreateSearchTree(SearchWindowContext context)
+        {
+            List<SearchTreeEntry> list = new List<SearchTreeEntry>();
+            list.Add(new SearchTreeGroupEntry(new GUIContent(DisplayName)));
+
+            List<Entry> entries = new List<Entry>();
+            BuildSearchTree(context, entries);
+            list.AddRange(entries);
+
+            return list;
+        }
+        bool ISearchWindowProvider.OnSelectEntry(SearchTreeEntry SearchTreeEntry, SearchWindowContext context)
+        {
+            if (OnSelectEntry(context, SearchTreeEntry as Entry))
+            {
+                OnSelected?.Invoke(SearchTreeEntry as Entry, context);
+                return true;
+            }
+            return false;
+        }
+
+        protected virtual void BuildSearchTree(in SearchWindowContext ctx, in List<Entry> list)
+        {
+        }
+        protected virtual bool OnSelectEntry(in SearchWindowContext ctx, in Entry entry)
+        {
+            return true;
+        }
     }
 }
 

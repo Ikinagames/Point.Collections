@@ -117,17 +117,20 @@ namespace Point.Collections.Editor
                 return;
             }
 
-            using (new CoreGUI.BoxBlock(Color.black, GUILayout.ExpandWidth(false)))
+            using (new CoreGUI.BoxBlock(Color.black, 
+                GUILayout.MaxWidth(Screen.width)))
             {
-                DrawHeader();
-
+                if (!DrawSetup())
+                {
+                    return;
+                }
                 if (!AssetInspectorDatabase.Builded) return;
 
                 DrawItems(editor, assetPath);
             }
         }
 
-        private static void DrawHeader()
+        private static bool DrawSetup()
         {
             string headerText;
             if (s_Cor != null && s_Cor.IsRunning)
@@ -140,7 +143,7 @@ namespace Point.Collections.Editor
             }
             else
             {
-                return;
+                return true;
             }
 
             using (new EditorGUILayout.HorizontalScope())
@@ -157,6 +160,8 @@ namespace Point.Collections.Editor
                     }
                 }
             }
+
+            return false;
         }
         private static void DrawItems(UnityEditor.Editor editor, string assetPath)
         {
@@ -195,16 +200,25 @@ namespace Point.Collections.Editor
 
             #endregion
 
+            const float c_IconWidth = 36;
+            const float c_ButtonWidth = 80;
+            float middleTextWidth = Screen.width - c_IconWidth - c_ButtonWidth - 20;
+
             using (new EditorGUILayout.VerticalScope())
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    GUILayout.Label(AssetDatabase.GetCachedIcon(assetPath), GUILayout.Width(36), GUILayout.Height(36));
+                    GUILayout.Label(AssetDatabase.GetCachedIcon(assetPath), 
+                        GUILayout.Width(36), GUILayout.Height(36));
                     using (new EditorGUILayout.VerticalScope())
                     {
-                        GUILayout.Label(Path.GetFileName(assetPath));
+                        GUILayout.Label(
+                            Path.GetFileName(assetPath), 
+                            GUILayout.Width(middleTextWidth));
                         // Display directory (without "Assets/" prefix)
-                        GUILayout.Label(Regex.Match(Path.GetDirectoryName(assetPath), "(\\\\.*)$").Value);
+                        GUILayout.Label(
+                            Regex.Match(Path.GetDirectoryName(assetPath), "(\\\\.*)$").Value,
+                            GUILayout.Width(middleTextWidth));
                     }
                     using (new EditorGUILayout.VerticalScope(GUILayout.Width(80)))
                     {
@@ -225,13 +239,17 @@ namespace Point.Collections.Editor
 
                 if (!s_DisplayAssetInspector) return;
 
-                using (new EditorGUILayout.HorizontalScope())
+                float toogleWidth = Screen.width * .5f - 30;
+
+                using (new EditorGUILayout.HorizontalScope(GUILayout.Width(Screen.width - 20)))
                 {
                     using (new EditorGUILayout.VerticalScope())
                     {
                         using (new CoreGUI.BoxBlock(Color.gray))
                         {
-                            s_DisplayReferences = EditorGUILayout.ToggleLeft(s_DisplayReferencesContent, s_DisplayReferences);
+                            s_DisplayReferences = EditorGUILayout.ToggleLeft(
+                                s_DisplayReferencesContent, s_DisplayReferences,
+                                GUILayout.Width(toogleWidth));
                             Rect lastRect = GUILayoutUtility.GetLastRect();
 
                             if (s_DisplayReferences)
@@ -278,7 +296,9 @@ namespace Point.Collections.Editor
                     {
                         using (new CoreGUI.BoxBlock(Color.gray))
                         {
-                            s_DisplayDependencies = EditorGUILayout.ToggleLeft(s_DisplayDependenciesContent, s_DisplayDependencies);
+                            s_DisplayDependencies = EditorGUILayout.ToggleLeft(
+                                s_DisplayDependenciesContent, s_DisplayDependencies,
+                                GUILayout.Width(toogleWidth));
                             Rect lastRect = GUILayoutUtility.GetLastRect();
 
                             if (s_DisplayDependencies)

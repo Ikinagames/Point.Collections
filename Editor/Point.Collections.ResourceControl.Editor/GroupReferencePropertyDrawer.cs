@@ -88,12 +88,12 @@ namespace Point.Collections.ResourceControl.Editor
         {
             public Action<string> m_OnClick;
 
-            public override List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
+            protected override string DisplayName => "Catalogs";
+
+            protected override void BuildSearchTree(in SearchWindowContext ctx, in List<SearchTreeEntry> list)
             {
                 const string c_BuiltInData = "Built In Data";
 
-                List<SearchTreeEntry> list = new List<SearchTreeEntry>();
-                list.Add(new SearchTreeGroupEntry(new GUIContent("Catalogs")));
                 list.Add(new SearchTreeEntry(new GUIContent("None", CoreGUI.EmptyIcon))
                 {
                     userData = string.Empty,
@@ -113,14 +113,12 @@ namespace Point.Collections.ResourceControl.Editor
                     };
                     list.Add(entry);
                 }
-
-                return list;
             }
-            public override bool OnSelectEntry(SearchTreeEntry SearchTreeEntry, SearchWindowContext context)
+            protected override bool OnSelectEntry(in SearchWindowContext ctx, in SearchTreeEntry entry)
             {
-                if (SearchTreeEntry is SearchTreeGroupEntry) return true;
+                if (entry is SearchTreeGroupEntry) return true;
 
-                m_OnClick?.Invoke((string)SearchTreeEntry.userData);
+                m_OnClick?.Invoke((string)entry.userData);
                 return true;
             }
         }

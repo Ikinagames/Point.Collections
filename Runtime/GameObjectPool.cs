@@ -110,6 +110,12 @@ namespace Point.Collections
             {
                 get
                 {
+#if UNITY_EDITOR
+                    if (!Application.isPlaying)
+                    {
+                        return m_Object.EditorAsset;
+                    }
+#endif
                     return m_Object.Asset.Asset as GameObject;
                 }
             }
@@ -152,7 +158,7 @@ namespace Point.Collections
             }
         }
 
-        public int Register(IList<PoolReferece> pools)
+        public void Register(IList<PoolReferece> pools)
         {
             int count = m_References.Count;
             for (int i = 0; i < pools.Count; i++)
@@ -165,20 +171,20 @@ namespace Point.Collections
                     m_HashMap[friendlyName] = pools[i];
                 }
             }
-            m_References.AddRange(pools);
+            //m_References.AddRange(pools);
 
-            return count;
+            //return count;
         }
 
-        public GameObject FindObject(string friendlyName)
-        {
-            m_HashMap.TryGetValue(new Hash(friendlyName), out var value);
-            return value != null ? value.Object : null;
-        }
-        public GameObject FindObject(int index)
-        {
-            return m_DirectReferences[index].Object;
-        }
+        //public GameObject FindObject(string friendlyName)
+        //{
+        //    m_HashMap.TryGetValue(new Hash(friendlyName), out var value);
+        //    return value != null ? value.Object : null;
+        //}
+        //public GameObject FindObject(int index)
+        //{
+        //    return m_DirectReferences[index].Object;
+        //}
 
         public void SpawnAtPosition(string friendlyName) => Spawn(friendlyName);
         public GameObject Spawn(string friendlyName)
@@ -187,21 +193,42 @@ namespace Point.Collections
 
             return value.Get();
         }
-        public GameObject Spawn(int index)
+
+        public GameObject Spawn(Hash hash)
         {
-            if (index >= m_References.Count || index < 0)
+            if (!m_HashMap.TryGetValue(hash, out var value))
             {
-                $"Cannot spawn index {index} it\'s out of range".ToLogError();
+                $"Cannot spawn hash({hash})".ToLogError();
                 return null;
             }
 
-            return m_References[index].Get();
+            return value.Get();
+        }
+        public void Reserve(Hash hash, GameObject obj)
+        {
+            if (!m_HashMap.TryGetValue(hash, out var value))
+            {
+                $"Cannot reserve hash({hash})".ToLogError();
+                return;
+            }
+
+            value.Reserve(obj);
         }
 
-        public void Reserve(int index, GameObject obj)
-        {
-            m_References[index].Reserve(obj);
-        }
+        //public GameObject Spawn(int index)
+        //{
+        //    if (index >= m_References.Count || index < 0)
+        //    {
+        //        $"Cannot spawn index {index} it\'s out of range".ToLogError();
+        //        return null;
+        //    }
+
+        //    return m_References[index].Get();
+        //}
+        //public void Reserve(int index, GameObject obj)
+        //{
+        //    m_References[index].Reserve(obj);
+        //}
     }
 }
 
