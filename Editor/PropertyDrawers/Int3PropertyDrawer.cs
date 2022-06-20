@@ -27,7 +27,31 @@ using UnityEngine.UIElements;
 namespace Point.Collections.Editor
 {
     [CustomPropertyDrawer(typeof(int3))]
-    internal sealed class Int3PropertyDrawer : PropertyDrawerUXML<int3>
+    internal sealed class Int3PropertyDrawer : Int3PropertyDrawerIMGUIFallback
+    {
+        protected override VisualElement CreateVisualElement(SerializedProperty property)
+        {
+            SerializedProperty
+                x = property.FindPropertyRelative("x"),
+                y = property.FindPropertyRelative("y"),
+                z = property.FindPropertyRelative("z");
+
+            Vector3IntField field = new Vector3IntField(property.displayName);
+            field.value = new Vector3Int(x.intValue, y.intValue, z.intValue);
+            field.RegisterValueChangedCallback(t =>
+            {
+                var value = t.newValue;
+                x.intValue = value.x;
+                y.intValue = value.y;
+                z.intValue = value.z;
+
+                x.serializedObject.ApplyModifiedProperties();
+            });
+
+            return field;
+        }
+    }
+    internal abstract class Int3PropertyDrawerIMGUIFallback : PropertyDrawerUXML<int3>
     {
         private static GUIContent[] m_ElementContents = new GUIContent[]
         {
@@ -65,32 +89,11 @@ namespace Point.Collections.Editor
             z.intValue = EditorGUI.IntField(elementRaws[1], z.intValue);
         }
 
-        //protected override void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
-        //{
-        //    Rect elementRect = rect.Pop();
-        //    //Rect[] rects = AutoRect.DivideWithRatio(elementRect, .2f, .4f, .4f);
-        //    Draw(elementRect, property, label);
-        //}
-        protected override VisualElement CreateVisualElement(SerializedProperty property)
+        protected override sealed void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
         {
-            SerializedProperty
-                x = property.FindPropertyRelative("x"),
-                y = property.FindPropertyRelative("y"),
-                z = property.FindPropertyRelative("z");
-
-            Vector3IntField field = new Vector3IntField(property.displayName);
-            field.value = new Vector3Int(x.intValue, y.intValue, z.intValue);
-            field.RegisterValueChangedCallback(t =>
-            {
-                var value = t.newValue;
-                x.intValue = value.x;
-                y.intValue = value.y;
-                z.intValue = value.z;
-
-                x.serializedObject.ApplyModifiedProperties();
-            });
-
-            return field;
+            Rect elementRect = rect.Pop();
+            //Rect[] rects = AutoRect.DivideWithRatio(elementRect, .2f, .4f, .4f);
+            Draw(elementRect, property, label);
         }
     }
 }

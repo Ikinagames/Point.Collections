@@ -326,22 +326,88 @@ namespace Point.Collections.Editor
     /// <typeparam name="T"></typeparam>
     public abstract class PropertyDrawerUXML<T> : PropertyDrawer
     {
+        #region Fallback IMGUI
+
+        private bool m_Initialized = false;
         private float m_AutoHeight = 0;
 
         public override sealed float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            //return base.GetPropertyHeight(property, label);
-            return m_AutoHeight;
+            float height = PropertyHeight(property, label);
+
+            height += m_AutoHeight;
+
+            return height;
         }
         public override sealed void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            //base.OnGUI(position, property, label);
+            if (!m_Initialized)
+            {
+                OnInitialize(property);
+                OnInitialize(property, label);
+                m_Initialized = true;
+            }
+
             AutoRect rect = new AutoRect(position);
             if (Event.current.type == EventType.Layout)
             {
                 m_AutoHeight = 0;
             }
 
+            BeforePropertyGUI(ref rect, property, label);
+
+            bool notEditable = false;
+            foreach (var att in fieldInfo.GetCustomAttributes())
+            {
+                if (att is NotEditableAttribute) notEditable = true;
+                //else if (att is SpaceAttribute space)
+                //{
+                //    rect.Pop(space.height == 0 ? EditorGUIUtility.standardVerticalSpacing : space.height);
+                //}
+            }
+
+            using (new EditorGUI.DisabledGroupScope(notEditable))
+            using (new EditorGUI.PropertyScope(position, label, property))
+            {
+                OnPropertyGUI(ref rect, property, label);
+            }
+        }
+
+        /// <summary>
+        /// 이 Propery 의 높이를 결정합니다.
+        /// </summary>
+        /// <param name="property"></param>
+        /// <param name="label"></param>
+        /// <returns></returns>
+        protected virtual float PropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return base.GetPropertyHeight(property, label);
+        }
+        /// <summary>
+        /// 이 <see cref="PropertyDrawer"/>(<typeparamref name="T"/>) 의 인스턴스 객체가 한번만 실행하는 함수입니다.
+        /// </summary>
+        /// <param name="property"></param>
+        protected virtual void OnInitialize(SerializedProperty property) { }
+        /// <summary><inheritdoc cref="OnInitialize(SerializedProperty)"/></summary>
+        /// <param name="property"></param>
+        /// <param name="label"></param>
+        protected virtual void OnInitialize(SerializedProperty property, GUIContent label) { }
+
+        /// <summary>
+        /// <see cref="EditorGUI.PropertyScope"/> 진입 전 실행되는 함수입니다.
+        /// </summary>
+        /// <param name="rect"></param>
+        /// <param name="property"></param>
+        /// <param name="label"></param>
+        protected virtual void BeforePropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label) { }
+        /// <summary>
+        /// <see cref="EditorGUI.PropertyScope"/> 내에서 실행되는 함수입니다.
+        /// </summary>
+        /// <param name="rect"></param>
+        /// <param name="property"></param>
+        /// <param name="label"></param>
+        protected virtual void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
+        {
             float height = EditorGUI.GetPropertyHeight(property, label, false);
             property.isExpanded = EditorGUI.Foldout(rect.Pop(height), property.isExpanded, label, true);
             if (Event.current.type == EventType.Layout)
@@ -367,6 +433,9 @@ namespace Point.Collections.Editor
             }
             rect.Indent(-10);
         }
+
+        #endregion
+
         public override sealed VisualElement CreatePropertyGUI(SerializedProperty property)
         {
             var ve = CreateVisualElement(property);
