@@ -97,7 +97,6 @@ namespace Point.Collections
             {
                 Array.Resize(ref m_Array, m_Array.Length + 1);
             }
-
             int index = m_Count;
             m_Array[index] = item;
             m_Count++;
@@ -167,6 +166,29 @@ namespace Point.Collections
 
             return true;
         }
+        public bool RemoveEmptyElements()
+        {
+            if (m_Count == m_Array.Length) return false;
+
+            var list = m_Array.ToList();
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+#if UNITYENGINE
+                if (list[i] is UnityEngine.Object obj && obj == null)
+                {
+                    list.RemoveAt(i);
+                    continue;
+                }
+#endif
+                if (EqualityComparer<T>.Default.Equals(list[i], default(T)))
+                {
+                    list.RemoveAt(i);
+                    continue;
+                }
+            }
+            m_Array = list.ToArray();
+            return true;
+        }
 
         public IEnumerator<T> GetEnumerator() => ((IList<T>)m_Array).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => m_Array.GetEnumerator();
@@ -178,6 +200,20 @@ namespace Point.Collections
         }
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
+#if UNITYENGINE
+            if (TypeHelper.InheritsFrom<UnityEngine.Object>(TypeHelper.TypeOf<T>.Type))
+            {
+                m_Count = 0;
+                for (int i = 0; i < m_Array.Length; i++)
+                {
+                    UnityEngine.Object obj = m_Array[i] as UnityEngine.Object;
+                    if (obj == null) continue;
+
+                    m_Count++;
+                }
+                return;
+            }
+#endif
             m_Count = m_Array.Length;
         }
 

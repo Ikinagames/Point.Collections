@@ -60,9 +60,9 @@ namespace Point.Collections.Editor
             if (RootVisualElement == null)
             {
                 RootVisualElement = CreateVisualElement();
-                SetupVisualElement(RootVisualElement);
-
                 RootVisualElement.Bind(serializedObject);
+
+                SetupVisualElement(RootVisualElement);
             }
 
             return RootVisualElement;

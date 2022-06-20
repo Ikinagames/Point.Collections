@@ -81,6 +81,7 @@ namespace Point.Collections
 
 #if UNITYENGINE
         public static event Action OnFrameUpdate;
+        public static event Action OnFixedUpdate;
         public static event Action OnLateUpdate;
         public static event Action OnApplicationShutdown;
 #endif
@@ -202,6 +203,10 @@ namespace Point.Collections
 #if ENABLE_INPUT_SYSTEM
             InActiveHandler();
 #endif
+        }
+        private void FixedUpdate()
+        {
+            OnFixedUpdate?.Invoke();
         }
         private void LateUpdate()
         {
