@@ -37,7 +37,7 @@ namespace Point.Collections.ResourceControl
 {
     [Serializable]
     public struct AssetReference : IValidation, IEmpty, IEquatable<AssetReference>
-#if !UNITYENGINE_OLD
+#if UNITY_ADDRESSABLES && !UNITYENGINE_OLD
         , IKeyEvaluator
 #endif
     {
@@ -51,7 +51,7 @@ namespace Point.Collections.ResourceControl
         [SerializeField] private FixedChar128Bytes m_SubAssetName;
 #endif
 
-#if !UNITYENGINE_OLD
+#if UNITY_ADDRESSABLES && !UNITYENGINE_OLD
         object IKeyEvaluator.RuntimeKey
         {
             get
@@ -81,7 +81,7 @@ namespace Point.Collections.ResourceControl
         }
 #endif
 
-#if !UNITYENGINE_OLD
+#if UNITY_ADDRESSABLES && !UNITYENGINE_OLD
         public AsyncOperationHandle<IResourceLocation> Location => ResourceManager.GetLocation(this, TypeHelper.TypeOf<UnityEngine.Object>.Type);
 #endif
 #if UNITY_COLLECTIONS
@@ -108,7 +108,7 @@ namespace Point.Collections.ResourceControl
         {
             if (m_Key.IsEmpty) return false;
 
-#if !UNITYENGINE_OLD
+#if UNITY_ADDRESSABLES && !UNITYENGINE_OLD
             const char c_guidstart = '[';
             string text = ((IKeyEvaluator)this).RuntimeKey.ToString();
             int num = text.IndexOf(c_guidstart);
@@ -122,7 +122,7 @@ namespace Point.Collections.ResourceControl
             return true;
 #endif
         }
-#if !UNITYENGINE_OLD
+#if UNITY_ADDRESSABLES && !UNITYENGINE_OLD
         bool IKeyEvaluator.RuntimeKeyIsValid() => IsValid();
 
         public AsyncOperationHandle<UnityEngine.Object> LoadAssetAsync()
