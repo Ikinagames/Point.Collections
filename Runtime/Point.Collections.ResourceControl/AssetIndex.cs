@@ -22,6 +22,7 @@
 #define UNITYENGINE_OLD
 #else
 #if UNITY_MATHEMATICS
+using Unity.Mathematics;
 #endif
 #endif
 
