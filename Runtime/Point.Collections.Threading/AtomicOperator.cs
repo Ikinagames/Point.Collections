@@ -27,7 +27,7 @@ using System.Threading;
 
 namespace Point.Collections.Threading
 {
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
     [global::Unity.Collections.BurstCompatible]
 #endif
     public struct AtomicOperator

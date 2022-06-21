@@ -18,6 +18,9 @@
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if UNITY_2019 || !UNITY_2020_1_OR_NEWER
+#define UNITYENGINE_OLD
+#endif
 #if UNITY_COLLECTIONS
 #endif
 
@@ -116,7 +119,11 @@ namespace Point.Collections
                         return m_Object.EditorAsset;
                     }
 #endif
+#if UNITYENGINE_OLD
+                    return UnityEngine.Resources.Load<GameObject>(m_Object.AssetPath);
+#else
                     return m_Object.Asset.Asset as GameObject;
+#endif
                 }
             }
         }

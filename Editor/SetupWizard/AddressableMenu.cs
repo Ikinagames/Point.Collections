@@ -49,23 +49,23 @@ namespace Point.Collections.Editor
             }
 
             return true;
-
-            static bool ValidateResourceLists(List<ResourceList> requireRebuildList)
-            {
-                requireRebuildList.Clear();
-                bool result = true;
-                foreach (var item in ResourceHashMap.Instance.ResourceLists)
-                {
-                    if (!ResourceListEditor.Validate(item))
-                    {
-                        requireRebuildList.Add(item);
-                        result = false;
-                    }
-                }
-
-                return result;
-            }
         }
+        static bool ValidateResourceLists(List<ResourceList> requireRebuildList)
+        {
+            requireRebuildList.Clear();
+            bool result = true;
+            foreach (var item in ResourceHashMap.Instance.ResourceLists)
+            {
+                if (!ResourceListEditor.Validate(item))
+                {
+                    requireRebuildList.Add(item);
+                    result = false;
+                }
+            }
+
+            return result;
+        }
+
         public override void OnGUI()
         {
             if (CoreGUI.BoxButton("Locate Resource Hash Map", Color.grey))

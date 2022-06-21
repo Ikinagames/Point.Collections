@@ -46,7 +46,9 @@ namespace Point.Collections
         [SerializeField] protected string p_AssetPath = string.Empty;
         [SerializeField] protected string p_SubAssetName = string.Empty;
 
+#if UNITY_2020_1_OR_NEWER
         [NonSerialized] protected AssetInfo p_AssetInfo;
+#endif
 
         public virtual System.Type TargetType => TypeHelper.TypeOf<UnityEngine.Object>.Type;
         public bool IsSubAsset => !p_SubAssetName.IsNullOrEmpty();
@@ -90,6 +92,7 @@ namespace Point.Collections
             }
         }
 #endif
+#if UNITY_2020_1_OR_NEWER
         public AssetInfo Asset
         {
             get
@@ -110,6 +113,7 @@ namespace Point.Collections
                 return p_AssetInfo;
             }
         }
+#endif
 
         public AssetPathField(string path) : this(path, string.Empty) { }
         public AssetPathField(string path, string subAssetName)
@@ -119,10 +123,12 @@ namespace Point.Collections
         }
         ~AssetPathField()
         {
+#if UNITY_2020_1_OR_NEWER
             if (p_AssetInfo.IsValid())
             {
                 p_AssetInfo.Reserve();
             }
+#endif
         }
 
 #if UNITY_EDITOR
@@ -166,6 +172,7 @@ namespace Point.Collections
             return UnityEditor.AssetDatabase.GetDependencies(p_AssetPath);
         }
 #endif
+#if UNITY_2020_1_OR_NEWER
         public AssetInfo LoadAsset()
         {
             if (p_AssetInfo.IsValid()) return p_AssetInfo;
@@ -173,6 +180,7 @@ namespace Point.Collections
             p_AssetInfo = ResourceManager.LoadAsset(this.ToString());
             return p_AssetInfo;
         }
+#endif
 
         public bool IsEmpty() => p_AssetPath.IsNullOrEmpty();
         public bool Equals(AssetPathField other) => p_AssetPath.Equals(other.p_AssetPath);

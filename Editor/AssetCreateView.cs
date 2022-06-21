@@ -18,6 +18,9 @@
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+#if !UNITY_2020_1_OR_NEWER
+#define UNITYENGINE_OLD
+#endif
 
 using System;
 using System.Collections.Generic;
@@ -47,11 +50,13 @@ namespace Point.Collections.Editor
                 name = "templete-Field-Name",
                 defaultValue = "Templete"
             };
+#if !UNITYENGINE_OLD
             UxmlTypeAttributeDescription<UnityEngine.Object> m_TempleteFieldType = new UxmlTypeAttributeDescription<UnityEngine.Object>
             {
                 name = "templete-Field-Type",
                 defaultValue = TypeHelper.TypeOf<UnityEngine.Object>.Type
             };
+#endif
 
             public override IEnumerable<UxmlChildElementDescription> uxmlChildElementsDescription
             {
@@ -65,7 +70,9 @@ namespace Point.Collections.Editor
                 ate.text = m_Text.GetValueFromBag(bag, cc);
                 ate.showTemplete = m_ShowTemplete.GetValueFromBag(bag, cc);
                 ate.templeteFieldName = m_TempleteFieldName.GetValueFromBag(bag, cc);
+#if !UNITYENGINE_OLD
                 ate.templeteFieldType = m_TempleteFieldType.GetValueFromBag(bag, cc);
+#endif
             }
         }
 

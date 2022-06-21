@@ -29,7 +29,9 @@ namespace Point.Collections
     public sealed class HelpBoxAttribute : PropertyAttribute
     {
         public string Text;
+#if UNITY_2020_1_OR_NEWER
         public HelpBoxMessageType Type;
+#endif
     }
 }
 

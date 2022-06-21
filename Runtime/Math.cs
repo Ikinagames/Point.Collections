@@ -640,6 +640,58 @@ namespace Point.Collections
 
         #endregion
 
+        #region floor
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float floor(float x)
+        {
+            return (float)System.Math.Floor(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float2 floor(float2 x)
+        {
+            return new float2(floor(x.x), floor(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 floor(float3 x)
+        {
+            return new float3(floor(x.x), floor(x.y), floor(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float4 floor(float4 x)
+        {
+            return new float4(floor(x.x), floor(x.y), floor(x.z), floor(x.w));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double floor(double x)
+        {
+            return System.Math.Floor(x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double2 floor(double2 x)
+        {
+            return new double2(floor(x.x), floor(x.y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double3 floor(double3 x)
+        {
+            return new double3(floor(x.x), floor(x.y), floor(x.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double4 floor(double4 x)
+        {
+            return new double4(floor(x.x), floor(x.y), floor(x.z), floor(x.w));
+        }
+
+        #endregion
+
         #region csum
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

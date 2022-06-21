@@ -23,11 +23,15 @@
 #endif
 
 using System;
+#if UNITY_COLLECTIONS
 using Unity.Collections;
+#endif
 
 namespace Point.Collections.ResourceControl
 {
+#if UNITY_COLLECTIONS
     [BurstCompatible]
+#endif
     public readonly struct AssetRuntimeKey : IEmpty, IEquatable<AssetRuntimeKey>
     {
         public static AssetRuntimeKey Empty => new AssetRuntimeKey(0);
@@ -35,7 +39,9 @@ namespace Point.Collections.ResourceControl
         private readonly Hash m_Key;
         public Hash Key => m_Key;
 
+#if UNITY_COLLECTIONS
         [NotBurstCompatible]
+#endif
         public AssetRuntimeKey(string path)
         {
             if (path.IsNullOrEmpty())
@@ -46,10 +52,12 @@ namespace Point.Collections.ResourceControl
 
             m_Key = new Hash(path.ToLowerInvariant());
         }
+#if UNITY_COLLECTIONS
         public AssetRuntimeKey(FixedString512Bytes path)
         {
             m_Key = new Hash(path.ToString().ToLowerInvariant());
         }
+#endif
         public AssetRuntimeKey(Hash hash)
         {
             m_Key = hash;
@@ -62,7 +70,9 @@ namespace Point.Collections.ResourceControl
         public bool IsEmpty() => m_Key == 0;
 
         public bool Equals(AssetRuntimeKey other) => m_Key.Equals(other.m_Key);
+#if UNITY_COLLECTIONS
         [NotBurstCompatible]
+#endif
         public override bool Equals(object obj)
         {
             if (!(obj is AssetRuntimeKey other)) return false;
@@ -71,7 +81,9 @@ namespace Point.Collections.ResourceControl
             return true;
         }
         public override int GetHashCode() => unchecked((int)m_Key.Value);
+#if UNITY_COLLECTIONS
         [NotBurstCompatible]
+#endif
         public override string ToString() => m_Key.ToString();
     }
 }

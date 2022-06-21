@@ -28,15 +28,15 @@ using Unity.Collections;
 
 namespace Point.Collections
 {
-    public struct FixedChar512Bytes
+    public struct FixedChar128Bytes
     {
-        private Char510 m_Buffer;
+        private Char126 m_Buffer;
         private ushort m_Length;
 
         public int Length => m_Length;
         public bool IsEmpty => m_Length == 0;
 
-        public FixedChar512Bytes(string str)
+        public FixedChar128Bytes(string str)
         {
             m_Buffer = str;
             m_Length = (ushort)str.Length;
@@ -44,7 +44,7 @@ namespace Point.Collections
 
         public override string ToString() => m_Buffer.Read(0, m_Length);
 
-        public static implicit operator FixedChar512Bytes(string t) => new FixedChar512Bytes(t);
-        public static implicit operator string(FixedChar512Bytes t) => t.ToString();
+        public static implicit operator FixedChar128Bytes(string t) => new FixedChar128Bytes(t);
+        public static implicit operator string(FixedChar128Bytes t) => t.ToString();
     }
 }

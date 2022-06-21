@@ -25,6 +25,8 @@
 #endif
 #endif
 
+#if !UNITYENGINE_OLD
+
 using UnityEngine;
 
 namespace Point.Collections.ResourceControl
@@ -37,4 +39,5 @@ namespace Point.Collections.ResourceControl
     }
 }
 
+#endif
 #endif

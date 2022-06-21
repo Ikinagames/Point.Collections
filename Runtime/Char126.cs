@@ -132,5 +132,8 @@ namespace Point.Collections
 
             return sum.Trim();
         }
+
+        public static implicit operator Char126(string str) => new Char126(str);
+        public static implicit operator string(Char126 str) => str.ToString();
     }
 }

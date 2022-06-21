@@ -27,8 +27,8 @@ using UnityEngine;
 using UnityEditor.UIElements;
 #if UNITY_MATHEMATICS
 using Unity.Mathematics;
-using UnityEngine.UIElements;
 #endif
+using UnityEngine.UIElements;
 
 using VE = UnityEngine.UIElements.VisualElement;
 

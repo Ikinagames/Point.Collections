@@ -201,14 +201,14 @@ namespace Point.Collections
 
             fields = t
                 .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
-                .Where(t =>
+                .Where(target =>
                 {
-                    if (t.IsPrivate)
+                    if (target.IsPrivate)
                     {
-                        return t.GetCustomAttribute<SerializeField>() != null || t.GetCustomAttribute<XmlFieldAttribute>() != null;
+                        return target.GetCustomAttribute<SerializeField>() != null || target.GetCustomAttribute<XmlFieldAttribute>() != null;
                     }
 
-                    return t.GetCustomAttribute<XmlFieldAttribute>() != null;
+                    return target.GetCustomAttribute<XmlFieldAttribute>() != null;
                 })
                 .ToArray();
             s_CachedSettingFields.Add(t, fields);

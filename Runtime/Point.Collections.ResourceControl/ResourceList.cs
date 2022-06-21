@@ -22,12 +22,7 @@
 #define UNITYENGINE_OLD
 #endif
 
-using Point.Collections.Buffer;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.Collections;
-using Unity.Mathematics;
 using UnityEngine;
 #if UNITY_ADDRESSABLES
 using UnityEngine.AddressableAssets;
@@ -94,7 +89,11 @@ namespace Point.Collections.ResourceControl
         public void AddAsset(string name, UnityEngine.Object obj)
         {
             string path = UnityEditor.AssetDatabase.GetAssetPath(obj);
+#if !UNITY_2020_1_OR_NEWER
+            var guid = UnityEditor.AssetDatabase.GUIDToAssetPath(path);
+#else
             var guid = UnityEditor.AssetDatabase.GUIDFromAssetPath(path);
+#endif
             AddressableAsset temp = new AddressableAsset(name, guid.ToString());
 
             m_AssetList.Add(temp);
@@ -126,7 +125,7 @@ namespace Point.Collections.ResourceControl
         }
 #endif
 #endif
-        public AddressableAsset GetAddressableAsset(int index)
+            public AddressableAsset GetAddressableAsset(int index)
         {
             return m_AssetList[index];
         }

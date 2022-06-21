@@ -19,6 +19,9 @@
 
 #if UNITY_2019_1_OR_NEWER
 #define UNITYENGINE
+#if !UNITY_2020_1_OR_NEWER
+#define UNITYENGINE_OLD
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
@@ -73,46 +76,52 @@ namespace Point.Collections.Editor
 #endif
             root.style.flexGrow = 1;
 
-            PropertyField field = CoreGUI.VisualElement.PropertyField(m_LogChannel);
-            field.RegisterValueChangeCallback(OnValueChanged);
-            root.Add(field);
+            PropertyField 
+                logField = CoreGUI.VisualElement.PropertyField(m_LogChannel),
+                channelNameField = CoreGUI.VisualElement.PropertyField(m_UserChannelNames),
+                enableLogField = CoreGUI.VisualElement.PropertyField(m_EnableLogFile),
+                logFileField = CoreGUI.VisualElement.PropertyField(m_LogFilePath),
+                logDisplayLinesField = CoreGUI.VisualElement.PropertyField(m_LogDisplayLines),
+                displayMainAppfield = CoreGUI.VisualElement.PropertyField(m_DisplayMainApplication);
+            logField.BindProperty(m_LogChannel);
+            channelNameField.BindProperty(m_UserChannelNames);
+            enableLogField.BindProperty(m_EnableLogFile);
+            logFileField.BindProperty(m_LogFilePath);
+            logDisplayLinesField.BindProperty(m_LogDisplayLines);
+            displayMainAppfield.BindProperty(m_DisplayMainApplication);
 
-            field = CoreGUI.VisualElement.PropertyField(m_UserChannelNames);
-            field.RegisterValueChangeCallback(OnValueChanged);
-            root.Add(field);
+#if !UNITYENGINE_OLD
+            logField.RegisterValueChangeCallback(OnValueChanged);
+            channelNameField.RegisterValueChangeCallback(OnValueChanged);
+            enableLogField.RegisterValueChangeCallback(OnValueChanged);
+            logFileField.RegisterValueChangeCallback(OnValueChanged);
+            logDisplayLinesField.RegisterValueChangeCallback(OnValueChanged);
+            displayMainAppfield.RegisterValueChangeCallback(OnValueChanged);
+#endif
 
+            root.Add(logField);
+            root.Add(channelNameField);
             root.Add(CoreGUI.VisualElement.Space());
-
-            field = CoreGUI.VisualElement.PropertyField(m_EnableLogFile);
-            field.RegisterValueChangeCallback(OnValueChanged);
-            root.Add(field);
-
-            field = CoreGUI.VisualElement.PropertyField(m_LogFilePath);
-            field.RegisterValueChangeCallback(OnValueChanged);
-            root.Add(field);
-
-            field = CoreGUI.VisualElement.PropertyField(m_LogDisplayLines);
-            field.RegisterValueChangeCallback(OnValueChanged);
-            root.Add(field);
-
+            root.Add(enableLogField);
+            root.Add(logFileField);
+            root.Add(logDisplayLinesField);
             root.Add(CoreGUI.VisualElement.Space());
-
-            field = CoreGUI.VisualElement.PropertyField(m_DisplayMainApplication);
-            field.RegisterValueChangeCallback(OnValueChanged);
-            root.Add(field);
+            root.Add(displayMainAppfield);
 
 #if ENABLE_INPUT_SYSTEM
-            field = CoreGUI.VisualElement.PropertyField(m_InActiveTime);
+            var field = CoreGUI.VisualElement.PropertyField(m_InActiveTime);
             field.RegisterValueChangeCallback(OnValueChanged);
             root.Add(field);
 #endif
 
             return root;
         }
+#if !UNITYENGINE_OLD
         private void OnValueChanged(SerializedPropertyChangeEvent ev)
         {
             EditorUtility.SetDirty(PointSettings.Instance);
         }
+#endif
     }
 }
 

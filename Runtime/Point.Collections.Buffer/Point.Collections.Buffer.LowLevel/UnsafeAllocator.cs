@@ -183,7 +183,9 @@ namespace Point.Collections.Buffer.LowLevel
         /// </summary>
         public void Clear()
         {
+#if UNITY_COLLECTIONS
             CompleteAllJobs();
+#endif
             unsafe
             {
                 NativeUtility.MemClear(m_Buffer.Value.Ptr, m_Buffer.Value.Size);
@@ -200,8 +202,9 @@ namespace Point.Collections.Buffer.LowLevel
         /// <param name="item"></param>
         public void Write<T>(T item) where T : unmanaged
         {
+#if UNITY_COLLECTIONS
             CompleteAllJobs();
-
+#endif
             unsafe
             {
                 byte* bytes = UnsafeBufferUtility.AsBytes(ref item, out int length);
@@ -210,15 +213,18 @@ namespace Point.Collections.Buffer.LowLevel
         }
         public unsafe void Write(byte* bytes, int length)
         {
+#if UNITY_COLLECTIONS
             CompleteAllJobs();
-
+#endif
             NativeUtility.MemCpy(m_Buffer.Value.Ptr, bytes, length);
         }
 
         public void Dispose()
         {
 #if UNITYENGINE && ENABLE_UNITY_COLLECTIONS_CHECKS
+#if UNITY_COLLECTIONS
             CompleteAllJobs();
+#endif
             if (!UnsafeUtility.IsValidAllocator(m_Allocator))
             {
                 PointHelper.LogError(Channel.Collections,
@@ -391,9 +397,9 @@ namespace Point.Collections.Buffer.LowLevel
             )
         {
             m_Buffer = new UnsafeAllocator(ptr, TypeHelper.SizeOf<T>() * length
-#if UNITYENGINE 
+#if UNITYENGINE
                 , allocator
-#endif 
+#endif
                 );
         }
         /// <summary>

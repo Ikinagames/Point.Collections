@@ -26,7 +26,6 @@
 #endif
 
 using System;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace Point.Collections.ResourceControl

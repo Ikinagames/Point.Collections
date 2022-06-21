@@ -22,7 +22,7 @@
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
-#if UNITY_2019 || !UNITY_2020_1_OR_NEWER
+#if !UNITY_2020_1_OR_NEWER
 #define UNITYENGINE_OLD
 #else
 using Point.Collections.ResourceControl.LowLevel;

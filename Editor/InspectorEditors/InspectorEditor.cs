@@ -157,7 +157,11 @@ namespace Point.Collections.Editor
             }
             else if (attribute is HelpBoxAttribute helpBoxAttribute)
             {
+#if !UNITY_2020_1_OR_NEWER
+                Label helpBox = new Label(helpBoxAttribute.Text);
+#else
                 HelpBox helpBox = new HelpBox(helpBoxAttribute.Text, helpBoxAttribute.Type);
+#endif
                 root.Add(helpBox);
             }
         }

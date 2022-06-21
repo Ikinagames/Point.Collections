@@ -13,15 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && UNITY_COLLECTIONS
 #define DEBUG_MODE
 #if UNITY_MATHEMATICS
+#endif
 using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
-#endif
-
 
 namespace Point.Collections.Editor
 {

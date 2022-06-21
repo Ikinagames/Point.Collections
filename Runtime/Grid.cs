@@ -13,12 +13,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if UNITY_2019_1_OR_NEWER
+#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
+#define DEBUG_MODE
+#endif
+#define UNITYENGINE
+#if UNITY_2019 && !UNITY_2020_OR_NEWER
+#define UNITYENGINE_OLD
+#if !UNITY_MATHEMATICS
+using math = Point.Collections.Math;
+#endif
+#endif
+#else
+#define POINT_COLLECTIONS_NATIVE
+#endif
+
 using Point.Collections.Burst;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+#if UNITY_COLLECTIONS
 using Unity.Collections;
+#endif
+#if UNITY_MATHEMATICS
 using Unity.Mathematics;
+#endif
+
+#if UNITY_COLLECTIONS && UNITY_MATHEMATICS
 
 namespace Point.Collections
 {
@@ -332,3 +353,5 @@ namespace Point.Collections
         public float3x2 Vertices0, Vertices1, Vertices2, Vertices3;
     }
 }
+
+#endif

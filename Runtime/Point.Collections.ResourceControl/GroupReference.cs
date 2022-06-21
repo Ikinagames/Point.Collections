@@ -26,7 +26,6 @@
 #endif
 
 using System;
-using Unity.Collections;
 using UnityEngine;
 
 namespace Point.Collections.ResourceControl
@@ -36,9 +35,9 @@ namespace Point.Collections.ResourceControl
     {
         public static GroupReference Empty = default(GroupReference);
 
-        [SerializeField] private FixedString128Bytes m_Name;
+        [SerializeField] private FixedChar128Bytes m_Name;
 
-        public GroupReference(FixedString128Bytes name)
+        public GroupReference(FixedChar128Bytes name)
         {
             m_Name = name;
         }

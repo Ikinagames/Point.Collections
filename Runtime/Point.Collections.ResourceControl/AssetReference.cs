@@ -37,16 +37,21 @@ namespace Point.Collections.ResourceControl
 {
     [Serializable]
     public struct AssetReference : IValidation, IEmpty, IEquatable<AssetReference>
-#if UNITY_ADDRESSABLES
+#if !UNITYENGINE_OLD
         , IKeyEvaluator
 #endif
     {
         public static AssetReference Empty => new AssetReference();
 
+#if UNITY_COLLECTIONS
         [SerializeField] private FixedString128Bytes m_Key;
         [SerializeField] private FixedString128Bytes m_SubAssetName;
+#else
+        [SerializeField] private FixedChar128Bytes m_Key;
+        [SerializeField] private FixedChar128Bytes m_SubAssetName;
+#endif
 
-#if UNITY_ADDRESSABLES
+#if !UNITYENGINE_OLD
         object IKeyEvaluator.RuntimeKey
         {
             get
@@ -76,16 +81,24 @@ namespace Point.Collections.ResourceControl
         }
 #endif
 
-#if UNITY_ADDRESSABLES
+#if !UNITYENGINE_OLD
         public AsyncOperationHandle<IResourceLocation> Location => ResourceManager.GetLocation(this, TypeHelper.TypeOf<UnityEngine.Object>.Type);
 #endif
-
+#if UNITY_COLLECTIONS
         public AssetReference(FixedString128Bytes key) : this(key, default) { }
         public AssetReference(FixedString128Bytes key, FixedString128Bytes subAssetName)
         {
             m_Key = key;
             m_SubAssetName = subAssetName;
         }
+#else
+        public AssetReference(FixedChar128Bytes key) : this(key, default) { }
+        public AssetReference(FixedChar128Bytes key, FixedChar128Bytes subAssetName)
+        {
+            m_Key = key;
+            m_SubAssetName = subAssetName;
+        }
+#endif
 
         public bool IsEmpty()
         {
@@ -95,7 +108,7 @@ namespace Point.Collections.ResourceControl
         {
             if (m_Key.IsEmpty) return false;
 
-#if UNITY_ADDRESSABLES
+#if !UNITYENGINE_OLD
             const char c_guidstart = '[';
             string text = ((IKeyEvaluator)this).RuntimeKey.ToString();
             int num = text.IndexOf(c_guidstart);
@@ -109,7 +122,7 @@ namespace Point.Collections.ResourceControl
             return true;
 #endif
         }
-#if UNITY_ADDRESSABLES
+#if !UNITYENGINE_OLD
         bool IKeyEvaluator.RuntimeKeyIsValid() => IsValid();
 
         public AsyncOperationHandle<UnityEngine.Object> LoadAssetAsync()

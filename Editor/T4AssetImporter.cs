@@ -19,11 +19,14 @@
 
 #if UNITY_2019_1_OR_NEWER
 #define UNITYENGINE
+#if !UNITY_2020_1_OR_NEWER
+#define UNITYENGINE_OLD
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
-#if UNITYENGINE
+#if UNITYENGINE && !UNITYENGINE_OLD
 
 using System;
 using System.CodeDom.Compiler;
