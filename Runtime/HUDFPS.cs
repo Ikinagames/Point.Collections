@@ -27,6 +27,7 @@ using System.Collections;
 
 namespace Point.Collections
 {
+    [AddComponentMenu("")]
     internal sealed class HUDFPS : StaticMonobehaviour<HUDFPS>
     {
         protected override bool HideInInspector => true;
