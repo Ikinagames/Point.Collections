@@ -35,6 +35,7 @@ namespace Point.Collections
 #if UNITYENGINE
     [AddComponentMenu("")]
 #endif
+    [XmlSettings(SaveToDisk = false)]
     public sealed class PointApplication :
 #if UNITYENGINE
         StaticMonobehaviour<PointApplication>
@@ -75,6 +76,9 @@ namespace Point.Collections
         private Timer m_InActiveTimer;
         private bool m_IsInActive = false;
         public event Action<bool> OnInActive;
+
+        // FPS
+        [SerializeField, XmlField(PropertyName = "DisplayFPS")] private bool m_DisplayFPS = false;
 #endif
 
         public ThreadInfo MainThread => m_MainThread;
@@ -84,12 +88,19 @@ namespace Point.Collections
         public static event Action OnFixedUpdate;
         public static event Action OnLateUpdate;
         public static event Action OnApplicationShutdown;
+
+        public static bool DisplayFPS { get => Instance.m_DisplayFPS; set => Instance.m_DisplayFPS = value; }
 #endif
 
         protected override void OnInitialize()
         {
             const string c_Instance = "Instance";
 
+            XmlSettings.LoadSettings(this);
+            if (m_DisplayFPS)
+            {
+                object temp = HUDFPS.Instance;
+            }
             CollectionUtility.Initialize();
 
             Type[] types = TypeHelper.GetTypes(other => TypeHelper.TypeOf<IStaticInitializer>.Type.IsAssignableFrom(other));
@@ -222,6 +233,7 @@ namespace Point.Collections
             {
                 PointHelper.s_LogHandler.CloseLogFile();
             }
+            XmlSettings.SaveSettings(this);
         }
 
 #if UNITYENGINE && ENABLE_INPUT_SYSTEM

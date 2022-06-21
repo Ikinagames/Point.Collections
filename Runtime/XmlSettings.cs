@@ -436,8 +436,8 @@ namespace Point.Collections
         /// </summary>
         public string PropertyName;
         /// <summary>
-        /// <see langword="true"/> 일 경우, <see cref="PlayerPrefs"/> 를 사용하여 레지스트리에 저장합니다. 
-        /// <see langword="false"/> 일 경우에는 로컬에 저장합니다.
+        /// <see langword="false"/> 일 경우, <see cref="PlayerPrefs"/> 를 사용하여 레지스트리에 저장합니다. 
+        /// <see langword="true"/> 일 경우에는 로컬에 저장합니다.
         /// </summary>
         public bool SaveToDisk;
     }
