@@ -156,15 +156,15 @@ namespace Point.Collections
             }
         }
 
-        private static XElement GetElement(Type t, XmlSettingsAttribute settings)
+        private static XElement GetElement(Type t, string propertyName, bool saveToDisk)
         {
             string key;
-            if (settings.PropertyName.IsNullOrEmpty()) key = TypeHelper.ToString(t);
-            else key = settings.PropertyName;
+            if (propertyName.IsNullOrEmpty()) key = TypeHelper.ToString(t);
+            else key = propertyName;
 
-            XDocument doc = settings.SaveToDisk ? LoadDocumentFromDisk() : LoadDocumentFromPref(key);
+            XDocument doc = saveToDisk ? LoadDocumentFromDisk() : LoadDocumentFromPref(key);
             XElement objRoot;
-            if (settings.SaveToDisk)
+            if (saveToDisk)
             {
                 objRoot = doc.Root.Element(key);
                 if (objRoot == null)
@@ -193,7 +193,7 @@ namespace Point.Collections
                 settings = t.GetCustomAttribute<XmlSettingsAttribute>();
             }
 
-            return GetElement(t, settings);
+            return GetElement(t, settings.PropertyName, settings.SaveToDisk);
         }
         private static FieldInfo[] GetSettingFields(Type t)
         {
@@ -317,6 +317,20 @@ namespace Point.Collections
             //Debug.Log($"save doc for {obj.GetType().Name}");
             SaveDocument(objRoot, att.SaveToDisk);
         }
+        public static void SaveSettings(object obj, string propertyName, bool saveToDisk)
+        {
+            Type t = obj.GetType();
+            XElement objRoot = GetElement(t, propertyName, saveToDisk);
+
+            IEnumerable<FieldInfo> fieldsIter = GetSettingFields(t);
+            foreach (FieldInfo fieldInfo in fieldsIter)
+            {
+                SaveValue(objRoot, fieldInfo, obj);
+            }
+
+            //Debug.Log($"save doc for {obj.GetType().Name}");
+            SaveDocument(objRoot, saveToDisk);
+        }
         /// <summary>
         /// <paramref name="obj"/> 의 설정 값을 불러옵니다.
         /// </summary>
@@ -340,6 +354,20 @@ namespace Point.Collections
 
             //Debug.Log(doc.ToString());
             SaveDocument(objRoot, att.SaveToDisk);
+        }
+        public static void LoadSettings(object obj, string propertyName, bool saveToDisk)
+        {
+            Type t = obj.GetType();
+            XElement objRoot = GetElement(t, propertyName, saveToDisk);
+
+            IEnumerable<FieldInfo> fieldsIter = GetSettingFields(t);
+            foreach (FieldInfo fieldInfo in fieldsIter)
+            {
+                SetValue(objRoot, fieldInfo, obj);
+            }
+
+            //Debug.Log(doc.ToString());
+            SaveDocument(objRoot, saveToDisk);
         }
         public static T LoadValueFromDisk<T>(string key, string name, T defaultValue = default(T))
         {
