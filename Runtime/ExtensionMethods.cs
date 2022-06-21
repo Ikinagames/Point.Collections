@@ -126,5 +126,14 @@ namespace Point.Collections
         }
 
         #endregion
+
+        // https://answers.unity.com/questions/1187767/how-to-draw-a-gizmo-on-a-canvas.html
+        public static Matrix4x4 GetCanvasMatrix(this Canvas _Canvas)
+        {
+            RectTransform rectTr = _Canvas.transform as RectTransform;
+            Matrix4x4 canvasMatrix = rectTr.localToWorldMatrix;
+            canvasMatrix *= Matrix4x4.Translate(-rectTr.sizeDelta / 2);
+            return canvasMatrix;
+        }
     }
 }
