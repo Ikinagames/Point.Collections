@@ -44,7 +44,7 @@ using Unity.Mathematics;
 namespace Point.Collections
 {
     [BurstCompatible]
-    internal unsafe struct Grid
+    public unsafe struct Grid
     {
         public readonly short m_CheckSum;
 
@@ -282,17 +282,17 @@ namespace Point.Collections
             }
         }
 
-        internal GridIndex(Grid grid, ulong index)
+        public GridIndex(Grid grid, ulong index)
         {
             m_CheckSum = grid.m_CheckSum;
             m_Index = index;
         }
-        internal GridIndex(short checkSum, ulong index)
+        public GridIndex(short checkSum, ulong index)
         {
             m_CheckSum = checkSum;
             m_Index = index;
         }
-        internal GridIndex(short checkSum, int3 location)
+        public GridIndex(short checkSum, int3 location)
         {
             m_CheckSum = checkSum;
             ulong temp;
@@ -335,11 +335,26 @@ namespace Point.Collections
 
         public bool Equals(GridIndex other) => m_Index.Equals(other.m_Index) && m_CheckSum.Equals(m_CheckSum);
         public bool Equals(int3 other) => Location.Equals(other);
+        [NotBurstCompatible]
+        public override bool Equals(object obj)
+        {
+            if (obj is GridIndex index) return Equals(index);
+            else if (obj is int3 loc) return Equals(loc);
+
+            return false;
+        }
 
         public bool IsEmpty() => m_CheckSum == 0 && m_Index == 0;
 
         [NotBurstCompatible]
         public override string ToString() => $"{m_Index}({Location})";
+        [NotBurstCompatible]
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public static implicit operator ulong(GridIndex t) => t.Index;
     }
     public struct GridBlock
     {
