@@ -27,7 +27,7 @@ using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
 {
-    public class ListContainerView : VisualElement
+    public class ListContainerView : BindableElement
     {
         public new class UxmlFactory : UxmlFactory<ListContainerView, UxmlTraits> { }
         public new class UxmlTraits : VisualElement.UxmlTraits
@@ -137,6 +137,8 @@ namespace Point.Collections.Editor
             }
             hierarchy.Add(headerContainer);
 
+            AfterCreateHeaderContainer(headerContainer);
+
             m_ContentContainer = new VisualElement();
             m_ContentContainer.AddToClassList("content-container");
             m_ContentContainer.AddToClassList("inner-container");
@@ -195,6 +197,8 @@ namespace Point.Collections.Editor
         {
             isExpanded = !isExpanded;
         }
+
+        protected virtual void AfterCreateHeaderContainer(VisualElement headerContainer) { }
 
         protected virtual void OnAddButtonClicked()
         {

@@ -24,6 +24,7 @@
 
 using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
@@ -79,6 +80,7 @@ namespace Point.Collections.Editor
         private Label m_HeaderLabel;
         private VisualElement m_ContentContainer;
         private VisualElement m_TempleteRow;
+        private Button m_TempleteLocateButton, m_CreateButton;
 
         private bool m_ShowTemplete = true;
 
@@ -107,8 +109,7 @@ namespace Point.Collections.Editor
         }
 
         public ObjectField templeteField { get; set; }
-        public Button templeteLocateButton { get; set; }
-
+        
         public VisualElement beforeContentContainer { get; private set; }
         public override VisualElement contentContainer => m_ContentContainer;
 
@@ -140,10 +141,24 @@ namespace Point.Collections.Editor
                 templeteField.style.flexGrow = 1;
                 m_TempleteRow.Add(templeteField);
 
-                templeteLocateButton = new Button();
-                templeteLocateButton.text = "Locate";
-                m_TempleteRow.Add(templeteLocateButton);
+                m_TempleteLocateButton = new Button();
+                m_TempleteLocateButton.text = "Locate";
+                m_TempleteLocateButton.clicked += TempleteLocateButton_clicked;
+                m_TempleteRow.Add(m_TempleteLocateButton);
             }
+            //// Path
+            //{
+            //    VisualElement pathRow = new VisualElement();
+            //    pathRow.name = "PathRow";
+            //    pathRow.style.flexGrow = 1;
+            //    pathRow.style.flexDirection = FlexDirection.Row;
+            //    pathRow.style.justifyContent = Justify.SpaceBetween;
+            //    beforeContentContainer.Add(pathRow);
+
+            //    TextField pathField = new TextField("Path", 0, false, false, '*');
+            //    pathField.name = "PathField";
+            //    pathField.style.textOverflow = TextOverflow.Ellipsis;
+            //}
 
             m_ContentContainer = new VisualElement();
             m_ContentContainer.name = "ContentContainer";
@@ -151,6 +166,27 @@ namespace Point.Collections.Editor
 
             contentContainer.AddToClassList("content-container");
             contentContainer.AddToClassList("inner-container");
+
+            m_CreateButton = new Button();
+            m_CreateButton.name = "CreateButton";
+            m_CreateButton.text = "Create";
+            m_CreateButton.clicked += M_CreateButton_clicked;
+            rootContainer.Add(m_CreateButton);
+        }
+
+        public event Action<AssetCreateView> OnCreateButtonClicked;
+
+        private void TempleteLocateButton_clicked()
+        {
+            if (templeteField.value != null)
+            {
+                EditorGUIUtility.PingObject(templeteField.value);
+                Selection.activeObject = templeteField.value;
+            }
+        }
+        private void M_CreateButton_clicked()
+        {
+            OnCreateButtonClicked?.Invoke(this);
         }
     }
 }
