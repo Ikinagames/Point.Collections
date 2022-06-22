@@ -132,7 +132,11 @@ namespace Point.Collections
             RectTransform rectTr = t.transform as RectTransform;
             Matrix4x4 canvasMatrix = rectTr.localToWorldMatrix;
 
-            canvasMatrix *= Matrix4x4.Translate(-rectTr.sizeDelta * .5f * t.scaleFactor);
+            canvasMatrix *= Matrix4x4.Translate(-rectTr.sizeDelta * .5f);
+
+            Vector3 curScale = canvasMatrix.lossyScale;
+            canvasMatrix *= Matrix4x4.Scale(new Vector3(1 / curScale.x, 1 / curScale.y, 1 / curScale.z));
+
             return canvasMatrix;
         }
 
