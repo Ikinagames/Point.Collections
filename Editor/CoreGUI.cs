@@ -744,7 +744,14 @@ namespace Point.Collections.Editor
             public static PropertyField PropertyField(SerializedProperty property)
             {
                 PropertyField field = new PropertyField(property);
-                field.BindProperty(property);
+                if (property != null)
+                {
+                    field.BindProperty(property);
+                }
+                else
+                {
+                    "?".ToLogError();
+                }
 
                 return field;
             }

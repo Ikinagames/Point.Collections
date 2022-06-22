@@ -72,11 +72,12 @@ namespace Point.Collections
 #endif
 
         private ThreadInfo m_MainThread;
-#if UNITYENGINE && ENABLE_INPUT_SYSTEM
+#if UNITYENGINE
+#if ENABLE_INPUT_SYSTEM
         private Timer m_InActiveTimer;
         private bool m_IsInActive = false;
         public event Action<bool> OnInActive;
-
+#endif
         // FPS
         [SerializeField, XmlField(PropertyName = "DisplayFPS")] private bool m_DisplayFPS = false;
 #endif

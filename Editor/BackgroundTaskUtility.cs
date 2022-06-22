@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
@@ -67,14 +67,16 @@ namespace Point.Collections.Editor
     }
     public sealed class BackgroundTask : IDisposable
     {
+#if UNITY_2020_1_OR_NEWER
         private int m_ProgressID;
+#endif
         private List<BackgroundTask> m_Childs = new List<BackgroundTask>();
 
         private IEnumerator m_Task;
         private bool m_Disposed = false;
 
+#if UNITY_2020_1_OR_NEWER
         public int ProgressID => m_ProgressID;
-        public bool IsRunning => !m_Disposed;
         public float Percent
         {
             get
@@ -86,10 +88,14 @@ namespace Point.Collections.Editor
                 return temp;
             }
         }
+#endif
+        public bool IsRunning => !m_Disposed;
 
         public BackgroundTask(string name)
         {
+#if UNITY_2020_1_OR_NEWER
             m_ProgressID = Progress.Start(name);
+#endif
         }
         public BackgroundTask(string name, IEnumerator enumerator) : this(name)
         {
@@ -103,8 +109,9 @@ namespace Point.Collections.Editor
         public void Dispose()
         {
             if (m_Disposed) return;
-
+#if UNITY_2020_1_OR_NEWER
             Progress.Remove(m_ProgressID);
+#endif
             m_Task = null;
             m_Disposed = true;
         }
@@ -131,7 +138,9 @@ namespace Point.Collections.Editor
             return true;
         }
 
+#if UNITY_2020_1_OR_NEWER
         public static implicit operator int(BackgroundTask t) => t.ProgressID;
+#endif
     }
 }
 

@@ -32,7 +32,14 @@ namespace Point.Collections
     {
         [Header("Logger")]
         [SerializeField] private LogChannel m_LogChannel = LogChannel.All;
+
+        // Before 2020 version of unity cannot serialize generic classes.
+#if UNITY_2020_1_OR_NEWER
         [SerializeField] private ArrayWrapper<string> m_UserChannelNames = new string[27];
+#else
+        [SerializeField] private string[] m_UserChannelNames = new string[27];
+#endif
+
         [SerializeField] internal bool m_EnableLogFile = false;
         /// <summary>
         /// 경로는 <see cref="Application.persistentDataPath"/> 다음부터 시작됩니다. (ex. m_LogFilePath = "test.txt" => Application.persistentDataPath/test.txt

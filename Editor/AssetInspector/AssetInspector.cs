@@ -135,7 +135,11 @@ namespace Point.Collections.Editor
             string headerText;
             if (s_Cor != null && s_Cor.IsRunning)
             {
+#if UNITY_2020_1_OR_NEWER
                 headerText = $"Assetdatabase is now building .. {s_Cor.Percent}";
+#else
+                headerText = $"Assetdatabase is now building ..";
+#endif
             }
             else if (!AssetInspectorDatabase.Builded)
             {

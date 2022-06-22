@@ -64,13 +64,13 @@ namespace Point.Collections.Editor
             {
                 sceneAssetProperty.objectReferenceValue = t.newValue;
 
-                var buildScene = BuildUtils.GetBuildScene(sceneAssetProperty.objectReferenceValue);
-                if (buildScene.scene == null)
+                var newBuildScene = BuildUtils.GetBuildScene(sceneAssetProperty.objectReferenceValue);
+                if (newBuildScene.scene == null)
                 {
                     GetScenePathProperty(property).stringValue = string.Empty;
                 }
                 
-                if (buildScene.assetGUID.Empty())
+                if (newBuildScene.assetGUID.Empty())
                 {
                     detailContainer.style.Hide(true);
                 }
@@ -180,8 +180,8 @@ namespace Point.Collections.Editor
             };
             disableBtt.clicked += delegate
             {
-                bool isEnabled = buildScene.scene.enabled;
-                BuildUtils.SetBuildSceneState(buildScene, !isEnabled);
+                bool newValueEnabled = buildScene.scene.enabled;
+                BuildUtils.SetBuildSceneState(buildScene, !newValueEnabled);
                 SetupLeftDetails(property, root);
             };
             settingsBtt.clicked += delegate

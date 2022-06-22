@@ -156,7 +156,9 @@ namespace Point.Collections.Editor
                 if (!tooltip.IsNullOrEmpty())
                 {
                     m_HeaderLabel.tooltip = tooltip;
+#if UNITY_2020_1_OR_NEWER
                     m_HeaderLabel.displayTooltipWhenElided = true;
+#endif
                 }
             }
 

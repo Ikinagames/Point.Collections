@@ -86,7 +86,9 @@ namespace Point.Collections.Editor
             textField.style.flexGrow = 1;
             textField.value = pathProperty.stringValue;
             textField.style.overflow = Overflow.Hidden;
+#if UNITY_2020_1_OR_NEWER
             textField.style.textOverflow = TextOverflow.Ellipsis;
+#endif
             textField.style.maxWidth = new StyleLength(new Length(81, LengthUnit.Percent));
             {
                 textField.RegisterValueChangedCallback(t =>

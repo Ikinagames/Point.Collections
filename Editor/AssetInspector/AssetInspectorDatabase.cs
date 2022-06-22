@@ -58,31 +58,19 @@ namespace Point.Collections.Editor
             }
         }
         public static bool Builded => Instance.m_Builded;
-        
-        //private Task<Dictionary<string, AssetInfo>> BuildDatabaseAsync()
-        //{
-        //    "start task".ToLog();
-        //    //SynchronizationContext.Current.pos
 
-        //    Task<Dictionary<string, AssetInfo>> task 
-        //        = new Task<Dictionary<string, AssetInfo>>(BuildDatabase);
-        //    task.Start();
+#if !UNITY_2020_1_OR_NEWER
+        private sealed class Progress
+        {
+            public static void Report(BackgroundTask _, int __, string ___) { }
+            public static void Report(BackgroundTask _, float __, string ____) { }
+            public static void Remove(BackgroundTask _) { }
+            public static void Remove(int _) { }
+            public static void Report(int _, float __, string ____) { }
+            public static int Start(string _, BackgroundTask parentId) => 0;
+        }
+#endif
 
-        //    return task;
-        //}
-        //private Task<Dictionary<string, AssetInfo>> RebuildDatabaseAsync()
-        //{
-        //    "start task".ToLog();
-        //    //var result = await Task.Run(RebuildDatabase);
-
-            
-
-        //    Task<Dictionary<string, AssetInfo>> task
-        //        = new Task<Dictionary<string, AssetInfo>>(RebuildDatabase);
-        //    task.Start();
-
-        //    return task;
-        //}
         public IEnumerator RebuildDatabase(BackgroundTask task)
         {
             m_Builded.Value = false;

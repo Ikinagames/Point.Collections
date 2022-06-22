@@ -139,19 +139,19 @@ namespace Point.Collections.ResourceControl.Editor
                 pos = GUIUtility.GUIToScreenPoint(pos);
 
                 var provider = ScriptableObject.CreateInstance<AssetIndexSearchProvider>();
-                provider.m_OnClick = index =>
+                provider.m_OnClick = newIndex =>
                 {
-                    if (index.x < 0)
+                    if (newIndex.x < 0)
                     {
-                        index = 0;
+                        newIndex = 0;
                         isCreatedProp.boolValue = false;
                     }
                     else
                     {
                         isCreatedProp.boolValue = true;
                     }
-                    listIndexProp.intValue = index.x;
-                    assetIndexProp.intValue = index.y;
+                    listIndexProp.intValue = newIndex.x;
+                    assetIndexProp.intValue = newIndex.y;
                     property.serializedObject.ApplyModifiedProperties();
 
                     m_Changed = true;

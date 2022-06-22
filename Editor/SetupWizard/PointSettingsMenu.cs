@@ -43,20 +43,13 @@ namespace Point.Collections.Editor
         SerializedProperty
             m_LogChannel, m_UserChannelNames,
             m_EnableLogFile, m_LogFilePath, m_LogDisplayLines,
-            m_DisplayMainApplication,
-            m_InActiveTime;
+            m_DisplayMainApplication;
+#if ENABLE_INPUT_SYSTEM
+        SerializedProperty m_InActiveTime;
+#endif
 
         public PointSettingsMenu()
         {
-            serializedObject = new SerializedObject(PointSettings.Instance);
-
-            m_LogChannel = serializedObject.FindProperty(nameof(m_LogChannel));
-            m_UserChannelNames = serializedObject.FindProperty(nameof(m_UserChannelNames));
-            m_EnableLogFile = serializedObject.FindProperty(nameof(m_EnableLogFile));
-            m_LogFilePath = serializedObject.FindProperty(nameof(m_LogFilePath));
-            m_LogDisplayLines = serializedObject.FindProperty(nameof(m_LogDisplayLines));
-            m_DisplayMainApplication = serializedObject.FindProperty(nameof(m_DisplayMainApplication));
-            m_InActiveTime = serializedObject.FindProperty(nameof(m_InActiveTime));
         }
         public override void OnFocus()
         {
@@ -69,6 +62,19 @@ namespace Point.Collections.Editor
         }
         protected override VisualElement CreateVisualElement()
         {
+            serializedObject = new SerializedObject(PointSettings.Instance);
+
+            m_LogChannel = serializedObject.FindProperty(nameof(m_LogChannel));
+            m_UserChannelNames = serializedObject.FindProperty(nameof(m_UserChannelNames));
+            m_EnableLogFile = serializedObject.FindProperty(nameof(m_EnableLogFile));
+            m_LogFilePath = serializedObject.FindProperty(nameof(m_LogFilePath));
+            m_LogDisplayLines = serializedObject.FindProperty(nameof(m_LogDisplayLines));
+            m_DisplayMainApplication = serializedObject.FindProperty(nameof(m_DisplayMainApplication));
+
+#if ENABLE_INPUT_SYSTEM
+            m_InActiveTime = serializedObject.FindProperty(nameof(m_InActiveTime));
+#endif
+
             ScrollView root = new ScrollView();
 #if UNITY_2021_1_OR_NEWER
             root.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
@@ -83,12 +89,6 @@ namespace Point.Collections.Editor
                 logFileField = CoreGUI.VisualElement.PropertyField(m_LogFilePath),
                 logDisplayLinesField = CoreGUI.VisualElement.PropertyField(m_LogDisplayLines),
                 displayMainAppfield = CoreGUI.VisualElement.PropertyField(m_DisplayMainApplication);
-            logField.BindProperty(m_LogChannel);
-            channelNameField.BindProperty(m_UserChannelNames);
-            enableLogField.BindProperty(m_EnableLogFile);
-            logFileField.BindProperty(m_LogFilePath);
-            logDisplayLinesField.BindProperty(m_LogDisplayLines);
-            displayMainAppfield.BindProperty(m_DisplayMainApplication);
 
 #if !UNITYENGINE_OLD
             logField.RegisterValueChangeCallback(OnValueChanged);
