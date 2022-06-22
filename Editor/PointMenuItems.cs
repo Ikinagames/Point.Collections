@@ -47,20 +47,7 @@ namespace Point.Collections.Editor
             CoreGUI.EditorWindow.OpenWindowAtCenterSafe<PointSetupWizard>(title, true, new Vector2(600, 500));
         }
 
-        [MenuItem("Point/Utils/Generate Guid", priority = 1000)]
-        public static void GenerateGUID()
-        {
-            Guid guid = Guid.NewGuid();
-            EditorGUIUtility.systemCopyBuffer = guid.ToString();
-
-            PointHelper.Log(LogChannel.Editor, $"{guid} is copied to clipboard.");
-        }
-        [MenuItem("Point/Utils/Unlock Assemblies", priority = 1001)]
-        public static void Unlock()
-        {
-            EditorApplication.UnlockReloadAssemblies();
-        }
-        [MenuItem("Point/Utils/Capture Current Game Screen", priority = 1001)]
+        [MenuItem("Point/Utils/Capture Current Game Screen", priority = 500)]
         public static void CaptureCurrentGameScreen()
         {
             if (Application.isPlaying)
@@ -96,6 +83,19 @@ namespace Point.Collections.Editor
             }
         }
 
+        [MenuItem("Point/Utils/Generate Guid", priority = 1000)]
+        public static void GenerateGUID()
+        {
+            Guid guid = Guid.NewGuid();
+            EditorGUIUtility.systemCopyBuffer = guid.ToString();
+
+            PointHelper.Log(LogChannel.Editor, $"{guid} is copied to clipboard.");
+        }
+        [MenuItem("Point/Utils/Unlock Assemblies", priority = 1001)]
+        public static void Unlock()
+        {
+            EditorApplication.UnlockReloadAssemblies();
+        }
         [MenuItem("Point/Utils/Locate Resource Hash Map", priority = 1002)]
         public static void LocateResourceHashMap()
         {
