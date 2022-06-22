@@ -86,8 +86,19 @@ namespace Point.Collections
             }
         }
 
+        //public float DesignWidth = 1280.0f;
+        //public float DesignHeight = 720.0f;
+
         void OnGUI()
         {
+            var prevMat = GUI.matrix;
+
+            //Calculate change aspects
+            float resX = (float)(Screen.width) / 800;
+            float resY = (float)(Screen.height) / 600;
+
+            GUI.matrix = Matrix4x4.TRS(new Vector3(0, 0, 0), Quaternion.identity, new Vector3(resX, resY, 1));
+
             // Copy the default label skin, change the color and the alignement
             if (style == null)
             {
@@ -97,7 +108,9 @@ namespace Point.Collections
             }
 
             GUI.color = updateColor ? color : Color.white;
-            startRect = GUI.Window(0, startRect, DoMyWindow, "");
+            startRect = GUI.Window(0, startRect, DoMyWindow, string.Empty);
+
+            GUI.matrix = prevMat;
         }
 
         void DoMyWindow(int windowID)
