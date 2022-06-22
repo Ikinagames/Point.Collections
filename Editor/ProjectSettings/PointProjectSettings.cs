@@ -36,18 +36,18 @@ namespace Point.Collections.Editor
 
         // https://docs.unity3d.com/Packages/com.unity.settings-manager@1.0/manual/index.html#quick-start
 
-        private static UnityEditor.SettingsManagement.Settings s_Settings;
-        private static UnityEditor.SettingsManagement.Settings Settings
-        {
-            get
-            {
-                if (s_Settings == null)
-                {
-                    s_Settings = new UnityEditor.SettingsManagement.Settings(c_ProjectName);
-                }
-                return s_Settings;
-            }
-        }
+        //private static UnityEditor.SettingsManagement.Settings s_Settings;
+        //private static UnityEditor.SettingsManagement.Settings Settings
+        //{
+        //    get
+        //    {
+        //        if (s_Settings == null)
+        //        {
+        //            s_Settings = new UnityEditor.SettingsManagement.Settings(c_ProjectName);
+        //        }
+        //        return s_Settings;
+        //    }
+        //}
 
         private bool[] m_OpenStaticSettings = Array.Empty<bool>();
         private IPointStaticSetting[] m_StaticSettings = Array.Empty<IPointStaticSetting>();
