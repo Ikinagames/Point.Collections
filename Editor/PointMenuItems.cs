@@ -28,10 +28,12 @@
 using Point.Collections.Native;
 using Point.Collections.ResourceControl;
 using System;
+using System.Collections;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
+using UnityEngine.Rendering;
 
 namespace Point.Collections.Editor
 {
@@ -58,6 +60,42 @@ namespace Point.Collections.Editor
         {
             EditorApplication.UnlockReloadAssemblies();
         }
+        [MenuItem("Point/Utils/Capture Current Game Screen", priority = 1001)]
+        public static void CaptureCurrentGameScreen()
+        {
+            if (Application.isPlaying)
+            {
+                PointApplication.Instance.StartCoroutine(CaptureUpdate());
+                return;
+            }
+
+            string path = EditorUtility.SaveFilePanel("Save ScreenShot",
+                Application.dataPath, "GameCapture", "png");
+            if (!path.IsNullOrEmpty())
+            {
+                GameView.Repaint();
+
+                var tex = GameView.RenderTexture.ToTexture2D();
+                tex.Flip();
+                tex.Reverse();
+
+                tex.SaveTextureAsPNG(path);
+            }
+        }
+        private static IEnumerator CaptureUpdate()
+        {
+            yield return new WaitForEndOfFrame();
+
+            Texture2D tex
+                    = ScreenCapture.CaptureScreenshotAsTexture(ScreenCapture.StereoScreenCaptureMode.BothEyes);
+            string path = EditorUtility.SaveFilePanel("Save ScreenShot",
+                Application.dataPath, "GameCapture", "png");
+            if (!path.IsNullOrEmpty())
+            {
+                tex.SaveTextureAsPNG(path);
+            }
+        }
+
         [MenuItem("Point/Utils/Locate Resource Hash Map", priority = 1002)]
         public static void LocateResourceHashMap()
         {

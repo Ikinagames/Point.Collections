@@ -138,5 +138,72 @@ namespace Point.Collections
             canvasMatrix *= Matrix4x4.Translate(-rectTr.sizeDelta * .5f * t.scaleFactor);
             return canvasMatrix;
         }
+
+        public static Texture2D ToTexture2D(this RenderTexture rt)
+        {
+            Texture2D tex = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
+            var old_rt = RenderTexture.active;
+            RenderTexture.active = rt;
+
+            tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+            tex.Apply();
+
+            RenderTexture.active = old_rt;
+            return tex;
+        }
+        public static void Reverse(this Texture2D texture)
+        {
+            Color[] pixels = texture.GetPixels();
+            Array.Reverse(pixels);
+            texture.SetPixels(pixels);
+        }
+        public static void Flip(this Texture2D texture)
+        {
+            int textureWidth = texture.width;
+            int textureHeight = texture.height;
+
+            Color32[] pixels = texture.GetPixels32();
+
+            for (int y = 0; y < textureHeight; y++)
+            {
+                int yo = y * textureWidth;
+                for (int il = yo, ir = yo + textureWidth - 1; il < ir; il++, ir--)
+                {
+                    Color32 col = pixels[il];
+                    pixels[il] = pixels[ir];
+                    pixels[ir] = col;
+                }
+            }
+            texture.SetPixels32(pixels);
+            texture.Apply();
+        }
+        public static void SaveTextureAsPNG(this Texture2D t, string fullPath)
+        {
+            byte[] bytes = t.EncodeToPNG();
+            System.IO.File.WriteAllBytes(fullPath, bytes);
+            //Debug.Log(_bytes.Length / 1024 + "Kb was saved as: " + _fullPath);
+        }
+        public static byte[] CompressToBytes(this Texture2D source, bool highQuality = false)
+        {
+            source.Compress(highQuality);
+
+            RenderTexture renderTex = RenderTexture.GetTemporary(
+                        source.width,
+                        source.height,
+                        0,
+                        RenderTextureFormat.Default,
+                        RenderTextureReadWrite.Linear);
+
+            Graphics.Blit(source, renderTex);
+            RenderTexture previous = RenderTexture.active;
+            RenderTexture.active = renderTex;
+            Texture2D readableText = new Texture2D(source.width, source.height);
+            readableText.ReadPixels(new Rect(0, 0, renderTex.width, renderTex.height), 0, 0);
+            readableText.Apply();
+            RenderTexture.active = previous;
+            RenderTexture.ReleaseTemporary(renderTex);
+
+            return readableText.EncodeToPNG();
+        }
     }
 }

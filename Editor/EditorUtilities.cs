@@ -35,6 +35,8 @@ namespace Point.Collections.Editor
     [Obsolete("Use CoreGUI")]
     public sealed class EditorUtilities
     {
+        
+
         #region Strings
 
         public static string String(string text) => HTMLString.String(text, EditorGUIUtility.isProSkin ? StringColor.white : StringColor.black);
