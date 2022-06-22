@@ -91,6 +91,9 @@ namespace Point.Collections.Editor
             c_DeviceSim = "com.unity.device-simulator",
 #else
             c_CodeCoverage = "com.unity.testtools.codecoverage",
+#if !UNITY_2022_1_OR_NEWER
+            c_Spline = "com.unity.splines",
+#endif
 #endif
             c_InputSystem = "com.unity.inputsystem",
             c_Burst = "com.unity.burst",
@@ -104,6 +107,9 @@ namespace Point.Collections.Editor
             m_DeviceSimInstalled,
 #else
             m_CodeCoverageInstalled,
+#if !UNITY_2022_1_OR_NEWER
+            m_SplineInstalled,
+#endif
 #endif
             m_InputSystemInstalled,
             m_BurstInstalled,
@@ -119,6 +125,9 @@ namespace Point.Collections.Editor
             m_DeviceSimInstalled = HasPackage(c_DeviceSim);
 #else
             m_CodeCoverageInstalled = HasPackage(c_CodeCoverage);
+#if !UNITY_2022_1_OR_NEWER
+            m_SplineInstalled = HasPackage(c_Spline);
+#endif
 #endif
             m_InputSystemInstalled = HasPackage(c_InputSystem);
             m_BurstInstalled = HasPackage(c_Burst);
@@ -134,6 +143,9 @@ namespace Point.Collections.Editor
             DrawPackageField(ref m_DeviceSimInstalled, c_DeviceSim);
 #else
             DrawPackageField(ref m_CodeCoverageInstalled, c_CodeCoverage);
+#if !UNITY_2022_1_OR_NEWER
+            DrawPackageField(ref m_SplineInstalled ,c_Spline);
+#endif
 #endif
             DrawPackageField(ref m_InputSystemInstalled, c_InputSystem);
             DrawPackageField(ref m_BurstInstalled, c_Burst);

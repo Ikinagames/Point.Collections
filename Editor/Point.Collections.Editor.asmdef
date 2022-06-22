@@ -11,7 +11,8 @@
         "UnityEngine.UI",
         "Unity.ResourceManager",
         "Unity.Addressables",
-        "Unity.Addressables.Editor"
+        "Unity.Addressables.Editor",
+        "Unity.Settings.Editor"
     ],
     "includePlatforms": [
         "Editor"
@@ -46,11 +47,6 @@
             "name": "com.unity.addressables",
             "expression": "1.18.19",
             "define": "UNITY_ADDRESSABLES"
-        },
-        {
-            "name": "com.unity.ui",
-            "expression": "1.0.0-preview.18",
-            "define": "UNITY_UI"
         }
     ],
     "noEngineReferences": false

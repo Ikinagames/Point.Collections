@@ -30,22 +30,30 @@ using System.ComponentModel;
 
 namespace Point.Collections.Editor
 {
-    public sealed class PointProjectSettings : EditorStaticScriptableObject<PointProjectSettings>
+    public sealed class PointProjectSettings : CLRSingleTone<PointProjectSettings>
     {
-        [SerializeField] private bool[] m_OpenStaticSettings = Array.Empty<bool>();
-        [SerializeField] private IPointStaticSetting[] m_StaticSettings = Array.Empty<IPointStaticSetting>();
+        private const string c_ProjectName = "point.collections";
 
-        [SerializeField] private int m_Number;
+        // https://docs.unity3d.com/Packages/com.unity.settings-manager@1.0/manual/index.html#quick-start
 
-        [SerializeField] private string m_SomeString;
+        private static UnityEditor.SettingsManagement.Settings s_Settings;
+        private static UnityEditor.SettingsManagement.Settings Settings
+        {
+            get
+            {
+                if (s_Settings == null)
+                {
+                    s_Settings = new UnityEditor.SettingsManagement.Settings(c_ProjectName);
+                }
+                return s_Settings;
+            }
+        }
+
+        private bool[] m_OpenStaticSettings = Array.Empty<bool>();
+        private IPointStaticSetting[] m_StaticSettings = Array.Empty<IPointStaticSetting>();
 
         public bool[] OpenStaticSettings => m_OpenStaticSettings;
         public IReadOnlyList<IPointStaticSetting> StaticSettings => m_StaticSettings;
-
-        internal static SerializedObject GetSerializedSettings()
-        {
-            return new SerializedObject(Instance);
-        }
 
         public TSetting GetSetting<TSetting>() where TSetting : class, IPointStaticSetting
         {
@@ -82,8 +90,6 @@ namespace Point.Collections.Editor
         {
             public static GUIContent 
                 AssetImportHandles = new GUIContent("Auto Asset Import", "해당 타입의 에셋이 등록되었을 때, 자동으로 ResourceAddresses 에서 해당 에셋을 관리합니다.");
-            public static GUIContent number = new GUIContent("My Number");
-            public static GUIContent someString = new GUIContent("Some string");
         }
 
         // Register the SettingsProvider
@@ -96,8 +102,6 @@ namespace Point.Collections.Editor
             provider.keywords = GetSearchKeywordsFromGUIContentProperties<Styles>();
             return provider;
         }
-
-        private SerializedObject m_CustomSettings;
 
         public PointProjectSettingsProvider(
             string path, 
@@ -114,7 +118,7 @@ namespace Point.Collections.Editor
         public override void OnActivate(string searchContext, VisualElement rootElement)
         {
             // This function is called when the user clicks on the MyCustom element in the Settings window.
-            m_CustomSettings = PointProjectSettings.GetSerializedSettings();
+            //m_CustomSettings = PointProjectSettings.GetSerializedSettings();
         }
         public override void OnGUI(string searchContext)
         {
@@ -130,12 +134,12 @@ namespace Point.Collections.Editor
                     if (i + 1 < list.Count) EditorUtilities.Line();
                 }
 
-                if (change.changed)
-                {
-                    EditorUtility.SetDirty(PointProjectSettings.Instance);
-                }
+                //if (change.changed)
+                //{
+                //    EditorUtility.SetDirty(PointProjectSettings.Instance);
+                //}
             }
-            m_CustomSettings.ApplyModifiedProperties();
+            //m_CustomSettings.ApplyModifiedProperties();
 
             void DrawSetting(int i, IPointStaticSetting setting)
             {
