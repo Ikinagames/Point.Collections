@@ -28,42 +28,42 @@
 
 #if UNITYENGINE && !UNITYENGINE_OLD
 
-using Mono.Cecil;
-using System;
-using System.Reflection;
+//using Mono.Cecil;
+//using System;
+//using System.Reflection;
 
 namespace Point.Collections.Editor
 {
-    public static class MonoCecilExtensions
-    {
-        public static string GetAssemblyQualifiedName(this TypeReference type)
-        {
-            string name = Assembly.CreateQualifiedName(type.Module.Assembly.FullName, type.FullName);
+    //public static class MonoCecilExtensions
+    //{
+    //    public static string GetAssemblyQualifiedName(this TypeReference type)
+    //    {
+    //        string name = Assembly.CreateQualifiedName(type.Module.Assembly.FullName, type.FullName);
 
-            return name;
-        }
-        public static Type GetActualType(this TypeReference type)
-        {
-            return Type.GetType(type.GetAssemblyQualifiedName());
-        }
-        public static MethodInfo GetMethodInfo(this MethodDefinition t)
-        {
-            Type declaringType = t.DeclaringType.GetActualType();
+    //        return name;
+    //    }
+    //    public static Type GetActualType(this TypeReference type)
+    //    {
+    //        return Type.GetType(type.GetAssemblyQualifiedName());
+    //    }
+    //    public static MethodInfo GetMethodInfo(this MethodDefinition t)
+    //    {
+    //        Type declaringType = t.DeclaringType.GetActualType();
 
-            BindingFlags bindingFlags = 0;
-            if (t.IsPublic) bindingFlags |= BindingFlags.Public;
-            else bindingFlags |= BindingFlags.NonPublic;
+    //        BindingFlags bindingFlags = 0;
+    //        if (t.IsPublic) bindingFlags |= BindingFlags.Public;
+    //        else bindingFlags |= BindingFlags.NonPublic;
 
-            if (t.IsStatic) bindingFlags |= BindingFlags.Static;
-            else bindingFlags |= BindingFlags.Instance;
+    //        if (t.IsStatic) bindingFlags |= BindingFlags.Static;
+    //        else bindingFlags |= BindingFlags.Instance;
 
-            MethodInfo method = declaringType.GetMethod(t.Name, bindingFlags | BindingFlags.FlattenHierarchy);
+    //        MethodInfo method = declaringType.GetMethod(t.Name, bindingFlags | BindingFlags.FlattenHierarchy);
 
-            //$"{t.Name}.{t.DeclaringType.Name} : {method != null}".ToLog();
+    //        //$"{t.Name}.{t.DeclaringType.Name} : {method != null}".ToLog();
 
-            return method;
-        }
-    }
+    //        return method;
+    //    }
+    //}
 }
 
 #endif

@@ -28,34 +28,34 @@
 
 #if UNITYENGINE && !UNITYENGINE_OLD
 
-using Mono.Cecil;
-using Mono.Cecil.Cil;
-using System;
-using System.Linq;
-using System.Runtime.InteropServices;
-using UnityEngine;
+//using Mono.Cecil;
+//using Mono.Cecil.Cil;
+//using System;
+//using System.Linq;
+//using System.Runtime.InteropServices;
+//using UnityEngine;
 
 namespace Point.Collections.Editor
 {
-    internal sealed class LogAttributeILProcessor : IL2CppPostProcessor<LogAttribute>
-    {
-        public override bool OnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute, LogAttribute attributeInstance)
-        {
-            MethodReference logMethodReference = module.ImportReference(typeof(Debug).GetMethod("Log", new Type[] { typeof(object) }));
+    //internal sealed class LogAttributeILProcessor : IL2CppPostProcessor<LogAttribute>
+    //{
+    //    public override bool OnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute, LogAttribute attributeInstance)
+    //    {
+    //        MethodReference logMethodReference = module.ImportReference(typeof(Debug).GetMethod("Log", new Type[] { typeof(object) }));
 
-            ILProcessor ilProcessor = method.Body.GetILProcessor();
-            Instruction first = method.Body.Instructions.First();
-            Instruction last = method.Body.Instructions.Last();
+    //        ILProcessor ilProcessor = method.Body.GetILProcessor();
+    //        Instruction first = method.Body.Instructions.First();
+    //        Instruction last = method.Body.Instructions.Last();
 
-            //Insertion function
-            ilProcessor.InsertBefore(first, ilProcessor.Create(OpCodes.Ldstr, attributeInstance.Text));
-            //string log = string.Copy(attributeInstance.Text);
-            //ilProcessor.InsertBefore(first, ilProcessor.Create(OpCodes.Ldstr, log));
-            ilProcessor.InsertBefore(first, ilProcessor.Create(OpCodes.Call, logMethodReference));
+    //        //Insertion function
+    //        ilProcessor.InsertBefore(first, ilProcessor.Create(OpCodes.Ldstr, attributeInstance.Text));
+    //        //string log = string.Copy(attributeInstance.Text);
+    //        //ilProcessor.InsertBefore(first, ilProcessor.Create(OpCodes.Ldstr, log));
+    //        ilProcessor.InsertBefore(first, ilProcessor.Create(OpCodes.Call, logMethodReference));
 
-            return true;
-        }
-    }
+    //        return true;
+    //    }
+    //}
 }
 
 #endif

@@ -28,64 +28,64 @@
 
 #if UNITYENGINE && !UNITYENGINE_OLD
 
-using Mono.Cecil;
-using System;
-using System.Reflection;
+//using Mono.Cecil;
+//using System;
+//using System.Reflection;
 
-namespace Point.Collections.Editor
-{
-    public abstract class IL2CppPostProcessorBase
-    {
-        internal bool m_IsMethod;
+//namespace Point.Collections.Editor
+//{
+//    public abstract class IL2CppPostProcessorBase
+//    {
+//        internal bool m_IsMethod;
 
-        public abstract Type TargetAttributeType { get; }
+//        public abstract Type TargetAttributeType { get; }
 
-        protected bool IsMethod => m_IsMethod;
-        protected bool IsType => !m_IsMethod;
+//        protected bool IsMethod => m_IsMethod;
+//        protected bool IsType => !m_IsMethod;
 
-        public virtual void OnInitialize() { }
+//        public virtual void OnInitialize() { }
 
-        /// <summary>
-        /// <see cref="IsType"/> 이 <see langword="true"/> 일 경우 실행됩니다.
-        /// </summary>
-        /// <param name="module"></param>
-        /// <param name="type"></param>
-        /// <param name="attribute"></param>
-        /// <returns></returns>
-        internal abstract bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, CustomAttribute attribute);
-        /// <summary>
-        /// <see cref="IsMethod"/> 가 <see langword="true"/> 일 경우 실행됩니다.
-        /// </summary>
-        /// <param name="module"></param>
-        /// <param name="type"></param>
-        /// <param name="method"></param>
-        /// <param name="attribute"></param>
-        /// <returns></returns>
-        internal abstract bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute);
+//        /// <summary>
+//        /// <see cref="IsType"/> 이 <see langword="true"/> 일 경우 실행됩니다.
+//        /// </summary>
+//        /// <param name="module"></param>
+//        /// <param name="type"></param>
+//        /// <param name="attribute"></param>
+//        /// <returns></returns>
+//        internal abstract bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, CustomAttribute attribute);
+//        /// <summary>
+//        /// <see cref="IsMethod"/> 가 <see langword="true"/> 일 경우 실행됩니다.
+//        /// </summary>
+//        /// <param name="module"></param>
+//        /// <param name="type"></param>
+//        /// <param name="method"></param>
+//        /// <param name="attribute"></param>
+//        /// <returns></returns>
+//        internal abstract bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute);
 
-        internal protected Attribute GetCustomAttribute(TypeDefinition type, Type attributeType)
-        {
-            return type.GetActualType().GetCustomAttribute(attributeType);
-        }
-        internal protected Attribute GetCustomAttribute(MethodDefinition type, Type attributeType)
-        {
-            MethodInfo method = type.GetMethodInfo();
-            Attribute attribute = null;
-            foreach (var item in method.GetCustomAttributes(true))
-            {
-                if (TypeHelper.InheritsFrom(item.GetType(), attributeType))
-                {
-                    attribute = item as Attribute;
-                    break;
-                }
-            }
+//        internal protected Attribute GetCustomAttribute(TypeDefinition type, Type attributeType)
+//        {
+//            return type.GetActualType().GetCustomAttribute(attributeType);
+//        }
+//        internal protected Attribute GetCustomAttribute(MethodDefinition type, Type attributeType)
+//        {
+//            MethodInfo method = type.GetMethodInfo();
+//            Attribute attribute = null;
+//            foreach (var item in method.GetCustomAttributes(true))
+//            {
+//                if (TypeHelper.InheritsFrom(item.GetType(), attributeType))
+//                {
+//                    attribute = item as Attribute;
+//                    break;
+//                }
+//            }
 
-            //Attribute attribute = method.GetCustomAttribute(attributeType, true);
-            //$"{method.Name}.{attributeType.Name} :: {attribute != null}".ToLog();
+//            //Attribute attribute = method.GetCustomAttribute(attributeType, true);
+//            //$"{method.Name}.{attributeType.Name} :: {attribute != null}".ToLog();
 
-            return attribute;
-        }
-    }
-}
+//            return attribute;
+//        }
+//    }
+//}
 
 #endif

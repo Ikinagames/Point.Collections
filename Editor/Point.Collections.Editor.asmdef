@@ -19,11 +19,12 @@
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
-    "overrideReferences": true,
+    "overrideReferences": false,
     "precompiledReferences": [
         "Point.Collections.Native.dll",
         "Newtonsoft.Json.dll",
-        "Mono.Cecil.dll"
+        "Mono.Cecil.dll",
+        ""
     ],
     "autoReferenced": true,
     "defineConstraints": [],

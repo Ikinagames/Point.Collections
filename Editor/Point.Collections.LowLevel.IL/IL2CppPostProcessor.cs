@@ -28,51 +28,51 @@
 
 #if UNITYENGINE && !UNITYENGINE_OLD
 
-using Mono.Cecil;
-using Point.Collections.LowLevel.IL;
-using System;
+//using Mono.Cecil;
+//using Point.Collections.LowLevel.IL;
+//using System;
 
 namespace Point.Collections.Editor
 {
-    public abstract class IL2CppPostProcessor : IL2CppPostProcessorBase
-    {
-        internal override bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute)
-        {
-            Attribute att = GetCustomAttribute(method, TargetAttributeType);
+    //public abstract class IL2CppPostProcessor : IL2CppPostProcessorBase
+    //{
+    //    internal override bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute)
+    //    {
+    //        Attribute att = GetCustomAttribute(method, TargetAttributeType);
 
-            return OnProcess(module, type, method, attribute, att);
-        }
-        internal override bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, CustomAttribute attribute)
-        {
-            Attribute att = GetCustomAttribute(type, TargetAttributeType);
+    //        return OnProcess(module, type, method, attribute, att);
+    //    }
+    //    internal override bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, CustomAttribute attribute)
+    //    {
+    //        Attribute att = GetCustomAttribute(type, TargetAttributeType);
 
-            return OnProcess(module, type, attribute, att);
-        }
+    //        return OnProcess(module, type, attribute, att);
+    //    }
 
-        public virtual bool OnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute, Attribute attributeInstance) { return false; }
-        public virtual bool OnProcess(ModuleDefinition module, TypeDefinition type, CustomAttribute attribute, Attribute attributeInstance) { return false; }
-    }
-    public abstract class IL2CppPostProcessor<T> : IL2CppPostProcessorBase
-        where T : ILProcessorAttribute
-    {
-        public override sealed Type TargetAttributeType => TypeHelper.TypeOf<T>.Type;
+    //    public virtual bool OnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute, Attribute attributeInstance) { return false; }
+    //    public virtual bool OnProcess(ModuleDefinition module, TypeDefinition type, CustomAttribute attribute, Attribute attributeInstance) { return false; }
+    //}
+    //public abstract class IL2CppPostProcessor<T> : IL2CppPostProcessorBase
+    //    where T : ILProcessorAttribute
+    //{
+    //    public override sealed Type TargetAttributeType => TypeHelper.TypeOf<T>.Type;
 
-        internal override bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute)
-        {
-            T att = (T)GetCustomAttribute(method, TargetAttributeType);
+    //    internal override bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute)
+    //    {
+    //        T att = (T)GetCustomAttribute(method, TargetAttributeType);
 
-            return OnProcess(module, type, method, attribute, att);
-        }
-        internal override bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, CustomAttribute attribute)
-        {
-            T att = (T)GetCustomAttribute(type, TargetAttributeType);
+    //        return OnProcess(module, type, method, attribute, att);
+    //    }
+    //    internal override bool InternalOnProcess(ModuleDefinition module, TypeDefinition type, CustomAttribute attribute)
+    //    {
+    //        T att = (T)GetCustomAttribute(type, TargetAttributeType);
 
-            return OnProcess(module, type, attribute, att);
-        }
+    //        return OnProcess(module, type, attribute, att);
+    //    }
 
-        public virtual bool OnProcess(ModuleDefinition module, TypeDefinition type, CustomAttribute attribute, T attributeInstance) { return false; }
-        public virtual bool OnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute, T attributeInstance) { return false; }
-    }
+    //    public virtual bool OnProcess(ModuleDefinition module, TypeDefinition type, CustomAttribute attribute, T attributeInstance) { return false; }
+    //    public virtual bool OnProcess(ModuleDefinition module, TypeDefinition type, MethodDefinition method, CustomAttribute attribute, T attributeInstance) { return false; }
+    //}
 }
 
 #endif

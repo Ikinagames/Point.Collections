@@ -59,11 +59,33 @@ namespace Point.Collections
         public static string s_EditorLogs = string.Empty;
 #endif
 
-        private static LogChannel LogChannel => PointSettings.Instance.LogChannel;
+        private static LogChannel LogChannel
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (!UnityEditorInternal.InternalEditorUtility.CurrentThreadIsMainThread())
+                {
+                    return (LogChannel)~0;
+                }
+#endif
+                return PointSettings.Instance.LogChannel;
+            }
+        }
 
         private static string LogStringFormat(LogChannel channel, in string msg, int type)
         {
-            string chan = PointSettings.Instance.GetUserChannelNames(channel);
+            string chan;
+#if UNITY_EDITOR
+            if (!UnityEditorInternal.InternalEditorUtility.CurrentThreadIsMainThread())
+            {
+                chan = TypeHelper.Enum<LogChannel>.ToString(channel);
+            }
+            else
+#endif
+            {
+                chan = PointSettings.Instance.GetUserChannelNames(channel);
+            }
 
             string context;
             switch (type)
