@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.UIElements;
+using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UIElements;
 
@@ -67,6 +68,7 @@ namespace Point.Collections.Editor
 
         private string m_Value;
         private bool m_DisplayPath = false;
+        private Label m_Label;
         private ObjectField m_ObjectField;
         private TextField m_PathField;
         private Button m_Button;
@@ -86,11 +88,12 @@ namespace Point.Collections.Editor
         }
         public string label
         {
-            get => m_ObjectField.label;
+            get => m_Label.text;
             set
             {
-                m_ObjectField.label = value;
-                m_ObjectField.MarkDirtyRepaint();
+                m_Label.text = value;
+
+                m_Label.MarkDirtyRepaint();
             }
         }
         public Type objectType
@@ -104,26 +107,37 @@ namespace Point.Collections.Editor
         {
             styleSheets.Add(CoreGUI.VisualElement.DefaultStyleSheet);
             style.flexGrow = 1;
+            style.maxWidth = new StyleLength(new Length(100, LengthUnit.Percent));
             style.flexDirection = FlexDirection.Row;
 
+            m_Label = new Label();
+            m_Label.style.flexShrink = 1;
+            m_Label.style.flexGrow = 1;
+            m_Label.style.alignContent = Align.Center;
+            m_Label.style.unityTextAlign = TextAnchor.MiddleLeft;
+            hierarchy.Add(m_Label);
+
             m_ObjectField = new ObjectField();
+            m_ObjectField.style.flexShrink = 1;
             m_ObjectField.style.flexGrow = 1;
             m_ObjectField.RegisterValueChangedCallback(ObjectChanged);
             hierarchy.Add(m_ObjectField);
 
             m_PathField = new TextField();
+            m_PathField.style.flexShrink = 1;
             m_PathField.style.flexGrow = 1;
             m_PathField.style.overflow = Overflow.Hidden;
 #if UNITY_2020_1_OR_NEWER
             m_PathField.style.textOverflow = TextOverflow.Ellipsis;
 #endif
-            m_PathField.style.maxWidth = new StyleLength(new Length(81, LengthUnit.Percent));
             m_PathField.style.Hide(true);
             m_PathField.RegisterValueChangedCallback(PathChanged);
             hierarchy.Add(m_PathField);
 
             m_Button = new Button();
             m_Button.text = "Raw";
+            m_Button.style.flexShrink = 1;
+            m_Button.style.flexGrow = 0;
             m_Button.style.SetBorderRadius(.1f);
             m_Button.style.width = new StyleLength(new Length(45, LengthUnit.Pixel));
             m_Button.clicked += M_Button_clicked;

@@ -29,6 +29,25 @@ namespace Point.Collections.Editor
     [CustomPropertyDrawer(typeof(ArrayWrapper<>), true)]
     public class ArrayWrapperPropertyDrawer : PropertyDrawerUXML<Array>
     {
+        private static VisualElement ElementFactory(SerializedProperty element)
+        {
+            if (element.ChildCount() > 1)
+            {
+                VisualElement ve = new VisualElement();
+                ve.AddToClassList("content-container");
+                ve.AddToClassList("inner-container");
+
+                foreach (var item in element.ForEachChild())
+                {
+                    var childVe = CoreGUI.VisualElement.PropertyField(item);
+                    ve.Add(childVe);
+                }
+
+                return ve;
+            }
+
+            return CoreGUI.VisualElement.PropertyField(element);
+        }
         protected override VisualElement CreateVisualElement(SerializedProperty property)
         {
             string displayName = property.displayName;
@@ -39,7 +58,7 @@ namespace Point.Collections.Editor
             for (int i = 0; i < property.arraySize; i++)
             {
                 var elementProp = property.GetArrayElementAtIndex(i);
-                list.Add(CoreGUI.VisualElement.PropertyField(elementProp));
+                list.Add(ElementFactory(elementProp));
             }
             list.isExpanded = property.isExpanded;
             list.onExpand += delegate (bool expanded)
@@ -51,10 +70,11 @@ namespace Point.Collections.Editor
             list.onAddButtonClicked += delegate (int index)
             {
                 property.InsertArrayElementAtIndex(index);
+                var element = property.GetArrayElementAtIndex(index);
+                element.SetDefaultValue();
                 property.serializedObject.ApplyModifiedProperties();
 
-                var element = property.GetArrayElementAtIndex(index);
-                return CoreGUI.VisualElement.PropertyField(element);
+                return ElementFactory(element);
             };
             list.onRemoveButtonClicked += delegate (int index)
             {
