@@ -32,6 +32,16 @@ namespace Point.Collections
 #if UNITY_2020_1_OR_NEWER
         public HelpBoxMessageType Type;
 #endif
+        public HelpBoxAttribute(string text)
+        {
+            Text = text;
+        }
+#if UNITY_2020_1_OR_NEWER
+        public HelpBoxAttribute(string text, HelpBoxMessageType type) : this(text)
+        {
+            Type = type;
+        }
+#endif
     }
 }
 
