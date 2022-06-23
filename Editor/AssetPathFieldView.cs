@@ -92,7 +92,7 @@ namespace Point.Collections.Editor
             set
             {
                 m_Label.text = value;
-
+                m_Label.style.Hide(value.IsNullOrEmpty());
                 m_Label.MarkDirtyRepaint();
             }
         }
@@ -113,19 +113,23 @@ namespace Point.Collections.Editor
             m_Label = new Label();
             m_Label.style.flexShrink = 1;
             m_Label.style.flexGrow = 1;
+            m_Label.style.width = new StyleLength(new Length(40, LengthUnit.Percent));
             m_Label.style.alignContent = Align.Center;
             m_Label.style.unityTextAlign = TextAnchor.MiddleLeft;
             hierarchy.Add(m_Label);
 
             m_ObjectField = new ObjectField();
+            m_ObjectField.allowSceneObjects = false;
             m_ObjectField.style.flexShrink = 1;
             m_ObjectField.style.flexGrow = 1;
+            m_ObjectField.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
             m_ObjectField.RegisterValueChangedCallback(ObjectChanged);
             hierarchy.Add(m_ObjectField);
 
             m_PathField = new TextField();
             m_PathField.style.flexShrink = 1;
             m_PathField.style.flexGrow = 1;
+            m_PathField.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
             m_PathField.style.overflow = Overflow.Hidden;
 #if UNITY_2020_1_OR_NEWER
             m_PathField.style.textOverflow = TextOverflow.Ellipsis;
