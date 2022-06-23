@@ -21,8 +21,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.UIElements;
+using UnityEngine.Assertions;
 using UnityEngine.UIElements;
 
 namespace Point.Collections.Editor
@@ -32,9 +34,9 @@ namespace Point.Collections.Editor
         public new class UxmlFactory : UxmlFactory<AssetPathFieldView, UxmlTraits> { }
         public new class UxmlTraits : VisualElement.UxmlTraits
         {
-            UxmlStringAttributeDescription m_Text = new UxmlStringAttributeDescription
+            UxmlStringAttributeDescription m_Label = new UxmlStringAttributeDescription
             {
-                name = "text",
+                name = "label",
                 defaultValue = "NAME"
             };
             UxmlStringAttributeDescription m_Value = new UxmlStringAttributeDescription
@@ -57,13 +59,14 @@ namespace Point.Collections.Editor
                 base.Init(ve, bag, cc);
                 AssetPathFieldView ate = ve as AssetPathFieldView;
 
-                ate.text = m_Text.GetValueFromBag(bag, cc);
+                ate.label = m_Label.GetValueFromBag(bag, cc);
                 ate.value = m_Value.GetValueFromBag(bag, cc);
                 ate.objectType = m_ObjectType.GetValueFromBag(bag, cc);
             }
         }
 
         private string m_Value;
+        private bool m_DisplayPath = false;
         private ObjectField m_ObjectField;
         private TextField m_PathField;
         private Button m_Button;
@@ -81,10 +84,14 @@ namespace Point.Collections.Editor
                 }
             }
         }
-        public string text
+        public string label
         {
             get => m_ObjectField.label;
-            set => m_ObjectField.label = value;
+            set
+            {
+                m_ObjectField.label = value;
+                m_ObjectField.MarkDirtyRepaint();
+            }
         }
         public Type objectType
         {
@@ -112,31 +119,78 @@ namespace Point.Collections.Editor
 #endif
             m_PathField.style.maxWidth = new StyleLength(new Length(81, LengthUnit.Percent));
             m_PathField.style.Hide(true);
+            m_PathField.RegisterValueChangedCallback(PathChanged);
             hierarchy.Add(m_PathField);
 
             m_Button = new Button();
             m_Button.text = "Raw";
+            m_Button.style.SetBorderRadius(.1f);
             m_Button.style.width = new StyleLength(new Length(45, LengthUnit.Pixel));
+            m_Button.clicked += M_Button_clicked;
             hierarchy.Add(m_Button);
         }
         public AssetPathFieldView(SerializedProperty property) : this()
         {
-            var strProp = property.FindPropertyRelative("p_AssetPath");
-            if (strProp == null)
-            {
-                "?".ToLog();
-                strProp = property;
-            }
+            BindProperty(property);
+        }
+        /// <inheritdoc cref="BindingExtensions.BindProperty(IBindable, SerializedProperty)"/>
+        public void BindProperty(SerializedProperty property)
+        {
+            Assert.IsTrue(property.type.Contains(nameof(AssetPathField)),
+                $"Cannot bind this property({property.displayName}, {property.type}) " +
+                $"because it\'s not {nameof(AssetPathField)}");
 
-            this.BindProperty(strProp);
+            var strProp = property.FindPropertyRelative("p_AssetPath");
+            Assert.IsNotNull(strProp);
+
+            var propertyType = property.GetFieldInfo().FieldType;
+            Type targetType = TypeHelper.TypeOf<UnityEngine.Object>.Type;
+            if (propertyType.GenericTypeArguments.Length == 1)
+            {
+                targetType = propertyType.GenericTypeArguments[0];
+            }
+            objectType = targetType;
+
+            ((IBindable)this).BindProperty(strProp);
         }
 
+        private void M_Button_clicked()
+        {
+            m_DisplayPath = !m_DisplayPath;
+            if (m_DisplayPath)
+            {
+                m_PathField.style.Hide(false);
+                m_ObjectField.style.Hide(true);
+            }
+            else
+            {
+                m_PathField.style.Hide(true);
+                m_ObjectField.style.Hide(false);
+            }
+        }
         public void SetValueWithoutNotify(string newValue)
         {
-            $"in {newValue}".ToLog();
             m_Value = newValue;
-        }
 
+            m_ObjectField.SetValueWithoutNotify(AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(newValue));
+            m_PathField.SetValueWithoutNotify(newValue);
+        }   
+
+        private void PathChanged(ChangeEvent<string> ev)
+        {
+            string newValue = ev.newValue;
+            UnityEngine.Object target = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(ev.newValue);
+            if (target == null)
+            {
+                m_ObjectField.SetValueWithoutNotify(null);
+            }
+            else
+            {
+                m_ObjectField.SetValueWithoutNotify(target);
+            }
+
+            value = newValue;
+        }
         private void ObjectChanged(ChangeEvent<UnityEngine.Object> ev)
         {
             UnityEngine.Object target = ev.newValue;

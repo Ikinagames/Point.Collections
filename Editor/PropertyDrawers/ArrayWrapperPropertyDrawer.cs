@@ -34,7 +34,21 @@ namespace Point.Collections.Editor
             string displayName = property.displayName;
             string tooltip = property.tooltip;
             property.Next(true);
-            ListContainerView list = new ListContainerView(displayName, tooltip, property);
+            //ListContainerView list = new ListContainerView(displayName, tooltip, property);
+            ListContainerView list = new ListContainerView(displayName);
+            list.onAddButtonClicked += delegate (int index)
+            {
+                property.InsertArrayElementAtIndex(index);
+                property.serializedObject.ApplyModifiedProperties();
+
+                var element = property.GetArrayElementAtIndex(index);
+                return CoreGUI.VisualElement.PropertyField(element);
+            };
+            list.onRemoveButtonClicked += delegate (int index)
+            {
+                property.DeleteArrayElementAtIndex(index);
+                property.serializedObject.ApplyModifiedProperties();
+            };
 
             return list;
         }

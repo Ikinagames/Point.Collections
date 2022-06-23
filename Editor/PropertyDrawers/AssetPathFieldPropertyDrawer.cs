@@ -34,153 +34,22 @@ using UnityEngine.UIElements;
 namespace Point.Collections.Editor
 {
     [CustomPropertyDrawer(typeof(AssetPathField), true)]
-    public sealed class AssetPathFieldPropertyDrawer : PropertyDrawerUXML<AssetPathField>
+    internal sealed class AssetPathFieldPropertyDrawer : AssetPathFieldPropertyDrawerFallback
     {
-        private const string c_AssetPathField = "p_AssetPath", c_AssetGUIDField = "p_AssetGUID";
-        private static Type s_GenericType = typeof(AssetPathField<>);
-
         protected override VisualElement CreateVisualElement(SerializedProperty property)
         {
-            SerializedProperty pathProperty = property.FindPropertyRelative(c_AssetPathField);
-            SerializedProperty guidProperty = property.FindPropertyRelative(c_AssetGUIDField);
-
-            string assetPath = pathProperty.stringValue;
-            UnityEngine.Object asset = GetObjectAtPath(in assetPath);
-
-            Type fieldType;
-            if (fieldInfo.FieldType.IsArray) fieldType = fieldInfo.FieldType.GetElementType();
-            else fieldType = fieldInfo.FieldType;
-
-            Type targetType;
-            if (TypeHelper.InheritsFrom(fieldType, s_GenericType))
+            AssetPathFieldView ve = new AssetPathFieldView(property);
+            if (!property.IsInArray() || property.GetParent().ChildCount() > 1)
             {
-                if (fieldType.IsGenericType &&
-                    s_GenericType.Equals(fieldType.GetGenericTypeDefinition()))
-                {
-                    targetType = fieldType.GenericTypeArguments[0];
-                }
-                else
-                {
-                    Type genericDef = TypeHelper.GetGenericBaseType(fieldType, s_GenericType);
-                    targetType = genericDef.GenericTypeArguments[0];
-                }
-            }
-            else
-            {
-                targetType = TypeHelper.TypeOf<UnityEngine.Object>.Type;
+                ve.label = property.displayName;
             }
 
-            VisualElement element = new VisualElement();
-            element.styleSheets.Add(CoreGUI.VisualElement.DefaultStyleSheet);
-            element.style.flexDirection = FlexDirection.Row;
-            element.style.flexGrow = 1;
-
-            ObjectField objectfield = new ObjectField();
-            objectfield.style.flexGrow = 1;
-            objectfield.objectType = targetType;
-            objectfield.value = asset;
-            objectfield.allowSceneObjects = false;
-            element.Add(objectfield);
-
-            TextField textField = new TextField();
-            textField.style.flexGrow = 1;
-            textField.value = pathProperty.stringValue;
-            textField.style.overflow = Overflow.Hidden;
-#if UNITY_2020_1_OR_NEWER
-            textField.style.textOverflow = TextOverflow.Ellipsis;
-#endif
-            textField.style.maxWidth = new StyleLength(new Length(81, LengthUnit.Percent));
-            {
-                textField.RegisterValueChangedCallback(t =>
-                {
-                    pathProperty.stringValue = t.newValue;
-                    guidProperty.stringValue = AssetDatabase.AssetPathToGUID(pathProperty.stringValue);
-
-                    pathProperty.serializedObject.ApplyModifiedProperties();
-
-                    if (pathProperty.stringValue.IsNullOrEmpty())
-                    {
-                        objectfield.SetValueWithoutNotify(null);
-                    }
-                    else
-                    {
-                        objectfield.SetValueWithoutNotify(
-                            AssetDatabase.LoadAssetAtPath(pathProperty.stringValue, 
-                            TypeHelper.TypeOf<UnityEngine.Object>.Type)
-                            );
-                    }
-                });
-                objectfield.RegisterValueChangedCallback(t =>
-                {
-                    UnityEngine.Object target = t.newValue;
-                    if (target == null)
-                    {
-                        pathProperty.stringValue = string.Empty;
-                    }
-                    else if (PrefabUtility.IsPartOfPrefabInstance(target))
-                    {
-                        pathProperty.stringValue =
-                            PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(target);
-                    }
-                    else
-                    {
-                        pathProperty.stringValue = AssetDatabase.GetAssetPath(target);
-                    }
-                    guidProperty.stringValue = AssetDatabase.AssetPathToGUID(pathProperty.stringValue);
-
-                    pathProperty.serializedObject.ApplyModifiedProperties();
-
-                    textField.SetValueWithoutNotify(pathProperty.stringValue);
-                });
-            }
-            element.Add(textField);
-
-            if (property.IsInArray() && property.GetParent().ChildCount() == 1)
-            {
-                //label = GUIContent.none;
-                objectfield.label = String.Empty;
-                textField.label = String.Empty;
-            }
-            else
-            {
-                objectfield.label = property.displayName;
-                textField.label = property.displayName;
-            }
-
-            if (!property.isExpanded)
-            {
-                textField.style.Hide(true);
-            }
-            else
-            {
-                objectfield.style.Hide(true);
-            }
-
-            Button btt = new Button();
-            btt.style.width = 60;
-            btt.text = "Raw";
-            {
-                btt.clicked += delegate
-                {
-                    property.isExpanded = !property.isExpanded;
-                    property.serializedObject.ApplyModifiedProperties();
-
-                    if (!property.isExpanded)
-                    {
-                        textField.style.Hide(true);
-                        objectfield.style.Hide(false);
-                    }
-                    else
-                    {
-                        textField.style.Hide(false);
-                        objectfield.style.Hide(true);
-                    }
-                };
-            }
-            element.Add(btt);
-
-            return element;
+            return ve;
         }
+    }
+    internal abstract class AssetPathFieldPropertyDrawerFallback : PropertyDrawerUXML<AssetPathField>
+    {
+
 
         private static UnityEngine.Object GetObjectAtPath(in string path)
         {

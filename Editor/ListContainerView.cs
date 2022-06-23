@@ -32,9 +32,9 @@ namespace Point.Collections.Editor
         public new class UxmlFactory : UxmlFactory<ListContainerView, UxmlTraits> { }
         public new class UxmlTraits : VisualElement.UxmlTraits
         {
-            UxmlStringAttributeDescription m_Text = new UxmlStringAttributeDescription
+            UxmlStringAttributeDescription m_Label = new UxmlStringAttributeDescription
             {
-                name = "text",
+                name = "label",
                 defaultValue = "NAME"
             };
 
@@ -47,7 +47,7 @@ namespace Point.Collections.Editor
                 base.Init(ve, bag, cc);
                 ListContainerView ate = ve as ListContainerView;
 
-                ate.text = m_Text.GetValueFromBag(bag, cc);
+                ate.label = m_Label.GetValueFromBag(bag, cc);
             }
         }
 
@@ -55,10 +55,10 @@ namespace Point.Collections.Editor
         private VisualElement m_ContentContainer;
         private Button m_AddButton, m_RemoveButton;
         private bool m_IsExpanded = false;
-        private SerializedProperty m_BindedArrayProperty;
+        //private SerializedProperty m_BindedArrayProperty;
 
         public override VisualElement contentContainer => m_ContentContainer;
-        public string text
+        public string label
         {
             get => m_HeaderLabel.text;
             set => m_HeaderLabel.text = value;
@@ -94,16 +94,8 @@ namespace Point.Collections.Editor
         }
 
         public event Action<bool> onExpand;
-        public event Action onAddButtonClicked
-        {
-            add => m_AddButton.clicked += value;
-            remove => m_AddButton.clicked -= value;
-        }
-        public event Action onRemoveButtonClicked
-        {
-            add => m_RemoveButton.clicked += value;
-            remove => m_RemoveButton.clicked -= value;
-        }
+        public event Func<int, VisualElement> onAddButtonClicked;
+        public event Action<int> onRemoveButtonClicked;
 
         public ListContainerView()
         {
@@ -127,13 +119,29 @@ namespace Point.Collections.Editor
                 m_AddButton.name = "AddButton";
                 m_AddButton.text = "+";
                 m_AddButton.AddToClassList("header-button-1");
-                m_AddButton.clicked += OnAddButtonClicked;
+                m_AddButton.clicked += delegate ()
+                {
+                    int index = m_Childs.Count;
+                    var ve = onAddButtonClicked?.Invoke(index);
+
+                    Add(ve);
+                };
+                //m_AddButton.clicked += OnAddButtonClicked;
 
                 m_RemoveButton.name = "RemoveButton";
                 m_RemoveButton.text = "-";
                 m_RemoveButton.AddToClassList("header-button-1");
                 m_RemoveButton.SetEnabled(false);
-                m_RemoveButton.clicked += OnRemoveButtonClicked;
+                //m_RemoveButton.clicked += OnRemoveButtonClicked;
+                m_RemoveButton.clicked += delegate ()
+                {
+                    if (m_Childs.Count == 0) return;
+
+                    int index = m_Childs.Count - 1;
+                    onRemoveButtonClicked?.Invoke(index);
+
+                    RemoveAt(index);
+                };
             }
             hierarchy.Add(headerContainer);
 
@@ -150,49 +158,53 @@ namespace Point.Collections.Editor
             }
             hierarchy.Add(m_ContentContainer);
         }
-        public ListContainerView(string text, string tooltip, SerializedProperty array) : this()
+        public ListContainerView(string label) : this()
         {
-            if (!text.IsNullOrEmpty())
-            {
-                m_HeaderLabel.text = text;
-                if (!tooltip.IsNullOrEmpty())
-                {
-                    m_HeaderLabel.tooltip = tooltip;
-#if UNITY_2020_1_OR_NEWER
-                    m_HeaderLabel.displayTooltipWhenElided = true;
-#endif
-                }
-            }
-
-            if (array != null && array.isArray)
-            {
-                m_BindedArrayProperty = array;
-                m_HeaderLabel.RegisterCallback<MouseDownEvent>(OnExpandProperty);
-
-                for (int i = 0; i < m_BindedArrayProperty.arraySize; i++)
-                {
-                    var prop = m_BindedArrayProperty.GetArrayElementAtIndex(i);
-                    PropertyField field = new PropertyField(prop);
-
-                    Add(field);
-                }
-
-                isExpanded = m_BindedArrayProperty.isExpanded;
-            }
+            this.label = label;
         }
-        public ListContainerView(string text, SerializedProperty array) : this(text, string.Empty, array)
-        {
-        }
-        public ListContainerView(SerializedProperty array)
-            : this(array.displayName, array.tooltip, array)
-        {
-        }
+//        public ListContainerView(string text, string tooltip, SerializedProperty array) : this()
+//        {
+//            if (!text.IsNullOrEmpty())
+//            {
+//                m_HeaderLabel.text = text;
+//                if (!tooltip.IsNullOrEmpty())
+//                {
+//                    m_HeaderLabel.tooltip = tooltip;
+//#if UNITY_2020_1_OR_NEWER
+//                    m_HeaderLabel.displayTooltipWhenElided = true;
+//#endif
+//                }
+//            }
 
-        private void OnExpandProperty(MouseDownEvent t)
-        {
-            m_BindedArrayProperty.isExpanded = !m_BindedArrayProperty.isExpanded;
-            m_BindedArrayProperty.serializedObject.ApplyModifiedProperties();
-        }
+//            if (array != null && array.isArray)
+//            {
+//                m_BindedArrayProperty = array;
+//                m_HeaderLabel.RegisterCallback<MouseDownEvent>(OnExpandProperty);
+
+//                for (int i = 0; i < m_BindedArrayProperty.arraySize; i++)
+//                {
+//                    var prop = m_BindedArrayProperty.GetArrayElementAtIndex(i);
+//                    PropertyField field = new PropertyField(prop);
+
+//                    Add(field);
+//                }
+
+//                isExpanded = m_BindedArrayProperty.isExpanded;
+//            }
+//        }
+//        public ListContainerView(string text, SerializedProperty array) : this(text, string.Empty, array)
+//        {
+//        }
+//        public ListContainerView(SerializedProperty array)
+//            : this(array.displayName, array.tooltip, array)
+//        {
+//        }
+
+        //private void OnExpandProperty(MouseDownEvent t)
+        //{
+        //    m_BindedArrayProperty.isExpanded = !m_BindedArrayProperty.isExpanded;
+        //    m_BindedArrayProperty.serializedObject.ApplyModifiedProperties();
+        //}
         private void OnExpand(MouseDownEvent t)
         {
             isExpanded = !isExpanded;
@@ -200,32 +212,30 @@ namespace Point.Collections.Editor
 
         protected virtual void AfterCreateHeaderContainer(VisualElement headerContainer) { }
 
-        protected virtual void OnAddButtonClicked()
-        {
-            if (m_BindedArrayProperty == null) return;
+        //protected virtual void OnAddButtonClicked()
+        //{
+        //    if (m_BindedArrayProperty == null) return;
 
-            int index = m_BindedArrayProperty.arraySize;
-            m_BindedArrayProperty.InsertArrayElementAtIndex(index);
-            var prop = m_BindedArrayProperty.GetArrayElementAtIndex(index);
-            prop.SetDefaultValue();
+        //    int index = m_BindedArrayProperty.arraySize;
+        //    m_BindedArrayProperty.InsertArrayElementAtIndex(index);
+        //    var prop = m_BindedArrayProperty.GetArrayElementAtIndex(index);
+        //    prop.SetDefaultValue();
 
-            PropertyField field = new PropertyField(prop);
-            field.BindProperty(prop);
+        //    PropertyField field = new PropertyField(prop);
+        //    field.BindProperty(prop);
 
-            Add(field);
-            m_BindedArrayProperty.serializedObject.ApplyModifiedProperties();
-        }
-        protected virtual void OnRemoveButtonClicked()
-        {
-            if (m_BindedArrayProperty == null) return;
+        //    Add(field);
+        //    m_BindedArrayProperty.serializedObject.ApplyModifiedProperties();
+        //}
+        //protected virtual void OnRemoveButtonClicked()
+        //{
+        //    if (m_BindedArrayProperty == null) return;
 
-            int index = m_BindedArrayProperty.arraySize - 1;
+        //    int index = m_BindedArrayProperty.arraySize - 1;
+        //    m_BindedArrayProperty.DeleteArrayElementAtIndex(index);
 
-            m_BindedArrayProperty.DeleteArrayElementAtIndex(index);
-            RemoveAt(index);
-
-            m_BindedArrayProperty.serializedObject.ApplyModifiedProperties();
-        }
+        //    m_BindedArrayProperty.serializedObject.ApplyModifiedProperties();
+        //}
 
         private List<VisualElement> m_Childs = new List<VisualElement>();
 
@@ -240,18 +250,14 @@ namespace Point.Collections.Editor
 
             VisualElement element = new VisualElement();
             element.AddToClassList("list-content");
-            //element.style.SetBorderColor(Color.white);
-            //element.style.SetBorderWidth(1);
 
             Button button = new Button();
             button.AddToClassList("list-remove-button");
-            //button.style.width = 30;
-            //button.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
-            //button.style.flexShrink = 1;
             button.text = "-";
-            //button.style.SetBorderRadius(0);
             button.clicked += delegate
             {
+                int index = m_Childs.IndexOf(item);
+                onRemoveButtonClicked?.Invoke(index);
                 Remove(item);
             };
 

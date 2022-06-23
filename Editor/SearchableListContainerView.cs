@@ -47,7 +47,7 @@ namespace Point.Collections.Editor
                 base.Init(ve, bag, cc);
                 SearchableListContainerView ate = ve as SearchableListContainerView;
 
-                ate.text = m_Text.GetValueFromBag(bag, cc);
+                ate.label = m_Text.GetValueFromBag(bag, cc);
             }
         }
 
@@ -56,10 +56,10 @@ namespace Point.Collections.Editor
         public event Action<string> OnSearchStringChanged;
 
         public SearchableListContainerView() : base() { }
-        public SearchableListContainerView(string text) : base(text, string.Empty, null)
+        public SearchableListContainerView(string text) : base(text)
         {
         }
-        public SearchableListContainerView(SerializedProperty property) : base(property) { }
+        //public SearchableListContainerView(SerializedProperty property) : base(property) { }
 
         protected override void AfterCreateHeaderContainer(VisualElement headerContainer)
         {

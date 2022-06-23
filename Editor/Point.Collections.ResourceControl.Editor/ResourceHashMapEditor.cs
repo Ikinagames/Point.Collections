@@ -65,27 +65,19 @@ namespace Point.Collections.ResourceControl.Editor
                     serializedObject.ApplyModifiedProperties();
                 };
 
-                sceneBindedLabelList.onAddButtonClicked += delegate
+                sceneBindedLabelList.onAddButtonClicked += delegate(int index)
                 {
-                    int index = m_SceneBindedLabelsProperty.arraySize;
                     m_SceneBindedLabelsProperty.InsertArrayElementAtIndex(index);
-
                     serializedObject.ApplyModifiedProperties();
 
                     var prop = m_SceneBindedLabelsProperty.GetArrayElementAtIndex(index);
                     var ve = CoreGUI.VisualElement.PropertyField(prop);
-                    sceneBindedLabelList.Add(ve);
+                    return ve;
                 };
-                sceneBindedLabelList.onRemoveButtonClicked += delegate
+                sceneBindedLabelList.onRemoveButtonClicked += delegate(int index)
                 {
-                    if (m_SceneBindedLabelsProperty.arraySize == 0) return;
-
-                    int index = m_SceneBindedLabelsProperty.arraySize - 1;
                     m_SceneBindedLabelsProperty.DeleteArrayElementAtIndex(index);
-
                     serializedObject.ApplyModifiedProperties();
-
-                    sceneBindedLabelList.RemoveAt(index);
                 };
 
                 for (int i = 0; i < m_SceneBindedLabelsProperty.arraySize; i++)
@@ -116,27 +108,21 @@ namespace Point.Collections.ResourceControl.Editor
                 m_StreamingAssetBundlesProperty.isExpanded = isExpand;
                 serializedObject.ApplyModifiedProperties();
             };
-            assetbundleList.onAddButtonClicked += delegate
+            assetbundleList.onAddButtonClicked += delegate(int index)
             {
-                int index = m_StreamingAssetBundlesProperty.arraySize;
                 m_StreamingAssetBundlesProperty.InsertArrayElementAtIndex(index);
 
                 serializedObject.ApplyModifiedProperties();
 
                 var prop = m_StreamingAssetBundlesProperty.GetArrayElementAtIndex(index);
                 var ve = CoreGUI.VisualElement.PropertyField(prop);
-                assetbundleList.Add(ve);
+
+                return ve;
             };
-            assetbundleList.onRemoveButtonClicked += delegate
+            assetbundleList.onRemoveButtonClicked += delegate(int index)
             {
-                if (m_StreamingAssetBundlesProperty.arraySize == 0) return;
-
-                int index = m_StreamingAssetBundlesProperty.arraySize - 1;
                 m_StreamingAssetBundlesProperty.DeleteArrayElementAtIndex(index);
-
                 serializedObject.ApplyModifiedProperties();
-
-                assetbundleList.RemoveAt(index);
             };
 
             for (int i = 0; i < m_StreamingAssetBundlesProperty.arraySize; i++)
@@ -156,10 +142,8 @@ namespace Point.Collections.ResourceControl.Editor
                 m_ResourceListsProperty.isExpanded = isExpand;
                 serializedObject.ApplyModifiedProperties();
             };
-            resourceList.onAddButtonClicked += delegate
+            resourceList.onAddButtonClicked += delegate(int index)
             {
-                int index = m_ResourceListsProperty.arraySize;
-
                 ResourceList list = AssetHelper.AddSubAssetAt<ResourceList>(
                     assetPath, "ResourceList " + index);
 
@@ -167,23 +151,15 @@ namespace Point.Collections.ResourceControl.Editor
                 var prop = m_ResourceListsProperty.GetArrayElementAtIndex(index);
                 prop.objectReferenceValue = list;
 
-                PropertyField element = new PropertyField(prop, prop.displayName);
-                element.RemoveFromHierarchy();
-
-                resourceList.Add(element);
-                element.Bind(serializedObject);
+                PropertyField element = CoreGUI.VisualElement.PropertyField(prop);
                 element.SetEnabled(false);
 
                 serializedObject.ApplyModifiedProperties();
+
+                return element;
             };
-            resourceList.onRemoveButtonClicked += delegate
+            resourceList.onRemoveButtonClicked += delegate(int index)
             {
-                if (m_ResourceListsProperty.arraySize == 0) return;
-
-                int index = m_ResourceListsProperty.arraySize - 1;
-
-                resourceList.RemoveAt(index);
-
                 ResourceList list = m_ResourceListsProperty.GetArrayElementAtIndex(index).objectReferenceValue as ResourceList;
                 m_ResourceListsProperty.DeleteArrayElementAtIndex(index);
                 AssetDatabase.RemoveObjectFromAsset(list);
@@ -195,8 +171,7 @@ namespace Point.Collections.ResourceControl.Editor
             {
                 SerializedProperty element = m_ResourceListsProperty.GetArrayElementAtIndex(i);
 
-                PropertyField propertyField
-                    = new PropertyField(element, element.displayName);
+                PropertyField propertyField = CoreGUI.VisualElement.PropertyField(element);
                 propertyField.SetEnabled(false);
                 resourceList.Add(propertyField);
             }
