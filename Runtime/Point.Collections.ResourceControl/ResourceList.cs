@@ -35,7 +35,9 @@ namespace Point.Collections.ResourceControl
 {
     public sealed class ResourceList : ScriptableObject
     {
+#if UNITY_ADDRESSABLES
         [SerializeField] private GroupReference m_Group;
+#endif
         [SerializeField] private List<AddressableAsset> m_AssetList = new List<AddressableAsset>();
 
         public int Count => m_AssetList.Count;
@@ -59,11 +61,12 @@ namespace Point.Collections.ResourceControl
         }
 
 #if UNITY_EDITOR
+#if UNITY_ADDRESSABLES
         /// <summary>
         /// Editor only
         /// </summary>
         public string Group => m_Group;
-
+#endif
         /// <summary>
         /// Editor only
         /// </summary>
@@ -125,7 +128,7 @@ namespace Point.Collections.ResourceControl
         }
 #endif
 #endif
-            public AddressableAsset GetAddressableAsset(int index)
+        public AddressableAsset GetAddressableAsset(int index)
         {
             return m_AssetList[index];
         }

@@ -56,8 +56,10 @@ namespace Point.Collections.ResourceControl.Editor
 #endif
 
         private SerializedProperty m_GroupProperty;
-        private SerializedProperty m_GroupNameProperty;
         private SerializedProperty m_AssetListProperty;
+#if UNITY_ADDRESSABLES
+        private SerializedProperty m_GroupNameProperty;
+#endif
 
         private bool m_RequireRebuild = false;
 
@@ -70,7 +72,9 @@ namespace Point.Collections.ResourceControl.Editor
         private void Validate()
         {
             m_GroupProperty = serializedObject.FindProperty("m_Group");
+#if UNITY_ADDRESSABLES
             m_GroupNameProperty = GroupReferencePropertyDrawer.Helper.GetCatalogName(m_GroupProperty);
+#endif
             m_AssetListProperty = serializedObject.FindProperty("m_AssetList");
 #if UNITY_ADDRESSABLES
             AddressableAssetGroup addressableAssetGroup = GetGroup(m_GroupNameProperty);
