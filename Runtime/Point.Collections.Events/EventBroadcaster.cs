@@ -33,12 +33,11 @@ namespace Point.Collections.Events
     public sealed class EventBroadcaster : CLRSingleTone<EventBroadcaster>
     {
         private ConcurrentQueue<ISynchronousEvent> m_Events;
-
         private Dictionary<Type, EventDescriptionBase> m_EventActions;
 
         #region Class Instructions
 
-        protected override void OnInitialize()
+        public EventBroadcaster()
         {
             m_Events = new ConcurrentQueue<ISynchronousEvent>();
             m_EventActions = new Dictionary<Type, EventDescriptionBase>();
@@ -139,6 +138,23 @@ namespace Point.Collections.Events
         /// </remarks>
         /// <typeparam name="TEvent"></typeparam>
         /// <param name="ev"></param>
+        public void LocalPostEvent<TEvent>(TEvent ev)
+            where TEvent : SynchronousEvent<TEvent>, new()
+        {
+            PointHelper.AssertMainThread();
+
+            if (PointApplication.IsShutdown)
+            {
+                // TODO : 
+                return;
+            }
+
+#if DEBUG_MODE
+            ((IStackDebugger)ev).SetStackFrame(ScriptUtils.GetCallerFrame(1));
+#endif
+            m_Events.Enqueue(ev);
+        }
+        /// <inheritdoc cref="LocalPostEvent{TEvent}(TEvent)"/>
         public static void PostEvent<TEvent>(TEvent ev)
             where TEvent : SynchronousEvent<TEvent>, new()
         {
@@ -154,6 +170,27 @@ namespace Point.Collections.Events
             ((IStackDebugger)ev).SetStackFrame(ScriptUtils.GetCallerFrame(1));
 #endif
             Instance.m_Events.Enqueue(ev);
+        }
+
+        public void LocalAddEvent<TEvent>(Action<TEvent> action)
+            where TEvent : SynchronousEvent<TEvent>, new()
+        {
+            PointHelper.AssertMainThread();
+
+            if (PointApplication.IsShutdown)
+            {
+                // TODO : 
+                return;
+            }
+
+            if (!m_EventActions.TryGetValue(TypeHelper.TypeOf<TEvent>.Type, out var desc))
+            {
+                desc = new EventDescription<TEvent>();
+                m_EventActions.Add(TypeHelper.TypeOf<TEvent>.Type, desc);
+            }
+
+            EventDescription<TEvent> description = (EventDescription<TEvent>)desc;
+            description.action += action;
         }
         public static void AddEvent<TEvent>(Action<TEvent> action)
             where TEvent : SynchronousEvent<TEvent>, new()
@@ -174,6 +211,25 @@ namespace Point.Collections.Events
 
             EventDescription<TEvent> description = (EventDescription<TEvent>)desc;
             description.action += action;
+        }
+        public void LocalRemoveEvent<TEvent>(Action<TEvent> action)
+            where TEvent : SynchronousEvent<TEvent>, new()
+        {
+            PointHelper.AssertMainThread();
+
+            if (PointApplication.IsShutdown)
+            {
+                // TODO : 
+                return;
+            }
+
+            if (!m_EventActions.TryGetValue(TypeHelper.TypeOf<TEvent>.Type, out var desc))
+            {
+                return;
+            }
+
+            EventDescription<TEvent> description = (EventDescription<TEvent>)desc;
+            description.action -= action;
         }
         public static void RemoveEvent<TEvent>(Action<TEvent> action)
             where TEvent : SynchronousEvent<TEvent>, new()

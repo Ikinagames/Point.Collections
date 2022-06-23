@@ -27,7 +27,7 @@ namespace Point.Collections
 {
     public static class FNV1a32
     {
-#if UNITYENGINE && !UNITY_BURST
+#if UNITY_EDITOR || (UNITYENGINE && !UNITY_BURST)
         private const uint
             kPrime32 = 16777619,
             kOffsetBasis32 = 2166136261U;
@@ -90,6 +90,27 @@ namespace Point.Collections
 #if POINT_COLLECTIONS_NATIVE
                     Native.NativeFNV1a.fnv1a32_byte(temp, &length, &hash);
 #elif UNITYENGINE && UNITY_BURST
+#if UNITY_EDITOR
+                    if (!UnityEditorInternal.InternalEditorUtility.CurrentThreadIsMainThread() ||
+                        !UnityEngine.Application.isPlaying)
+                    {
+                        if (bytes == null || bytes.Length == 0)
+                        {
+                            hash = kOffsetBasis32;
+                        }
+                        else
+                        {
+                            hash = kOffsetBasis32;
+
+                            for (int i = 0; i < length; i++)
+                            {
+                                hash *= kPrime32;
+                                hash ^= (uint)temp[i];
+                            }
+                        }
+                        return hash;
+                    }
+#endif
                     Burst.BurstFNV1a.fnv1a32_byte(temp, &length, &hash);
 #else
                     if (bytes == null || bytes.Length == 0)
