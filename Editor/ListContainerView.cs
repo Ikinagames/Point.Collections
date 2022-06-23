@@ -90,6 +90,7 @@ namespace Point.Collections.Editor
                 }
 
                 onExpand?.Invoke(m_IsExpanded);
+                OnExpanded(m_IsExpanded);
             }
         }
 
@@ -210,6 +211,7 @@ namespace Point.Collections.Editor
             isExpanded = !isExpanded;
         }
 
+        protected virtual void OnExpanded(bool expand) { }
         protected virtual void AfterCreateHeaderContainer(VisualElement headerContainer) { }
 
         //protected virtual void OnAddButtonClicked()

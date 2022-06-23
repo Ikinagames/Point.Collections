@@ -51,6 +51,7 @@ namespace Point.Collections.Editor
             }
         }
 
+        private ToolbarSearchField m_SearchField;
         private string m_SearchString;
 
         public event Action<string> OnSearchStringChanged;
@@ -66,11 +67,16 @@ namespace Point.Collections.Editor
             VisualElement root = new VisualElement();
             hierarchy.Add(root);
 
-            ToolbarSearchField searchField = new ToolbarSearchField();
-            searchField.style.width = new StyleLength(new Length(98, LengthUnit.Percent));
-            root.Add(searchField);
+            m_SearchField = new ToolbarSearchField();
+            m_SearchField.style.width = new StyleLength(new Length(98, LengthUnit.Percent));
+            m_SearchField.style.Hide(!isExpanded);
+            root.Add(m_SearchField);
 
-            searchField.RegisterValueChangedCallback(SearchFieldChanged);
+            m_SearchField.RegisterValueChangedCallback(SearchFieldChanged);
+        }
+        protected override void OnExpanded(bool expand)
+        {
+            m_SearchField.style.Hide(!expand);
         }
 
         private void SearchFieldChanged(ChangeEvent<string> e)

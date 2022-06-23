@@ -36,6 +36,18 @@ namespace Point.Collections.Editor
             property.Next(true);
             //ListContainerView list = new ListContainerView(displayName, tooltip, property);
             ListContainerView list = new ListContainerView(displayName);
+            for (int i = 0; i < property.arraySize; i++)
+            {
+                var elementProp = property.GetArrayElementAtIndex(i);
+                list.Add(CoreGUI.VisualElement.PropertyField(elementProp));
+            }
+            list.isExpanded = property.isExpanded;
+            list.onExpand += delegate (bool expanded)
+            {
+                property.isExpanded = expanded;
+                property.serializedObject.ApplyModifiedProperties();
+            };
+
             list.onAddButtonClicked += delegate (int index)
             {
                 property.InsertArrayElementAtIndex(index);
