@@ -29,25 +29,6 @@ namespace Point.Collections.Editor
     [CustomPropertyDrawer(typeof(ArrayWrapper<>), true)]
     public class ArrayWrapperPropertyDrawer : PropertyDrawerUXML<Array>
     {
-        private static VisualElement ElementFactory(SerializedProperty element)
-        {
-            if (element.ChildCount() > 1)
-            {
-                VisualElement ve = new VisualElement();
-                ve.AddToClassList("content-container");
-                ve.AddToClassList("inner-container");
-
-                foreach (var item in element.ForEachChild())
-                {
-                    var childVe = CoreGUI.VisualElement.PropertyField(item);
-                    ve.Add(childVe);
-                }
-
-                return ve;
-            }
-
-            return CoreGUI.VisualElement.PropertyField(element);
-        }
         protected override VisualElement CreateVisualElement(SerializedProperty property)
         {
             string displayName = property.displayName;
@@ -58,7 +39,7 @@ namespace Point.Collections.Editor
             for (int i = 0; i < property.arraySize; i++)
             {
                 var elementProp = property.GetArrayElementAtIndex(i);
-                list.Add(ElementFactory(elementProp));
+                list.Add(elementProp);
             }
             list.isExpanded = property.isExpanded;
             list.onExpand += delegate (bool expanded)
@@ -74,7 +55,7 @@ namespace Point.Collections.Editor
                 element.SetDefaultValue();
                 property.serializedObject.ApplyModifiedProperties();
 
-                return ElementFactory(element);
+                return ListContainerView.ElementFactory(element);
             };
             list.onRemoveButtonClicked += delegate (int index)
             {

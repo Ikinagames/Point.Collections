@@ -71,7 +71,7 @@ namespace Point.Collections.ResourceControl.Editor
                     serializedObject.ApplyModifiedProperties();
 
                     var prop = m_SceneBindedLabelsProperty.GetArrayElementAtIndex(index);
-                    var ve = CoreGUI.VisualElement.PropertyField(prop);
+                    var ve = ListContainerView.ElementFactory(prop);
                     return ve;
                 };
                 sceneBindedLabelList.onRemoveButtonClicked += delegate(int index)
@@ -83,9 +83,9 @@ namespace Point.Collections.ResourceControl.Editor
                 for (int i = 0; i < m_SceneBindedLabelsProperty.arraySize; i++)
                 {
                     var prop = m_SceneBindedLabelsProperty.GetArrayElementAtIndex(i);
-                    var ve = CoreGUI.VisualElement.PropertyField(prop);
+                    //var ve = CoreGUI.VisualElement.PropertyField(prop);
 
-                    sceneBindedLabelList.Add(ve);
+                    sceneBindedLabelList.Add(prop);
                 }
 #else
                 sceneBindedLabelList.style.Hide(true);

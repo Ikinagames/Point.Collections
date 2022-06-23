@@ -28,6 +28,7 @@ using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
 using System.Text.RegularExpressions;
+using UnityEngine.Assertions;
 
 namespace Point.Collections.Editor
 {
@@ -97,7 +98,52 @@ namespace Point.Collections.Editor
                 }
             }
         }
+        private static class FixedChar128Fields
+        {
+            private static FieldInfo
+                s_Utf8LengthInBytes, s_bytes;
 
+            public const string
+                utf8LengthInBytesStr = "utf8LengthInBytes",
+                bytesStr = "bytes";
+
+            public static FieldInfo utf8LengthInBytes
+            {
+                get
+                {
+                    if (s_Utf8LengthInBytes == null)
+                    {
+                        s_Utf8LengthInBytes = TypeHelper.TypeOf<FixedChar128Bytes>.GetFieldInfo(utf8LengthInBytesStr);
+                    }
+                    return s_Utf8LengthInBytes;
+                }
+            }
+            public static FieldInfo bytes
+            {
+                get
+                {
+                    if (s_bytes == null)
+                    {
+                        s_bytes = TypeHelper.TypeOf<FixedChar128Bytes>.GetFieldInfo(bytesStr);
+                    }
+
+                    return s_bytes;
+                }
+            }
+        }
+
+        public static void SetFixedChar128Bytes(
+            SerializedProperty property, FixedChar128Bytes str)
+        {
+            SerializedProperty
+                utf8LengthInBytes = property.FindPropertyRelative(FixedChar128Fields.utf8LengthInBytesStr),
+                bytes = property.FindPropertyRelative(FixedChar128Fields.bytesStr);
+
+            utf8LengthInBytes.intValue = (ushort)FixedChar128Fields.utf8LengthInBytes.GetValue(str);
+            Char126 bytes126 = (Char126)FixedChar128Fields.bytes.GetValue(str);
+
+            SetChar126(bytes, bytes126);
+        }
         public static void SetFixedString128Bytes(
             SerializedProperty property, FixedString128Bytes str)
         {
@@ -110,8 +156,28 @@ namespace Point.Collections.Editor
 
             SetFixedBytes126(bytes, bytes126);
         }
+        public static FixedChar128Bytes ReadFixedChar128Bytes(SerializedProperty property)
+        {
+            Assert.IsNotNull(property);
+
+            SerializedProperty
+                utf8LengthInBytes = property.FindPropertyRelative(FixedChar128Fields.utf8LengthInBytesStr),
+                bytes = property.FindPropertyRelative(FixedChar128Fields.bytesStr);
+
+            FixedChar128Bytes result = new FixedChar128Bytes();
+            object boxed = result;
+
+            FixedChar128Fields.utf8LengthInBytes.SetValue(boxed, (ushort)utf8LengthInBytes.intValue);
+            FixedChar128Fields.bytes.SetValue(boxed, ReadChar126(bytes));
+
+            result = (FixedChar128Bytes)boxed;
+
+            return result;
+        }
         public static FixedString128Bytes ReadFixedString128Bytes(SerializedProperty property)
         {
+            Assert.IsNotNull(property);
+
             SerializedProperty
                 utf8LengthInBytes = property.FindPropertyRelative(FixedString128Fields.utf8LengthInBytesStr),
                 bytes = property.FindPropertyRelative(FixedString128Fields.bytesStr);
@@ -127,6 +193,74 @@ namespace Point.Collections.Editor
             return result;
         }
 
+        public static Char126 ReadChar126(SerializedProperty property)
+        {
+            SerializedProperty item = property.FindPropertyRelative("offset0000");
+            Char126 result = new Char126();
+            result.offset0000 = ReadChar16(item);
+
+            item.Next(false);
+            result.offset0016 = ReadChar16(item);
+
+            item.Next(false);
+            result.offset0032 = ReadChar16(item);
+
+            item.Next(false);
+            result.offset0048 = ReadChar16(item);
+
+            item.Next(false);
+            result.offset0064 = ReadChar16(item);
+
+            item.Next(false);
+            result.offset0080 = ReadChar16(item);
+
+            item.Next(false);
+            result.offset0096 = ReadChar16(item);
+
+            item.Next(false);
+            result.char0112 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0113 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0114 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0115 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0116 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0117 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0118 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0119 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0120 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0121 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0122 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0123 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0124 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0125 = (char)item.intValue;
+
+            return result;
+        }
         public static FixedBytes126 ReadFixedBytes126(SerializedProperty property)
         {
             SerializedProperty item = property.FindPropertyRelative("offset0000");
@@ -195,6 +329,71 @@ namespace Point.Collections.Editor
 
             return result;
         }
+        public static void SetChar126(SerializedProperty property, Char126 bytes)
+        {
+            SerializedProperty item = property.FindPropertyRelative("offset0000");
+            SetChar16(item, bytes.offset0000);
+
+            item.Next(false);
+            SetChar16(item, bytes.offset0016);
+
+            item.Next(false);
+            SetChar16(item, bytes.offset0032);
+
+            item.Next(false);
+            SetChar16(item, bytes.offset0048);
+
+            item.Next(false);
+            SetChar16(item, bytes.offset0064);
+
+            item.Next(false);
+            SetChar16(item, bytes.offset0080);
+
+            item.Next(false);
+            SetChar16(item, bytes.offset0096);
+
+            item.Next(false);
+            item.intValue = bytes.char0112;
+
+            item.Next(false);
+            item.intValue = bytes.char0113;
+
+            item.Next(false);
+            item.intValue = bytes.char0114;
+
+            item.Next(false);
+            item.intValue = bytes.char0115;
+
+            item.Next(false);
+            item.intValue = bytes.char0116;
+
+            item.Next(false);
+            item.intValue = bytes.char0117;
+
+            item.Next(false);
+            item.intValue = bytes.char0118;
+
+            item.Next(false);
+            item.intValue = bytes.char0119;
+
+            item.Next(false);
+            item.intValue = bytes.char0120;
+
+            item.Next(false);
+            item.intValue = bytes.char0121;
+
+            item.Next(false);
+            item.intValue = bytes.char0122;
+
+            item.Next(false);
+            item.intValue = bytes.char0123;
+
+            item.Next(false);
+            item.intValue = bytes.char0124;
+
+            item.Next(false);
+            item.intValue = bytes.char0125;
+        }
         public static void SetFixedBytes126(SerializedProperty property, FixedBytes126 bytes)
         {
             SerializedProperty item = property.FindPropertyRelative("offset0000");
@@ -261,6 +460,59 @@ namespace Point.Collections.Editor
             item.intValue = bytes.byte0125;
         }
 
+        public static Char16 ReadChar16(SerializedProperty property)
+        {
+            SerializedProperty item = property.FindPropertyRelative("char0000");
+            Char16 result = new Char16();
+            result.char0000 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0001 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0002 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0003 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0004 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0005 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0006 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0007 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0008 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0009 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0010 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0011 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0012 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0013 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0014 = (char)item.intValue;
+
+            item.Next(false);
+            result.char0015 = (char)item.intValue;
+
+            return result;
+        }
         public static FixedBytes16 ReadFixedBytes16(SerializedProperty property)
         {
             SerializedProperty item = property.FindPropertyRelative("byte0000");
@@ -313,6 +565,56 @@ namespace Point.Collections.Editor
             result.byte0015 = (byte)item.intValue;
 
             return result;
+        }
+        public static void SetChar16(SerializedProperty property, Char16 bytes)
+        {
+            SerializedProperty item = property.FindPropertyRelative("char0000");
+            item.intValue = bytes.char0000;
+
+            item.Next(false);
+            item.intValue = bytes.char0001;
+
+            item.Next(false);
+            item.intValue = bytes.char0002;
+
+            item.Next(false);
+            item.intValue = bytes.char0003;
+
+            item.Next(false);
+            item.intValue = bytes.char0004;
+
+            item.Next(false);
+            item.intValue = bytes.char0005;
+
+            item.Next(false);
+            item.intValue = bytes.char0006;
+
+            item.Next(false);
+            item.intValue = bytes.char0007;
+
+            item.Next(false);
+            item.intValue = bytes.char0008;
+
+            item.Next(false);
+            item.intValue = bytes.char0009;
+
+            item.Next(false);
+            item.intValue = bytes.char0010;
+
+            item.Next(false);
+            item.intValue = bytes.char0011;
+
+            item.Next(false);
+            item.intValue = bytes.char0012;
+
+            item.Next(false);
+            item.intValue = bytes.char0013;
+
+            item.Next(false);
+            item.intValue = bytes.char0014;
+
+            item.Next(false);
+            item.intValue = bytes.char0015;
         }
         public static void SetFixedBytes16(SerializedProperty property, FixedBytes16 bytes)
         {

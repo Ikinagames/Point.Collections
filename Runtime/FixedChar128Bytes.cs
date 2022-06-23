@@ -19,6 +19,7 @@
 #endif
 #define UNITYENGINE
 #if UNITY_COLLECTIONS
+using System;
 using Unity.Collections;
 #endif
 #else
@@ -28,21 +29,24 @@ using Unity.Collections;
 
 namespace Point.Collections
 {
+    [Serializable]
     public struct FixedChar128Bytes
     {
-        private Char126 m_Buffer;
-        private ushort m_Length;
+        [UnityEngine.SerializeField]
+        private Char126 bytes;
+        [UnityEngine.SerializeField]
+        private ushort utf8LengthInBytes;
 
-        public int Length => m_Length;
-        public bool IsEmpty => m_Length == 0;
+        public int Length => utf8LengthInBytes;
+        public bool IsEmpty => utf8LengthInBytes == 0;
 
         public FixedChar128Bytes(string str)
         {
-            m_Buffer = str;
-            m_Length = (ushort)str.Length;
+            bytes = str;
+            utf8LengthInBytes = (ushort)str.Length;
         }
 
-        public override string ToString() => m_Buffer.Read(0, m_Length);
+        public override string ToString() => bytes.Read(0, utf8LengthInBytes);
 
         public static implicit operator FixedChar128Bytes(string t) => new FixedChar128Bytes(t);
         public static implicit operator string(FixedChar128Bytes t) => t.ToString();

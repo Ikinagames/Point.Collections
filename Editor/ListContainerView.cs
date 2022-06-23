@@ -271,6 +271,11 @@ namespace Point.Collections.Editor
             base.Add(element);
             m_Childs.Add(item);
         }
+        public void Add(SerializedProperty property)
+        {
+            var ve = ElementFactory(property);
+            Add(ve);
+        }
 
         public new void Remove(VisualElement item)
         {
@@ -304,6 +309,26 @@ namespace Point.Collections.Editor
             }
 
             //item.RemoveFromClassList("list-content-margin");
+        }
+
+        public static VisualElement ElementFactory(SerializedProperty element)
+        {
+            if (element.ChildCount() > 1)
+            {
+                VisualElement ve = new VisualElement();
+                ve.AddToClassList("content-container");
+                ve.AddToClassList("inner-container");
+
+                foreach (var item in element.ForEachChild())
+                {
+                    var childVe = CoreGUI.VisualElement.PropertyField(item);
+                    ve.Add(childVe);
+                }
+
+                return ve;
+            }
+
+            return CoreGUI.VisualElement.PropertyField(element);
         }
     }
 }

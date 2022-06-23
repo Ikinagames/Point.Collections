@@ -57,7 +57,7 @@ namespace Point.Collections.ResourceControl.Editor
             Rect[] rects = AutoRect.DivideWithRatio(lane, .2f, .8f);
             EditorGUI.LabelField(rects[0], label);
 
-            string currentNameValue = SerializedPropertyHelper.ReadFixedString128Bytes(catalogNameProp).ToString();
+            string currentNameValue = SerializedPropertyHelper.ReadFixedChar128Bytes(catalogNameProp).ToString();
             string displayName = currentNameValue.IsNullOrEmpty() ? "Invalid" : currentNameValue;
             bool clicked = CoreGUI.BoxButton(rects[1], displayName, Color.gray);
 

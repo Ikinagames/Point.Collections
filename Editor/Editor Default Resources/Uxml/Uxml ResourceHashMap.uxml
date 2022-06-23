@@ -2,8 +2,8 @@
     <Style src="project://database/Assets/Plugins/Point/Point.Collections/Editor/Editor%20Default%20Resources/Uxml/default-uss.uss?fileID=7433441132597879392&amp;guid=c2e1af765731c5e4d830f487d77eacbf&amp;type=3#default-uss" />
     <ui:Label text="Resource Hash Map" display-tooltip-when-elided="true" class="header-label" />
     <ui:VisualElement name="ContentContainer">
-        <Point.Collections.Editor.ListContainerView name="StreamingAssetBundleList" text="Streaming Asset Bundles" />
-        <Point.Collections.Editor.ListContainerView text="Scene Binded Labels" name="SceneBindedLabelList" />
+        <Point.Collections.Editor.ListContainerView name="StreamingAssetBundleList" text="Streaming Asset Bundles" label="Streaming Asset Bundles" />
+        <Point.Collections.Editor.ListContainerView text="Scene Binded Labels" name="SceneBindedLabelList" label="Scene Binded Labels" />
         <ui:VisualElement name="SceneBindedLabels" class="content-container" style="padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; display: none;">
             <ui:VisualElement class="header-list-1">
                 <ui:Label text="Scene Binded Labels" display-tooltip-when-elided="true" name="H2-Label" />
@@ -14,6 +14,6 @@
                 <ui:IMGUIContainer name="SceneBindedLabelsGUI" />
             </ui:VisualElement>
         </ui:VisualElement>
-        <Point.Collections.Editor.ListContainerView name="ResourceList" text="Resource List" />
+        <Point.Collections.Editor.ListContainerView name="ResourceList" text="Resource List" label="Resource List" />
     </ui:VisualElement>
 </ui:UXML>

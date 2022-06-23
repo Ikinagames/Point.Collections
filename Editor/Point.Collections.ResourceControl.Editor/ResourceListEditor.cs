@@ -56,9 +56,7 @@ namespace Point.Collections.ResourceControl.Editor
 #endif
 
         private SerializedProperty m_GroupProperty;
-#if UNITY_ADDRESSABLES
         private SerializedProperty m_GroupNameProperty;
-#endif
         private SerializedProperty m_AssetListProperty;
 
         private bool m_RequireRebuild = false;
@@ -67,18 +65,13 @@ namespace Point.Collections.ResourceControl.Editor
 
         private void OnEnable()
         {
-            m_GroupProperty = serializedObject.FindProperty("m_Group");
-#if UNITY_ADDRESSABLES
-            m_GroupNameProperty = GroupReferencePropertyDrawer.Helper.GetCatalogName(m_GroupProperty);
-#endif
-            m_AssetListProperty = serializedObject.FindProperty("m_AssetList");
-
             Validate();
-
-            VisualTreeAsset = AssetHelper.LoadAsset<VisualTreeAsset>("Uxml ResourceList", "PointEditor");
         }
         private void Validate()
         {
+            m_GroupProperty = serializedObject.FindProperty("m_Group");
+            m_GroupNameProperty = GroupReferencePropertyDrawer.Helper.GetCatalogName(m_GroupProperty);
+            m_AssetListProperty = serializedObject.FindProperty("m_AssetList");
 #if UNITY_ADDRESSABLES
             AddressableAssetGroup addressableAssetGroup = GetGroup(m_GroupNameProperty);
             if (addressableAssetGroup == null)
@@ -136,6 +129,7 @@ namespace Point.Collections.ResourceControl.Editor
 
         protected override VisualElement CreateVisualElement()
         {
+            VisualTreeAsset = AssetHelper.LoadAsset<VisualTreeAsset>("Uxml ResourceList", "PointEditor");
             var tree = VisualTreeAsset.CloneTree();
 
             ToolbarSearchField toolbarSearchField = tree.Q<ToolbarSearchField>("SearchField");
@@ -310,7 +304,7 @@ namespace Point.Collections.ResourceControl.Editor
 
         private static AddressableAssetGroup GetGroup(SerializedProperty groupNameProperty)
         {
-            var catalogName = SerializedPropertyHelper.ReadFixedString128Bytes(groupNameProperty);
+            var catalogName = SerializedPropertyHelper.ReadFixedChar128Bytes(groupNameProperty);
             return GetGroup(catalogName.IsEmpty ? string.Empty : catalogName.ToString());
         }
         private static AddressableAssetGroup GetGroup(string groupName)

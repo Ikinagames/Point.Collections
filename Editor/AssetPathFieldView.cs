@@ -116,6 +116,7 @@ namespace Point.Collections.Editor
             m_Label.style.width = new StyleLength(new Length(40, LengthUnit.Percent));
             m_Label.style.alignContent = Align.Center;
             m_Label.style.unityTextAlign = TextAnchor.MiddleLeft;
+            m_Label.style.Hide(true);
             hierarchy.Add(m_Label);
 
             m_ObjectField = new ObjectField();
