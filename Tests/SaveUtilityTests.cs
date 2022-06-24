@@ -29,11 +29,46 @@ namespace Point.Collections.Tests
 {
     public sealed class SaveUtilityTests
     {
+        const int iteration = 5000;
+
+        [Test]
+        public void PlayerPrefsTest()
+        {
+            for (int i = 0; i < iteration; i++)
+            {
+                PlayerPrefs.SetString("stringTest", "none");
+                PlayerPrefs.SetInt("intTest", 123);
+                PlayerPrefs.SetFloat("floatTest", 123f);
+                PlayerPrefs.Save();
+            }
+
+            PlayerPrefs.GetString("stringTest");
+        }
+        [Test]
+        public void SaveDataTest()
+        {
+            var strTest = new Identifier("stringTest");
+            var intTest = new Identifier("intTest");
+            var floatTest = new Identifier("floatTest");
+            SaveData data = new SaveData("main", new KeyValuePair<Identifier, System.Type>[]
+            {
+                new KeyValuePair<Identifier, System.Type>(strTest, TypeHelper.TypeOf<FixedString128Bytes>.Type),
+                new KeyValuePair<Identifier, System.Type>(intTest, TypeHelper.TypeOf<int>.Type),
+                new KeyValuePair<Identifier, System.Type>(floatTest, TypeHelper.TypeOf<float>.Type)
+            });
+            data.Load();
+
+            for (int i = 0; i < iteration; i++)
+            {
+                data.SetValue(strTest, "none");
+                data.SetValue(intTest, 123);
+                data.SetValue(floatTest, 123f);
+                data.Save();
+            }
+        }
         [Test]
         public void Comparson()
         {
-            const int iteration = 5000;
-
             long playerPrefTime, saveDataTime;
             HighPrecisionTimer timer = new HighPrecisionTimer();
 
