@@ -27,10 +27,7 @@ using Point.Collections.Buffer.LowLevel;
 using Point.Collections.IO;
 using Point.Collections.IO.LowLevel;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using Unity.Collections;
@@ -84,22 +81,30 @@ namespace Point.Collections.IO
         public static void Load(this ISaveable t)
         {
             Assert.IsFalse(t.Identifier.IsEmpty());
-
-            Bucket bucket = new Bucket(DataState.Load | DataState.Calculate);
-            t.LoadValues(ref bucket);
-
-            UnsafeAllocator<byte> data = new UnsafeAllocator<byte>(bucket.totalSize, Allocator.Temp);
             string path = GetPath(t.Identifier);
             if (!Directory.Exists(DataPath))
             {
                 Directory.CreateDirectory(DataPath);
             }
+
+            if (!File.Exists(path))
+            {
+                return;
+            }
+
+            Bucket bucket;
+            // Bucket bucket = new Bucket(DataState.Load | DataState.Calculate);
+            // t.LoadValues(ref bucket);
+            int totalSize = (int)new FileInfo(path).Length;
+            UnsafeAllocator<byte> data 
+                = new UnsafeAllocator<byte>(totalSize, Allocator.Temp);
+            
             using (var st = new FileStream(path, FileMode.Open, FileAccess.Read))
             using (var rdr = new BinaryReader(st, Encoding.UTF8))
             {
-                fixed (byte* p = rdr.ReadBytes(bucket.totalSize))
+                fixed (byte* p = rdr.ReadBytes(totalSize))
                 {
-                    UnsafeUtility.MemCpy(data.Ptr, p, bucket.totalSize);
+                    UnsafeUtility.MemCpy(data.Ptr, p, totalSize);
                 }
 
                 bucket = new Bucket(DataState.Load | DataState.Allocate, data);
@@ -149,183 +154,6 @@ namespace Point.Collections.IO
 
         Calculate = 0b0100,
         Allocate = 0b1000,
-    }
-    public unsafe struct Bucket
-    {
-        internal int totalSize;
-        private int m_Position;
-
-        private DataState m_State;
-        private UnsafeAllocator<byte> m_Data;
-
-        internal Bucket(DataState state)
-        {
-            this = default(Bucket);
-
-            m_State = state;
-        }
-        internal Bucket(DataState state, UnsafeAllocator<byte> data)
-        {
-            this = default(Bucket);
-
-            m_State = state;
-            m_Data = data;
-        }
-
-        public void Save(object t)
-        {
-            System.Type type = t.GetType();
-            Assert.IsTrue(UnsafeUtility.IsUnmanaged(type),
-                $"Type({TypeHelper.ToString(type)}) is not unmananged type.");
-#if UNITY_EDITOR
-            if ((m_State & DataState.Save) != DataState.Save)
-            {
-                "fatal err".ToLogError();
-                Debug.Break();
-            }
-#endif
-            int size = UnsafeUtility.SizeOf(type);
-
-            if ((m_State & DataState.Calculate) == DataState.Calculate)
-            {
-                this.totalSize += size;
-                return;
-            }
-
-            try
-            {
-                //T boxed = t;
-                //UnsafeReference<byte> p = (byte*)UnsafeUtility.AddressOf<T>(ref boxed);
-                //UnsafeUtility.MemCpy(m_Data.Ptr + m_Position, p, size);
-                Marshal.StructureToPtr(t, m_Data.Ptr + m_Position, false);
-            }
-            catch (System.Exception e)
-            {
-                $"Failed to serialize. Reason: {e.Message}".ToLogError();
-            }
-
-            m_Position += size;
-        }
-        public void Save<T>(T t) where T : struct
-        {
-            Save((object)t);
-        }
-        public object Load(System.Type type)
-        {
-            Assert.IsTrue(UnsafeUtility.IsUnmanaged(type));
-#if UNITY_EDITOR
-            if ((m_State & DataState.Load) != DataState.Load)
-            {
-                "fatal err".ToLogError();
-                Debug.Break();
-            }
-#endif
-            object t = null;
-            int size = UnsafeUtility.SizeOf(type);
-
-            if ((m_State & DataState.Calculate) == DataState.Calculate)
-            {
-                this.totalSize += size;
-                return t;
-            }
-
-            try
-            {
-                t = Marshal.PtrToStructure(m_Data.Ptr + m_Position, type);
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogException(e);
-            }
-
-            m_Position += size;
-            return t;
-        }
-        public T Load<T>() where T : struct
-        {
-            object obj = Load(TypeHelper.TypeOf<T>.Type);
-            if (obj == null) return default(T);
-            return (T)obj;
-        }
-    }
-
-    public struct SaveData : ISaveable
-    {
-        private Identifier m_Name;
-        private KeyValuePair<Identifier, System.Type>[] m_Properties;
-        private object[] m_Values;
-
-        private struct Comparer : IComparer<KeyValuePair<Identifier, System.Type>>
-        {
-            public int Compare(KeyValuePair<Identifier, Type> x, KeyValuePair<Identifier, Type> y)
-            {
-                uint 
-                    xx = x.Key,
-                    yy = y.Key;
-
-                if (xx < yy) return -1;
-                else if (xx > yy) return 1;
-                return 0;
-            }
-        }
-        public object this[Identifier id]
-        {
-            get
-            {
-                int index = Array.BinarySearch(m_Properties, 
-                    new KeyValuePair<Identifier, Type>(id, null), new Comparer());
-                if (index < 0)
-                {
-                    throw new KeyNotFoundException();
-                }
-
-                return m_Values[index];
-            }
-            set
-            {
-                int index = Array.BinarySearch(m_Properties,
-                    new KeyValuePair<Identifier, Type>(id, null), new Comparer());
-                if (index < 0)
-                {
-                    throw new KeyNotFoundException();
-                }
-
-                m_Values[index] = value;
-            }
-        }
-
-        Identifier ISaveable.Identifier => m_Name;
-
-        public SaveData(Identifier name, IEnumerable<KeyValuePair<Identifier, System.Type>> values)
-        {
-            m_Name = name;
-            m_Properties = values.OrderBy(t => (uint)t.Key).ToArray();
-            m_Values = new object[m_Properties.Length];
-        }
-        void ISaveable.SaveValues(ref Bucket bucket)
-        {
-            for (int i = 0; i < m_Values.Length; i++)
-            {
-                bucket.Save(m_Values[i]);
-            }
-        }
-        void ISaveable.LoadValues(ref Bucket bucket)
-        {
-            for (int i = 0; i < m_Values.Length; i++)
-            {
-                m_Values[i] = bucket.Load(m_Properties[i].Value);
-            }
-        }
-
-        public void SetValue<T>(Identifier id, T value) where T : struct
-        {
-            this[id] = value;
-        }
-        public void SetValue(Identifier id, string value)
-        {
-            FixedString128Bytes str = value;
-            this[id] = str;
-        }
     }
 }
 
