@@ -127,6 +127,7 @@ namespace Point.Collections.IO
         public bool Equals(Identifier other) => m_Hash.Equals(other.m_Hash);
         public override string ToString() => m_Hash.Value.ToString();
 
+        public static implicit operator Identifier(string name) => new Identifier(name);
         public static implicit operator uint(Identifier identifier) => identifier.m_Hash.Value;
     }
     public unsafe struct Data
@@ -171,7 +172,8 @@ namespace Point.Collections.IO
         public void Save(object t)
         {
             System.Type type = t.GetType();
-            Assert.IsTrue(UnsafeUtility.IsUnmanaged(type));
+            Assert.IsTrue(UnsafeUtility.IsUnmanaged(type),
+                $"Type({TypeHelper.ToString(type)}) is not unmananged type.");
 #if UNITY_EDITOR
             if ((m_State & DataState.Save) != DataState.Save)
             {
@@ -250,6 +252,33 @@ namespace Point.Collections.IO
         private KeyValuePair<Identifier, System.Type>[] m_Properties;
         private object[] m_Values;
 
+        public object this[Identifier id]
+        {
+            get
+            {
+                for (int i = 0; i < m_Properties.Length; i++)
+                {
+                    if (m_Properties[i].Key.Equals(id))
+                    {
+                        return m_Values[i];
+                    }
+                }
+                throw new KeyNotFoundException();
+            }
+            set
+            {
+                for (int i = 0; i < m_Properties.Length; i++)
+                {
+                    if (m_Properties[i].Key.Equals(id))
+                    {
+                        m_Values[i] = value;
+                        return;
+                    }
+                }
+                throw new KeyNotFoundException();
+            }
+        }
+
         Identifier ISaveable.Identifier => m_Name;
 
         public SaveData(Identifier name, IEnumerable<KeyValuePair<Identifier, System.Type>> values)
@@ -271,6 +300,12 @@ namespace Point.Collections.IO
             {
                 m_Values[i] = bucket.Load(m_Properties[i].Value);
             }
+        }
+
+        public void SetValue(Identifier id, string value)
+        {
+            FixedString128Bytes str = value;
+            this[id] = str;
         }
     }
 }

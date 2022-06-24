@@ -27,6 +27,8 @@ namespace Point.Collections
     {
         private long m_TimeStamp;
 
+        public long TimeStamp => m_TimeStamp;
+
         public void Reset() => m_TimeStamp = 0;
         public void Begin() => m_TimeStamp = HighPrecisionTime.Now;
         /// <summary>
