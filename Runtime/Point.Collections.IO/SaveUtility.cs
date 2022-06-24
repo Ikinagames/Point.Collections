@@ -93,8 +93,9 @@ namespace Point.Collections.IO
             }
 
             Bucket bucket;
-            // Bucket bucket = new Bucket(DataState.Load | DataState.Calculate);
-            // t.LoadValues(ref bucket);
+            //bucket = new Bucket(DataState.Load | DataState.Calculate);
+            //t.LoadValues(ref bucket);
+
             int totalSize = (int)new FileInfo(path).Length;
             UnsafeAllocator<byte> data 
                 = new UnsafeAllocator<byte>(totalSize, Allocator.Temp);

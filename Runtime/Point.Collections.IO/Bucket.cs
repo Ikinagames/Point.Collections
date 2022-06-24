@@ -100,14 +100,13 @@ namespace Point.Collections.IO
                 Debug.Break();
             }
 #endif
+            //if ((m_State & DataState.Calculate) == DataState.Calculate)
+            //{
+            //    return null;
+            //}
+
             object t = null;
             int size = UnsafeUtility.SizeOf(type);
-
-            if ((m_State & DataState.Calculate) == DataState.Calculate)
-            {
-                this.totalSize += size;
-                return t;
-            }
 
             try
             {
