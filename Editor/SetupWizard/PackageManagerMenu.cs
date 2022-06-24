@@ -183,6 +183,10 @@ namespace Point.Collections.Editor
 
                         EditorUtility.DisplayProgressBar($"Add package {m_AddPackageID}", "Requesting package data ...", 0);
                     }
+                    else
+                    {
+
+                    }
                 }
             }
         }
@@ -227,6 +231,11 @@ namespace Point.Collections.Editor
         {
             var request = UnityEditor.PackageManager.Client.Add(id);
 
+            return request;
+        }
+        private static RemoveRequest RemovePackage(string id)
+        {
+            var request = UnityEditor.PackageManager.Client.Remove(id);
             return request;
         }
     }
