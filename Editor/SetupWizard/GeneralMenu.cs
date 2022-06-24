@@ -26,6 +26,7 @@
 #if UNITYENGINE
 
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -38,8 +39,12 @@ namespace Point.Collections.Editor
 
         LayerNTagSetups layerNTagSetups = new LayerNTagSetups();
         UnityAudioSetups unityAudioSetups = new UnityAudioSetups();
-        SymbolSetups symbolSetups = new SymbolSetups();
+        SymbolSetups symbolSetups;
 
+        public GeneralMenu()
+        {
+            symbolSetups = new SymbolSetups(this);
+        }
         public override bool Predicate()
             => layerNTagSetups.Predicate() && unityAudioSetups.Predicate();
         public override void OnGUI()
@@ -321,9 +326,10 @@ namespace Point.Collections.Editor
             {
                 defined = ScriptUtilities.IsDefinedSymbol(symbol);
             }
-            private static void DrawSymbol(ref bool defined, in string symbol)
+            private void DrawSymbol(ref bool defined, in string symbol, bool disable = false)
             {
                 const string c_Label = "Define {0}";
+                using (new EditorGUI.DisabledGroupScope(disable))
                 using (var check = new EditorGUI.ChangeCheckScope())
                 {
                     defined =
@@ -333,10 +339,13 @@ namespace Point.Collections.Editor
                     {
                         if (defined) ScriptUtilities.DefineSymbol(symbol);
                         else ScriptUtilities.UndefSymbol(symbol);
+
+                        m_Menu.RequestCompilation();
                     }
                 }
             }
 
+            private GeneralMenu m_Menu;
             private bool m_Opened;
 
             private bool
@@ -348,11 +357,19 @@ namespace Point.Collections.Editor
                 unityCollectionsCheckSymbol = "ENABLE_UNITY_COLLECTIONS_CHECKS",
                 behaviorTreeSymbol = "POINT_BEHAVIORTREE";
 
-            public SymbolSetups()
+            const string 
+                behaviorTreeInstallationFolder = "Behavior Designer";
+
+            private bool
+                hasBehaviorTree = false;
+
+            public SymbolSetups(GeneralMenu menu)
             {
+                m_Menu = menu;
+
                 CheckSymbol(ref unityCollectionsCheck, unityCollectionsCheckSymbol);
                 CheckSymbol(ref unityEnhancedTouch, unityEnhancedTouchSymbol);
-                CheckSymbol(ref behaviorTree, behaviorTreeSymbol);
+                CheckBehaviorTree();
             }
 
             public void OnGUI()
@@ -360,12 +377,44 @@ namespace Point.Collections.Editor
                 m_Opened = EditorGUILayout.Foldout(m_Opened, "Symbols", true);
                 if (!m_Opened) return;
 
+                //using (new EditorGUI.DisabledGroupScope(s_WaitForComplie))
                 using (new EditorGUI.IndentLevelScope())
                 using (new CoreGUI.BoxBlock(Color.white))
                 {
                     DrawSymbol(ref unityCollectionsCheck, unityCollectionsCheckSymbol);
                     DrawSymbol(ref unityEnhancedTouch, unityEnhancedTouchSymbol);
-                    DrawSymbol(ref behaviorTree, behaviorTreeSymbol);
+                    DrawBehaviorTree();
+                }
+            }
+
+            private void CheckBehaviorTree()
+            {
+                CheckSymbol(ref behaviorTree, behaviorTreeSymbol);
+                if (Directory.Exists(Path.Combine(Application.dataPath, behaviorTreeInstallationFolder)))
+                {
+                    hasBehaviorTree = true;
+                }
+            }
+            private void DrawBehaviorTree()
+            {
+                DrawSymbol(ref behaviorTree, behaviorTreeSymbol, hasBehaviorTree);
+                if (hasBehaviorTree)
+                {
+                    EditorGUILayout.HelpBox(
+                        "You have Behavior Designer but not inside of Plugins folder.", 
+                        MessageType.Warning);
+
+                    string
+                        from = Path.Combine("Assets", behaviorTreeInstallationFolder),
+                        to = Path.Combine("Assets", "Plugins", behaviorTreeInstallationFolder);
+                    EditorGUILayout.LabelField($"From : {from}");
+                    EditorGUILayout.LabelField($"To : {to}");
+
+                    if (GUILayout.Button("Move"))
+                    {
+                        AssetDatabase.MoveAsset(from, to);
+                        m_Menu.RequestCompilation();
+                    }
                 }
             }
         }

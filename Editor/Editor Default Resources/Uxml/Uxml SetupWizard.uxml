@@ -22,5 +22,8 @@
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:Label text="Copyright 2022 Ikinagames. All rights reserved." display-tooltip-when-elided="true" style="-unity-text-align: middle-center; font-size: 10px; -unity-font-style: italic; padding-bottom: 2px;" />
+        <ui:VisualElement name="BlurTexture" style="position: absolute; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 255); opacity: 0.66; justify-content: center; align-items: center;">
+            <ui:Label text="MESSAGE" display-tooltip-when-elided="true" name="Label" style="-unity-font-style: bold; font-size: 30px;" />
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

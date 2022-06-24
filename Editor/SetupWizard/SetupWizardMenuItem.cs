@@ -30,6 +30,7 @@ namespace Point.Collections.Editor
     {
         private Action<GUIContent> showNotificationDelegate;
         private Action removeNotificationDelegate;
+        private Action requestCompilationDelegate;
 
         /// <summary>
         /// 이 메뉴의 표시될 이름입니다.
@@ -51,6 +52,7 @@ namespace Point.Collections.Editor
 
             showNotificationDelegate = setupWizard.ShowNotification;
             removeNotificationDelegate = setupWizard.RemoveNotification;
+            requestCompilationDelegate = setupWizard.RequestCompilation;
         }
 
         /// <summary>
@@ -79,6 +81,7 @@ namespace Point.Collections.Editor
         /// 현재 <see cref="PointSetupWizard"/> 의 알람을 제거합니다.
         /// </summary>
         protected virtual void RemoveNotification() => removeNotificationDelegate.Invoke();
+        protected virtual void RequestCompilation() => requestCompilationDelegate.Invoke();
 
         public abstract bool Predicate();
         /// <summary>

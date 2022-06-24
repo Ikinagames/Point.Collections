@@ -35,6 +35,8 @@ namespace Point.Collections.Editor
 {
     public sealed class PointSetupWizard : EditorWindowUXML, IStaticInitializer
     {
+        private static bool s_CompileRequested = false;
+
         static PointSetupWizard()
         {
             EditorApplication.delayCall -= Startup;
@@ -110,6 +112,9 @@ namespace Point.Collections.Editor
         }
         protected override void SetupVisualElement(VisualElement root)
         {
+            var blurMsg = rootVisualElement.Q("BlurMessageContainer");
+            blurMsg.style.Hide(true);
+
             SetupMenuItems(root);
 
             SetupGUI(root);
@@ -171,10 +176,37 @@ namespace Point.Collections.Editor
         {
             if (m_SelectedToolbar == null) return;
 
-            if (m_SelectedToolbar.Root == null)
+            using (new EditorGUI.DisabledGroupScope(s_CompileRequested))
             {
-                m_SelectedToolbar.OnGUI();
+                if (m_SelectedToolbar.Root == null)
+                {
+                    m_SelectedToolbar.OnGUI();
+                }
             }
+        }
+
+        public void RequestCompilation()
+        {
+            OpenBlurMessage("Wait For Compilation ..");
+
+            UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
+            s_CompileRequested = true;
+        }
+
+        private void OpenBlurMessage(string msg)
+        {
+            for (int i = 0; i < m_MenuItems.Length; i++)
+            {
+                if (m_MenuItems[i].Root == null) continue;
+
+                m_MenuItems[i].Root.SetEnabled(false);
+            }
+
+            var root = rootVisualElement.Q("BlurMessageContainer");
+            root.style.Hide(false);
+
+            Label message = root.Q<Label>("Message");
+            message.text = msg;
         }
     }
 }
