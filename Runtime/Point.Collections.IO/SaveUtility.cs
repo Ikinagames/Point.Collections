@@ -40,6 +40,9 @@ using UnityEngine.Assertions;
 
 namespace Point.Collections.IO
 {
+    // https://devblogs.microsoft.com/oldnewthing/20060222-11/?p=32193
+    // https://stackoverflow.com/questions/3929697/performance-of-reading-a-registry-key
+
     public unsafe static class SaveUtility
     {
         private static string DataPath => Path.Combine(PointPath.DataPath, new Hash(Application.identifier).Value.ToString());
