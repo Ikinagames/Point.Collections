@@ -33,7 +33,8 @@ namespace Point.Collections
 {
     public static class PointPath
     {
-        public static string DataPath => Path.Combine(Application.dataPath, "..", "Point");
+        public static string ApplicationPath => Path.Combine(Application.dataPath, "..");
+        public static string DataPath => Path.Combine(ApplicationPath, "Point");
         public static string CachePath
         {
             get
