@@ -258,7 +258,6 @@ namespace Point.Collections.IO
             m_Properties = values.ToArray();
             m_Values = new object[m_Properties.Length];
         }
-
         void ISaveable.SaveValues(ref Bucket bucket)
         {
             for (int i = 0; i < m_Values.Length; i++)
