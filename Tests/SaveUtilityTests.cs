@@ -42,6 +42,8 @@ namespace Point.Collections.Tests
             for (int i = 0; i < iteration; i++)
             {
                 PlayerPrefs.SetString("stringTest", "none");
+                PlayerPrefs.SetInt("intTest", 123);
+                PlayerPrefs.SetFloat("floatTest", 123f);
                 PlayerPrefs.Save();
             }
 
@@ -54,16 +56,22 @@ namespace Point.Collections.Tests
 
             timer.Begin();
 
-            var id = new Identifier("stringTest");
+            var strTest = new Identifier("stringTest");
+            var intTest = new Identifier("intTest");
+            var floatTest = new Identifier("floatTest");
             SaveData data = new SaveData("main", new KeyValuePair<Identifier, System.Type>[]
             {
-                new KeyValuePair<Identifier, System.Type>(id, TypeHelper.TypeOf<FixedString128Bytes>.Type)
+                new KeyValuePair<Identifier, System.Type>(strTest, TypeHelper.TypeOf<FixedString128Bytes>.Type),
+                new KeyValuePair<Identifier, System.Type>(intTest, TypeHelper.TypeOf<int>.Type),
+                new KeyValuePair<Identifier, System.Type>(floatTest, TypeHelper.TypeOf<float>.Type)
             });
             data.Load();
 
             for (int i = 0; i < iteration; i++)
             {
-                data.SetValue(id, "none");
+                data.SetValue(strTest, "none");
+                data.SetValue(intTest, 123);
+                data.SetValue(floatTest, 123f);
                 data.Save();
             }
 
@@ -74,11 +82,11 @@ namespace Point.Collections.Tests
 
             if (playerPrefTime < saveDataTime)
             {
-                Debug.Log($"winner : playerPref");
+                Debug.Log($"winner : playerPref, {playerPrefTime - saveDataTime}");
             }
             else if (playerPrefTime > saveDataTime)
             {
-                Debug.Log($"winner : saveData");
+                Debug.Log($"winner : saveData, {saveDataTime - playerPrefTime}");
             }
         }
     }

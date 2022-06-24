@@ -252,30 +252,42 @@ namespace Point.Collections.IO
         private KeyValuePair<Identifier, System.Type>[] m_Properties;
         private object[] m_Values;
 
+        private struct Comparer : IComparer<KeyValuePair<Identifier, System.Type>>
+        {
+            public int Compare(KeyValuePair<Identifier, Type> x, KeyValuePair<Identifier, Type> y)
+            {
+                uint 
+                    xx = x.Key,
+                    yy = y.Key;
+
+                if (xx < yy) return -1;
+                else if (xx > yy) return 1;
+                return 0;
+            }
+        }
         public object this[Identifier id]
         {
             get
             {
-                for (int i = 0; i < m_Properties.Length; i++)
+                int index = Array.BinarySearch(m_Properties, 
+                    new KeyValuePair<Identifier, Type>(id, null), new Comparer());
+                if (index < 0)
                 {
-                    if (m_Properties[i].Key.Equals(id))
-                    {
-                        return m_Values[i];
-                    }
+                    throw new KeyNotFoundException();
                 }
-                throw new KeyNotFoundException();
+
+                return m_Values[index];
             }
             set
             {
-                for (int i = 0; i < m_Properties.Length; i++)
+                int index = Array.BinarySearch(m_Properties,
+                    new KeyValuePair<Identifier, Type>(id, null), new Comparer());
+                if (index < 0)
                 {
-                    if (m_Properties[i].Key.Equals(id))
-                    {
-                        m_Values[i] = value;
-                        return;
-                    }
+                    throw new KeyNotFoundException();
                 }
-                throw new KeyNotFoundException();
+
+                m_Values[index] = value;
             }
         }
 
@@ -284,7 +296,7 @@ namespace Point.Collections.IO
         public SaveData(Identifier name, IEnumerable<KeyValuePair<Identifier, System.Type>> values)
         {
             m_Name = name;
-            m_Properties = values.ToArray();
+            m_Properties = values.OrderBy(t => (uint)t.Key).ToArray();
             m_Values = new object[m_Properties.Length];
         }
         void ISaveable.SaveValues(ref Bucket bucket)
@@ -302,6 +314,10 @@ namespace Point.Collections.IO
             }
         }
 
+        public void SetValue<T>(Identifier id, T value) where T : struct
+        {
+            this[id] = value;
+        }
         public void SetValue(Identifier id, string value)
         {
             FixedString128Bytes str = value;
