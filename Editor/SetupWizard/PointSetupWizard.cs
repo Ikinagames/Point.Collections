@@ -192,8 +192,7 @@ namespace Point.Collections.Editor
             UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
             s_CompileRequested = true;
         }
-
-        private void OpenBlurMessage(string msg)
+        public void OpenBlurMessage(string msg)
         {
             for (int i = 0; i < m_MenuItems.Length; i++)
             {
