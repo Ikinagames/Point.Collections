@@ -80,7 +80,7 @@ namespace Point.Collections.ResourceControl
             m_MapingJobHandle;
 
         // key = path, value = bundleIndex
-        [NonSerialized] private NativeHashMap<AssetRuntimeKey, Mapped> m_MappedAssets;
+        [NonSerialized] private NativeParallelHashMap<AssetRuntimeKey, Mapped> m_MappedAssets;
         [NonSerialized] private Hash m_ReferenceCheckSum;
 
         private NativeList<Mapped> m_WaitForUnloadIndices;
@@ -92,7 +92,7 @@ namespace Point.Collections.ResourceControl
             m_AssetBundleInfos = new NativeList<UnsafeAssetBundleInfo>(AllocatorManager.Persistent);
             m_AssetBundles = new List<AssetContainer>();
 
-            m_MappedAssets = new NativeHashMap<AssetRuntimeKey, Mapped>(1024, AllocatorManager.Persistent);
+            m_MappedAssets = new NativeParallelHashMap<AssetRuntimeKey, Mapped>(1024, AllocatorManager.Persistent);
             m_WaitForUnloadIndices = new NativeList<Mapped>(1024, AllocatorManager.Persistent);
 
             SceneManager.activeSceneChanged += SceneManager_activeSceneChanged;
@@ -436,7 +436,7 @@ namespace Point.Collections.ResourceControl
             [ReadOnly] public int m_BundleIndex;
             [ReadOnly, DeallocateOnJobCompletion] public NativeArray<FixedString512Bytes> m_Names;
             [WriteOnly, NativeDisableUnsafePtrRestriction] public UnsafeAssetInfo* m_HashMap;
-            [WriteOnly] public NativeHashMap<AssetRuntimeKey, Mapped>.ParallelWriter m_MappedAssets;
+            [WriteOnly] public NativeParallelHashMap<AssetRuntimeKey, Mapped>.ParallelWriter m_MappedAssets;
 
             public void Execute(int i)
             {

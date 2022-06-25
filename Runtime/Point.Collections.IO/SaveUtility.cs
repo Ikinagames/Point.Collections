@@ -26,7 +26,6 @@ using Point.Collections;
 using Point.Collections.Buffer.LowLevel;
 using Point.Collections.IO;
 using Point.Collections.IO.LowLevel;
-using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
@@ -107,7 +106,7 @@ namespace Point.Collections.IO
                 {
                     UnsafeUtility.MemCpy(data.Ptr, p, totalSize);
                 }
-
+       
                 bucket = new Bucket(DataState.Load | DataState.Allocate, data);
                 t.LoadValues(ref bucket);
             }
@@ -121,40 +120,6 @@ namespace Point.Collections.IO
 
         void SaveValues(ref Bucket bucket);
         void LoadValues(ref Bucket bucket);
-    }
-    public struct Identifier : IEmpty, IEquatable<Identifier>
-    {
-        private readonly Hash m_Hash;
-
-        public Identifier(string name)
-        {
-            m_Hash = new Hash(name);
-        }
-
-        public bool IsEmpty() => m_Hash.IsEmpty();
-
-        public bool Equals(Identifier other) => m_Hash.Equals(other.m_Hash);
-        public override string ToString() => m_Hash.Value.ToString();
-
-        public static implicit operator Identifier(string name) => new Identifier(name);
-        public static implicit operator uint(Identifier identifier) => identifier.m_Hash.Value;
-    }
-    public unsafe struct Data
-    {
-        public Identifier identifier;
-        public UnsafeAllocator<byte> data;
-    }
-    
-    [System.Flags]
-    public enum DataState
-    {
-        None = 0,
-
-        Load = 0b0001,
-        Save = 0b0010,
-
-        Calculate = 0b0100,
-        Allocate = 0b1000,
     }
 }
 

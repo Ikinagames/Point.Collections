@@ -33,6 +33,8 @@ namespace Point.Collections.Editor
     [InitializeOnLoad]
     public static class AssetInspector
     {
+        // // https://github.com/ogxd/project-curator
+
         private static Texture2D
             s_LinkBlack, s_LinkWhite, s_LinkBlue;
         private static GUIContent
@@ -111,7 +113,7 @@ namespace Point.Collections.Editor
                 }
             }
 
-            string assetPath = GetAssetPath(editor.target);
+            string assetPath = AssetHelper.GetAssetPath(editor.target);
             if (assetPath.IsNullOrEmpty())
             {
                 return;
@@ -348,25 +350,6 @@ namespace Point.Collections.Editor
                 }
                 //
             }
-        }
-
-        private static string GetAssetPath(UnityEngine.Object obj)
-        {
-            string assetPath;
-            if (PrefabUtility.IsPartOfAnyPrefab(obj))
-            {
-                if (PrefabUtility.IsPartOfPrefabInstance(obj))
-                {
-                    assetPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(obj);
-                    //if (obj == null) "?".ToLogError();
-                }
-                else assetPath = AssetDatabase.GetAssetPath(obj);
-
-                //assetPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(obj);
-            }
-            else assetPath = AssetDatabase.GetAssetPath(obj);
-
-            return assetPath;
         }
     }
 }

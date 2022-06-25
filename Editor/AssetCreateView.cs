@@ -35,9 +35,9 @@ namespace Point.Collections.Editor
         public new class UxmlFactory : UxmlFactory<AssetCreateView, UxmlTraits> { }
         public new class UxmlTraits : VisualElement.UxmlTraits
         {
-            UxmlStringAttributeDescription m_Text = new UxmlStringAttributeDescription
+            UxmlStringAttributeDescription m_Label = new UxmlStringAttributeDescription
             {
-                name = "text",
+                name = "label",
                 defaultValue = "NAME"
             };
 
@@ -68,7 +68,7 @@ namespace Point.Collections.Editor
                 base.Init(ve, bag, cc);
                 AssetCreateView ate = ve as AssetCreateView;
 
-                ate.text = m_Text.GetValueFromBag(bag, cc);
+                ate.label = m_Label.GetValueFromBag(bag, cc);
                 ate.showTemplete = m_ShowTemplete.GetValueFromBag(bag, cc);
                 ate.templeteFieldName = m_TempleteFieldName.GetValueFromBag(bag, cc);
 #if !UNITYENGINE_OLD
@@ -84,7 +84,7 @@ namespace Point.Collections.Editor
 
         private bool m_ShowTemplete = true;
 
-        public string text { get => m_HeaderLabel.text; set => m_HeaderLabel.text = value; }
+        public string label { get => m_HeaderLabel.text; set => m_HeaderLabel.text = value; }
         public bool showTemplete
         {
             get => m_ShowTemplete;
@@ -172,6 +172,12 @@ namespace Point.Collections.Editor
             m_CreateButton.text = "Create";
             m_CreateButton.clicked += M_CreateButton_clicked;
             rootContainer.Add(m_CreateButton);
+        }
+        public AssetCreateView(string label, string templeteFieldName, Type templeteType) : this() 
+        {
+            this.label = label;
+            this.templeteFieldName = templeteFieldName;
+            this.templeteFieldType = templeteType;
         }
 
         public event Action<AssetCreateView> OnCreateButtonClicked;
