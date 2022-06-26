@@ -27,7 +27,6 @@ namespace Point.Collections
 {
     public abstract class PointMonobehaviour : UnityEngine.MonoBehaviour
     {
-
     }
 }
 
