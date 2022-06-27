@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Assertions;
 
 namespace Point.Collections.Formations
@@ -43,6 +44,9 @@ namespace Point.Collections.Formations
         [SerializeField] private bool m_InitializeOnEnable = true;
         [SerializeField] private string m_DisplayName;
         [SerializeField] private ProvideOption m_ProvideOption;
+
+        [SerializeField] private float m_Speed = 2f;
+        [SerializeField] private float m_Acceleration = 1f;
 
         [SerializeField] private FormationComponent m_Parent;
         [SerializeField] private List<FormationComponent> m_Children = new List<FormationComponent>();
@@ -62,12 +66,19 @@ namespace Point.Collections.Formations
                         case ProvideOption.Column:
                             result = new ColumnFormationGroup()
                             {
-                                EnableLerp = true
+                                StopDistance = 1f,
+                                Speed = m_Speed,
+                                Acceleration = m_Acceleration,
                             };
                             break;
                         case ProvideOption.Row:
                         default:
-                            result = new RowFormationGroup();
+                            result = new RowFormationGroup()
+                            {
+                                StopDistance = 1f,
+                                Speed = m_Speed,
+                                Acceleration = m_Acceleration,
+                            };
                             break;
                     }
                     m_GroupProvider = result;
@@ -89,7 +100,7 @@ namespace Point.Collections.Formations
                     m_Formation = new Formation()
                     {
                         DisplayName = m_DisplayName,
-                        TransformationProvider = new UnityTransformProvider(transform),
+                        TransformationProvider = new UnityTransformProvider(transform, GetComponent<NavMeshAgent>()),
                     };
                 }
                 return m_Formation;
@@ -129,6 +140,8 @@ namespace Point.Collections.Formations
         {
             if (m_Formation == null) return;
 
+            //m_Formation.position = transform.position;
+            //m_Formation.rotation = transform.rotation;
             m_Formation.Refresh();
         }
 
@@ -155,7 +168,6 @@ namespace Point.Collections.Formations
                 Formation.GroupProvider = GroupProvider;
             }
 
-            //child.transform.SetParent(transform);
             Formation.AddChild(child.Formation);
             if (!m_Children.Contains(child))
             {

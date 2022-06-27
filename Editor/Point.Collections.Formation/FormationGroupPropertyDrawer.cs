@@ -18,24 +18,14 @@
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
-#if UNITY_COLLECTIONS
-#endif
-#else
-#define POINT_COLLECTIONS_NATIVE
-#endif
 
-using Unity.Mathematics;
 
-namespace Point.Collections.Formations
+namespace Point.Collections.Editor
 {
-    public class RowFormationGroup : FormationGroup
+    internal class FormationGroupPropertyDrawer :PropertyDrawerUXML<Formations.FormationGroup>
     {
-        public float Offset { get; set; } = 3;
 
-        protected override float3 CalculateOffset(int index, IFormation child)
-        {
-            float dis = Offset * (index + 1);
-            return new float3(-dis, 0, 0);
-        }
     }
 }
+
+#endif

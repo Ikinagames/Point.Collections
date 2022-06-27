@@ -31,9 +31,15 @@ namespace Point.Collections.Formations
 {
     public interface IFormationGroupProvider
     {
-        bool EnableLerp { get; set; }
+        /// <summary>
+        /// 감속을 시작할 거리
+        /// </summary>
         float StopDistance { get; set; }
-        float UpdateMultipiler { get; set; }
+        /// <summary>
+        /// 평상 속도
+        /// </summary>
+        float Speed { get; set; }
+        float Acceleration { get; set; }
 
 #pragma warning disable IDE1006 // Naming Styles
         IReadOnlyList<IFormation> children { get; set; }

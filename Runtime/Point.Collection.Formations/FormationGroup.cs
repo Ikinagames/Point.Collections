@@ -27,28 +27,48 @@
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace Point.Collections.Formations
 {
+    [System.Serializable]
     public abstract class FormationGroup : IFormationGroupProvider
     {
-        public bool EnableLerp { get; set; } = false;
-        public float StopDistance { get; set; } = .2f;
-        public float UpdateMultipiler { get; set; } = 1;
+        [SerializeField] private float m_StopDistance;
+        [SerializeField] private float m_Speed = 2;
+        [SerializeField] private float m_Acceleration = 1;
+
+        public float StopDistance { get => m_StopDistance; set => m_StopDistance = value; }
+        public float Speed { get => m_Speed; set => m_Speed = value; }
+        public float Acceleration { get => m_Acceleration; set => m_Acceleration = value; }
 
         public IReadOnlyList<IFormation> children { get; set; }
 
-        public abstract float3 CalculateOffset(int index, IFormation child);
-
+        float3 IFormationGroupProvider.CalculateOffset(int index, IFormation child)
+        {
+            return CalculateOffset(index, child);
+        }
         float3 IFormationGroupProvider.UpdatePosition(int index, IFormation child, float3 targetLocalPosition)
         {
             return UpdatePosition(index, child, targetLocalPosition);
         }
+
+        protected abstract float3 CalculateOffset(int index, IFormation child);
         protected virtual float3 UpdatePosition(int index, IFormation child, float3 targetLocalPosition)
         {
-            if (!EnableLerp) return targetLocalPosition;
+            float3 dir = targetLocalPosition - child.localPosition;
 
-            return math.lerp(child.localPosition, targetLocalPosition, Time.deltaTime * UpdateMultipiler);
+            if (child.targetSpeed == 0)
+            {
+                var temp = child.localPosition + (child.currentVelocity * Time.deltaTime * child.currentSpeed);
+
+                return temp;
+            }
+
+            float3 norm = math.normalize(dir);
+            float3 targetPos = child.localPosition + (norm * (Time.deltaTime * child.currentSpeed));
+
+            return targetPos;
         }
     }
 }

@@ -29,11 +29,12 @@ using UnityEngine;
 
 namespace Point.Collections.Formations
 {
+    [System.Serializable]
     public class ColumnFormationGroup : FormationGroup
     {
         public float Offset { get; set; } = 3;
 
-        public override float3 CalculateOffset(int index, IFormation child)
+        protected override float3 CalculateOffset(int index, IFormation child)
         {
             float dis = Offset * (index + 1);
             return new float3(0, 0, -dis);

@@ -27,6 +27,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace Point.Collections.Formations
@@ -110,6 +111,13 @@ namespace Point.Collections.Formations
             }
         }
         public IReadOnlyList<IFormation> children => m_Children;
+
+        public bool updateRotation { get; set; } = true;
+        public bool alignRotationOnStop { get; set; } = true;
+
+        public float currentSpeed { get; set; }
+        public float targetSpeed { get; set; }
+        public float3 currentVelocity { get; set; }
 
         #region ITransformation
 
@@ -427,21 +435,64 @@ namespace Point.Collections.Formations
             m_Parent = null;
         }
 
+        void IFormation.UpdateCurrentSpeed(float accel)
+        {
+            currentSpeed = math.lerp(currentSpeed, targetSpeed, Time.deltaTime * accel);
+        }
+
+        const float c_TakeAsStopDistance = .01f * .01f;
+
         public void Refresh()
         {
-            float3 localPosition;
-            bool requireUpdate;
+            if (updateRotation)
+            {
+                RefreshWithRotation();
+            }
+            else
+            {
+                RefreshNormal();
+            }
+        }
+        private void RefreshNormal()
+        {
+            float3 localPosition, worldPosition, direction;
+            float remainSqr;
             for (int i = 0; i < m_Children.Count; i++)
             {
                 localPosition = m_GroupProvider.CalculateOffset(i, m_Children[i]);
-                // If is not reached
-                float remain = ((UnityEngine.Vector3)(localPosition - m_Children[i].localPosition)).sqrMagnitude;
-                requireUpdate = m_GroupProvider.StopDistance * m_GroupProvider.StopDistance < remain;
-                if (!requireUpdate)
+                direction = (localPosition - m_Children[i].localPosition);
+                remainSqr = ((UnityEngine.Vector3)(direction)).sqrMagnitude;
+
+                if (remainSqr <= c_TakeAsStopDistance)
                 {
                     continue;
                 }
+
+                if (m_Children[i].TransformationProvider != null &&
+                    m_Children[i].TransformationProvider is UnityTransformProvider unityTransform &&
+                    unityTransform.NavMeshAgent != null)
+                {
+                    worldPosition = math.mul(localToWorld, new float4(localPosition, 1)).xyz;
+                    unityTransform.SetPosition(worldPosition);
+                    continue;
+                }
+
+                bool isStopping = m_GroupProvider.StopDistance * m_GroupProvider.StopDistance > remainSqr;
+
+                if (isStopping)
+                {
+                    m_Children[i].targetSpeed = 0;
+                }
+                else
+                {
+                    m_Children[i].targetSpeed = m_GroupProvider.Speed;
+                    m_Children[i].currentVelocity = direction;
+                }
+                m_Children[i].UpdateCurrentSpeed(m_GroupProvider.Acceleration);
+
                 localPosition = m_GroupProvider.UpdatePosition(i, m_Children[i], localPosition);
+
+                // Set actual transformation data
 
                 if (m_Children[i].TransformationProvider == null)
                 {
@@ -449,8 +500,69 @@ namespace Point.Collections.Formations
                     continue;
                 }
 
-                float3 worldPosition = math.mul(localToWorld, new float4(localPosition, 1)).xyz;
+                worldPosition = math.mul(localToWorld, new float4(localPosition, 1)).xyz;
                 m_Children[i].TransformationProvider.SetPosition(worldPosition);
+            }
+        }
+        private void RefreshWithRotation()
+        {
+            float3 localPosition, worldPosition, direction;
+            float remainSqr;
+            for (int i = 0; i < m_Children.Count; i++)
+            {
+                localPosition = m_GroupProvider.CalculateOffset(i, m_Children[i]);
+                direction = (localPosition - m_Children[i].localPosition);
+                remainSqr = ((UnityEngine.Vector3)(direction)).sqrMagnitude;
+
+                if (remainSqr <= c_TakeAsStopDistance)
+                {
+                    continue;
+                }
+
+                if (m_Children[i].TransformationProvider != null &&
+                    m_Children[i].TransformationProvider is UnityTransformProvider unityTransform &&
+                    unityTransform.NavMeshAgent != null)
+                {
+                    worldPosition = math.mul(localToWorld, new float4(localPosition, 1)).xyz;
+                    unityTransform.SetPosition(worldPosition);
+                    continue;
+                }
+
+                bool isStopping = m_GroupProvider.StopDistance * m_GroupProvider.StopDistance > remainSqr;
+
+                if (isStopping)
+                {
+                    m_Children[i].targetSpeed = 0;
+                }
+                else
+                {
+                    m_Children[i].targetSpeed = m_GroupProvider.Speed;
+                    m_Children[i].currentVelocity = direction;
+                }
+                m_Children[i].UpdateCurrentSpeed(m_GroupProvider.Acceleration);
+
+                localPosition = m_GroupProvider.UpdatePosition(i, m_Children[i], localPosition);
+
+                // Set actual transformation data
+
+                Quaternion lookRot = Quaternion.LookRotation(direction, math.mul(rotation, math.up()));
+
+                if (m_Children[i].TransformationProvider == null)
+                {
+                    lookRot =
+                        Quaternion.Lerp(m_Children[i].rotation, lookRot, Time.deltaTime * 5);
+
+                    m_Children[i].localPosition = localPosition;
+                    m_Children[i].rotation = lookRot;
+                    continue;
+                }
+
+                worldPosition = math.mul(localToWorld, new float4(localPosition, 1)).xyz;
+                m_Children[i].TransformationProvider.SetPosition(worldPosition);
+
+                lookRot =
+                    Quaternion.Lerp(m_Children[i].TransformationProvider.rotation, lookRot, Time.deltaTime * 5);
+                m_Children[i].TransformationProvider.rotation = lookRot;
             }
         }
     }
