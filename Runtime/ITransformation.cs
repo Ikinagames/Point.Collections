@@ -97,8 +97,6 @@ namespace Point.Collections
         }
         public UnityTransformProvider(UnityEngine.Transform transform, UnityEngine.AI.NavMeshAgent navAgent) : this(transform)
         {
-            Assert.IsNotNull(navAgent);
-
             m_Agent = navAgent;
         }
 
