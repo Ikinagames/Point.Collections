@@ -45,6 +45,7 @@ namespace Point.Collections.Formations
         [SerializeField] private string m_DisplayName;
         [SerializeField] private ProvideOption m_ProvideOption;
 
+        [SerializeField] private bool m_UpdateRotation = true;
         [SerializeField] private float m_Speed = 2f;
         [SerializeField] private float m_Acceleration = 1f;
 
@@ -101,6 +102,7 @@ namespace Point.Collections.Formations
                     {
                         DisplayName = m_DisplayName,
                         TransformationProvider = new UnityTransformProvider(transform, GetComponent<NavMeshAgent>()),
+                        updateRotation = m_UpdateRotation,
                     };
                 }
                 return m_Formation;
@@ -120,13 +122,42 @@ namespace Point.Collections.Formations
                 Formation.GroupProvider = GroupProvider;
                 for (int i = 0; i < m_Children.Count; i++)
                 {
-                    Formation.AddChild(m_Children[i].Formation);
+                    AddChild(m_Children[i]);
                 }
             }
         }
         private void OnDisable()
         {
-            
+            for (int i = m_Children.Count - 1; i >= 0; i--)
+            {
+                if (m_Children[i] == null)
+                {
+                    m_Children.RemoveAt(i);
+                }
+            }
+
+            if (m_Formation != null)
+            {
+                for (int i = 0; i < m_Children.Count; i++)
+                {
+                    m_Children[i].m_Parent = null;
+                }
+                Formation.ClearChildren();
+
+                if (m_Children.Count > 0)
+                {
+                    var newLeader = m_Children[0];
+                    //newLeader.enabled = true;
+
+                    m_Children.RemoveAt(0);
+                    for (int i = 0; i < m_Children.Count; i++)
+                    {
+                        newLeader.AddChild(m_Children[i]);
+                    }
+                }
+
+                m_Children.Clear();
+            }
         }
         private void Update()
         {
@@ -153,11 +184,6 @@ namespace Point.Collections.Formations
 
         public void AddChild(FormationComponent child)
         {
-            if (Formation.GroupProvider == null)
-            {
-                Formation.GroupProvider = GroupProvider;
-            }
-
             Formation.AddChild(child.Formation);
 
             child.m_Parent = this;
@@ -165,6 +191,28 @@ namespace Point.Collections.Formations
             {
                 m_Children.Add(child);
             }
+
+            //child.enabled = false;
+        }
+        public void RemoveChild(FormationComponent child)
+        {
+            Formation.RemoveChild(child.Formation);
+
+            if (m_Children.Remove(child))
+            {
+                child.m_Parent = null;
+                //child.enabled = true;
+            }
+        }
+        public void ClearChildren()
+        {
+            for (int i = 0; i < m_Children.Count; i++)
+            {
+                m_Children[i].m_Parent = null;
+                //m_Children[i].enabled = true;
+            }
+            Formation.ClearChildren();
+            m_Children.Clear();
         }
     }
 }

@@ -467,19 +467,35 @@ namespace Point.Collections.Formations
                 direction = (localPosition - m_Children[i].localPosition);
                 remainSqr = ((UnityEngine.Vector3)(direction)).sqrMagnitude;
 
-                if (remainSqr <= c_TakeAsStopDistance)
-                {
-                    finished++;
-                    continue;
-                }
 
-                if (m_Children[i].TransformationProvider != null &&
-                    m_Children[i].TransformationProvider is UnityTransformProvider unityTransform &&
+                if (m_Children[i].TryGetUnityTransformProvider(out UnityTransformProvider unityTransform) &&
                     unityTransform.NavMeshAgent != null)
                 {
+                    float destSqr = (unityTransform.NavMeshAgent.destination - (Vector3)m_Children[i].position).sqrMagnitude;
+                    if (remainSqr <= destSqr)
+                    {
+                        finished++;
+
+                        if (unityTransform.NavMeshAgent.hasPath)
+                        {
+                            unityTransform.NavMeshAgent.ResetPath();
+                        }
+
+                        continue;
+                    }
+
+                    unityTransform.NavMeshAgent.updateRotation = updateRotation;
                     worldPosition = math.mul(localToWorld, new float4(localPosition, 1)).xyz;
                     unityTransform.SetPosition(worldPosition);
                     continue;
+                }
+                else
+                {
+                    if (remainSqr <= c_TakeAsStopDistance)
+                    {
+                        finished++;
+                        continue;
+                    }
                 }
 
                 bool isStopping = m_GroupProvider.StopDistance * m_GroupProvider.StopDistance > remainSqr;
@@ -522,19 +538,34 @@ namespace Point.Collections.Formations
                 direction = (localPosition - m_Children[i].localPosition);
                 remainSqr = ((UnityEngine.Vector3)(direction)).sqrMagnitude;
 
-                if (remainSqr <= c_TakeAsStopDistance)
-                {
-                    finished++;
-                    continue;
-                }
-
-                if (m_Children[i].TransformationProvider != null &&
-                    m_Children[i].TransformationProvider is UnityTransformProvider unityTransform &&
+                if (m_Children[i].TryGetUnityTransformProvider(out UnityTransformProvider unityTransform) &&
                     unityTransform.NavMeshAgent != null)
                 {
+                    float destSqr = (unityTransform.NavMeshAgent.destination - (Vector3)m_Children[i].position).sqrMagnitude;
+                    if (remainSqr <= destSqr)
+                    {
+                        finished++;
+
+                        if (unityTransform.NavMeshAgent.hasPath)
+                        {
+                            unityTransform.NavMeshAgent.ResetPath();
+                        }
+
+                        continue;
+                    }
+
+                    unityTransform.NavMeshAgent.updateRotation = updateRotation;
                     worldPosition = math.mul(localToWorld, new float4(localPosition, 1)).xyz;
                     unityTransform.SetPosition(worldPosition);
                     continue;
+                }
+                else
+                {
+                    if (remainSqr <= c_TakeAsStopDistance)
+                    {
+                        finished++;
+                        continue;
+                    }
                 }
 
                 bool isStopping = m_GroupProvider.StopDistance * m_GroupProvider.StopDistance > remainSqr;

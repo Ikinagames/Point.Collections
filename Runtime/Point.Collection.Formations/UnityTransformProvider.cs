@@ -54,7 +54,7 @@ namespace Point.Collections.Formations
             }
         }
         public UnityEngine.AI.NavMeshAgent NavMeshAgent => m_Agent;
-
+        
         public float4x4 localToWorld => m_Transform.localToWorldMatrix;
         public float4x4 worldToLocal => m_Transform.worldToLocalMatrix;
 

@@ -56,4 +56,20 @@ namespace Point.Collections.Formations
         void UpdateCurrentSpeed(float accel);
         bool Refresh();
     }
+
+    public static class IFormationExtensions
+    {
+        public static bool TryGetUnityTransformProvider(this IFormation t, out UnityTransformProvider provider)
+        {
+            if (t.TransformationProvider != null &&
+                t.TransformationProvider is UnityTransformProvider prv)
+            {
+                provider = prv;
+                return true;
+            }
+
+            provider = null;
+            return false;
+        }
+    }
 }
