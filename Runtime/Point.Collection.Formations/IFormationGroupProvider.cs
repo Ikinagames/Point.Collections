@@ -31,10 +31,22 @@ namespace Point.Collections.Formations
 {
     public interface IFormationGroupProvider
     {
+        bool EnableLerp { get; set; }
+        float StopDistance { get; set; }
+        float UpdateMultipiler { get; set; }
+
 #pragma warning disable IDE1006 // Naming Styles
         IReadOnlyList<IFormation> children { get; set; }
 #pragma warning restore IDE1006 // Naming Styles
 
         float3 CalculateOffset(int index, IFormation child);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="child"></param>
+        /// <param name="targetLocalPosition"></param>
+        /// <returns>실제 적용할 로컬 좌표입니다.</returns>
+        float3 UpdatePosition(int index, IFormation child, float3 targetLocalPosition);
     }
 }

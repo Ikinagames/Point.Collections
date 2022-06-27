@@ -60,7 +60,10 @@ namespace Point.Collections.Formations
                     switch (m_ProvideOption)
                     {
                         case ProvideOption.Column:
-                            result = new ColumnFormationGroup();
+                            result = new ColumnFormationGroup()
+                            {
+                                EnableLerp = true
+                            };
                             break;
                         case ProvideOption.Row:
                         default:
@@ -121,6 +124,12 @@ namespace Point.Collections.Formations
         private void OnDisable()
         {
             
+        }
+        private void Update()
+        {
+            if (m_Formation == null) return;
+
+            m_Formation.Refresh();
         }
 
 #if UNITY_EDITOR

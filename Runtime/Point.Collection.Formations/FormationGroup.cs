@@ -26,13 +26,29 @@
 
 using System.Collections.Generic;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace Point.Collections.Formations
 {
     public abstract class FormationGroup : IFormationGroupProvider
     {
+        public bool EnableLerp { get; set; } = false;
+        public float StopDistance { get; set; } = .2f;
+        public float UpdateMultipiler { get; set; } = 1;
+
         public IReadOnlyList<IFormation> children { get; set; }
 
         public abstract float3 CalculateOffset(int index, IFormation child);
+
+        float3 IFormationGroupProvider.UpdatePosition(int index, IFormation child, float3 targetLocalPosition)
+        {
+            return UpdatePosition(index, child, targetLocalPosition);
+        }
+        protected virtual float3 UpdatePosition(int index, IFormation child, float3 targetLocalPosition)
+        {
+            if (!EnableLerp) return targetLocalPosition;
+
+            return math.lerp(child.localPosition, targetLocalPosition, Time.deltaTime * UpdateMultipiler);
+        }
     }
 }

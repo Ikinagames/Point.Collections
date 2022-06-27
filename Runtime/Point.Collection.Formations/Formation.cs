@@ -408,6 +408,7 @@ namespace Point.Collections.Formations
 
             int index = parent.AddChildWithoutNotification(this);
             float3 localPosition = parent.GroupProvider.CalculateOffset(index, this);
+            localPosition = parent.GroupProvider.UpdatePosition(index, this, localPosition);
 
             if (TransformationProvider == null)
             {
@@ -415,9 +416,7 @@ namespace Point.Collections.Formations
                 return;
             }
 
-            $"{localPosition}".ToLog();
             float3 worldPosition = math.mul(targetParent.localToWorld, new float4(localPosition, 1)).xyz;
-            $"{worldPosition}".ToLog();
             TransformationProvider.SetPosition(worldPosition);
         }
         public void RemoveFromHierarchy()
@@ -431,9 +430,18 @@ namespace Point.Collections.Formations
         public void Refresh()
         {
             float3 localPosition;
+            bool requireUpdate;
             for (int i = 0; i < m_Children.Count; i++)
             {
                 localPosition = m_GroupProvider.CalculateOffset(i, m_Children[i]);
+                // If is not reached
+                float remain = ((UnityEngine.Vector3)(localPosition - m_Children[i].localPosition)).sqrMagnitude;
+                requireUpdate = m_GroupProvider.StopDistance * m_GroupProvider.StopDistance < remain;
+                if (!requireUpdate)
+                {
+                    continue;
+                }
+                localPosition = m_GroupProvider.UpdatePosition(i, m_Children[i], localPosition);
 
                 if (m_Children[i].TransformationProvider == null)
                 {
