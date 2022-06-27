@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -121,6 +122,22 @@ namespace Point.Collections.Formations
         {
             
         }
+
+#if UNITY_EDITOR
+        private void OnDrawGizmosSelected()
+        {
+            if (m_Formation == null) return;
+
+            Gizmos.color = Color.white;
+            Gizmos.DrawSphere(m_Formation.position, .5f);
+            Gizmos.DrawLine(m_Formation.position, m_Formation.position + (math.up() * 2));
+            for (int i = 0; i < m_Formation.children?.Count; i++)
+            {
+                float3 pos = m_Formation.children[i].position;
+                Gizmos.DrawLine(pos, pos + (math.up() * 2));
+            }
+        }
+#endif
 
         public void AddChild(FormationComponent child)
         {
