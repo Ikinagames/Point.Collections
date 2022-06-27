@@ -83,11 +83,29 @@ namespace Point.Collections.Formations
             }
             set
             {
-                if (TransformationProvider != null)
-                {
-                    TransformationProvider.parent = value;
-                    return;
-                }
+                //if (TransformationProvider != null)
+                //{
+                //    if (parent == null)
+                //    {
+                //        "remove parent".ToLog();
+                //        RemoveFromHierarchy();
+                //        return;
+                //    }
+                //    TransformationProvider.parent = value;
+
+                //    int index = value.AddChildWithoutNotification(this);
+                //    float3 localPosition = value.GroupProvider.CalculateOffset(index, this);
+
+                //    if (TransformationProvider == null)
+                //    {
+                //        this._localPosition = localPosition;
+                //        return;
+                //    }
+
+                //    float3 worldPosition = math.mul(value.localToWorld, new float4(localPosition, 1)).xyz;
+                //    TransformationProvider.SetPosition(worldPosition);
+                //    return;
+                //}
                 SetParent(value);
             }
         }
@@ -290,6 +308,7 @@ namespace Point.Collections.Formations
 
         public int AddChild(IFormation child)
         {
+            Assert.IsNotNull(child);
             Assert.IsNotNull(GroupProvider,
                 $"target parent\'s Group provider is null. set provider before declaring this formation as leader");
 
@@ -334,10 +353,19 @@ namespace Point.Collections.Formations
                 RemoveFromHierarchy();
                 return;
             }
-            m_Parent = parent;
 
-            int index = m_Parent.AddChildWithoutNotification(this);
-            float3 localPosition = m_Parent.GroupProvider.CalculateOffset(index, this);
+            if (TransformationProvider == null)
+            {
+                m_Parent = parent;
+            }
+            else
+            {
+                ITransformation targetParent = parent.TransformationProvider == null ? parent : parent.TransformationProvider;
+                TransformationProvider.parent = targetParent;
+            }
+
+            int index = parent.AddChildWithoutNotification(this);
+            float3 localPosition = parent.GroupProvider.CalculateOffset(index, this);
 
             if (TransformationProvider == null)
             {
@@ -345,7 +373,7 @@ namespace Point.Collections.Formations
                 return;
             }
             
-            float3 worldPosition = math.mul(m_Parent.localToWorld, new float4(localPosition, 1)).xyz;
+            float3 worldPosition = math.mul(parent.localToWorld, new float4(localPosition, 1)).xyz;
             TransformationProvider.SetPosition(worldPosition);
         }
         public void RemoveFromHierarchy()

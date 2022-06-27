@@ -39,11 +39,12 @@ namespace Point.Collections.Formations
             Column,
         }
 
+        [SerializeField] private bool m_InitializeOnEnable = true;
         [SerializeField] private string m_DisplayName;
         [SerializeField] private ProvideOption m_ProvideOption;
 
         [SerializeField] private FormationComponent m_Parent;
-        [SerializeField] private List<FormationComponent> m_Children;
+        [SerializeField] private List<FormationComponent> m_Children = new List<FormationComponent>();
 
         private IFormationGroupProvider m_GroupProvider;
         private Formation m_Formation;
@@ -97,16 +98,41 @@ namespace Point.Collections.Formations
             }
         }
 
+        private void OnEnable()
+        {
+            if (m_InitializeOnEnable)
+            {
+                Formation.GroupProvider = GroupProvider;
+                for (int i = 0; i < m_Children.Count; i++)
+                {
+                    //m_Children[i].transform.SetParent(transform);
+                    Formation.AddChild(m_Children[i].Formation);
+                }
+
+                if (m_Parent != null)
+                {
+                    m_Parent.AddChild(this);
+                }
+            }
+        }
+        private void OnDisable()
+        {
+            
+        }
+
         public void AddChild(FormationComponent child)
         {
             if (Formation.GroupProvider == null)
             {
                 Formation.GroupProvider = GroupProvider;
             }
-            if (m_Children == null) m_Children = new List<FormationComponent>();
 
+            //child.transform.SetParent(transform);
             Formation.AddChild(child.Formation);
-            m_Children.Add(child);
+            if (!m_Children.Contains(child))
+            {
+                m_Children.Add(child);
+            }
         }
     }
 }

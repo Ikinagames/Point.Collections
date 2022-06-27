@@ -26,6 +26,7 @@
 
 
 using Unity.Mathematics;
+using UnityEngine.Assertions;
 
 namespace Point.Collections
 {
@@ -50,10 +51,27 @@ namespace Point.Collections
     }
     public class UnityTransformProvider : ITransformation
     {
+        private ITransformation m_Parent;
         private UnityEngine.Transform m_Transform;
         private UnityEngine.AI.NavMeshAgent m_Agent;
 
-        public ITransformation parent { get; set; }
+        public ITransformation parent
+        {
+            get => m_Parent;
+            set
+            {
+                Assert.IsNotNull(m_Transform);
+                if (value == null && m_Parent is UnityTransformProvider)
+                {
+                    m_Transform.SetParent(null);
+                }
+                m_Parent = value;
+                if (value != null && value is UnityTransformProvider unityTransform)
+                {
+                    m_Transform.SetParent(unityTransform.m_Transform);
+                }
+            }
+        }
 
         public float4x4 localToWorld => m_Transform.localToWorldMatrix;
         public float4x4 worldToLocal => m_Transform.worldToLocalMatrix;
@@ -69,6 +87,8 @@ namespace Point.Collections
 
         public UnityTransformProvider(UnityEngine.Transform transform)
         {
+            Assert.IsNotNull(transform);
+
             m_Transform = transform;
             if (transform.parent != null)
             {
@@ -77,6 +97,8 @@ namespace Point.Collections
         }
         public UnityTransformProvider(UnityEngine.Transform transform, UnityEngine.AI.NavMeshAgent navAgent) : this(transform)
         {
+            Assert.IsNotNull(navAgent);
+
             m_Agent = navAgent;
         }
 
