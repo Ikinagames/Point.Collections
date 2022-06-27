@@ -214,8 +214,12 @@ namespace Point.Collections.Formations
         }
         public void SetParent(IFormation parent)
         {
+            if (parent == null)
+            {
+                RemoveFromHierarchy();
+                return;
+            }
             m_Parent = parent;
-            if (m_Parent == null) return;
 
             int index = m_Parent.AddChildWithoutNotification(this);
             float3 localPosition = m_Parent.GroupProvider.CalculateOffset(index, this);
