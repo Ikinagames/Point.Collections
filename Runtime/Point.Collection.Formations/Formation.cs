@@ -31,7 +31,7 @@ using UnityEngine.Assertions;
 
 namespace Point.Collections.Formations
 {
-    public class Formation : IFormation
+    public class Formation : IFormation, ITransformation
     {
         private IFormation m_Parent;
         private List<IFormation> m_Children;
