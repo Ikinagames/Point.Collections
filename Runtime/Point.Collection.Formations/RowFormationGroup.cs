@@ -30,7 +30,7 @@ namespace Point.Collections.Formations
 {
     public class RowFormationGroup : FormationGroup
     {
-        public float Offset { get; set; }
+        public float Offset { get; set; } = 3;
 
         public override float3 CalculateOffset(int index, IFormation child)
         {

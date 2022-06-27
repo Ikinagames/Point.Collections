@@ -25,6 +25,7 @@
 #endif
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Point.Collections.Formations
@@ -40,6 +41,58 @@ namespace Point.Collections.Formations
         [SerializeField] private string m_DisplayName;
         [SerializeField] private ProvideOption m_ProvideOption;
 
+        [SerializeField] private List<FormationComponent> m_Children;
+
+        private IFormationGroupProvider m_GroupProvider;
         private Formation m_Formation;
+
+        public IFormationGroupProvider GroupProvider
+        {
+            get
+            {
+                if (m_GroupProvider == null)
+                {
+                    IFormationGroupProvider result;
+                    switch (m_ProvideOption)
+                    {
+                        case ProvideOption.Column:
+                            result = new ColumnFormationGroup();
+                            break;
+                        case ProvideOption.Row:
+                        default:
+                            result = new RowFormationGroup();
+                            break;
+                    }
+                    m_GroupProvider = result;
+                }
+                return m_GroupProvider;
+            }
+        }
+        public Formation Formation
+        {
+            get
+            {
+                if (m_Formation == null)
+                {
+                    m_Formation = new Formation()
+                    {
+                        DisplayName = m_DisplayName,
+                    };
+                }
+                return m_Formation;
+            }
+        }
+
+        public void AddChild(FormationComponent child)
+        {
+            if (Formation.GroupProvider == null)
+            {
+                Formation.GroupProvider = GroupProvider;
+            }
+            if (m_Children == null) m_Children = new List<FormationComponent>();
+
+            Formation.AddChild(child.Formation);
+            m_Children.Add(child);
+        }
     }
 }
