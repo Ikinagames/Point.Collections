@@ -118,22 +118,8 @@ namespace Point.Collections.Formations
         }
         public quaternion localRotation
         {
-            get
-            {
-                if (parent == null) return m_Transform.rotation;
-
-                return math.mul(m_Transform.rotation, parent.rotation);
-            }
-            set
-            {
-                if (parent == null)
-                {
-                    m_Transform.rotation = value;
-                    return;
-                }
-
-                m_Transform.rotation = math.mul(parent.rotation, value);
-            }
+            get => m_Transform.rotation;
+            set => m_Transform.rotation = value;
         }
         public float3 eulerAngles
         {

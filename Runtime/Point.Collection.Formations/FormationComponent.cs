@@ -120,15 +120,7 @@ namespace Point.Collections.Formations
                 Formation.GroupProvider = GroupProvider;
                 for (int i = 0; i < m_Children.Count; i++)
                 {
-                    //m_Children[i].transform.SetParent(transform);
                     Formation.AddChild(m_Children[i].Formation);
-
-                    m_Children[i].m_Parent = null;
-                }
-
-                if (m_Parent != null)
-                {
-                    m_Parent.AddChild(this);
                 }
             }
         }
@@ -140,8 +132,6 @@ namespace Point.Collections.Formations
         {
             if (m_Formation == null) return;
 
-            //m_Formation.position = transform.position;
-            //m_Formation.rotation = transform.rotation;
             m_Formation.Refresh();
         }
 
@@ -169,6 +159,8 @@ namespace Point.Collections.Formations
             }
 
             Formation.AddChild(child.Formation);
+
+            child.m_Parent = this;
             if (!m_Children.Contains(child))
             {
                 m_Children.Add(child);

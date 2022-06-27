@@ -442,21 +442,25 @@ namespace Point.Collections.Formations
 
         const float c_TakeAsStopDistance = .01f * .01f;
 
-        public void Refresh()
+        public bool Refresh()
         {
+            bool finished;
             if (updateRotation)
             {
-                RefreshWithRotation();
+                finished = RefreshWithRotation();
             }
             else
             {
-                RefreshNormal();
+                finished = RefreshNormal();
             }
+
+            return finished;
         }
-        private void RefreshNormal()
+        private bool RefreshNormal()
         {
             float3 localPosition, worldPosition, direction;
             float remainSqr;
+            int finished = 0;
             for (int i = 0; i < m_Children.Count; i++)
             {
                 localPosition = m_GroupProvider.CalculateOffset(i, m_Children[i]);
@@ -465,6 +469,7 @@ namespace Point.Collections.Formations
 
                 if (remainSqr <= c_TakeAsStopDistance)
                 {
+                    finished++;
                     continue;
                 }
 
@@ -503,11 +508,14 @@ namespace Point.Collections.Formations
                 worldPosition = math.mul(localToWorld, new float4(localPosition, 1)).xyz;
                 m_Children[i].TransformationProvider.SetPosition(worldPosition);
             }
+
+            return finished == m_Children.Count;
         }
-        private void RefreshWithRotation()
+        private bool RefreshWithRotation()
         {
             float3 localPosition, worldPosition, direction;
             float remainSqr;
+            int finished = 0;
             for (int i = 0; i < m_Children.Count; i++)
             {
                 localPosition = m_GroupProvider.CalculateOffset(i, m_Children[i]);
@@ -516,6 +524,7 @@ namespace Point.Collections.Formations
 
                 if (remainSqr <= c_TakeAsStopDistance)
                 {
+                    finished++;
                     continue;
                 }
 
@@ -545,7 +554,7 @@ namespace Point.Collections.Formations
 
                 // Set actual transformation data
 
-                Quaternion lookRot = Quaternion.LookRotation(direction, math.mul(rotation, math.up()));
+                Quaternion lookRot = Quaternion.LookRotation(direction, math.mul(localRotation, math.up()));
 
                 if (m_Children[i].TransformationProvider == null)
                 {
@@ -561,9 +570,11 @@ namespace Point.Collections.Formations
                 m_Children[i].TransformationProvider.SetPosition(worldPosition);
 
                 lookRot =
-                    Quaternion.Lerp(m_Children[i].TransformationProvider.rotation, lookRot, Time.deltaTime * 5);
-                m_Children[i].TransformationProvider.rotation = lookRot;
+                    Quaternion.Lerp(m_Children[i].TransformationProvider.localRotation, lookRot, Time.deltaTime * 5);
+                m_Children[i].TransformationProvider.localRotation = lookRot;
             }
+
+            return finished == m_Children.Count;
         }
     }
 }

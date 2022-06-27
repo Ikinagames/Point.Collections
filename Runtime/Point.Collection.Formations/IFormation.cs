@@ -54,6 +54,6 @@ namespace Point.Collections.Formations
         void RemoveFromHierarchy();
 
         void UpdateCurrentSpeed(float accel);
-        void Refresh();
+        bool Refresh();
     }
 }
