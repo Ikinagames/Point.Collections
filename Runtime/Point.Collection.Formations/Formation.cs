@@ -36,6 +36,7 @@ namespace Point.Collections.Formations
         private IFormation m_Parent;
         private List<IFormation> m_Children;
         private IFormationGroupProvider m_GroupProvider;
+        private ITransformation m_TransformationProvider;
 
         public string DisplayName { get; set; }
         public IFormationGroupProvider GroupProvider
@@ -61,65 +62,169 @@ namespace Point.Collections.Formations
                 }
             }
         }
+        public ITransformation TransformationProvider
+        {
+            get => m_TransformationProvider;
+            set
+            {
+                m_TransformationProvider = value;
+            }
+        }
 
         public IFormation parent
         {
-            get => m_Parent;
-            set => SetParent(value);
+            get
+            {
+                if (TransformationProvider != null)
+                {
+                    return TransformationProvider.parent as IFormation;
+                }
+                return m_Parent;
+            }
+            set
+            {
+                if (TransformationProvider != null)
+                {
+                    TransformationProvider.parent = value;
+                    return;
+                }
+                SetParent(value);
+            }
         }
         public IReadOnlyList<IFormation> children => m_Children;
 
         #region ITransformation
 
-        private float3 m_LocalPosition;
-        private quaternion m_LocalRotation;
-        private float3 m_LocalScale;
+        private float3 _localPosition;
+        private quaternion _localRotation;
+        private float3 _localScale;
+
+        private float3 INTERNAL_LocalPosition
+        {
+            get
+            {
+                if (TransformationProvider == null)
+                {
+                    return _localPosition;
+                }
+                return TransformationProvider.localPosition;
+            }
+            set
+            {
+                if (TransformationProvider == null)
+                {
+                    _localPosition = value;
+                    return;
+                }
+                TransformationProvider.localPosition = value;
+            }
+        }
+        private quaternion INTERNAL_LocalRotation
+        {
+            get
+            {
+                if (TransformationProvider == null)
+                {
+                    return _localRotation;
+                }
+                return TransformationProvider.localRotation;
+            }
+            set
+            {
+                if (TransformationProvider == null)
+                {
+                    _localRotation = value;
+                    return;
+                }
+                TransformationProvider.localRotation = value;
+            }
+        }
+        private float3 INTERNAL_LocalScale
+        {
+            get
+            {
+                if (TransformationProvider == null)
+                {
+                    return _localScale;
+                }
+                return TransformationProvider.localScale;
+            }
+            set
+            {
+                if (TransformationProvider == null)
+                {
+                    _localScale = value;
+                    return;
+                }
+                TransformationProvider.localScale = value;
+            }
+        }
 
         ITransformation ITransformation.parent { get => parent; set => parent = value as IFormation; }
 
-        public float4x4 localToWorld => new float4x4(new float3x3(rotation), position);
-        public float4x4 worldToLocal => math.fastinverse(worldToLocal);
+        public float4x4 localToWorld
+        {
+            get
+            {
+                if (TransformationProvider != null)
+                {
+                    return TransformationProvider.localToWorld;
+                }
+                return new float4x4(new float3x3(rotation), position);
+            }
+        }
+        public float4x4 worldToLocal
+        {
+            get
+            {
+                if (TransformationProvider != null)
+                {
+                    return TransformationProvider.worldToLocal;
+                }
+                return math.fastinverse(worldToLocal);
+            }
+        }
 
         public float3 position
         {
             get
             {
-                if (parent == null) return m_LocalPosition;
+                if (parent == null) return INTERNAL_LocalPosition;
 
-                return math.mul(parent.localToWorld, new float4(m_LocalPosition, 1)).xyz;
+                return math.mul(parent.localToWorld, new float4(INTERNAL_LocalPosition, 1)).xyz;
             }
             set
             {
                 if (parent == null)
                 {
-                    m_LocalPosition = value;
+                    INTERNAL_LocalPosition = value;
                     return;
                 }
 
-                m_LocalPosition = math.mul(parent.worldToLocal, new float4(value, 1)).xyz;
+                INTERNAL_LocalPosition = math.mul(parent.worldToLocal, new float4(value, 1)).xyz;
             }
         }
-        public float3 localPosition { get => m_LocalPosition; set => m_LocalPosition = value; }
+        public float3 localPosition { get => INTERNAL_LocalPosition; set => INTERNAL_LocalPosition = value; }
         public quaternion rotation
         {
             get
             {
-                if (parent == null) return m_LocalRotation;
+                if (parent == null) return INTERNAL_LocalRotation;
 
-                return math.mul(m_LocalRotation, parent.rotation);
+                return math.mul(INTERNAL_LocalRotation, parent.rotation);
             }
             set
             {
                 if (parent == null)
                 {
-                    m_LocalRotation = value;
+                    INTERNAL_LocalRotation = value;
                     return;
                 }
 
-                m_LocalRotation = math.mul(parent.rotation, value);
+                INTERNAL_LocalRotation = math.mul(parent.rotation, value);
             }
         }
-        public quaternion localRotation { get => m_LocalRotation; set => m_LocalRotation = value; }
+        public quaternion localRotation { get => INTERNAL_LocalRotation; set => INTERNAL_LocalRotation = value; }
         public float3 eulerAngles
         {
             get => rotation.Euler() * Math.Rad2Deg;
@@ -162,7 +267,17 @@ namespace Point.Collections.Formations
                 lossyScale = math.mul(parent.lossyScale, value);
             }
         }
-        public float3 localScale { get => m_LocalScale; set => m_LocalScale = value; }
+        public float3 localScale { get => INTERNAL_LocalScale; set => INTERNAL_LocalScale = value; }
+
+        public void SetPosition(float3 position)
+        {
+            if (TransformationProvider == null)
+            {
+                this.position = position;
+                return;
+            }
+            TransformationProvider.SetPosition(position);
+        }
 
         #endregion
 
@@ -223,7 +338,15 @@ namespace Point.Collections.Formations
 
             int index = m_Parent.AddChildWithoutNotification(this);
             float3 localPosition = m_Parent.GroupProvider.CalculateOffset(index, this);
-            this.localPosition = localPosition;
+
+            if (TransformationProvider == null)
+            {
+                this._localPosition = localPosition;
+                return;
+            }
+            
+            float3 worldPosition = math.mul(m_Parent.localToWorld, new float4(localPosition, 1)).xyz;
+            TransformationProvider.SetPosition(worldPosition);
         }
         public void RemoveFromHierarchy()
         {
@@ -239,7 +362,15 @@ namespace Point.Collections.Formations
             for (int i = 0; i < m_Children.Count; i++)
             {
                 localPosition = m_GroupProvider.CalculateOffset(i, m_Children[i]);
-                m_Children[i].localPosition = localPosition;
+
+                if (m_Children[i].TransformationProvider == null)
+                {
+                    m_Children[i].localPosition = localPosition;
+                    continue;
+                }
+
+                float3 worldPosition = math.mul(localToWorld, new float4(localPosition, 1)).xyz;
+                m_Children[i].TransformationProvider.SetPosition(worldPosition);
             }
         }
     }

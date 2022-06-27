@@ -45,6 +45,50 @@ namespace Point.Collections
         float3 lossyScale { get; set; }
         float3 localScale { get; set; }
 #pragma warning restore IDE1006 // Naming Styles
-    }
 
+        void SetPosition(float3 position);
+    }
+    public class UnityTransformProvider : ITransformation
+    {
+        private UnityEngine.Transform m_Transform;
+        private UnityEngine.AI.NavMeshAgent m_Agent;
+
+        public ITransformation parent { get; set; }
+
+        public float4x4 localToWorld => m_Transform.localToWorldMatrix;
+        public float4x4 worldToLocal => m_Transform.worldToLocalMatrix;
+
+        public float3 position { get => m_Transform.position; set => m_Transform.position = value; }
+        public float3 localPosition { get => m_Transform.localPosition; set => m_Transform.localPosition = value; }
+        public quaternion rotation { get => m_Transform.rotation; set => m_Transform.rotation = value; }
+        public quaternion localRotation { get => m_Transform.localRotation; set => m_Transform.localRotation = value; }
+        public float3 eulerAngles { get => m_Transform.eulerAngles; set => m_Transform.eulerAngles = value; }
+        public float3 localEulerAngles { get => m_Transform.localEulerAngles; set => m_Transform.localEulerAngles = value; }
+        public float3 lossyScale { get => m_Transform.lossyScale; set => throw new System.NotImplementedException(); }
+        public float3 localScale { get => m_Transform.localScale; set => m_Transform.localScale = value; }
+
+        public UnityTransformProvider(UnityEngine.Transform transform)
+        {
+            m_Transform = transform;
+            if (transform.parent != null)
+            {
+                parent = new UnityTransformProvider(transform.parent);
+            }
+        }
+        public UnityTransformProvider(UnityEngine.Transform transform, UnityEngine.AI.NavMeshAgent navAgent) : this(transform)
+        {
+            m_Agent = navAgent;
+        }
+
+        public void SetPosition(float3 position)
+        {
+            if (m_Agent == null)
+            {
+                this.position = position;
+                return;
+            }
+
+            m_Agent.SetDestination(position);
+        }
+    }
 }

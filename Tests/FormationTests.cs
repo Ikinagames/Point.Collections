@@ -114,6 +114,41 @@ namespace Point.Collections.Tests
                 Debug.Log($"{item.DisplayName}: {item.position}");
             }
         }
+        [Test]
+        public void UnityFormationTest()
+        {
+            ColumnFormationGroup group = new ColumnFormationGroup()
+            {
+                Offset = 5
+            };
+            Formation leader = new Formation()
+            {
+                GroupProvider = group,
+                DisplayName = "Column Leader"
+            };
+            GameObject leaderObject = new GameObject();
+            leader.TransformationProvider = new UnityTransformProvider(leaderObject.transform);
+            leader.position = randomPosition;
+
+            leader.AddChild(new Formation()
+            {
+                DisplayName = "Child 0",
+            });
+            leader.AddChild(new Formation()
+            {
+                DisplayName = "Child 1",
+            });
+            leader.AddChild(new Formation()
+            {
+                DisplayName = "Child 2",
+            });
+
+            Debug.Log($"Leader({leader.DisplayName}): {leader.position}");
+            foreach (var item in leader)
+            {
+                Debug.Log($"{item.DisplayName}: {item.position}");
+            }
+        }
     }
 }
 

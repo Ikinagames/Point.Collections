@@ -32,6 +32,7 @@ namespace Point.Collections.Formations
     {
         string DisplayName { get; }
         IFormationGroupProvider GroupProvider { get; }
+        ITransformation TransformationProvider { get; }
 
 #pragma warning disable IDE1006 // Naming Styles
         new IFormation parent { get; set; }

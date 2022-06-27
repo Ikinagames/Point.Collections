@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Point.Collections.Formations
 {
@@ -41,6 +42,7 @@ namespace Point.Collections.Formations
         [SerializeField] private string m_DisplayName;
         [SerializeField] private ProvideOption m_ProvideOption;
 
+        [SerializeField] private FormationComponent m_Parent;
         [SerializeField] private List<FormationComponent> m_Children;
 
         private IFormationGroupProvider m_GroupProvider;
@@ -67,6 +69,11 @@ namespace Point.Collections.Formations
                 }
                 return m_GroupProvider;
             }
+            set
+            {
+                Assert.IsNull(m_GroupProvider);
+                m_GroupProvider = value;
+            }
         }
         public Formation Formation
         {
@@ -77,9 +84,16 @@ namespace Point.Collections.Formations
                     m_Formation = new Formation()
                     {
                         DisplayName = m_DisplayName,
+                        TransformationProvider = new UnityTransformProvider(transform),
                     };
                 }
                 return m_Formation;
+            }
+            set
+            {
+                Assert.IsNull(m_Formation);
+
+                m_Formation = value;
             }
         }
 
