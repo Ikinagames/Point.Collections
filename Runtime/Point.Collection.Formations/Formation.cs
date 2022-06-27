@@ -183,6 +183,14 @@ namespace Point.Collections.Formations
 
             return index;
         }
+        public bool RemoveChild(IFormation child)
+        {
+            if (m_Children == null) return false;
+
+            bool result = m_Children.Remove(child);
+
+            return result;
+        }
         int IFormation.AddChildWithoutNotification(IFormation child)
         {
             if (m_Children == null) m_Children = new List<IFormation>();
@@ -207,9 +215,18 @@ namespace Point.Collections.Formations
         public void SetParent(IFormation parent)
         {
             m_Parent = parent;
-            int index = parent.AddChildWithoutNotification(this);
-            float3 localPosition = parent.GroupProvider.CalculateOffset(index, this);
+            if (m_Parent == null) return;
+
+            int index = m_Parent.AddChildWithoutNotification(this);
+            float3 localPosition = m_Parent.GroupProvider.CalculateOffset(index, this);
             this.localPosition = localPosition;
+        }
+        public void RemoveFromHierarchy()
+        {
+            if (m_Parent == null) return;
+
+            m_Parent.RemoveChild(this);
+            m_Parent = null;
         }
 
         public void Refresh()

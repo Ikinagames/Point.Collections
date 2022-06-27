@@ -24,27 +24,22 @@
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
-using System.Collections.Generic;
+using System;
+using UnityEngine;
 
 namespace Point.Collections.Formations
 {
-    public interface IFormation : ITransformation, IEnumerable<IFormation>
+    public class FormationComponent : PointMonobehaviour
     {
-        string DisplayName { get; }
-        IFormationGroupProvider GroupProvider { get; }
+        public enum ProvideOption
+        {
+            Row,
+            Column,
+        }
 
-#pragma warning disable IDE1006 // Naming Styles
-        new IFormation parent { get; set; }
-        IReadOnlyList<IFormation> children { get; }
-#pragma warning restore IDE1006 // Naming Styles
+        [SerializeField] private string m_DisplayName;
+        [SerializeField] private ProvideOption m_ProvideOption;
 
-        int AddChild(IFormation child);
-        bool RemoveChild(IFormation child);
-        int AddChildWithoutNotification(IFormation child);
-        void ClearChildren();
-        void SetParent(IFormation parent);
-        void RemoveFromHierarchy();
-
-        void Refresh();
+        private Formation m_Formation;
     }
 }
