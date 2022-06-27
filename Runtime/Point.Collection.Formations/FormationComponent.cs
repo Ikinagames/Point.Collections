@@ -107,6 +107,8 @@ namespace Point.Collections.Formations
                 {
                     //m_Children[i].transform.SetParent(transform);
                     Formation.AddChild(m_Children[i].Formation);
+
+                    m_Children[i].m_Parent = null;
                 }
 
                 if (m_Parent != null)
