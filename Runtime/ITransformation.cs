@@ -24,25 +24,27 @@
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
-using System.Collections.Generic;
 
-namespace Point.Collections.Formations
+using Unity.Mathematics;
+
+namespace Point.Collections
 {
-    public interface IFormation : ITransformation, IEnumerable<IFormation>
+    public interface ITransformation
     {
-        string DisplayName { get; }
-        IFormationGroupProvider GroupProvider { get; }
-
 #pragma warning disable IDE1006 // Naming Styles
-        new IFormation parent { get; set; }
-        IReadOnlyList<IFormation> children { get; }
+        ITransformation parent { get; set; }
+
+        float4x4 localToWorld { get; }
+        float4x4 worldToLocal { get; }
+        float3 position { get; set; }
+        float3 localPosition { get; set; }
+        quaternion rotation { get; set; }
+        quaternion localRotation { get; set; }
+        float3 eulerAngles { get; set; }
+        float3 localEulerAngles { get; set; }
+        float3 lossyScale { get; set; }
+        float3 localScale { get; set; }
 #pragma warning restore IDE1006 // Naming Styles
-
-        int AddChild(IFormation child);
-        int AddChildWithoutNotification(IFormation child);
-        void ClearChildren();
-        void SetParent(IFormation parent);
-
-        void Refresh();
     }
+
 }

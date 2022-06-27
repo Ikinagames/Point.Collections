@@ -24,25 +24,18 @@
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
-using System.Collections.Generic;
+using Unity.Mathematics;
 
 namespace Point.Collections.Formations
 {
-    public interface IFormation : ITransformation, IEnumerable<IFormation>
+    public class RowFormationGroup : FormationGroup
     {
-        string DisplayName { get; }
-        IFormationGroupProvider GroupProvider { get; }
+        public float Offset { get; set; }
 
-#pragma warning disable IDE1006 // Naming Styles
-        new IFormation parent { get; set; }
-        IReadOnlyList<IFormation> children { get; }
-#pragma warning restore IDE1006 // Naming Styles
-
-        int AddChild(IFormation child);
-        int AddChildWithoutNotification(IFormation child);
-        void ClearChildren();
-        void SetParent(IFormation parent);
-
-        void Refresh();
+        public override float3 CalculateOffset(int index, IFormation child)
+        {
+            float dis = Offset * (index + 1);
+            return new float3(-dis, 0, 0);
+        }
     }
 }

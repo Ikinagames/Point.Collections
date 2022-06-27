@@ -24,29 +24,15 @@
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
-
 using System.Collections.Generic;
 using Unity.Mathematics;
 
-namespace Point.Collections
+namespace Point.Collections.Formations
 {
-    public abstract class FormationGroup : IFormationGroup
+    public abstract class FormationGroup : IFormationGroupProvider
     {
-        private List<IFormation> m_Entities = new List<IFormation>();
+        public IReadOnlyList<IFormation> children { get; set; }
 
-        IFormation IFormationGroup.Leader => m_Entities[0];
-        IEnumerable<IFormation> IFormationGroup.Entities => m_Entities;
-
-        public void SetPosition(float3 position)
-        {
-
-        }
-    }
-    public interface IFormationGroup
-    {
-        IFormation Leader { get; }
-        IEnumerable<IFormation> Entities { get; }
-
-        void SetPosition(float3 position);
+        public abstract float3 CalculateOffset(int index, IFormation child);
     }
 }

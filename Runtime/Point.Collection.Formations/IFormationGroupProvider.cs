@@ -25,24 +25,16 @@
 #endif
 
 using System.Collections.Generic;
+using Unity.Mathematics;
 
 namespace Point.Collections.Formations
 {
-    public interface IFormation : ITransformation, IEnumerable<IFormation>
+    public interface IFormationGroupProvider
     {
-        string DisplayName { get; }
-        IFormationGroupProvider GroupProvider { get; }
-
 #pragma warning disable IDE1006 // Naming Styles
-        new IFormation parent { get; set; }
-        IReadOnlyList<IFormation> children { get; }
+        IReadOnlyList<IFormation> children { get; set; }
 #pragma warning restore IDE1006 // Naming Styles
 
-        int AddChild(IFormation child);
-        int AddChildWithoutNotification(IFormation child);
-        void ClearChildren();
-        void SetParent(IFormation parent);
-
-        void Refresh();
+        float3 CalculateOffset(int index, IFormation child);
     }
 }
