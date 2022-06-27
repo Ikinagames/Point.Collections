@@ -32,27 +32,21 @@ namespace Point.Collections
 {
     public abstract class FormationGroup : IFormationGroup
     {
-        IEnumerator<IFormation> IFormationGroup.Entities { get; }
+        private List<IFormation> m_Entities = new List<IFormation>();
 
-        public void SetPositions(IEnumerator<float3> positions)
+        IFormation IFormationGroup.Leader => m_Entities[0];
+        IEnumerable<IFormation> IFormationGroup.Entities => m_Entities;
+
+        public void SetPosition(float3 position)
         {
-            
-        }
-    }
-    public interface IFormation
-    {
-        string DisplayName { get; }
-        IEnumerator<IFormation> Childs { get; }
-        float3 Position { get; }
-        float3 Offset { get; }
 
-        void SetPosition();
-        void SetOffset();
+        }
     }
     public interface IFormationGroup
     {
-        IEnumerator<IFormation> Entities { get; }
+        IFormation Leader { get; }
+        IEnumerable<IFormation> Entities { get; }
 
-        void SetPositions(IEnumerator<float3> positions);
+        void SetPosition(float3 position);
     }
 }

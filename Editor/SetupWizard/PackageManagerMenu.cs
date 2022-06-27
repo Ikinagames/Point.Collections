@@ -91,6 +91,8 @@ namespace Point.Collections.Editor
             c_DeviceSim = "com.unity.device-simulator",
 #else
             c_CodeCoverage = "com.unity.testtools.codecoverage",
+            c_VectorGraphics = "com.unity.vectorgraphics",
+            c_PlayableGroupVisualizer = "com.unity.playablegraph-visualizer",
 #if !UNITY_2022_1_OR_NEWER
             c_Spline = "com.unity.splines",
 #endif
@@ -107,6 +109,8 @@ namespace Point.Collections.Editor
             m_DeviceSimInstalled,
 #else
             m_CodeCoverageInstalled,
+            m_VectorGraphicsInstalled,
+            m_PlayableGroupVisualizerInstalled,
 #if !UNITY_2022_1_OR_NEWER
             m_SplineInstalled,
 #endif
@@ -125,6 +129,8 @@ namespace Point.Collections.Editor
             m_DeviceSimInstalled = HasPackage(c_DeviceSim);
 #else
             m_CodeCoverageInstalled = HasPackage(c_CodeCoverage);
+            m_VectorGraphicsInstalled = HasPackage(c_VectorGraphics);
+            m_PlayableGroupVisualizerInstalled = HasPackage(c_PlayableGroupVisualizer);
 #if !UNITY_2022_1_OR_NEWER
             m_SplineInstalled = HasPackage(c_Spline);
 #endif
@@ -143,8 +149,10 @@ namespace Point.Collections.Editor
             DrawPackageField(ref m_DeviceSimInstalled, c_DeviceSim);
 #else
             DrawPackageField(ref m_CodeCoverageInstalled, c_CodeCoverage);
+            DrawPackageField(ref m_VectorGraphicsInstalled, c_VectorGraphics);
+            DrawPackageField(ref m_PlayableGroupVisualizerInstalled, c_PlayableGroupVisualizer);
 #if !UNITY_2022_1_OR_NEWER
-            DrawPackageField(ref m_SplineInstalled ,c_Spline);
+            DrawPackageField(ref m_SplineInstalled, c_Spline);
 #endif
 #endif
             DrawPackageField(ref m_InputSystemInstalled, c_InputSystem);
