@@ -259,7 +259,20 @@ namespace Point.Collections.Editor
         {
             foreach (var item in m_Packages)
             {
-                foreach (var dep in item.dependencies)
+                if (item.packageId.Contains(id))
+                {
+                    PackageVersion packageVersion = new PackageVersion(item.version);
+                    if (minimumVersion.IsValid() && packageVersion < minimumVersion)
+                    {
+                        return PackageStatus.RequireUpdate;
+                    }
+                    return PackageStatus.Installed;
+                }
+            }
+
+            foreach (var item in m_Packages)
+            {
+                foreach (var dep in item.resolvedDependencies)
                 {
                     //PackageVersion packageVersion = new PackageVersion(dep.version);
                     //$"{dep.name} ({dep.version} : {packageVersion})".ToLog();
@@ -275,17 +288,8 @@ namespace Point.Collections.Editor
                         return PackageStatus.InstalledWithDependencies;
                     }
                 }
-
-                if (item.packageId.Contains(id))
-                {
-                    PackageVersion packageVersion = new PackageVersion(item.version);
-                    if (minimumVersion.IsValid() && packageVersion < minimumVersion)
-                    {
-                        return PackageStatus.RequireUpdate;
-                    }
-                    return PackageStatus.Installed;
-                }
             }
+
             return PackageStatus.NotInstalled;
         }
         private static AddRequest AddPackage(string id, PackageVersion version = default)
@@ -294,7 +298,6 @@ namespace Point.Collections.Editor
             {
                 id += $"@{version.ToString()}";
                 $"request id {id}".ToLog();
-                return null;
             }
 
             var request = UnityEditor.PackageManager.Client.Add(id);
@@ -388,18 +391,26 @@ namespace Point.Collections.Editor
             public static bool operator <(PackageVersion xx, PackageVersion yy)
             {
                 if (xx.x < yy.x) return true;
-                else if (xx.x <= yy.x && xx.y < yy.y) return true;
-                else if (xx.x <= yy.x && xx.y <= yy.y && xx.z < yy.z) return true;
-                else if (xx.x <= yy.x && xx.y <= yy.y && xx.z <= yy.z && xx.w < yy.w) return true;
+                else if (xx.x == yy.x && xx.y < yy.y) return true;
+                else if (xx.x == yy.x && xx.y == yy.y && xx.z < yy.z) return true;
+
+                if (xx.w != -1 && yy.w != -1)
+                {
+                    if (xx.x == yy.x && xx.y == yy.y && xx.z == yy.z && xx.w < yy.w) return true;
+                }
 
                 return false;
             }
             public static bool operator >(PackageVersion yy, PackageVersion xx)
             {
                 if (xx.x < yy.x) return true;
-                else if (xx.x <= yy.x && xx.y < yy.y) return true;
-                else if (xx.x <= yy.x && xx.y <= yy.y && xx.z < yy.z) return true;
-                else if (xx.x <= yy.x && xx.y <= yy.y && xx.z <= yy.z && xx.w < yy.w) return true;
+                else if (xx.x == yy.x && xx.y < yy.y) return true;
+                else if (xx.x == yy.x && xx.y == yy.y && xx.z < yy.z) return true;
+
+                if (xx.w != -1 && yy.w != -1)
+                {
+                    if (xx.x == yy.x && xx.y == yy.y && xx.z == yy.z && xx.w < yy.w) return true;
+                }
 
                 return false;
             }
