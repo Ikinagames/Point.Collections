@@ -27,7 +27,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
@@ -133,6 +135,10 @@ namespace Point.Collections.Editor
             m_BurstInstalled,
             m_CollectionsInstalled,
             m_MathematicsInstalled;
+        private static readonly PackageVersion
+            s_BurstVersion = new PackageVersion(1, 6, 6),
+            s_CollectionsVersion = new PackageVersion(1, 3, 1),
+            s_MathematicsVersion = new PackageVersion(1, 2, 6);
 
         private void OnPackageLoaded()
         {
@@ -150,9 +156,9 @@ namespace Point.Collections.Editor
 #endif
 #endif
             m_InputSystemInstalled = HasPackage(c_InputSystem);
-            m_BurstInstalled = HasPackage(c_Burst);
-            m_CollectionsInstalled = HasPackage(c_Collections);
-            m_MathematicsInstalled = HasPackage(c_Mathematics);
+            m_BurstInstalled = HasPackage(c_Burst, s_BurstVersion);
+            m_CollectionsInstalled = HasPackage(c_Collections, s_CollectionsVersion);
+            m_MathematicsInstalled = HasPackage(c_Mathematics, s_MathematicsVersion);
         }
         private void DrawGUI()
         {
@@ -170,16 +176,16 @@ namespace Point.Collections.Editor
 #endif
 #endif
             DrawPackageField(ref m_InputSystemInstalled, c_InputSystem);
-            DrawPackageField(ref m_BurstInstalled, c_Burst);
-            DrawPackageField(ref m_CollectionsInstalled, c_Collections);
-            DrawPackageField(ref m_MathematicsInstalled, c_Mathematics);
+            DrawPackageField(ref m_BurstInstalled, c_Burst, s_BurstVersion);
+            DrawPackageField(ref m_CollectionsInstalled, c_Collections, s_CollectionsVersion);
+            DrawPackageField(ref m_MathematicsInstalled, c_Mathematics, s_MathematicsVersion);
         }
 
         private AddRequest m_AddRequest;
         private string m_AddPackageID;
         private Action m_RevertDelegate;
 
-        private void DrawPackageField(ref PackageStatus status, in string id)
+        private void DrawPackageField(ref PackageStatus status, in string id, in PackageVersion minimumVersion = default)
         {
             string text;
             if (status == PackageStatus.Loading)
@@ -192,7 +198,7 @@ namespace Point.Collections.Editor
             }
             else
             {
-                text = $"{status} {id}";
+                text = $"{ObjectNames.NicifyVariableName(status.ToString())} {id}";
             }
             bool isInstalled = status == PackageStatus.Installed || status == PackageStatus.InstalledWithDependencies;
 
@@ -204,7 +210,7 @@ namespace Point.Collections.Editor
 
                 if (changed.changed)
                 {
-                    if (isInstalled)
+                    if (status == PackageStatus.NotInstalled)
                     {
                         status = PackageStatus.Installed;
                         m_AddPackageID = id;
@@ -212,9 +218,13 @@ namespace Point.Collections.Editor
 
                         EditorUtility.DisplayProgressBar($"Add package {m_AddPackageID}", "Requesting package data ...", 0);
                     }
-                    else
+                    else if (status == PackageStatus.RequireUpdate)
                     {
+                        status = PackageStatus.Installed;
+                        m_AddPackageID = id;
+                        m_AddRequest = AddPackage(m_AddPackageID);
 
+                        EditorUtility.DisplayProgressBar($"Add package {m_AddPackageID}", "Requesting package data ...", 0);
                     }
                 }
             }
@@ -245,59 +255,48 @@ namespace Point.Collections.Editor
         }
 
         // https://forum.unity.com/threads/is-there-a-scripting-api-to-view-installed-projects.536908/
-        private PackageStatus HasPackage(string id)
+        private PackageStatus HasPackage(string id, PackageVersion minimumVersion = default)
         {
-            //if (!m_SearchRequests.TryGetValue(id, out var localRequest))
-            //{
-            //    localRequest = Client.Search(id, true);
-            //}
-            //if (!m_ServerSearchRequests.TryGetValue(id, out var serverRequest))
-            //{
-            //    serverRequest = Client.Search(id, false);
-            //}
-
-            //if (localRequest.Status == StatusCode.InProgress ||
-            //    serverRequest.Status == StatusCode.InProgress)
-            //{
-            //    return PackageStatus.Loading;
-            //}
-
-            ////if (!localRequest.IsCompleted || !serverRequest.IsCompleted)
-            ////{
-            ////    return PackageStatus.Loading;
-            ////}
-
-            //$"{localRequest.Result?.Length} {localRequest.Status} {localRequest.PackageIdOrName}".ToLog();
-
-            //if (localRequest.Result.IsNullOrEmpty()) return PackageStatus.NotInstalled;
-
-            //var local = localRequest.Result[0];
-            //var server = serverRequest.Result[0];
-
-            //$"{local}, {server}".ToLog();
-
-            //return PackageStatus.Installed;
-            
             foreach (var item in m_Packages)
             {
                 foreach (var dep in item.dependencies)
                 {
+                    //PackageVersion packageVersion = new PackageVersion(dep.version);
+                    //$"{dep.name} ({dep.version} : {packageVersion})".ToLog();
+
                     if (dep.name.Contains(id))
                     {
+                        PackageVersion packageVersion = new PackageVersion(dep.version);
+                        if (minimumVersion.IsValid() && packageVersion < minimumVersion)
+                        {
+                            return PackageStatus.RequireUpdate;
+                        }
+
                         return PackageStatus.InstalledWithDependencies;
                     }
                 }
 
                 if (item.packageId.Contains(id))
                 {
+                    PackageVersion packageVersion = new PackageVersion(item.version);
+                    if (minimumVersion.IsValid() && packageVersion < minimumVersion)
+                    {
+                        return PackageStatus.RequireUpdate;
+                    }
                     return PackageStatus.Installed;
                 }
             }
             return PackageStatus.NotInstalled;
-            //return false;
         }
-        private static AddRequest AddPackage(string id)
+        private static AddRequest AddPackage(string id, PackageVersion version = default)
         {
+            if (version.IsValid())
+            {
+                id += $"@{version.ToString()}";
+                $"request id {id}".ToLog();
+                return null;
+            }
+
             var request = UnityEditor.PackageManager.Client.Add(id);
 
             return request;
@@ -306,6 +305,106 @@ namespace Point.Collections.Editor
         {
             var request = UnityEditor.PackageManager.Client.Remove(id);
             return request;
+        }
+
+        private struct PackageVersion : IValidation
+        {
+            public int x, y, z;
+            public string wString;
+            public int w;
+
+            public PackageVersion(string version)
+            {
+                var match 
+                    = Regex.Match(version, @"^(\d+)" + Regex.Escape(".") + @"(\d+)" + Regex.Escape(".") + @"(\d+)(?:-?)(.+)?");
+                if (!match.Success)
+                {
+                    this = default(PackageVersion);
+                    return;
+                }
+
+                x = int.Parse(match.Groups[1].Value);
+                y = int.Parse(match.Groups[2].Value);
+                z = int.Parse(match.Groups[3].Value);
+
+                if (!match.Groups[4].Value.IsNullOrEmpty())
+                {
+                    wString = match.Groups[4].Value;
+                    var temp = Regex.Replace(wString, @"[^\d]", string.Empty);
+                    w = int.Parse(temp);
+                }
+                else
+                {
+                    wString = string.Empty;
+                    w = -1;
+                }
+            }
+            public PackageVersion(int x, int y, int z)
+            {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+                wString = string.Empty;
+                w = -1;
+            }
+            public PackageVersion(int4 version)
+            {
+                x = version.x;
+                y = version.y;
+                z = version.z;
+                wString = string.Empty;
+                w = version.w;
+            }
+
+            public bool IsValid()
+            {
+                if (x == 0 && y == 0 && z == 0 && w == 0) return false;
+                return true; ;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null) return false;
+                if (!(obj is PackageVersion other)) return false;
+                
+                return x == other.x &&
+                    y == other.y &&
+                    z == other.z &&
+                    w == other.w;
+            }
+            public override int GetHashCode()
+            {
+                return x ^ y ^ z ^ w;
+            }
+            public override string ToString()
+            {
+                if (wString.IsNullOrEmpty())
+                {
+                    return $"{x}.{y}.{z}";
+                }
+                return $"{x}.{y}.{z}-{wString}";
+            }
+
+            public static bool operator <(PackageVersion xx, PackageVersion yy)
+            {
+                if (xx.x < yy.x || xx.y < yy.y || xx.z < yy.z || xx.w < yy.w) return true;
+                return false;
+            }
+            public static bool operator >(PackageVersion xx, PackageVersion yy)
+            {
+                if (yy.x < xx.x || yy.y < xx.y || yy.z < xx.z || yy.w < xx.w) return true;
+                return false;
+            }
+            public static bool operator ==(PackageVersion xx, PackageVersion yy)
+            {
+                if (xx.x == yy.x && xx.y == yy.y && xx.z == yy.z && xx.w == yy.w) return true;
+                return false;
+            }
+            public static bool operator !=(PackageVersion xx, PackageVersion yy)
+            {
+                if (xx.x != yy.x || xx.y != yy.y || xx.z != yy.z || xx.w != yy.w) return true;
+                return false;
+            }
         }
     }
 }
