@@ -29,6 +29,9 @@ using Unity.Mathematics;
 
 namespace Point.Collections.Formations
 {
+    // https://www.hindawi.com/journals/mpe/2020/4383915/
+    // https://www.oreilly.com/library/view/ai-for-game/0596005555/ch04.html
+
     public interface IFormationGroupProvider
     {
         /// <summary>
