@@ -106,12 +106,13 @@ namespace Point.Collections.Buffer.LowLevel
                 ));
         }
 
+        #region Privates
+
         private void SortBucket()
         {
             BucketComparer comparer = new BucketComparer(m_Buffer[0].buffer);
             m_Buffer[0].blocks.Sort(comparer);
         }
-
         private void IncrementBucket()
         {
             int length = m_Buffer[0].blocks.Capacity;
@@ -225,6 +226,8 @@ namespace Point.Collections.Buffer.LowLevel
             block = new UnsafeMemoryBlock(m_Hash, p, length);
             return true;
         }
+
+        #endregion
 
         /// <summary>
         /// <paramref name="length"/> bytes 만큼 메모리 주소를 할당받습니다.
@@ -387,6 +390,69 @@ namespace Point.Collections.Buffer.LowLevel
 
         #endregion
     }
+#if UNITYENGINE && UNITY_COLLECTIONS
+    [BurstCompatible]
+#endif
+    public struct UnsafeMemoryPool<T> :
+#if UNITYENGINE && UNITY_COLLECTIONS
+        INativeDisposable,
+#endif
+        IDisposable
+
+        where T : unmanaged
+    {
+        private UnsafeMemoryPool m_Pool;
+
+        public UnsafeMemoryPool(int size
+#if UNITYENGINE
+            , Allocator allocator
+#endif
+            , int bucketSize = UnsafeMemoryPool.INITBUCKETSIZE)
+        {
+            m_Pool = new UnsafeMemoryPool(size, allocator, bucketSize);
+        }
+
+        public UnsafeMemoryBlock<T> Get(in int count)
+        {
+            int size = TypeHelper.SizeOf<T>() * count;
+            var block = m_Pool.Get(in size);
+
+            return (UnsafeMemoryBlock<T>)block;
+        }
+        public bool TryGet(in int count, out UnsafeMemoryBlock<T> block)
+        {
+            int size = TypeHelper.SizeOf<T>() * count;
+            bool result = m_Pool.TryGet(in size, out var tempBlock);
+            if (!result)
+            {
+                block = default(UnsafeMemoryBlock<T>);
+                return false;
+            }
+
+            block = (UnsafeMemoryBlock<T>)tempBlock;
+            return true;
+        }
+        public void Reserve(UnsafeMemoryBlock<T> block)
+        {
+            m_Pool.Reserve(block);
+        }
+
+        public void Dispose()
+        {
+            PointHelper.AssertMainThread();
+
+            m_Pool.Dispose();
+        }
+#if UNITYENGINE && UNITY_COLLECTIONS
+        public JobHandle Dispose(JobHandle inputDeps)
+        {
+            var job = m_Pool.Dispose(inputDeps);
+
+            return job;
+        }
+#endif
+    }
+
     public static class MemoryPoolExtensions
     {
         
