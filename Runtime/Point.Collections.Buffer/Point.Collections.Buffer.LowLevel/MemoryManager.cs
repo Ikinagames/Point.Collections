@@ -66,47 +66,6 @@ namespace Point.Collections.Buffer.LowLevel
 
             return (UnsafeMemoryBlock<T>)temp;
         }
-
-    }
-
-    public struct NativeMemoryPool
-    {
-        private UnsafeMemoryPool m_Pool;
-        private UnsafeLinearHashMap<Hash, UnsafeMemoryBlock> m_HashMap;
-
-        //public NativeMemoryPool(Allocator allocator)
-        //{
-
-        //}
-
-        public MemoryBlock GetMemory(in int length)
-        {
-            if (!m_Pool.TryGet(length, out UnsafeMemoryBlock unsafeBlock))
-            {
-                throw new System.Exception();
-            }
-
-            Hash hash = Hash.NewHash();
-            m_HashMap.Add(hash, unsafeBlock);
-
-            MemoryBlock block = new MemoryBlock(m_HashMap, m_Pool.m_Hash, hash);
-
-            return block;
-        }
-    }
-
-    public struct MemoryBlock
-    {
-        private UnsafeLinearHashMap<Hash, UnsafeMemoryBlock> m_HashMap;
-        private Hash m_OwnerHash, m_Hash;
-
-        internal MemoryBlock(UnsafeLinearHashMap<Hash, UnsafeMemoryBlock> hashMap, 
-            Hash ownerHash, Hash hash)
-        {
-            m_HashMap = hashMap;
-            m_OwnerHash = ownerHash;
-            m_Hash = hash;
-        }
     }
 }
 
