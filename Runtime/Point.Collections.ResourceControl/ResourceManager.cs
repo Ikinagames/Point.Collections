@@ -80,7 +80,11 @@ namespace Point.Collections.ResourceControl
             m_MapingJobHandle;
 
         // key = path, value = bundleIndex
+#if UNITY_COLLECTIONS_NEW
         [NonSerialized] private NativeParallelHashMap<AssetRuntimeKey, Mapped> m_MappedAssets;
+#else
+        [NonSerialized] private NativeHashMap<AssetRuntimeKey, Mapped> m_MappedAssets;
+#endif
         [NonSerialized] private Hash m_ReferenceCheckSum;
 
         private NativeList<Mapped> m_WaitForUnloadIndices;
@@ -92,7 +96,11 @@ namespace Point.Collections.ResourceControl
             m_AssetBundleInfos = new NativeList<UnsafeAssetBundleInfo>(AllocatorManager.Persistent);
             m_AssetBundles = new List<AssetContainer>();
 
+#if UNITY_COLLECTIONS_NEW
             m_MappedAssets = new NativeParallelHashMap<AssetRuntimeKey, Mapped>(1024, AllocatorManager.Persistent);
+#else
+            m_MappedAssets = new NativeHashMap<AssetRuntimeKey, Mapped>(1024, AllocatorManager.Persistent);
+#endif
             m_WaitForUnloadIndices = new NativeList<Mapped>(1024, AllocatorManager.Persistent);
 
             SceneManager.activeSceneChanged += SceneManager_activeSceneChanged;
@@ -436,7 +444,11 @@ namespace Point.Collections.ResourceControl
             [ReadOnly] public int m_BundleIndex;
             [ReadOnly, DeallocateOnJobCompletion] public NativeArray<FixedString512Bytes> m_Names;
             [WriteOnly, NativeDisableUnsafePtrRestriction] public UnsafeAssetInfo* m_HashMap;
+#if UNITY_COLLECTIONS_NEW
             [WriteOnly] public NativeParallelHashMap<AssetRuntimeKey, Mapped>.ParallelWriter m_MappedAssets;
+#else
+            [WriteOnly] public NativeHashMap<AssetRuntimeKey, Mapped>.ParallelWriter m_MappedAssets;
+#endif
 
             public void Execute(int i)
             {
@@ -1211,7 +1223,7 @@ namespace Point.Collections.ResourceControl
             return LoadAsset(p, in key);
         }
 #endif
-        }
+    }
 
     //////////////////////////////////////////////////////////////////////////////////////////
     /*                                End of Critical Section                               */
