@@ -387,12 +387,20 @@ namespace Point.Collections.Editor
 
             public static bool operator <(PackageVersion xx, PackageVersion yy)
             {
-                if (xx.x < yy.x || xx.y < yy.y || xx.z < yy.z || xx.w < yy.w) return true;
+                if (xx.x < yy.x) return true;
+                else if (xx.x <= yy.x && xx.y < yy.y) return true;
+                else if (xx.x <= yy.x && xx.y <= yy.y && xx.z < yy.z) return true;
+                else if (xx.x <= yy.x && xx.y <= yy.y && xx.z <= yy.z && xx.w < yy.w) return true;
+
                 return false;
             }
-            public static bool operator >(PackageVersion xx, PackageVersion yy)
+            public static bool operator >(PackageVersion yy, PackageVersion xx)
             {
-                if (yy.x < xx.x || yy.y < xx.y || yy.z < xx.z || yy.w < xx.w) return true;
+                if (xx.x < yy.x) return true;
+                else if (xx.x <= yy.x && xx.y < yy.y) return true;
+                else if (xx.x <= yy.x && xx.y <= yy.y && xx.z < yy.z) return true;
+                else if (xx.x <= yy.x && xx.y <= yy.y && xx.z <= yy.z && xx.w < yy.w) return true;
+
                 return false;
             }
             public static bool operator ==(PackageVersion xx, PackageVersion yy)
