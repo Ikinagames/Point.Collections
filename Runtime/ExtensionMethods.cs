@@ -126,6 +126,12 @@ namespace Point.Collections
 
         #endregion
 
+        public static bool IsNullOrEmpty<T>(this T[] t)
+        {
+            if (t == null || t.Length == 0) return true;
+            return false;
+        }
+
         // https://answers.unity.com/questions/1187767/how-to-draw-a-gizmo-on-a-canvas.html
         public static Matrix4x4 GetCanvasMatrix(this Canvas t)
         {

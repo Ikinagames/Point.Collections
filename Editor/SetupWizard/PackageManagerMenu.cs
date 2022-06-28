@@ -26,6 +26,7 @@
 #if UNITYENGINE
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.PackageManager;
@@ -41,12 +42,25 @@ namespace Point.Collections.Editor
         public override string Name => "Package Manager";
         public override int Order => 0;
 
+        private Dictionary<string, SearchRequest> m_SearchRequests = new Dictionary<string, SearchRequest>();
+        private Dictionary<string, SearchRequest> m_ServerSearchRequests = new Dictionary<string, SearchRequest>();
+
         private PackageCollection m_Packages;
         private ListRequest m_Request;
         private bool m_OpenAllPackages = false;
 
         private Vector2 m_Scroll;
 
+        public enum PackageStatus
+        {
+            Loading = 0,
+
+            Installed,
+            InstalledWithDependencies,
+            NotInstalled,
+
+            RequireUpdate
+        }
         public PackageManagerMenu()
         {
             m_Request = UnityEditor.PackageManager.Client.List();
@@ -101,7 +115,7 @@ namespace Point.Collections.Editor
             c_Burst = "com.unity.burst",
             c_Collections = "com.unity.collections",
             c_Mathematics = "com.unity.mathematics";
-        private bool
+        private PackageStatus
             m_JsonInstalled,
 #if !UNITY_2021_1_OR_NEWER
             m_UIInstalled,
@@ -165,27 +179,34 @@ namespace Point.Collections.Editor
         private string m_AddPackageID;
         private Action m_RevertDelegate;
 
-        private void DrawPackageField(ref bool installed, in string id)
+        private void DrawPackageField(ref PackageStatus status, in string id)
         {
             string text;
-            if (installed)
+            if (status == PackageStatus.Loading)
             {
-                text = $"Installed {id}";
+                text = $"Loading {id}";
             }
-            else
+            else if (status == PackageStatus.NotInstalled)
             {
                 text = $"Install {id}";
             }
+            else
+            {
+                text = $"{status} {id}";
+            }
+            bool isInstalled = status == PackageStatus.Installed || status == PackageStatus.InstalledWithDependencies;
 
-            using (new EditorGUI.DisabledGroupScope(installed))
+            using (new EditorGUI.DisabledGroupScope(
+                isInstalled || status == PackageStatus.Loading))
             using (var changed = new EditorGUI.ChangeCheckScope())
             {
-                installed = EditorGUILayout.ToggleLeft(text, installed);
+                isInstalled = EditorGUILayout.ToggleLeft(text, isInstalled);
 
                 if (changed.changed)
                 {
-                    if (installed)
+                    if (isInstalled)
                     {
+                        status = PackageStatus.Installed;
                         m_AddPackageID = id;
                         m_AddRequest = AddPackage(m_AddPackageID);
 
@@ -224,16 +245,56 @@ namespace Point.Collections.Editor
         }
 
         // https://forum.unity.com/threads/is-there-a-scripting-api-to-view-installed-projects.536908/
-        private bool HasPackage(string id)
+        private PackageStatus HasPackage(string id)
         {
+            //if (!m_SearchRequests.TryGetValue(id, out var localRequest))
+            //{
+            //    localRequest = Client.Search(id, true);
+            //}
+            //if (!m_ServerSearchRequests.TryGetValue(id, out var serverRequest))
+            //{
+            //    serverRequest = Client.Search(id, false);
+            //}
+
+            //if (localRequest.Status == StatusCode.InProgress ||
+            //    serverRequest.Status == StatusCode.InProgress)
+            //{
+            //    return PackageStatus.Loading;
+            //}
+
+            ////if (!localRequest.IsCompleted || !serverRequest.IsCompleted)
+            ////{
+            ////    return PackageStatus.Loading;
+            ////}
+
+            //$"{localRequest.Result?.Length} {localRequest.Status} {localRequest.PackageIdOrName}".ToLog();
+
+            //if (localRequest.Result.IsNullOrEmpty()) return PackageStatus.NotInstalled;
+
+            //var local = localRequest.Result[0];
+            //var server = serverRequest.Result[0];
+
+            //$"{local}, {server}".ToLog();
+
+            //return PackageStatus.Installed;
+            
             foreach (var item in m_Packages)
             {
+                foreach (var dep in item.dependencies)
+                {
+                    if (dep.name.Contains(id))
+                    {
+                        return PackageStatus.InstalledWithDependencies;
+                    }
+                }
+
                 if (item.packageId.Contains(id))
                 {
-                    return true;
+                    return PackageStatus.Installed;
                 }
             }
-            return false;
+            return PackageStatus.NotInstalled;
+            //return false;
         }
         private static AddRequest AddPackage(string id)
         {
