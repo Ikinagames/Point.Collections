@@ -57,7 +57,7 @@ namespace Point.Collections.Editor
 
         private sealed class Popup : CLRSingleTone<Popup>
         {
-            private PositionHandleAttribute m_Attribute;
+            private bool m_IsLocalPosition;
             private Transform m_Tr;
 
             private UnityEngine.Object m_Object;
@@ -91,6 +91,10 @@ namespace Point.Collections.Editor
                 Tools.hidden = false;
                 SceneView.RepaintAll();
                 IsOpened = false;
+
+                m_Tr = null;
+                m_Object = null;
+                m_IsLocalPosition = false;
             }
             private void Apply()
             {
@@ -105,7 +109,7 @@ namespace Point.Collections.Editor
             }
             public void SetProperty(SerializedProperty property, PositionHandleAttribute attribute)
             {
-                m_Attribute = attribute;
+                m_IsLocalPosition = attribute.Local;
                 m_Object = property.serializedObject.targetObject;
 
                 SerializedProperty
@@ -122,13 +126,13 @@ namespace Point.Collections.Editor
                     zProp.floatValue
                     );
 
-                if (m_Attribute.Local)
+                if (m_IsLocalPosition)
                 {
-                    if (property.serializedObject.targetObject is GameObject obj)
+                    if (m_Object is GameObject obj)
                     {
                         m_Tr = obj.transform;
                     }
-                    else if (property.serializedObject.targetObject is UnityEngine.Component com)
+                    else if (m_Object is UnityEngine.Component com)
                     {
                         m_Tr = com.transform;
                     }

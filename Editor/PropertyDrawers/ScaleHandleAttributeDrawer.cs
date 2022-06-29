@@ -98,6 +98,9 @@ namespace Point.Collections.Editor
                 Tools.hidden = false;
                 SceneView.RepaintAll();
                 IsOpened = false;
+
+                m_Object = null;
+                m_PositionValue = Vector3.zero;
             }
             private void Apply()
             {
@@ -119,7 +122,10 @@ namespace Point.Collections.Editor
                 {
                     m_PositionValue = positionProperty.GetVector3();
                 }
-                else m_PositionValue = defaultPosition;
+                else
+                {
+                    m_PositionValue = defaultPosition;
+                }
 
                 if (rotationProperty != null)
                 {

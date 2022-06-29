@@ -18,6 +18,7 @@
 #if UNITY_MATHEMATICS
 #endif
 
+using System.Reflection;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
@@ -76,6 +77,9 @@ namespace Point.Collections.Editor
                 m_Position,
                 m_X, m_Y, m_Z, m_W;
             private Vector3 m_PositionValue;
+
+            private bool m_IsLocalPosition;
+            private Transform m_Transform;
             private Quaternion m_Value;
 
             public bool IsOpened { get; private set; } = false;
@@ -104,6 +108,12 @@ namespace Point.Collections.Editor
                 Tools.hidden = false;
                 SceneView.RepaintAll();
                 IsOpened = false;
+
+                m_Object = null;
+                m_Transform = null;
+                m_IsLocalPosition = false;
+                m_Position = null;
+                m_PositionValue = Vector3.zero;
             }
             public void Apply()
             {
@@ -133,9 +143,32 @@ namespace Point.Collections.Editor
                 if (positionProperty != null)
                 {
                     m_Position = positionProperty.propertyPath;
+                    var positionAtt = positionProperty.GetFieldInfo().GetCustomAttribute<PositionHandleAttribute>();
+                    if (positionAtt != null)
+                    {
+                        m_IsLocalPosition = positionAtt.Local;
+                    }
+
                     m_PositionValue = positionProperty.GetVector3();
+                    if (m_IsLocalPosition)
+                    {
+                        if (m_Object is GameObject obj)
+                        {
+                            m_Transform = obj.transform;
+                        }
+                        else if (m_Object is UnityEngine.Component com)
+                        {
+                            m_Transform = com.transform;
+                        }
+
+                        m_PositionValue = positionProperty.GetVector3() + m_Transform.position;
+                    }
+                    else m_PositionValue = positionProperty.GetVector3();
                 }
-                else m_Position = null;
+                else
+                {
+                    m_Position = null;
+                }
 
                 SerializedProperty
                     xProp = property.FindPropertyRelative("x"),
@@ -199,17 +232,20 @@ namespace Point.Collections.Editor
                 Handles.EndGUI();
 
                 var changed = Handles.DoRotationHandle(m_Value, m_PositionValue);
-
                 if (!m_Value.Equals(changed))
                 {
                     m_Value = changed;
                     Apply();
                 }
-                //m_Value.x = rotation.x;
-                //m_Value.y = rotation.y;
-                //m_Value.z = rotation.z;
-                //m_Value.w = rotation.w;
 
+                var prevMatrix = Handles.matrix;
+                {
+                    var size = HandleUtility.GetHandleSize(m_PositionValue);
+                    Handles.matrix = Matrix4x4.TRS(m_PositionValue, m_Value, Vector3.one);
+
+                    Handles.DrawWireCube(Vector3.zero, Vector3.one * size * .5f);
+                }
+                Handles.matrix = prevMatrix;
                 // https://gamedev.stackexchange.com/questions/149514/use-unity-handles-for-interaction-in-the-scene-view
             }
             //
