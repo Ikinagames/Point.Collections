@@ -177,17 +177,28 @@ namespace Point.Collections.Editor
                 Handles.EndGUI();
 
                 Vector3 changed;
+                var prevMatrix = Handles.matrix;
                 if (m_Tr != null)
                 {
                     changed = Handles.DoPositionHandle(m_Value + m_Tr.position, m_Rotation);
-                    Handles.DrawWireCube(changed, Vector3.one * HandleUtility.GetHandleSize(changed) * .5f);
+
+                    {
+                        Handles.matrix = Matrix4x4.TRS(changed, m_Rotation, Vector3.one);
+                        Handles.DrawWireCube(changed, Vector3.one * HandleUtility.GetHandleSize(changed) * .5f);
+                    }
+                    Handles.matrix = prevMatrix;
 
                     changed -= m_Tr.position;
                 }
                 else
                 {
                     changed = Handles.DoPositionHandle(m_Value, m_Rotation);
-                    Handles.DrawWireCube(changed, Vector3.one * HandleUtility.GetHandleSize(changed) * .5f);
+
+                    {
+                        Handles.matrix = Matrix4x4.TRS(changed, m_Rotation, Vector3.one);
+                        Handles.DrawWireCube(changed, Vector3.one * HandleUtility.GetHandleSize(changed) * .5f);
+                    }
+                    Handles.matrix = prevMatrix;
                 }
                 if (!m_Value.Equals(changed))
                 {
