@@ -73,6 +73,7 @@ namespace Point.Collections.Editor
         {
             private UnityEngine.Object m_Object;
             private string
+                m_Position,
                 m_X, m_Y, m_Z, m_W;
             private Vector3 m_PositionValue;
             private Quaternion m_Value;
@@ -124,8 +125,10 @@ namespace Point.Collections.Editor
                 m_Object = property.serializedObject.targetObject;
                 if (positionProperty != null)
                 {
+                    m_Position = positionProperty.propertyPath;
                     m_PositionValue = positionProperty.GetVector3();
                 }
+                else m_Position = null;
 
                 SerializedProperty
                     xProp = property.FindPropertyRelative("x"),
@@ -188,7 +191,6 @@ namespace Point.Collections.Editor
 
                 Handles.EndGUI();
 
-                //const float size = 1, arrowSize = 2, centerOffset = .5f;
                 var changed = Handles.DoRotationHandle(m_Value, m_PositionValue);
 
                 if (!m_Value.Equals(changed))
