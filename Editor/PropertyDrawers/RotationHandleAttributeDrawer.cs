@@ -109,12 +109,19 @@ namespace Point.Collections.Editor
             {
                 using (SerializedObject obj = new SerializedObject(m_Object))
                 {
-                    obj.FindProperty(m_X).floatValue = m_Value.x;
-                    obj.FindProperty(m_Y).floatValue = m_Value.y;
-                    obj.FindProperty(m_Z).floatValue = m_Value.z;
                     if (m_W != null)
                     {
+                        obj.FindProperty(m_X).floatValue = m_Value.x;
+                        obj.FindProperty(m_Y).floatValue = m_Value.y;
+                        obj.FindProperty(m_Z).floatValue = m_Value.z;
                         obj.FindProperty(m_W).floatValue = m_Value.w;
+                    }
+                    else
+                    {
+                        var euler = m_Value.eulerAngles;
+                        obj.FindProperty(m_X).floatValue = euler.x;
+                        obj.FindProperty(m_Y).floatValue = euler.y;
+                        obj.FindProperty(m_Z).floatValue = euler.z;
                     }
 
                     obj.ApplyModifiedProperties();
