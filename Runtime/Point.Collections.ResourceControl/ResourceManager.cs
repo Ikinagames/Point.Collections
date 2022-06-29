@@ -1174,6 +1174,14 @@ namespace Point.Collections.ResourceControl
                 try
                 {
                     bundleName = UnityEditor.AssetDatabase.GetImplicitAssetBundleName(key.ToString());
+                    if (bundleName.IsNullOrEmpty())
+                    {
+                        PointHelper.LogError(LogChannel.Collections,
+                            $"Asset({key}) is not registered. This asset is not in any AssetBundle at all.");
+
+                        return new AssetInfo(hash, true);
+                    }
+
                     int bundleIndex = Instance.m_AssetBundles.FindIndex(t => t.AssetBundle.name.ToLowerInvariant().Equals(bundleName.ToLowerInvariant()));
 
                     if (bundleIndex < 0)
