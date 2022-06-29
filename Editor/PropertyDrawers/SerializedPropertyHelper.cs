@@ -810,6 +810,35 @@ namespace Point.Collections.Editor
 
             throw new NotImplementedException();
         }
+        public static Vector4 GetVector4(this SerializedProperty t)
+        {
+            if (t.propertyType == SerializedPropertyType.Vector4)
+            {
+                return t.vector4Value;
+            }
+            else if (t.IsTypeOf<float4>())
+            {
+                SerializedProperty
+                    x = t.FindPropertyRelative("x"),
+                    y = t.FindPropertyRelative("y"),
+                    z = t.FindPropertyRelative("z"),
+                    w = t.FindPropertyRelative("w");
+
+                return new Vector4(x.floatValue, y.floatValue, z.floatValue, w.floatValue);
+            }
+            else if (t.IsTypeOf<int4>())
+            {
+                SerializedProperty
+                    x = t.FindPropertyRelative("x"),
+                    y = t.FindPropertyRelative("y"),
+                    z = t.FindPropertyRelative("z"),
+                    w = t.FindPropertyRelative("w");
+
+                return new Vector4(x.intValue, y.intValue, z.intValue, w.intValue);
+            }
+
+            throw new NotImplementedException();
+        }
 
         public static Type GetSystemType(this SerializedProperty t)
         {

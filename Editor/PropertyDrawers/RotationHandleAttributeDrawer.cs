@@ -18,6 +18,7 @@
 #if UNITY_MATHEMATICS
 #endif
 
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
@@ -33,50 +34,48 @@ namespace Point.Collections.Editor
         protected override string ClosedButtonText => "Close";
         protected override string ClosedButtonTooltip => "Scene view 에서 오브젝트 위치를 수정합니다.";
 
-        private bool m_Opened = false;
-
-        protected override bool Opened => m_Opened;
+        protected override bool Opened => Popup.Instance.IsOpened;
 
         protected override float PropertyHeight(SerializedProperty property, GUIContent label)
         {
             return base.PropertyHeight(property, label) + EditorGUIUtility.standardVerticalSpacing;
         }
 
-        protected override void BeforePropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
-        {
-            if (!Popup.Instance.IsOpened && m_Opened)
-            {
-                m_Opened = false;
-            }
-        }
         protected override void OnButtonClick(SerializedProperty property)
         {
-            if (!m_Opened)
+            if (!Opened)
             {
-                var parent = property.GetParent();
                 SerializedProperty positionField = null;
                 if (!attribute.PositionField.IsNullOrEmpty())
                 {
+                    var parent = property.GetParent();
                     positionField = parent.FindPropertyRelative(attribute.PositionField);
                 }
 
                 Popup.Instance.SetProperty(property, positionField);
                 Popup.Instance.Open();
 
-                m_Opened = true;
+                Selection.selectionChanged += Close;
             }
             else
             {
-                Popup.Instance.Close();
-                m_Opened = false;
+                Close();
             }
+        }
+        private void Close()
+        {
+            Selection.selectionChanged -= Close;
+
+            Popup.Instance.Close();
         }
 
         private sealed class Popup : CLRSingleTone<Popup>
         {
-            private SerializedProperty
-                m_Property, m_PositionProperty,
+            private UnityEngine.Object m_Object;
+            private string
                 m_X, m_Y, m_Z, m_W;
+            private Vector3 m_PositionValue;
+            private Quaternion m_Value;
 
             public bool IsOpened { get; private set; } = false;
 
@@ -89,6 +88,7 @@ namespace Point.Collections.Editor
             {
                 if (IsOpened) return;
 
+                Tools.hidden = true;
                 SceneView.duringSceneGui += OnSceneGUI;
 
                 SceneView.RepaintAll();
@@ -98,30 +98,77 @@ namespace Point.Collections.Editor
             {
                 SceneView.duringSceneGui -= OnSceneGUI;
 
-                if (m_Property != null)
-                {
-                    m_Property.serializedObject.ApplyModifiedProperties();
-                    m_Property.serializedObject.Update();
-                }
+                Apply();
 
+                Tools.hidden = false;
                 SceneView.RepaintAll();
                 IsOpened = false;
             }
+            public void Apply()
+            {
+                using (SerializedObject obj = new SerializedObject(m_Object))
+                {
+                    obj.FindProperty(m_X).floatValue = m_Value.x;
+                    obj.FindProperty(m_Y).floatValue = m_Value.y;
+                    obj.FindProperty(m_Z).floatValue = m_Value.z;
+                    if (m_W != null)
+                    {
+                        obj.FindProperty(m_W).floatValue = m_Value.w;
+                    }
+
+                    obj.ApplyModifiedProperties();
+                }
+            }
             public void SetProperty(SerializedProperty property, SerializedProperty positionProperty)
             {
-                m_Property = property;
-                m_PositionProperty = positionProperty;
+                m_Object = property.serializedObject.targetObject;
+                if (positionProperty != null)
+                {
+                    m_PositionValue = positionProperty.GetVector3();
+                }
 
-                m_X = m_Property.FindPropertyRelative("x");
-                m_Y = m_Property.FindPropertyRelative("y");
-                m_Z = m_Property.FindPropertyRelative("z");
-                m_W = m_Property.FindPropertyRelative("w");
+                SerializedProperty
+                    xProp = property.FindPropertyRelative("x"),
+                    yProp = property.FindPropertyRelative("y"),
+                    zProp = property.FindPropertyRelative("z"),
+                    wProp = property.FindPropertyRelative("w");
+
+                m_X = xProp.propertyPath;
+                m_Y = yProp.propertyPath;
+                m_Z = zProp.propertyPath;
+                
+                if (wProp == null)
+                {
+                    m_W = null;
+                    m_Value = Quaternion.Euler(new float3(
+                        xProp.floatValue,
+                        yProp.floatValue,
+                        zProp.floatValue
+                        ));
+                }
+                else
+                {
+                    m_W = wProp.propertyPath;
+                    
+                    if (xProp.floatValue == 0 && yProp.floatValue == 0 && 
+                        zProp.floatValue == 0 && wProp.floatValue == 0)
+                    {
+                        m_Value = Quaternion.identity;
+                    }
+                    else
+                    {
+                        m_Value = new Quaternion(
+                            xProp.floatValue,
+                            yProp.floatValue,
+                            zProp.floatValue,
+                            wProp.floatValue
+                            );
+                    }
+                }
             }
 
             private void OnSceneGUI(SceneView sceneView)
             {
-                if (m_Property == null) return;
-
                 Handles.BeginGUI();
                 float
                     width = 100,
@@ -142,37 +189,19 @@ namespace Point.Collections.Editor
                 Handles.EndGUI();
 
                 //const float size = 1, arrowSize = 2, centerOffset = .5f;
-                Quaternion rotation;
-                Vector4 temp = new Vector4(m_X.floatValue, m_Y.floatValue, m_Z.floatValue, m_W.floatValue);
-                if (temp.Equals(Vector4.zero))
+                var changed = Handles.DoRotationHandle(m_Value, m_PositionValue);
+
+                if (!m_Value.Equals(changed))
                 {
-                    rotation = Quaternion.identity;
+                    m_Value = changed;
+                    Apply();
                 }
-                else
-                {
-                    rotation = new Quaternion(m_X.floatValue, m_Y.floatValue, m_Z.floatValue, m_W.floatValue);
-                }
-
-                Vector3 position = Vector3.zero;
-
-                if (m_PositionProperty != null)
-                {
-                    position = m_PositionProperty.GetVector3();
-                    //Vector3 scale = m_PositionProperty.GetVector3();
-                    //Handles.DrawWireCube(position, scale);
-                }
-
-                rotation = Handles.DoRotationHandle(rotation, position);
-
-                m_X.floatValue = rotation.x;
-                m_Y.floatValue = rotation.y;
-                m_Z.floatValue = rotation.z;
-                m_W.floatValue = rotation.w;
+                //m_Value.x = rotation.x;
+                //m_Value.y = rotation.y;
+                //m_Value.z = rotation.z;
+                //m_Value.w = rotation.w;
 
                 // https://gamedev.stackexchange.com/questions/149514/use-unity-handles-for-interaction-in-the-scene-view
-
-                m_Property.serializedObject.ApplyModifiedProperties();
-                //Debug.Log($"{Event.current.mousePosition}");
             }
             //
         }

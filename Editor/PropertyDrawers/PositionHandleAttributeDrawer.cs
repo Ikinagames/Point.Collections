@@ -32,40 +32,38 @@ namespace Point.Collections.Editor
         protected override string ClosedButtonText => "Close";
         protected override string ClosedButtonTooltip => "Scene view 에서 오브젝트 위치를 수정합니다.";
 
-        private bool m_Opened = false;
+        protected override bool Opened => Popup.Instance.IsOpened;
 
-        protected override bool Opened => m_Opened;
-
-        protected override void BeforePropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
-        {
-            if (!Popup.Instance.IsOpened && m_Opened)
-            {
-                m_Opened = false;
-            }
-        }
         protected override void OnButtonClick(SerializedProperty property)
         {
-            if (!m_Opened)
+            if (!Opened)
             {
                 Popup.Instance.SetProperty(property, attribute as PositionHandleAttribute);
                 Popup.Instance.Open();
 
-                m_Opened = true;
+                Selection.selectionChanged += Close;
             }
             else
             {
-                Popup.Instance.Close();
-                m_Opened = false;
+                Close();
             }
+        }
+        private void Close()
+        {
+            Selection.selectionChanged -= Close;
+
+            Popup.Instance.Close();
         }
 
         private sealed class Popup : CLRSingleTone<Popup>
         {
             private PositionHandleAttribute m_Attribute;
             private Transform m_Tr;
-            private SerializedProperty
-                m_Property,
+
+            private UnityEngine.Object m_Object;
+            private string
                 m_X, m_Y, m_Z;
+            private Vector3 m_Value;
 
             public bool IsOpened { get; private set; } = false;
 
@@ -78,6 +76,7 @@ namespace Point.Collections.Editor
             {
                 if (IsOpened) return;
 
+                Tools.hidden = true;
                 SceneView.duringSceneGui += OnSceneGUI;
 
                 SceneView.RepaintAll();
@@ -87,23 +86,41 @@ namespace Point.Collections.Editor
             {
                 SceneView.duringSceneGui -= OnSceneGUI;
 
-                if (m_Property != null)
-                {
-                    m_Property.serializedObject.ApplyModifiedProperties();
-                    m_Property.serializedObject.Update();
-                }
+                Apply();
 
+                Tools.hidden = false;
                 SceneView.RepaintAll();
                 IsOpened = false;
+            }
+            private void Apply()
+            {
+                using (SerializedObject obj = new SerializedObject(m_Object))
+                {
+                    obj.FindProperty(m_X).floatValue = m_Value.x;
+                    obj.FindProperty(m_Y).floatValue = m_Value.y;
+                    obj.FindProperty(m_Z).floatValue = m_Value.z;
+
+                    obj.ApplyModifiedProperties();
+                }
             }
             public void SetProperty(SerializedProperty property, PositionHandleAttribute attribute)
             {
                 m_Attribute = attribute;
-                m_Property = property;
+                m_Object = property.serializedObject.targetObject;
 
-                m_X = m_Property.FindPropertyRelative("x");
-                m_Y = m_Property.FindPropertyRelative("y");
-                m_Z = m_Property.FindPropertyRelative("z");
+                SerializedProperty
+                    xProp = property.FindPropertyRelative("x"),
+                    yProp = property.FindPropertyRelative("y"),
+                    zProp = property.FindPropertyRelative("z");
+
+                m_X = xProp.propertyPath;
+                m_Y = yProp.propertyPath;
+                m_Z = zProp.propertyPath;
+                m_Value = new Vector3(
+                    xProp.floatValue,
+                    yProp.floatValue,
+                    zProp.floatValue
+                    );
 
                 if (m_Attribute.Local)
                 {
@@ -120,8 +137,6 @@ namespace Point.Collections.Editor
 
             private void OnSceneGUI(SceneView sceneView)
             {
-                if (m_Property == null) return;
-
                 Handles.BeginGUI();
                 float
                     width = 100,
@@ -141,28 +156,24 @@ namespace Point.Collections.Editor
 
                 Handles.EndGUI();
 
-                //const float size = 1, arrowSize = 2, centerOffset = .5f;
-                Vector3 position = new Vector3(m_X.floatValue, m_Y.floatValue, m_Z.floatValue);
+                Vector3 changed;
                 if (m_Tr != null)
                 {
-                    position = Handles.DoPositionHandle(position + m_Tr.position, quaternion.identity);
-
-                    position -= m_Tr.position;
+                    changed = Handles.DoPositionHandle(m_Value + m_Tr.position, quaternion.identity);
+                    changed -= m_Tr.position;
                 }
                 else
                 {
-                    position = Handles.DoPositionHandle(position, quaternion.identity);
+                    changed = Handles.DoPositionHandle(m_Value, quaternion.identity);
                 }
 
-                m_X.floatValue = position.x;
-                m_Y.floatValue = position.y;
-                m_Z.floatValue = position.z;
-
-                m_Property.serializedObject.ApplyModifiedProperties();
+                if (!m_Value.Equals(changed))
+                {
+                    m_Value = changed;
+                    Apply();
+                }
 
                 // https://gamedev.stackexchange.com/questions/149514/use-unity-handles-for-interaction-in-the-scene-view
-
-                //Debug.Log($"{Event.current.mousePosition}");
             }
             //
         }

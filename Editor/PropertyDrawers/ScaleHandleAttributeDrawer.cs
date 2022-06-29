@@ -34,41 +34,43 @@ namespace Point.Collections.Editor
         protected override string ClosedButtonText => "Close";
         protected override string ClosedButtonTooltip => "Scene view 에서 오브젝트 스케일을 수정합니다.";
 
-        private bool m_Opened = false;
+        protected override bool Opened => Popup.Instance.IsOpened;
 
-        protected override bool Opened => m_Opened;
-
-        protected override void BeforePropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
-        {
-            if (!Popup.Instance.IsOpened && m_Opened)
-            {
-                m_Opened = false;
-            }
-        }
         protected override void OnButtonClick(SerializedProperty property)
         {
-            if (!m_Opened)
+            if (!Opened)
             {
-                var parent = PropertyDrawerHelper.GetParentOfProperty(property);
+                var parent = property.GetParent();
                 var positionField = parent.FindPropertyRelative(attribute.PositionField);
 
-                Popup.Instance.SetProperty(property, positionField);
+                Popup.Instance.SetProperty(property, 
+                    positionField,
+                    parent.FindPropertyRelative(attribute.RotationField),
+                    attribute.Position);
                 Popup.Instance.Open();
 
-                m_Opened = true;
+                Selection.selectionChanged += Close;
             }
             else
             {
-                Popup.Instance.Close();
-                m_Opened = false;
+                Close();
             }
+        }
+        private void Close()
+        {
+            Selection.selectionChanged -= Close;
+
+            Popup.Instance.Close();
         }
 
         private sealed class Popup : CLRSingleTone<Popup>
         {
-            private SerializedProperty
-                m_Property, m_PositionProperty,
+            private UnityEngine.Object m_Object;
+            private string
                 m_X, m_Y, m_Z;
+            private Vector3 m_PositionValue;
+            private Quaternion m_RotationValue;
+            private Vector3 m_Value;
 
             public bool IsOpened { get; private set; } = false;
 
@@ -81,6 +83,7 @@ namespace Point.Collections.Editor
             {
                 if (IsOpened) return;
 
+                Tools.hidden = true;
                 SceneView.duringSceneGui += OnSceneGUI;
 
                 SceneView.RepaintAll();
@@ -90,29 +93,65 @@ namespace Point.Collections.Editor
             {
                 SceneView.duringSceneGui -= OnSceneGUI;
 
-                if (m_Property != null)
-                {
-                    m_Property.serializedObject.ApplyModifiedProperties();
-                    m_Property.serializedObject.Update();
-                }
+                Apply();
 
+                Tools.hidden = false;
                 SceneView.RepaintAll();
                 IsOpened = false;
             }
-            public void SetProperty(SerializedProperty property, SerializedProperty positionProp)
+            private void Apply()
             {
-                m_Property = property;
-                m_PositionProperty = positionProp;
+                using (SerializedObject obj = new SerializedObject(m_Object))
+                {
+                    obj.FindProperty(m_X).floatValue = m_Value.x;
+                    obj.FindProperty(m_Y).floatValue = m_Value.y;
+                    obj.FindProperty(m_Z).floatValue = m_Value.z;
 
-                m_X = m_Property.FindPropertyRelative("x");
-                m_Y = m_Property.FindPropertyRelative("y");
-                m_Z = m_Property.FindPropertyRelative("z");
+                    obj.ApplyModifiedProperties();
+                }
+            }
+            public void SetProperty(SerializedProperty property, 
+                SerializedProperty positionProperty, SerializedProperty rotationProperty,
+                Vector3 defaultPosition = default(Vector3))
+            {
+                m_Object = property.serializedObject.targetObject;
+                if (positionProperty != null)
+                {
+                    m_PositionValue = positionProperty.GetVector3();
+                }
+                else m_PositionValue = defaultPosition;
+
+                if (rotationProperty != null)
+                {
+                    if (rotationProperty.propertyType == SerializedPropertyType.Vector4)
+                    {
+                        m_RotationValue = new quaternion(rotationProperty.GetVector4());
+                    }
+                    else if (rotationProperty.propertyType == SerializedPropertyType.Vector3)
+                    {
+                        m_RotationValue = Quaternion.Euler(rotationProperty.GetVector3());
+                    }
+                    else m_RotationValue = Quaternion.identity;
+                }
+                else m_RotationValue = Quaternion.identity;
+
+                SerializedProperty
+                    xProp = property.FindPropertyRelative("x"),
+                    yProp = property.FindPropertyRelative("y"),
+                    zProp = property.FindPropertyRelative("z");
+
+                m_X = xProp.propertyPath;
+                m_Y = yProp.propertyPath;
+                m_Z = zProp.propertyPath;
+                m_Value = new Vector3(
+                    xProp.floatValue,
+                    yProp.floatValue,
+                    zProp.floatValue
+                    );
             }
 
             private void OnSceneGUI(SceneView sceneView)
             {
-                if (m_Property == null) return;
-
                 Handles.BeginGUI();
                 float
                     width = 100,
@@ -133,17 +172,22 @@ namespace Point.Collections.Editor
                 Handles.EndGUI();
 
                 //const float size = 1, arrowSize = 2, centerOffset = .5f;
-                Vector3 scale = new Vector3(m_X.floatValue, m_Y.floatValue, m_Z.floatValue);
-                if (scale.Equals(Vector3.zero))
+                if (m_Value.Equals(Vector3.zero))
                 {
-                    scale = (float3)Mathf.Epsilon;
+                    m_Value = (float3)Mathf.Epsilon;
                 }
 
-                scale = Handles.DoScaleHandle(scale, m_PositionProperty.GetVector3(), quaternion.identity, 1);
+                var changed = Handles.DoScaleHandle(m_Value, m_PositionValue, m_RotationValue, HandleUtility.GetHandleSize(m_PositionValue));
 
-                m_X.floatValue = scale.x;
-                m_Y.floatValue = scale.y;
-                m_Z.floatValue = scale.z;
+                if (!m_Value.Equals(changed))
+                {
+                    m_Value = changed;
+                    Apply();
+                }
+
+                //m_X.floatValue = scale.x;
+                //m_Y.floatValue = scale.y;
+                //m_Z.floatValue = scale.z;
 
                 // https://gamedev.stackexchange.com/questions/149514/use-unity-handles-for-interaction-in-the-scene-view
 

@@ -29,6 +29,7 @@ namespace Point.Collections
     {
         public Vector3 Position;
         public string PositionField = string.Empty;
+        public string RotationField = string.Empty;
 
         public ScaleHandleAttribute() { }
         public ScaleHandleAttribute(string positionField)
