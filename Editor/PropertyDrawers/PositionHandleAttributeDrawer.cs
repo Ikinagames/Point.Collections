@@ -184,7 +184,7 @@ namespace Point.Collections.Editor
 
                     {
                         Handles.matrix = Matrix4x4.TRS(changed, m_Rotation, Vector3.one);
-                        Handles.DrawWireCube(changed, Vector3.one * HandleUtility.GetHandleSize(changed) * .5f);
+                        Handles.DrawWireCube(Vector3.zero, Vector3.one * HandleUtility.GetHandleSize(changed) * .5f);
                     }
                     Handles.matrix = prevMatrix;
 
@@ -196,7 +196,7 @@ namespace Point.Collections.Editor
 
                     {
                         Handles.matrix = Matrix4x4.TRS(changed, m_Rotation, Vector3.one);
-                        Handles.DrawWireCube(changed, Vector3.one * HandleUtility.GetHandleSize(changed) * .5f);
+                        Handles.DrawWireCube(Vector3.zero, Vector3.one * HandleUtility.GetHandleSize(changed) * .5f);
                     }
                     Handles.matrix = prevMatrix;
                 }
