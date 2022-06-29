@@ -64,6 +64,7 @@ namespace Point.Collections.Editor
             private string
                 m_X, m_Y, m_Z;
             private Vector3 m_Value;
+            private Quaternion m_Rotation;
 
             public bool IsOpened { get; private set; } = false;
 
@@ -95,6 +96,7 @@ namespace Point.Collections.Editor
                 m_Tr = null;
                 m_Object = null;
                 m_IsLocalPosition = false;
+                m_Rotation = Quaternion.identity;
             }
             private void Apply()
             {
@@ -107,9 +109,9 @@ namespace Point.Collections.Editor
                     obj.ApplyModifiedProperties();
                 }
             }
-            public void SetProperty(SerializedProperty property, PositionHandleAttribute attribute)
+            public void SetProperty(SerializedProperty property, PositionHandleAttribute positionAtt)
             {
-                m_IsLocalPosition = attribute.Local;
+                m_IsLocalPosition = positionAtt.Local;
                 m_Object = property.serializedObject.targetObject;
 
                 SerializedProperty
@@ -135,6 +137,20 @@ namespace Point.Collections.Editor
                     else if (m_Object is UnityEngine.Component com)
                     {
                         m_Tr = com.transform;
+                    }
+                }
+
+                if (!positionAtt.RotationField.IsNullOrEmpty())
+                {
+                    var parent = property.GetParent();
+                    var rotProp = parent.FindPropertyRelative(positionAtt.RotationField);
+                    if (rotProp.propertyType == SerializedPropertyType.Vector3)
+                    {
+                        m_Rotation = Quaternion.Euler(rotProp.GetVector3());
+                    }
+                    else if (rotProp.propertyType == SerializedPropertyType.Vector4)
+                    {
+                        m_Rotation = new quaternion(rotProp.GetVector4());
                     }
                 }
             }
@@ -163,20 +179,21 @@ namespace Point.Collections.Editor
                 Vector3 changed;
                 if (m_Tr != null)
                 {
-                    changed = Handles.DoPositionHandle(m_Value + m_Tr.position, quaternion.identity);
+                    changed = Handles.DoPositionHandle(m_Value + m_Tr.position, m_Rotation);
+                    Handles.DrawWireCube(changed, Vector3.one * HandleUtility.GetHandleSize(changed) * .5f);
+
                     changed -= m_Tr.position;
                 }
                 else
                 {
-                    changed = Handles.DoPositionHandle(m_Value, quaternion.identity);
+                    changed = Handles.DoPositionHandle(m_Value, m_Rotation);
+                    Handles.DrawWireCube(changed, Vector3.one * HandleUtility.GetHandleSize(changed) * .5f);
                 }
-
                 if (!m_Value.Equals(changed))
                 {
                     m_Value = changed;
                     Apply();
                 }
-
                 // https://gamedev.stackexchange.com/questions/149514/use-unity-handles-for-interaction-in-the-scene-view
             }
             //
