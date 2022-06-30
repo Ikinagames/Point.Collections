@@ -264,6 +264,7 @@ namespace Point.Collections.Editor
             };
 
             item.AddToClassList("list-content-item");
+            item.style.paddingLeft = 15;
 
             element.Add(button);
             element.Add(item);
@@ -313,20 +314,20 @@ namespace Point.Collections.Editor
 
         public static VisualElement ElementFactory(SerializedProperty element)
         {
-            if (element.ChildCount() > 1)
-            {
-                VisualElement ve = new VisualElement();
-                ve.AddToClassList("content-container");
-                ve.AddToClassList("inner-container");
+            //if (element.ChildCount() > 1)
+            //{
+            //    VisualElement ve = new VisualElement();
+            //    ve.AddToClassList("content-container");
+            //    ve.AddToClassList("inner-container");
 
-                foreach (var item in element.ForEachChild())
-                {
-                    var childVe = CoreGUI.VisualElement.PropertyField(item);
-                    ve.Add(childVe);
-                }
+            //    foreach (var item in element.ForEachChild())
+            //    {
+            //        var childVe = CoreGUI.VisualElement.PropertyField(item);
+            //        ve.Add(childVe);
+            //    }
 
-                return ve;
-            }
+            //    return ve;
+            //}
 
             return CoreGUI.VisualElement.PropertyField(element);
         }

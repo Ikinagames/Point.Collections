@@ -103,6 +103,11 @@ namespace Point.Collections.Editor
         }
         public override VisualElement contentContainer => null;
 
+        public const string ussBaseClassName = "unity-base-field";
+        public const string ussClassName = "unity-object-field";
+        public const string labelUssBaseClassName = ussBaseClassName + "__label";
+        public const string labelUssClassName = ussClassName + "__label";
+
         public AssetPathFieldView()
         {
             styleSheets.Add(CoreGUI.VisualElement.DefaultStyleSheet);
@@ -111,11 +116,8 @@ namespace Point.Collections.Editor
             style.flexDirection = FlexDirection.Row;
 
             m_Label = new Label();
-            m_Label.style.flexShrink = 1;
-            m_Label.style.flexGrow = 1;
-            m_Label.style.width = new StyleLength(new Length(40, LengthUnit.Percent));
-            m_Label.style.alignContent = Align.Center;
-            m_Label.style.unityTextAlign = TextAnchor.MiddleLeft;
+            m_Label.AddToClassList(labelUssBaseClassName);
+            m_Label.AddToClassList(labelUssClassName);
             m_Label.style.Hide(true);
             hierarchy.Add(m_Label);
 
@@ -123,14 +125,14 @@ namespace Point.Collections.Editor
             m_ObjectField.allowSceneObjects = false;
             m_ObjectField.style.flexShrink = 1;
             m_ObjectField.style.flexGrow = 1;
-            m_ObjectField.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
+            m_ObjectField.style.width = new StyleLength(new Length(50, LengthUnit.Percent));
             m_ObjectField.RegisterValueChangedCallback(ObjectChanged);
             hierarchy.Add(m_ObjectField);
 
             m_PathField = new TextField();
             m_PathField.style.flexShrink = 1;
             m_PathField.style.flexGrow = 1;
-            m_PathField.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
+            m_PathField.style.width = new StyleLength(new Length(50, LengthUnit.Percent));
             m_PathField.style.overflow = Overflow.Hidden;
 #if UNITY_2020_1_OR_NEWER
             m_PathField.style.textOverflow = TextOverflow.Ellipsis;
