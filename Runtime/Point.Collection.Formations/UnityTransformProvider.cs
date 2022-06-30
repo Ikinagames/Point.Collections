@@ -30,13 +30,13 @@ using UnityEngine.Assertions;
 
 namespace Point.Collections.Formations
 {
-    public class UnityTransformProvider : ITransformation
+    public class UnityTransformProvider : ITransform
     {
-        private ITransformation m_Parent;
+        private ITransform m_Parent;
         private UnityEngine.Transform m_Transform;
         private UnityEngine.AI.NavMeshAgent m_Agent;
 
-        public ITransformation parent
+        public ITransform parent
         {
             get => m_Parent;
             set

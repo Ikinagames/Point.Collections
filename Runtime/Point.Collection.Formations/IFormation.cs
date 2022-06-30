@@ -29,11 +29,11 @@ using Unity.Mathematics;
 
 namespace Point.Collections.Formations
 {
-    public interface IFormation : ITransformation, IEnumerable<IFormation>
+    public interface IFormation : ITransform, IEnumerable<IFormation>
     {
         string DisplayName { get; }
         IFormationGroupProvider GroupProvider { get; }
-        ITransformation TransformationProvider { get; }
+        ITransform TransformationProvider { get; }
 
 #pragma warning disable IDE1006 // Naming Styles
         new IFormation parent { get; set; }

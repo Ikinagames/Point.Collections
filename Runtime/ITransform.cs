@@ -24,26 +24,19 @@
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
-
 using Unity.Mathematics;
 
-namespace Point.Collections.Formations
+namespace Point.Collections
 {
-    public interface ITransformation
+    public interface ITransform : ITransformation
     {
 #pragma warning disable IDE1006 // Naming Styles
-        ITransformation parent { get; set; }
+        ITransform parent { get; set; }
 
-        float4x4 localToWorld { get; }
-        float4x4 worldToLocal { get; }
         float3 position { get; set; }
-        float3 localPosition { get; set; }
         quaternion rotation { get; set; }
-        quaternion localRotation { get; set; }
         float3 eulerAngles { get; set; }
-        float3 localEulerAngles { get; set; }
         float3 lossyScale { get; set; }
-        float3 localScale { get; set; }
 #pragma warning restore IDE1006 // Naming Styles
 
         void SetPosition(float3 position);

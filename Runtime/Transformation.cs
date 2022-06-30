@@ -20,6 +20,7 @@
 #define UNITYENGINE
 using UnityEngine;
 using Unity.Collections;
+using System;
 #if UNITY_MATHEMATICS
 using Unity.Mathematics;
 #else
@@ -37,7 +38,8 @@ namespace Point.Collections
 #if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
-    public struct Transformation
+    [Serializable]
+    public struct Transformation : ITransformation
     {
         [JsonProperty(Order = 0, PropertyName = "localRotation")]
         public quaternion localRotation;
@@ -61,6 +63,36 @@ namespace Point.Collections
             localPosition = position;
             localRotation = rotation;
             localScale = scale;
+        }
+
+        [JsonIgnore]
+        public float4x4 localToWorld
+        {
+            get
+            {
+                return new float4x4(new float3x3(localRotation), localPosition);
+            }
+        }
+        [JsonIgnore]
+        public float4x4 worldToLocal => math.inverse(localToWorld);
+
+        [JsonIgnore]
+        float3 ITransformation.localPosition { get => localPosition; set => localPosition = value; }
+        [JsonIgnore]
+        quaternion ITransformation.localRotation { get => localRotation; set => localRotation = value; }
+        [JsonIgnore]
+        float3 ITransformation.localScale { get => localScale; set => localScale = value; }
+        [JsonIgnore]
+        public float3 localEulerAngles
+        {
+            get => localRotation.Euler() * Math.Deg2Rad;
+            set
+            {
+                float3 temp = value * Math.Deg2Rad;
+                // .001f
+                temp = math.round(temp * 1000) * 0.001f;
+                localRotation = quaternion.EulerZXY(temp);
+            }
         }
 
         public static implicit operator Transformation(Transform t)

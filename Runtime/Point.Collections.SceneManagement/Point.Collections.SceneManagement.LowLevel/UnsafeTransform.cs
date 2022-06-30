@@ -61,4 +61,9 @@ namespace Point.Collections.SceneManagement.LowLevel
 
         public override int GetHashCode() => hashCode;
     }
+
+    public struct UnsafeTransformScene
+    {
+
+    }
 }

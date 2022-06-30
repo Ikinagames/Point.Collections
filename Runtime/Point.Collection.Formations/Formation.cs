@@ -32,12 +32,12 @@ using UnityEngine.Assertions;
 
 namespace Point.Collections.Formations
 {
-    public class Formation : IFormation, ITransformation
+    public class Formation : IFormation, ITransform
     {
         private IFormation m_Parent;
         private List<IFormation> m_Children;
         private IFormationGroupProvider m_GroupProvider;
-        private ITransformation m_TransformationProvider;
+        private ITransform m_TransformationProvider;
 
         public string DisplayName { get; set; }
         public IFormationGroupProvider GroupProvider
@@ -63,7 +63,7 @@ namespace Point.Collections.Formations
                 }
             }
         }
-        public ITransformation TransformationProvider
+        public ITransform TransformationProvider
         {
             get => m_TransformationProvider;
             set
@@ -226,7 +226,7 @@ namespace Point.Collections.Formations
             }
         }
 
-        ITransformation ITransformation.parent { get => parent; set => parent = value as IFormation; }
+        ITransform ITransform.parent { get => parent; set => parent = value as IFormation; }
 
         public float4x4 localToWorld
         {
@@ -247,7 +247,7 @@ namespace Point.Collections.Formations
                 {
                     return TransformationProvider.worldToLocal;
                 }
-                return math.fastinverse(worldToLocal);
+                return math.inverse(localToWorld);
             }
         }
 
@@ -402,7 +402,7 @@ namespace Point.Collections.Formations
                 return;
             }
 
-            ITransformation targetParent;
+            ITransform targetParent;
             if (TransformationProvider == null)
             {
                 m_Parent = parent;
