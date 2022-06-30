@@ -36,27 +36,18 @@ namespace Point.Collections.SceneManagement.LowLevel
 
         public int parentIndex;
 
-        public float3 localPosition;
-        public quaternion localRotation;
-        public float3 localScale;
+        public Transformation transformation;
 
         public UnsafeTransform(Transformation tr)
         {
             hashCode = CollectionUtility.CreateHashCode();
             parentIndex = -1;
 
-            localPosition = tr.localPosition;
-            localRotation = tr.localRotation;
-            localScale = tr.localScale;
+            transformation = tr;
         }
-        public UnsafeTransform(Transformation tr, int parent)
+        public UnsafeTransform(Transformation tr, int parent) : this(tr)
         {
-            hashCode = CollectionUtility.CreateHashCode();
             parentIndex = parent;
-
-            localPosition = tr.localPosition;
-            localRotation = tr.localRotation;
-            localScale = tr.localScale;
         }
 
         public override int GetHashCode() => hashCode;
