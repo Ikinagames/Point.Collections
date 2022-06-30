@@ -32,6 +32,8 @@ namespace Point.Collections.SceneManagement.LowLevel
         [SerializeField] private bool m_Lerp;
         [SerializeField] private Vector3 m_TargetPosition;
 
+        public override bool EnableOnAwake => true;
+
         private void Start()
         {
             SetRandomTarget();
@@ -46,7 +48,7 @@ namespace Point.Collections.SceneManagement.LowLevel
 
         private void SetRandomTarget()
         {
-            m_TargetPosition = transform.position + GetRandomVector(-1000, 1000);
+            m_TargetPosition = transform.position + GetRandomVector(-100, 100);
         }
         private static Vector3 GetRandomVector(float st, float en)
         {

@@ -168,8 +168,8 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             int prevLength = data[0].buffer.Length;
             data[0].buffer.Resize(prevLength * 2);
-            data[0].transforms.Ptr = data[0].buffer.Ptr;
-            data[0].transforms.Capacity = prevLength * 2;
+            data[0].transforms = new UnsafeFixedListWrapper<UnsafeTransform>(
+                data[0].buffer, data[0].transforms.Length);
 
             transformAccessArray.Dispose();
             transformAccessArray = new TransformAccessArray(prevLength * 2);

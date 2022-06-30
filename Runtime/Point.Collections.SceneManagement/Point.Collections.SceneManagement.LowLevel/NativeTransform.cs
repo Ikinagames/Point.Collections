@@ -31,11 +31,15 @@ namespace Point.Collections.SceneManagement.LowLevel
     [DisallowMultipleComponent]
     public class NativeTransform : PointMonobehaviour
     {
+        [SerializeField] private bool m_EnableOnAwake = true;
         [SerializeField] private Vector3 m_Position;
         [SerializeField] private Vector3 m_Rotation;
         [SerializeField] private Vector3 m_Scale = Vector3.one;
 
         private UnsafeReference<UnsafeTransform> m_Ptr;
+
+        public bool Enabled => m_Ptr.IsCreated;
+        public virtual bool EnableOnAwake => m_EnableOnAwake;
 
         public float3 localPosition
         {
@@ -43,7 +47,11 @@ namespace Point.Collections.SceneManagement.LowLevel
             set
             {
                 m_Position = value;
-                m_Ptr.Value.transformation.localPosition = m_Position;
+                if (Enabled)
+                {
+                    m_Ptr.Value.transformation.localPosition = m_Position;
+                }
+                else transform.localPosition = value;
             }
         } 
         public quaternion localRotation
@@ -52,7 +60,12 @@ namespace Point.Collections.SceneManagement.LowLevel
             set
             {
                 m_Rotation = ((Quaternion)value).eulerAngles;
-                m_Ptr.Value.transformation.localRotation = value;
+
+                if (Enabled)
+                {
+                    m_Ptr.Value.transformation.localRotation = value;
+                }
+                else transform.localRotation = value;
             }
         }
         public float3 localScale
@@ -61,7 +74,12 @@ namespace Point.Collections.SceneManagement.LowLevel
             set
             {
                 m_Scale = value;
-                m_Ptr.Value.transformation.localScale = m_Scale;
+
+                if (Enabled)
+                {
+                    m_Ptr.Value.transformation.localScale = m_Scale;
+                }
+                else transform.localScale = value;
             }
         }
         public float3 eulerAngles
@@ -70,12 +88,27 @@ namespace Point.Collections.SceneManagement.LowLevel
             set
             {
                 m_Rotation = value;
-                m_Ptr.Value.transformation.localRotation = quaternion.EulerZXY(m_Rotation * Math.Deg2Rad);
+                if (Enabled)
+                {
+                    m_Ptr.Value.transformation.localRotation = quaternion.EulerZXY(m_Rotation * Math.Deg2Rad);
+                }
+                else transform.eulerAngles = value;
             }
         }
 
         protected virtual void OnEnable()
         {
+            if (EnableOnAwake) Enable();
+        }
+        protected virtual void OnDisable()
+        {
+            Disable();
+        }
+
+        public void Enable()
+        {
+            if (m_Ptr.IsCreated) return;
+
             m_Ptr = TransformSceneManager.Add(transform);
             m_Ptr.Value.transformation.localPosition = m_Position;
             m_Ptr.Value.transformation.localRotation = quaternion.EulerZXY(m_Rotation * Math.Deg2Rad);
@@ -83,20 +116,14 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             OnInitialized();
         }
-        protected virtual void OnDisable()
+        public void Disable()
         {
-            TransformSceneManager.Remove(m_Ptr);
-        }
-//#if UNITY_EDITOR
-//        protected virtual void OnValidate()
-//        {
-//            if (!Application.isPlaying && !m_Ptr.IsCreated) return;
+            if (!m_Ptr.IsCreated) return;
 
-//            m_Ptr.Value.transformation.localPosition = m_Position;
-//            m_Ptr.Value.transformation.localRotation = quaternion.EulerZXY(m_Rotation * Math.Deg2Rad);
-//            m_Ptr.Value.transformation.localScale = m_Scale;
-//        }
-//#endif
+            TransformSceneManager.Remove(m_Ptr);
+
+            m_Ptr = default;
+        }
 
         protected virtual void OnInitialized() { }
     }

@@ -55,10 +55,8 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             if (Instance.m_Scene.RequireResize())
             {
-                Debug.Break();
                 Instance.m_Scene.Resize(Instance.m_TransformList);
                 "resized".ToLog();
-                Debug.Break();
             }
 
             var ptr = Instance.m_Scene.AddTransform(tr, new Transformation(tr));

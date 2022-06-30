@@ -44,7 +44,7 @@ namespace Point.Collections.Buffer.LowLevel
         where T : unmanaged
     {
         internal UnsafeReference<T> m_Buffer;
-        private readonly int m_Capacity;
+        private int m_Capacity;
         private int m_Count;
 
         public UnsafeReference<T> Ptr
