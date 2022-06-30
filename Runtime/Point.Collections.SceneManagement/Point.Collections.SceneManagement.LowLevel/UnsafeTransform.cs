@@ -92,8 +92,14 @@ namespace Point.Collections.SceneManagement.LowLevel
             return false;
         }
 
-        public UnsafeReference<UnsafeTransform> AddTransform(UnityEngine.Transform transform, Transformation transformation = default(Transformation))
+        public UnsafeReference<UnsafeTransform> AddTransform(UnityEngine.Transform transform, 
+            Transformation transformation = default(Transformation))
         {
+            if (transformation.Equals(default(Transformation)))
+            {
+                transformation = Transformation.identity;
+            }
+
             Assert.IsFalse(RequireResize(), "This Scene require resize but you didn\'t.");
 
             int count = data[0].transforms.Length;

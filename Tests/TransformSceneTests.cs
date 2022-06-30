@@ -22,6 +22,7 @@
 using NUnit.Framework;
 using Point.Collections.Buffer.LowLevel;
 using Point.Collections.SceneManagement.LowLevel;
+using UnityEngine;
 
 namespace Point.Collections.Tests
 {
@@ -36,10 +37,12 @@ namespace Point.Collections.Tests
 
             scene.RemoveTransform(temp1.Ptr);
 
-            var temp = scene.AddTransform();
+            GameObject obj = new GameObject();
+
+            var temp = scene.AddTransform(obj.transform);
             scene.RemoveTransform(temp);
 
-            Unmanaged<UnsafeTransformScene>();
+            //Unmanaged<UnsafeTransformScene>();
         }
         public void Unmanaged<T>() where T : unmanaged { }
     }

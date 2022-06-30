@@ -39,8 +39,10 @@ namespace Point.Collections
     [BurstCompatible]
 #endif
     [Serializable]
-    public struct Transformation : ITransformation
+    public struct Transformation : ITransformation, IEquatable<Transformation>
     {
+        public static Transformation identity => new Transformation(0, quaternion.identity, 0);
+
         [JsonProperty(Order = 0, PropertyName = "localRotation")]
         public quaternion localRotation;
         [JsonProperty(Order = 1, PropertyName = "localPosition")]
@@ -103,6 +105,13 @@ namespace Point.Collections
                 localRotation = t.localRotation,
                 localScale = t.localScale
             };
+        }
+
+        public bool Equals(Transformation other)
+        {
+            return localPosition.Equals(other.localPosition) &&
+                localRotation.Equals(other.localRotation) &&
+                localScale.Equals(other.localScale);
         }
 #endif
     }
