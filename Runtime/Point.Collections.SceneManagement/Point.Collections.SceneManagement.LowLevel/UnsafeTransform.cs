@@ -40,7 +40,7 @@ namespace Point.Collections.SceneManagement.LowLevel
         public struct ReadOnly
         {
             public readonly int hashCode;
-            public readonly Transformation parent;
+            public readonly float4x4 localToWorld, worldToLocal;
             public readonly Transformation transformation;
 
             public ReadOnly(UnsafeTransform tr)
@@ -48,9 +48,14 @@ namespace Point.Collections.SceneManagement.LowLevel
                 hashCode = tr.hashCode;
                 if (tr.parent.IsCreated)
                 {
-                    parent = tr.parent.Value.transformation;
+                    localToWorld = tr.parent.Value.transformation.localToWorld;
+                    worldToLocal = tr.parent.Value.transformation.worldToLocal;
                 }
-                else parent = Transformation.identity;
+                else
+                {
+                    localToWorld = float4x4.identity;
+                    worldToLocal = float4x4.identity;
+                }
 
                 transformation = tr.transformation;
             }
@@ -119,10 +124,13 @@ namespace Point.Collections.SceneManagement.LowLevel
                 this.buffer = buffer;
             }
 
-            public void Execute(int i, TransformAccess transform)
+            public void Execute(int i, TransformAccess tr)
             {
+                UnsafeTransform.ReadOnly transform = buffer[0];
+
                 // TODO : 
-                transform.position = buffer[0].transformation.localPosition;
+                tr.position 
+                    = math.mul(transform.localToWorld, new float4(transform.transformation.localPosition, 1)).xyz;
             }
         }
 
