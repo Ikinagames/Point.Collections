@@ -52,6 +52,9 @@ namespace Point.Collections.Buffer.LowLevel
         int INativeList<T>.Capacity { get => m_Capacity; set => throw new NotImplementedException(); }
 #endif
         int IFixedList.Length => Length;
+        /// <summary>
+        /// 아이템의 총 갯수, 버퍼의 길이가 아님. 버퍼의 길이는 <seealso cref="Capacity"/> 를 참고
+        /// </summary>
         public int Length
         {
             get => m_Count;

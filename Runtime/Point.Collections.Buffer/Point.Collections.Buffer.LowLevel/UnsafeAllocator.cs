@@ -629,6 +629,38 @@ namespace Point.Collections.Buffer.LowLevel
         }
 #endif
 
+        public static unsafe bool Contains(this in UnsafeAllocator t, UnsafeReference ptr)
+        {
+            UnsafeReference start = t.Ptr;
+            UnsafeReference end = ((byte*)t.Ptr) + t.Size;
+
+            if (start.Ptr <= ptr.Ptr && ptr.Ptr < end.Ptr) return true;
+            return false;
+        }
+        public static unsafe bool Contains<T>(this in UnsafeAllocator<T> t, UnsafeReference ptr)
+            where T : unmanaged
+        {
+            UnsafeReference start = t.Ptr;
+            UnsafeReference end = ((byte*)t.Ptr.Ptr) + t.Size;
+
+            if (start.Ptr <= ptr.Ptr && ptr.Ptr < end.Ptr) return true;
+            return false;
+        }
+
+        public static unsafe int IndexOf<T>(this in UnsafeAllocator<T> t, UnsafeReference ptr)
+            where T : unmanaged
+        {
+            if (!t.Contains(ptr)) return -1;
+
+            UnsafeReference<T> first = t.Ptr;
+            for (int i = 0; i < t.Length; i++)
+            {
+                UnsafeReference target = first + i;
+                if (target.Equals(ptr)) return i;
+            }
+            return -1;
+        }
+
         public static void Sort<T, U>(this ref UnsafeAllocator<T> t, U comparer)
             where T : unmanaged
             where U : unmanaged, IComparer<T>
