@@ -58,14 +58,19 @@ namespace Point.Collections.SceneManagement.LowLevel
         public bool Equals(UnsafeTransform other) => hashCode == other.hashCode;
     }
 
-    public struct UnsafeTransformScene
+    public struct UnsafeTransformScene : IDisposable
     {
         public const int INIT_COUNT = 512;
 
-        private struct Data
+        private struct Data : IDisposable
         {
             public UnsafeAllocator<UnsafeTransform> buffer;
             public UnsafeFixedListWrapper<UnsafeTransform> transforms;
+
+            public void Dispose()
+            {
+                buffer.Dispose();
+            }
         }
 
         private UnsafeAllocator<Data> data;
@@ -130,6 +135,13 @@ namespace Point.Collections.SceneManagement.LowLevel
             data[0].transforms.RemoveAtSwapback(index);
             transformAccessArray.RemoveAtSwapBack(index);
             "success".ToLog();
+        }
+
+        public void Dispose()
+        {
+            data[0].Dispose();
+            data.Dispose();
+            transformAccessArray.Dispose();
         }
     }
 }
