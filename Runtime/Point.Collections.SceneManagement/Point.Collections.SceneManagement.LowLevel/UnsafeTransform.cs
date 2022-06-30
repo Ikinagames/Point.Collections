@@ -20,7 +20,9 @@
 #define UNITYENGINE
 using Point.Collections.Buffer.LowLevel;
 using System;
+using Unity.Burst;
 using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine.Assertions;
 using UnityEngine.Jobs;
@@ -35,23 +37,43 @@ namespace Point.Collections.SceneManagement.LowLevel
 #endif
     public struct UnsafeTransform : IEquatable<UnsafeTransform>
     {
-        public static UnsafeTransform Invalid => new UnsafeTransform(default(Transformation), -1);
+        public struct ReadOnly
+        {
+            public readonly int hashCode;
+            public readonly Transformation parent;
+            public readonly Transformation transformation;
+
+            public ReadOnly(UnsafeTransform tr)
+            {
+                hashCode = tr.hashCode;
+                if (tr.parent.IsCreated)
+                {
+                    parent = tr.parent.Value.transformation;
+                }
+                else parent = Transformation.identity;
+
+                transformation = tr.transformation;
+            }
+        }
+
+        public static UnsafeTransform Invalid => new UnsafeTransform(default(Transformation));
         public int hashCode;
 
-        public int parentIndex;
+        public UnsafeReference<UnsafeTransform> parent;
         public Transformation transformation;
 
         public UnsafeTransform(Transformation tr)
         {
+            this = default(UnsafeTransform);
             hashCode = CollectionUtility.CreateHashCode();
-            parentIndex = -1;
 
             transformation = tr;
         }
-        public UnsafeTransform(Transformation tr, int parent) : this(tr)
+        public UnsafeTransform(Transformation tr, UnsafeReference<UnsafeTransform> parent) : this(tr)
         {
-            parentIndex = parent;
+            this.parent = parent;
         }
+        public ReadOnly AsReadOnly() => new ReadOnly(this);
 
         public override int GetHashCode() => hashCode;
 
@@ -66,10 +88,41 @@ namespace Point.Collections.SceneManagement.LowLevel
         {
             public UnsafeAllocator<UnsafeTransform> buffer;
             public UnsafeFixedListWrapper<UnsafeTransform> transforms;
+            public JobHandle jobHandle;
 
             public void Dispose()
             {
                 buffer.Dispose();
+            }
+        }
+        [BurstCompile(CompileSynchronously = true)]
+        private struct CollectTransformationJob : IJobParallelFor
+        {
+            [ReadOnly]
+            public UnsafeAllocator<UnsafeTransform> buffer;
+            [WriteOnly]
+            public NativeArray<UnsafeTransform.ReadOnly> results;
+
+            public void Execute(int i)
+            {
+                results[i] = buffer[i].AsReadOnly();
+            }
+        }
+        [BurstCompile(CompileSynchronously = true)]
+        private struct SynchronizeJob : IJobParallelForTransform
+        {
+            [DeallocateOnJobCompletion]
+            private NativeArray<UnsafeTransform.ReadOnly> buffer;
+
+            public SynchronizeJob(NativeArray<UnsafeTransform.ReadOnly> buffer)
+            {
+                this.buffer = buffer;
+            }
+
+            public void Execute(int i, TransformAccess transform)
+            {
+                // TODO : 
+                transform.position = buffer[0].transformation.localPosition;
             }
         }
 
@@ -135,6 +188,29 @@ namespace Point.Collections.SceneManagement.LowLevel
             data[0].transforms.RemoveAtSwapback(index);
             transformAccessArray.RemoveAtSwapBack(index);
             "success".ToLog();
+        }
+
+        public JobHandle Synchronize(JobHandle dependsOn = default)
+        {
+            int dataCount = data[0].transforms.Length;
+
+            NativeArray<UnsafeTransform.ReadOnly> readonlyData
+                = new NativeArray<UnsafeTransform.ReadOnly>(dataCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            CollectTransformationJob collectJob = new CollectTransformationJob
+            {
+                buffer = data[0].buffer,
+                results = readonlyData
+            };
+            JobHandle jobHandle = collectJob.Schedule(dataCount, 64, JobHandle.CombineDependencies(data[0].jobHandle, dependsOn));
+
+            SynchronizeJob job = new SynchronizeJob(readonlyData);
+            JobHandle handle = job.Schedule(
+                transformAccessArray,
+                jobHandle);
+
+            data[0].jobHandle = JobHandle.CombineDependencies(data[0].jobHandle, handle);
+
+            return handle;
         }
 
         public void Dispose()
