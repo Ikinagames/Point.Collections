@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Point.Collections
@@ -122,6 +123,32 @@ namespace Point.Collections
             }
 
             return components.ToArray();
+        }
+
+        #endregion
+
+        #region float4x4
+
+        public static float3 GetPosition(this float4x4 t)
+        {
+            return t.c3.xyz;
+        }
+        public static quaternion GetRotation(this float4x4 t)
+        {
+            return quaternion.LookRotationSafe(t.c2.xyz, t.c1.xyz);
+        }
+        /// <summary>
+        /// local
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static float3 GetScale(this float4x4 t)
+        {
+            return new float3(
+                math.sqrt(math.mul(t.c0.xyz, t.c0.xyz)),
+                math.sqrt(math.mul(t.c1.xyz, t.c1.xyz)),
+                math.sqrt(math.mul(t.c2.xyz, t.c2.xyz))
+                );
         }
 
         #endregion

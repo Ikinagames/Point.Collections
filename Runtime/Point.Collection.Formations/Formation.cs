@@ -321,7 +321,7 @@ namespace Point.Collections.Formations
                 {
                     return localScale;
                 }
-                return parent.lossyScale / localScale;
+                return parent.localScale / localScale;
             }
             set
             {

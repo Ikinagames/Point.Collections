@@ -22,6 +22,7 @@
 using NUnit.Framework;
 using Point.Collections.Buffer.LowLevel;
 using Point.Collections.SceneManagement.LowLevel;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Point.Collections.Tests
@@ -47,6 +48,15 @@ namespace Point.Collections.Tests
             scene.Dispose();
         }
         public void Unmanaged<T>() where T : unmanaged { }
+        [Test]
+        public void ResizeTest()
+        {
+            List<Transform> list = new List<Transform>();
+            UnsafeTransformScene scene = new UnsafeTransformScene(Unity.Collections.Allocator.Temp);
+            scene.Resize(list);
+
+            scene.Dispose();
+        }
     }
 }
 

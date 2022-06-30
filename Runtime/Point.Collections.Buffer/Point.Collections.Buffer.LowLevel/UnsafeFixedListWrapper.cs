@@ -43,13 +43,22 @@ namespace Point.Collections.Buffer.LowLevel
     public struct UnsafeFixedListWrapper<T> : IFixedList<T>, IEquatable<UnsafeFixedListWrapper<T>>
         where T : unmanaged
     {
-        internal readonly UnsafeReference<T> m_Buffer;
+        internal UnsafeReference<T> m_Buffer;
         private readonly int m_Capacity;
         private int m_Count;
 
-        public int Capacity => m_Capacity;
+        public UnsafeReference<T> Ptr
+        {
+            get => m_Buffer;
+            set => m_Buffer = value;
+        }
+        public int Capacity
+        {
+            get => m_Capacity;
+            set => m_Capacity = value;
+        }
 #if UNITYENGINE && UNITY_COLLECTIONS
-        int INativeList<T>.Capacity { get => m_Capacity; set => throw new NotImplementedException(); }
+        int INativeList<T>.Capacity { get => m_Capacity; set => m_Capacity = value; }
 #endif
         int IFixedList.Length => Length;
         /// <summary>

@@ -20,10 +20,13 @@
 #define UNITYENGINE
 using Point.Collections.Buffer.LowLevel;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Jobs;
 #else
@@ -41,6 +44,8 @@ namespace Point.Collections.SceneManagement.LowLevel
         {
             public readonly int hashCode;
             public readonly float4x4 localToWorld, worldToLocal;
+            public readonly quaternion parentRotation;
+            public readonly float3 parentScale;
             public readonly Transformation transformation;
 
             public ReadOnly(UnsafeTransform tr)
@@ -50,11 +55,15 @@ namespace Point.Collections.SceneManagement.LowLevel
                 {
                     localToWorld = tr.parent.Value.transformation.localToWorld;
                     worldToLocal = tr.parent.Value.transformation.worldToLocal;
+                    parentRotation = tr.parent.Value.transformation.localRotation;
+                    parentScale = tr.parent.Value.transformation.localScale;
                 }
                 else
                 {
                     localToWorld = float4x4.identity;
                     worldToLocal = float4x4.identity;
+                    parentRotation = quaternion.identity;
+                    parentScale = 1;
                 }
 
                 transformation = tr.transformation;
@@ -85,15 +94,16 @@ namespace Point.Collections.SceneManagement.LowLevel
         public bool Equals(UnsafeTransform other) => hashCode == other.hashCode;
     }
 
-    public struct UnsafeTransformScene : IDisposable
+    [BurstCompatible]
+    public struct UnsafeTransformScene : IValidation, IDisposable
     {
         public const int INIT_COUNT = 512;
 
+        [BurstCompatible]
         private struct Data : IDisposable
         {
             public UnsafeAllocator<UnsafeTransform> buffer;
             public UnsafeFixedListWrapper<UnsafeTransform> transforms;
-            public JobHandle jobHandle;
 
             public void Dispose()
             {
@@ -116,7 +126,7 @@ namespace Point.Collections.SceneManagement.LowLevel
         [BurstCompile(CompileSynchronously = true)]
         private struct SynchronizeJob : IJobParallelForTransform
         {
-            [DeallocateOnJobCompletion]
+            [DeallocateOnJobCompletion, ReadOnly]
             private NativeArray<UnsafeTransform.ReadOnly> buffer;
 
             public SynchronizeJob(NativeArray<UnsafeTransform.ReadOnly> buffer)
@@ -131,11 +141,14 @@ namespace Point.Collections.SceneManagement.LowLevel
                 // TODO : 
                 tr.position 
                     = math.mul(transform.localToWorld, new float4(transform.transformation.localPosition, 1)).xyz;
+                tr.rotation = math.mul(transform.transformation.localRotation, transform.parentRotation);
+                tr.localScale = transform.parentScale / transform.transformation.localScale;
             }
         }
 
         private UnsafeAllocator<Data> data;
         private TransformAccessArray transformAccessArray;
+        private JobHandle jobHandle;
 
         public UnsafeTransformScene(Allocator allocator, int initCount = INIT_COUNT)
         {
@@ -146,8 +159,32 @@ namespace Point.Collections.SceneManagement.LowLevel
                 allocator);
             data[0].transforms = new UnsafeFixedListWrapper<UnsafeTransform>(data[0].buffer, 0);
             transformAccessArray = new TransformAccessArray(initCount);
+
+            jobHandle = default(JobHandle);
+        }
+        public void Resize(IEnumerable<Transform> tr)
+        {
+            Complete();
+
+            int prevLength = data[0].buffer.Length;
+            data[0].buffer.Resize(prevLength * 2);
+            data[0].transforms.Ptr = data[0].buffer.Ptr;
+            data[0].transforms.Capacity = prevLength * 2;
+
+            transformAccessArray.Dispose();
+            transformAccessArray = new TransformAccessArray(prevLength * 2);
+            foreach (var item in tr)
+            {
+                transformAccessArray.Add(item);
+            }
+
+            jobHandle = default(JobHandle);
         }
 
+        public bool IsValid()
+        {
+            return data.IsCreated && transformAccessArray.isCreated;
+        }
         public bool RequireResize()
         {
             if (data[0].transforms.Length >= data[0].buffer.Length ||
@@ -161,6 +198,11 @@ namespace Point.Collections.SceneManagement.LowLevel
         public UnsafeReference<UnsafeTransform> AddTransform(UnityEngine.Transform transform, 
             Transformation transformation = default(Transformation))
         {
+            if (RequireResize())
+            {
+                UnityEngine.Debug.LogError("require Resize");
+                return default;
+            }
             if (transformation.Equals(default(Transformation)))
             {
                 transformation = Transformation.identity;
@@ -175,19 +217,19 @@ namespace Point.Collections.SceneManagement.LowLevel
             UnsafeReference<UnsafeTransform> ptr = data[0].buffer.ElementAt(count);
             return ptr;
         }
-        public void RemoveTransform(UnsafeReference<UnsafeTransform> ptr)
+        public int RemoveTransform(UnsafeReference<UnsafeTransform> ptr)
         {
             if (!data[0].buffer.Contains(ptr))
             {
-                $"?? not in the buffer {data[0].buffer.Ptr} ? {ptr}".ToLog();
-                return;
+                UnityEngine.Debug.LogError($"?? not in the buffer {data[0].buffer.Ptr} ? {ptr}");
+                return -1;
             }
 
             int index = data[0].buffer.IndexOf(ptr);
             if (index < 0)
             {
-                $"?? not in the buffer {data[0].buffer.Ptr} ? {ptr}".ToLog();
-                return;
+                UnityEngine.Debug.LogError($"?? not in the buffer {data[0].buffer.Ptr} ? {ptr}");
+                return -1;
             }
 
             UnsafeTransform tr = data[0].buffer[index];
@@ -195,11 +237,19 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             data[0].transforms.RemoveAtSwapback(index);
             transformAccessArray.RemoveAtSwapBack(index);
-            "success".ToLog();
+            
+            return index;
+        }
+
+        public void Complete()
+        {
+            jobHandle.Complete();
         }
 
         public JobHandle Synchronize(JobHandle dependsOn = default)
         {
+            Complete();
+
             int dataCount = data[0].transforms.Length;
 
             NativeArray<UnsafeTransform.ReadOnly> readonlyData
@@ -209,20 +259,23 @@ namespace Point.Collections.SceneManagement.LowLevel
                 buffer = data[0].buffer,
                 results = readonlyData
             };
-            JobHandle jobHandle = collectJob.Schedule(dataCount, 64, JobHandle.CombineDependencies(data[0].jobHandle, dependsOn));
+            JobHandle jobHandle = collectJob.Schedule(
+                dataCount, 64, JobHandle.CombineDependencies(this.jobHandle, dependsOn));
 
             SynchronizeJob job = new SynchronizeJob(readonlyData);
             JobHandle handle = job.Schedule(
                 transformAccessArray,
                 jobHandle);
 
-            data[0].jobHandle = JobHandle.CombineDependencies(data[0].jobHandle, handle);
+            jobHandle = handle;
 
             return handle;
         }
 
         public void Dispose()
         {
+            Complete();
+
             data[0].Dispose();
             data.Dispose();
             transformAccessArray.Dispose();
