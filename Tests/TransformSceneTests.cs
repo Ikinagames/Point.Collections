@@ -38,7 +38,10 @@ namespace Point.Collections.Tests
 
             var temp = scene.AddTransform();
             scene.RemoveTransform(temp);
+
+            Unmanaged<UnsafeTransformScene>();
         }
+        public void Unmanaged<T>() where T : unmanaged { }
     }
 }
 

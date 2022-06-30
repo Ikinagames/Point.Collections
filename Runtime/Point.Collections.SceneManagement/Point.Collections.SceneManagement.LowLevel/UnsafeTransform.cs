@@ -23,6 +23,7 @@ using System;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine.Assertions;
+using UnityEngine.Jobs;
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
@@ -61,54 +62,67 @@ namespace Point.Collections.SceneManagement.LowLevel
     {
         public const int INIT_COUNT = 512;
 
-        private UnsafeAllocator<UnsafeTransform> buffer;
-        private UnsafeFixedListWrapper<UnsafeTransform> transforms;
+        private struct Data
+        {
+            public UnsafeAllocator<UnsafeTransform> buffer;
+            public UnsafeFixedListWrapper<UnsafeTransform> transforms;
+        }
+
+        private UnsafeAllocator<Data> data;
+        private TransformAccessArray transformAccessArray;
 
         public UnsafeTransformScene(Allocator allocator, int initCount = INIT_COUNT)
         {
-            buffer = new UnsafeAllocator<UnsafeTransform>(
+            data = new UnsafeAllocator<Data>(1, allocator);
+
+            data[0].buffer = new UnsafeAllocator<UnsafeTransform>(
                 initCount,
                 allocator);
-            transforms = new UnsafeFixedListWrapper<UnsafeTransform>(buffer, 0);
+            data[0].transforms = new UnsafeFixedListWrapper<UnsafeTransform>(data[0].buffer, 0);
+            transformAccessArray = new TransformAccessArray(initCount);
         }
 
         public bool RequireResize()
         {
-            if (transforms.Length >= buffer.Length ||
-                transforms.Length + 1 >= buffer.Length)
+            if (data[0].transforms.Length >= data[0].buffer.Length ||
+                data[0].transforms.Length + 1 >= data[0].buffer.Length)
             {
                 return true;
             }
             return false;
         }
 
-        public UnsafeReference<UnsafeTransform> AddTransform(Transformation tr = default(Transformation))
+        public UnsafeReference<UnsafeTransform> AddTransform(UnityEngine.Transform transform, Transformation transformation = default(Transformation))
         {
             Assert.IsFalse(RequireResize(), "This Scene require resize but you didn\'t.");
 
-            int count = transforms.Length;
-            transforms.AddNoResize(new UnsafeTransform(tr));
+            int count = data[0].transforms.Length;
+            data[0].transforms.AddNoResize(new UnsafeTransform(transformation));
+            transformAccessArray.Add(transform);
 
-            UnsafeReference<UnsafeTransform> ptr = buffer.ElementAt(count);
+            UnsafeReference<UnsafeTransform> ptr = data[0].buffer.ElementAt(count);
             return ptr;
         }
         public void RemoveTransform(UnsafeReference<UnsafeTransform> ptr)
         {
-            if (!buffer.Contains(ptr))
+            if (!data[0].buffer.Contains(ptr))
             {
-                $"?? not in the buffer {buffer.Ptr} ? {ptr}".ToLog();
+                $"?? not in the buffer {data[0].buffer.Ptr} ? {ptr}".ToLog();
                 return;
             }
 
-            int index = buffer.IndexOf(ptr);
+            int index = data[0].buffer.IndexOf(ptr);
             if (index < 0)
             {
-                $"?? not in the buffer {buffer.Ptr} ? {ptr}".ToLog();
+                $"?? not in the buffer {data[0].buffer.Ptr} ? {ptr}".ToLog();
                 return;
             }
 
-            UnsafeTransform tr = buffer[index];
-            transforms.RemoveSwapback(tr);
+            UnsafeTransform tr = data[0].buffer[index];
+            index = data[0].transforms.IndexOf(tr);
+
+            data[0].transforms.RemoveAtSwapback(index);
+            transformAccessArray.RemoveAtSwapBack(index);
             "success".ToLog();
         }
     }
