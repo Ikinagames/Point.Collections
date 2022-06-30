@@ -238,14 +238,11 @@ namespace Point.Collections.Editor
                     Apply();
                 }
 
-                var prevMatrix = Handles.matrix;
+                float size = HandleUtility.GetHandleSize(m_PositionValue);
+                using (new HandleMatrix(Matrix4x4.TRS(m_PositionValue, m_Value, Vector3.one)))
                 {
-                    var size = HandleUtility.GetHandleSize(m_PositionValue);
-                    Handles.matrix = Matrix4x4.TRS(m_PositionValue, m_Value, Vector3.one);
-
                     Handles.DrawWireCube(Vector3.zero, Vector3.one * size * .5f);
                 }
-                Handles.matrix = prevMatrix;
                 // https://gamedev.stackexchange.com/questions/149514/use-unity-handles-for-interaction-in-the-scene-view
             }
             //

@@ -177,16 +177,14 @@ namespace Point.Collections.Editor
                 Handles.EndGUI();
 
                 Vector3 changed;
-                var prevMatrix = Handles.matrix;
                 if (m_Tr != null)
                 {
                     changed = Handles.DoPositionHandle(m_Value + m_Tr.position, m_Rotation);
 
+                    using (new HandleMatrix(Matrix4x4.TRS(changed, m_Rotation, Vector3.one)))
                     {
-                        Handles.matrix = Matrix4x4.TRS(changed, m_Rotation, Vector3.one);
                         Handles.DrawWireCube(Vector3.zero, Vector3.one * HandleUtility.GetHandleSize(changed) * .5f);
                     }
-                    Handles.matrix = prevMatrix;
 
                     changed -= m_Tr.position;
                 }
@@ -194,11 +192,10 @@ namespace Point.Collections.Editor
                 {
                     changed = Handles.DoPositionHandle(m_Value, m_Rotation);
 
+                    using (new HandleMatrix(Matrix4x4.TRS(changed, m_Rotation, Vector3.one)))
                     {
-                        Handles.matrix = Matrix4x4.TRS(changed, m_Rotation, Vector3.one);
                         Handles.DrawWireCube(Vector3.zero, Vector3.one * HandleUtility.GetHandleSize(changed) * .5f);
                     }
-                    Handles.matrix = prevMatrix;
                 }
                 if (!m_Value.Equals(changed))
                 {
