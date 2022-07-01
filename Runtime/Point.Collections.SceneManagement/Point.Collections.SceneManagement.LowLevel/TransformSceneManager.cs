@@ -23,6 +23,7 @@
 #endif
 
 using Point.Collections.Buffer.LowLevel;
+using System;
 using System.Collections.Generic;
 using Unity.Jobs;
 using UnityEngine;
@@ -99,22 +100,50 @@ namespace Point.Collections.SceneManagement.LowLevel
 
         #region BatchedData
 
+        private struct MeshMaterialKey : IEquatable<MeshMaterialKey>
+        {
+            public readonly int mesh;
+            public readonly int material;
+
+            public MeshMaterialKey(Mesh mesh, Material material)
+            {
+                this.mesh = mesh.GetInstanceID();
+                this.material = material.GetInstanceID();
+            }
+
+            public bool Equals(MeshMaterialKey other) 
+                => mesh == other.mesh && material == other.material;
+        }
+        private Dictionary<int, Material> m_MaterialMap = new Dictionary<int, Material>();
+        private Dictionary<int, Mesh> m_MeshMap = new Dictionary<int, Mesh>();
+
+        private static MeshMaterialKey GetMeshMaterialKey(Mesh mesh, Material material)
+        {
+            Instance.m_MaterialMap[material.GetInstanceID()] = material;
+            Instance.m_MeshMap[mesh.GetInstanceID()] = mesh;
+
+            return new MeshMaterialKey(mesh, material);
+        }
+
         private struct BatchedData
         {
-            public Material material;
+            //public Material material;
+            public MeshMaterialKey key;
             public List<UnsafeGraphicsModel> graphics;
         }
+        
+
         private Dictionary<Material, int> m_BatchedDataHashMap = new Dictionary<Material, int>();
         private List<BatchedData> m_BatchedData = new List<BatchedData>();
 
-        private static BatchedData GetBatchedData(Material material)
+        private static BatchedData GetBatchedData(Mesh mesh, Material material)
         {
             if (!Instance.m_BatchedDataHashMap.TryGetValue(material, out int index))
             {
                 index = Instance.m_BatchedData.Count;
                 Instance.m_BatchedData.Add(new BatchedData
                 {
-                    material = material,
+                    key = GetMeshMaterialKey(mesh, material),
                     graphics = new List<UnsafeGraphicsModel>()
                 });
                 Instance.m_BatchedDataHashMap.Add(material, index);
@@ -122,20 +151,31 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             return Instance.m_BatchedData[index];
         }
-        private static void SetBatchedData(Material material, BatchedData data)
+        private static void SetBatchedData(Mesh mesh, Material material, BatchedData data)
         {
             if (!Instance.m_BatchedDataHashMap.TryGetValue(material, out int index))
             {
                 index = Instance.m_BatchedData.Count;
                 Instance.m_BatchedData.Add(new BatchedData
                 {
-                    material = material,
+                    key = GetMeshMaterialKey(mesh, material),
                     graphics = new List<UnsafeGraphicsModel>(),
                 });
                 Instance.m_BatchedDataHashMap.Add(material, index);
             }
 
             Instance.m_BatchedData[index] = data;
+        }
+
+        private void SendDrawCalls()
+        {
+            for (int i = 0; i < m_BatchedData.Count; i++)
+            {
+                BatchedData data = m_BatchedData[i];
+                Material material = m_MaterialMap[data.key.material];
+
+                //GraphicsBuffer gbuffer = new GraphicsBuffer(GraphicsBuffer.Target.Raw, )
+            }
         }
 
         #endregion
@@ -145,13 +185,13 @@ namespace Point.Collections.SceneManagement.LowLevel
         {
             for (int i = 0; i < materials.Length; i++)
             {
-                BatchedData data = GetBatchedData(materials[i]);
+                BatchedData data = GetBatchedData(mesh, materials[i]);
 
                 UnsafeGraphicsModel model 
-                    = new UnsafeGraphicsModel(transform, materials[i], mesh, i, false);
+                    = new UnsafeGraphicsModel(transform, mesh, i, false);
                 data.graphics.Add(model);
 
-                SetBatchedData(materials[i], data);
+                SetBatchedData(mesh, materials[i], data);
             }
         }
 

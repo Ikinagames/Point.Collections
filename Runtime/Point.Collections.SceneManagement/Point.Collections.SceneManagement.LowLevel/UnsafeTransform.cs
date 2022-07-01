@@ -71,7 +71,7 @@ namespace Point.Collections.SceneManagement.LowLevel
         }
 
         public static UnsafeTransform Invalid => new UnsafeTransform(default(Transformation));
-        public int hashCode;
+        public int index, hashCode;
 
         public UnsafeReference<UnsafeTransform> parent;
         public Transformation transformation;
@@ -79,6 +79,7 @@ namespace Point.Collections.SceneManagement.LowLevel
         public UnsafeTransform(Transformation tr)
         {
             this = default(UnsafeTransform);
+            index = -1;
             hashCode = CollectionUtility.CreateHashCode();
 
             transformation = tr;
@@ -206,8 +207,10 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             Assert.IsFalse(RequireResize(), "This Scene require resize but you didn\'t.");
 
+            int count = data[0].transforms.Length;
             UnsafeReference<UnsafeTransform> ptr 
                 = data[0].transforms.AddNoResize(new UnsafeTransform(transformation));
+            ptr.Value.index = count;
 
             return ptr;
         }
@@ -277,14 +280,12 @@ namespace Point.Collections.SceneManagement.LowLevel
 
     public struct UnsafeGraphicsModel
     {
-        public Material material;
         public Mesh mesh;
         public int subMeshIndex;
         public UnsafeReference<UnsafeTransform> transform;
 
         public UnsafeGraphicsModel(
-            UnsafeReference<UnsafeTransform> transform, Material material, 
-            Mesh mesh, int subMeshIndex, bool hasCollider)
+            UnsafeReference<UnsafeTransform> transform, Mesh mesh, int subMeshIndex, bool hasCollider)
         {
             if (hasCollider)
             {
@@ -292,7 +293,6 @@ namespace Point.Collections.SceneManagement.LowLevel
                 Physics.BakeMesh(mesh.GetInstanceID(), false);
             }
 
-            this.material = material;
             this.mesh = mesh;
             this.subMeshIndex = subMeshIndex;
             this.transform = transform;
