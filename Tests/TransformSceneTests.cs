@@ -51,9 +51,9 @@ namespace Point.Collections.Tests
         [Test]
         public void ResizeTest()
         {
-            List<Transform> list = new List<Transform>();
+            //Transform[] list = new Transform[0];
             UnsafeTransformScene scene = new UnsafeTransformScene(Unity.Collections.Allocator.Temp);
-            scene.Resize(list);
+            scene.Resize();
 
             scene.Dispose();
         }

@@ -128,7 +128,7 @@ namespace Point.Collections.Buffer.LowLevel
 
         public ref T ElementAt(int index) => ref m_Buffer[index];
         public ref T ElementAt(uint index) => ref m_Buffer[index];
-        public void AddNoResize(T element)
+        public UnsafeReference<T> AddNoResize(T element)
         {
             if (m_Count >= Capacity)
             {
@@ -136,7 +136,10 @@ namespace Point.Collections.Buffer.LowLevel
             }
 
             m_Buffer[m_Count] = element;
+            UnsafeReference<T> ptr = m_Buffer + m_Count;
             m_Count++;
+
+            return ptr;
         }
 
         public void Clear()

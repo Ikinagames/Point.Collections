@@ -64,7 +64,16 @@ namespace Point.Collections
             set => m_Array[index] = value;
         }
 
-        public ArrayWrapper() { }
+        public ArrayWrapper()
+        {
+            m_Array = Array.Empty<T>();
+            m_Count = 0;
+        }
+        public ArrayWrapper(int initLength)
+        {
+            m_Array = new T[initLength];
+            m_Count = 0;
+        }
         [JsonConstructor]
         public ArrayWrapper(IEnumerable<T> attributes)
         {
@@ -188,6 +197,17 @@ namespace Point.Collections
             }
             m_Array = list.ToArray();
             return true;
+        }
+
+        public void Resize(int length)
+        {
+            int prev = m_Array.Length;
+            Array.Resize(ref m_Array, length);
+
+            if (length < Count)
+            {
+                m_Count = length;
+            }
         }
 
         public IEnumerator<T> GetEnumerator() => ((IList<T>)m_Array).GetEnumerator();

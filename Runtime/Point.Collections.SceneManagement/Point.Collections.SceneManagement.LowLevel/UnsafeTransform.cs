@@ -123,31 +123,31 @@ namespace Point.Collections.SceneManagement.LowLevel
                 results[i] = buffer[i].AsReadOnly();
             }
         }
-        [BurstCompile(CompileSynchronously = true)]
-        private struct SynchronizeJob : IJobParallelForTransform
-        {
-            [DeallocateOnJobCompletion, ReadOnly]
-            private NativeArray<UnsafeTransform.ReadOnly> buffer;
+        //[BurstCompile(CompileSynchronously = true)]
+        //private struct SynchronizeJob : IJobParallelForTransform
+        //{
+        //    [DeallocateOnJobCompletion, ReadOnly]
+        //    private NativeArray<UnsafeTransform.ReadOnly> buffer;
 
-            public SynchronizeJob(NativeArray<UnsafeTransform.ReadOnly> buffer)
-            {
-                this.buffer = buffer;
-            }
+        //    public SynchronizeJob(NativeArray<UnsafeTransform.ReadOnly> buffer)
+        //    {
+        //        this.buffer = buffer;
+        //    }
 
-            public void Execute(int i, TransformAccess tr)
-            {
-                UnsafeTransform.ReadOnly transform = buffer[0];
+        //    public void Execute(int i, TransformAccess tr)
+        //    {
+        //        UnsafeTransform.ReadOnly transform = buffer[i];
 
-                // TODO : 
-                tr.position 
-                    = math.mul(transform.localToWorld, new float4(transform.transformation.localPosition, 1)).xyz;
-                tr.rotation = math.mul(transform.transformation.localRotation, transform.parentRotation);
-                tr.localScale = transform.parentScale / transform.transformation.localScale;
-            }
-        }
+        //        // TODO : 
+        //        tr.position 
+        //            = math.mul(transform.localToWorld, new float4(transform.transformation.localPosition, 1)).xyz;
+        //        tr.rotation = math.mul(transform.transformation.localRotation, transform.parentRotation);
+        //        tr.localScale = transform.parentScale / transform.transformation.localScale;
+        //    }
+        //}
 
         private UnsafeAllocator<Data> data;
-        private TransformAccessArray transformAccessArray;
+        //private TransformAccessArray transformAccessArray;
         private JobHandle jobHandle;
 
         public UnsafeTransformScene(Allocator allocator, int initCount = INIT_COUNT)
@@ -158,32 +158,28 @@ namespace Point.Collections.SceneManagement.LowLevel
                 initCount,
                 allocator);
             data[0].transforms = new UnsafeFixedListWrapper<UnsafeTransform>(data[0].buffer, 0);
-            transformAccessArray = new TransformAccessArray(initCount);
+            //transformAccessArray = new TransformAccessArray(initCount);
 
             jobHandle = default(JobHandle);
         }
-        public void Resize(IEnumerable<Transform> tr)
+        public void Resize(int length)
         {
             Complete();
 
-            int prevLength = data[0].buffer.Length;
-            data[0].buffer.Resize(prevLength * 2);
+            data[0].buffer.Resize(length);
             data[0].transforms = new UnsafeFixedListWrapper<UnsafeTransform>(
                 data[0].buffer, data[0].transforms.Length);
 
-            transformAccessArray.Dispose();
-            transformAccessArray = new TransformAccessArray(prevLength * 2);
-            foreach (var item in tr)
-            {
-                transformAccessArray.Add(item);
-            }
-
             jobHandle = default(JobHandle);
+        }
+        public void Resize()
+        {
+            Resize(data[0].buffer.Length * 2);
         }
 
         public bool IsValid()
         {
-            return data.IsCreated && transformAccessArray.isCreated;
+            return data.IsCreated;
         }
         public bool RequireResize()
         {
@@ -195,12 +191,12 @@ namespace Point.Collections.SceneManagement.LowLevel
             return false;
         }
 
-        public UnsafeReference<UnsafeTransform> AddTransform(UnityEngine.Transform transform, 
-            Transformation transformation = default(Transformation))
+        public UnsafeReference<UnsafeTransform> AddTransform(Transformation transformation = default(Transformation))
         {
             if (RequireResize())
             {
                 UnityEngine.Debug.LogError("require Resize");
+                Debug.Break();
                 return default;
             }
             if (transformation.Equals(default(Transformation)))
@@ -210,11 +206,9 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             Assert.IsFalse(RequireResize(), "This Scene require resize but you didn\'t.");
 
-            int count = data[0].transforms.Length;
-            data[0].transforms.AddNoResize(new UnsafeTransform(transformation));
-            transformAccessArray.Add(transform);
+            UnsafeReference<UnsafeTransform> ptr 
+                = data[0].transforms.AddNoResize(new UnsafeTransform(transformation));
 
-            UnsafeReference<UnsafeTransform> ptr = data[0].buffer.ElementAt(count);
             return ptr;
         }
         public int RemoveTransform(UnsafeReference<UnsafeTransform> ptr)
@@ -236,7 +230,6 @@ namespace Point.Collections.SceneManagement.LowLevel
             index = data[0].transforms.IndexOf(tr);
 
             data[0].transforms.RemoveAtSwapback(index);
-            transformAccessArray.RemoveAtSwapBack(index);
             
             return index;
         }
@@ -262,14 +255,14 @@ namespace Point.Collections.SceneManagement.LowLevel
             JobHandle jobHandle = collectJob.Schedule(
                 dataCount, 64, JobHandle.CombineDependencies(this.jobHandle, dependsOn));
 
-            SynchronizeJob job = new SynchronizeJob(readonlyData);
-            JobHandle handle = job.Schedule(
-                transformAccessArray,
-                jobHandle);
+            //SynchronizeJob job = new SynchronizeJob(readonlyData);
+            //JobHandle handle = job.Schedule(
+            //    transformAccessArray,
+            //    jobHandle);
 
-            jobHandle = handle;
+            //jobHandle = handle;
 
-            return handle;
+            return jobHandle;
         }
 
         public void Dispose()
@@ -278,7 +271,31 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             data[0].Dispose();
             data.Dispose();
-            transformAccessArray.Dispose();
+            //transformAccessArray.Dispose();
+        }
+    }
+
+    public struct UnsafeGraphicsModel
+    {
+        public Material material;
+        public Mesh mesh;
+        public int subMeshIndex;
+        public UnsafeReference<UnsafeTransform> transform;
+
+        public UnsafeGraphicsModel(
+            UnsafeReference<UnsafeTransform> transform, Material material, 
+            Mesh mesh, int subMeshIndex, bool hasCollider)
+        {
+            if (hasCollider)
+            {
+                // https://docs.unity3d.com/ScriptReference/Physics.BakeMesh.html
+                Physics.BakeMesh(mesh.GetInstanceID(), false);
+            }
+
+            this.material = material;
+            this.mesh = mesh;
+            this.subMeshIndex = subMeshIndex;
+            this.transform = transform;
         }
     }
 }
