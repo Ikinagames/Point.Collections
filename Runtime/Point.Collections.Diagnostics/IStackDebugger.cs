@@ -24,6 +24,8 @@ namespace Point.Collections.Diagnostics
     public interface IStackDebugger
     {
         StackFrame GetStackFrame();
+        object GetContextObject();
         void SetStackFrame(StackFrame frame);
+        void SetContextObject(object contextObject);
     }
 }

@@ -70,6 +70,7 @@ namespace Point.Collections.Events
 
         private bool m_Reserved;
         private System.Diagnostics.StackFrame m_Caller;
+        private object m_ContextObject;
 
         public bool Reserved => m_Reserved;
         bool ISynchronousEvent.InternalEnableLog => EnableLog;
@@ -103,6 +104,7 @@ namespace Point.Collections.Events
             OnReserve();
 
             m_Caller = null;
+            m_ContextObject = null;
             m_Reserved = true;
         }
         bool IValidation.IsValid() => IsValid();
@@ -114,7 +116,10 @@ namespace Point.Collections.Events
 
         #endregion
 
+        public void SetContextObject(object contextObject) => m_ContextObject = this;
+
         System.Diagnostics.StackFrame IStackDebugger.GetStackFrame() => m_Caller;
+        object IStackDebugger.GetContextObject() => m_ContextObject;
         void IStackDebugger.SetStackFrame(System.Diagnostics.StackFrame frame)
         {
             m_Caller = frame;

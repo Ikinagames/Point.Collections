@@ -116,7 +116,8 @@ namespace Point.Collections.Events
             if (ev.InternalEnableLog)
             {
                 PointHelper.Log(Channel.Collections,
-                    string.Format(c_LogFormat, TypeHelper.ToString(ev.GetType()), ScriptUtils.ToStringFormat(ev.GetStackFrame()))
+                    string.Format(c_LogFormat, TypeHelper.ToString(ev.GetType()), ScriptUtils.ToStringFormat(ev.GetStackFrame())),
+                    ev.GetContextObject() as UnityEngine.Object
                     );
             }
 #endif
@@ -154,6 +155,23 @@ namespace Point.Collections.Events
 #endif
             m_Events.Enqueue(ev);
         }
+        public void LocalPostEvent<TEvent>(TEvent ev, object ctx)
+            where TEvent : SynchronousEvent<TEvent>, new()
+        {
+            PointHelper.AssertMainThread();
+
+            if (PointApplication.IsShutdown)
+            {
+                // TODO : 
+                return;
+            }
+
+#if DEBUG_MODE
+            ((IStackDebugger)ev).SetStackFrame(ScriptUtils.GetCallerFrame(1));
+            ((IStackDebugger)ev).SetContextObject(ctx);
+#endif
+            m_Events.Enqueue(ev);
+        }
         /// <inheritdoc cref="LocalPostEvent{TEvent}(TEvent)"/>
         public static void PostEvent<TEvent>(TEvent ev)
             where TEvent : SynchronousEvent<TEvent>, new()
@@ -168,6 +186,23 @@ namespace Point.Collections.Events
 
 #if DEBUG_MODE
             ((IStackDebugger)ev).SetStackFrame(ScriptUtils.GetCallerFrame(1));
+#endif
+            Instance.m_Events.Enqueue(ev);
+        }
+        public static void PostEvent<TEvent>(TEvent ev, object ctx)
+            where TEvent : SynchronousEvent<TEvent>, new()
+        {
+            PointHelper.AssertMainThread();
+
+            if (PointApplication.IsShutdown)
+            {
+                // TODO : 
+                return;
+            }
+
+#if DEBUG_MODE
+            ((IStackDebugger)ev).SetStackFrame(ScriptUtils.GetCallerFrame(1));
+            ((IStackDebugger)ev).SetContextObject(ctx);
 #endif
             Instance.m_Events.Enqueue(ev);
         }
