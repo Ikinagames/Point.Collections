@@ -122,7 +122,7 @@ namespace Point.Collections.Editor
             hierarchy.Add(m_Label);
 
             m_ObjectField = new ObjectField();
-            m_ObjectField.allowSceneObjects = false;
+            m_ObjectField.allowSceneObjects = true;
             m_ObjectField.style.flexShrink = 1;
             m_ObjectField.style.flexGrow = 1;
             m_ObjectField.style.width = new StyleLength(new Length(50, LengthUnit.Percent));
