@@ -130,6 +130,21 @@ namespace Point.Collections.Editor
 
             return assetPath;
         }
+        public static GameObject GetPrefabAsset(UnityEngine.Object obj)
+        {
+            string assetPath;
+            if (PrefabUtility.IsPartOfAnyPrefab(obj))
+            {
+                if (PrefabUtility.IsPartOfPrefabInstance(obj))
+                {
+                    assetPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(obj);
+                }
+                else assetPath = AssetDatabase.GetAssetPath(obj);
+            }
+            else return null;
+
+            return AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+        }
         public static string GetSelectionFolderPath()
         {
             string path = AssetDatabase.GetAssetPath(Selection.activeObject);

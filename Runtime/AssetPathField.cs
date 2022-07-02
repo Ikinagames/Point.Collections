@@ -131,6 +131,17 @@ namespace Point.Collections
 #endif
         }
 
+        public bool IsInResourceFolder()
+        {
+            const string c_Str = "resources";
+            var vs = p_AssetPath.Split('/', StringSplitOptions.None);
+            for (int i = 0; i < vs.Length; i++)
+            {
+                if (vs[0].ToLowerInvariant().Contains(c_Str)) return true;
+            }
+            return false;
+        }
+
 #if UNITY_EDITOR
         /// <summary>
         /// Editor Only
@@ -150,16 +161,6 @@ namespace Point.Collections
             const string c_Str = "plugins";
             return p_AssetPath.ToLowerInvariant().Contains(c_Str);
         }
-        /// <summary>
-        /// Editor Only
-        /// </summary>
-        /// <returns></returns>
-        public bool IsInResourceFolder()
-        {
-            const string c_Str = "resources";
-            return p_AssetPath.ToLowerInvariant().Contains(c_Str);
-        }
-
         /// <summary>
         /// Editor Only 
         /// <inheritdoc cref="UnityEditor.AssetDatabase.GetDependencies(string)"/>
