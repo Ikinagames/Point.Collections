@@ -253,8 +253,36 @@ namespace Point.Collections
             }
         }
 #endif
+#if UNITY_2020_1_OR_NEWER
+        public new AssetInfo<T> Asset
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    PointHelper.LogError(Channel.Collections,
+                        $"You cannot load AssetInfo from editor.");
+
+                    return AssetInfo<T>.Invalid;
+                }
+#endif
+                return LoadAsset();
+            }
+        }
+#endif
 
         public AssetPathField(string path) : base(path) { }
+
+#if UNITY_2020_1_OR_NEWER
+        public new AssetInfo<T> LoadAsset()
+        {
+            if (p_AssetInfo.IsValid()) return (AssetInfo<T>)p_AssetInfo;
+
+            p_AssetInfo = ResourceManager.LoadAsset(this.ToString());
+            return (AssetInfo<T>)p_AssetInfo;
+        }
+#endif
 
         public bool Equals(AssetPathField<T> other) => p_AssetPath.Equals(other.p_AssetPath) && TargetType.Equals(other.TargetType);
     }

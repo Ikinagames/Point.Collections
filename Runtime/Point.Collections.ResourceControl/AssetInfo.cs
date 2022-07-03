@@ -52,7 +52,7 @@ namespace Point.Collections.ResourceControl
         internal readonly Hash m_InstanceID;
         internal readonly AssetRuntimeKey m_Key;
 #if UNITY_EDITOR
-        private readonly bool m_EditorOnly;
+        internal readonly bool m_EditorOnly;
 #endif
 
         #endregion
@@ -167,13 +167,31 @@ namespace Point.Collections.ResourceControl
 
             m_Key = key;
         }
-        internal unsafe AssetInfo(UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash instanceID, AssetRuntimeKey key)
+        internal unsafe AssetInfo(
+            UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash instanceID, AssetRuntimeKey key
+            )
         {
             this = default(AssetInfo);
 
             m_BundlePointer = bundle;
             m_InstanceID = instanceID;
             this.m_Key = key;
+        }
+        internal unsafe AssetInfo(
+            UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash instanceID, AssetRuntimeKey key
+#if UNITY_EDITOR
+            , bool editorOnly
+#endif
+            )
+        {
+            this = default(AssetInfo);
+
+            m_BundlePointer = bundle;
+            m_InstanceID = instanceID;
+            this.m_Key = key;
+#if UNITY_EDITOR
+            m_EditorOnly = editorOnly;
+#endif
         }
 #if UNITY_EDITOR
         internal unsafe AssetInfo(AssetRuntimeKey key, bool editorOnly)
@@ -271,7 +289,7 @@ namespace Point.Collections.ResourceControl
         internal readonly Hash m_InstanceID;
         internal readonly AssetRuntimeKey m_Key;
 #if UNITY_EDITOR
-        private readonly bool m_EditorOnly;
+        internal readonly bool m_EditorOnly;
 #endif
 
         #endregion
@@ -398,6 +416,9 @@ namespace Point.Collections.ResourceControl
             m_BundlePointer = assetInfo.m_BundlePointer;
             m_InstanceID = assetInfo.InstanceID;
             this.m_Key = assetInfo.Key;
+#if UNITY_EDITOR
+            m_EditorOnly = assetInfo.m_EditorOnly;
+#endif
         }
         internal unsafe AssetInfo(UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash instanceID, AssetRuntimeKey key)
         {
@@ -489,7 +510,11 @@ namespace Point.Collections.ResourceControl
         }
         public static implicit operator AssetInfo(AssetInfo<T> t)
         {
-            return new AssetInfo(t.m_BundlePointer, t.m_InstanceID, t.m_Key);
+            return new AssetInfo(t.m_BundlePointer, t.m_InstanceID, t.m_Key
+#if UNITY_EDITOR
+                , t.m_EditorOnly
+#endif
+                );
         }
         public static implicit operator T(AssetInfo<T> t) => t.Asset;
     }

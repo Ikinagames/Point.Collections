@@ -26,6 +26,7 @@
 #if UNITYENGINE
 
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEditor;
@@ -73,12 +74,16 @@ namespace Point.Collections.Editor
                 labelContext,
                 TypeHelper.TypeOf<T>.Name);
 
-            var assets = AssetDatabase.FindAssets(context);
-            if (assets.Length == 0) return null;
+            var assets = AssetDatabase.FindAssets(context)
+                .Select(AssetDatabase.GUIDToAssetPath)
+                .Select(AssetDatabase.LoadAssetAtPath<T>);
+            if (!assets.Any()) return null;
 
-            string guid = assets[0];
-            string path = AssetDatabase.GUIDToAssetPath(guid);
-            return AssetDatabase.LoadAssetAtPath<T>(path);
+            //string guid = assets[0];
+            //string path = AssetDatabase.GUIDToAssetPath(guid);
+            //return AssetDatabase.LoadAssetAtPath<T>(path);
+
+            return assets.Where(t => t.name.Equals(name)).FirstOrDefault();
         }
         public static T LoadAsset<T>(string name) where T : UnityEngine.Object
         {
