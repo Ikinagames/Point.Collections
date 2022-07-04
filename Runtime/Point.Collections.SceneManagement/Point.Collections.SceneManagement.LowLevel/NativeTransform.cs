@@ -36,9 +36,12 @@ namespace Point.Collections.SceneManagement.LowLevel
         [SerializeField] private Vector3 m_Rotation;
         [SerializeField] private Vector3 m_Scale = Vector3.one;
 
-        private UnsafeReference<UnsafeTransform> m_Ptr;
+        private UnsafeAllocator<UnsafeTransformScene.Data> m_Buffer;
+        private int m_Index = -1;
 
-        public bool Enabled => m_Ptr.IsCreated;
+        private UnsafeReference<UnsafeTransform> Ptr => m_Buffer[0].buffer.ElementAt(m_Index);
+
+        public bool Enabled => m_Buffer.IsCreated && m_Index >= 0;
         public virtual bool EnableOnAwake => m_EnableOnAwake;
 
         public float3 localPosition
@@ -49,10 +52,10 @@ namespace Point.Collections.SceneManagement.LowLevel
                 m_Position = value;
                 if (Enabled && !PointApplication.IsShutdown)
                 {
-                    var boxed = m_Ptr.Value.transformation;
+                    var boxed = Ptr.Value.transformation;
                     boxed.localPosition = m_Position;
 
-                    m_Ptr.Value.transformation = boxed;
+                    Ptr.Value.transformation = boxed;
                 }
                 else transform.localPosition = value;
             }
@@ -66,10 +69,10 @@ namespace Point.Collections.SceneManagement.LowLevel
 
                 if (Enabled && !PointApplication.IsShutdown)
                 {
-                    var boxed = m_Ptr.Value.transformation;
+                    var boxed = Ptr.Value.transformation;
                     boxed.localRotation = value;
 
-                    m_Ptr.Value.transformation = boxed;
+                    Ptr.Value.transformation = boxed;
                 }
                 else transform.localRotation = value;
             }
@@ -83,10 +86,10 @@ namespace Point.Collections.SceneManagement.LowLevel
 
                 if (Enabled && !PointApplication.IsShutdown)
                 {
-                    var boxed = m_Ptr.Value.transformation;
+                    var boxed = Ptr.Value.transformation;
                     boxed.localScale = m_Scale;
 
-                    m_Ptr.Value.transformation = boxed;
+                    Ptr.Value.transformation = boxed;
                 }
                 else transform.localScale = value;
             }
@@ -99,10 +102,10 @@ namespace Point.Collections.SceneManagement.LowLevel
                 m_Rotation = value;
                 if (Enabled && !PointApplication.IsShutdown)
                 {
-                    var boxed = m_Ptr.Value.transformation;
+                    var boxed = Ptr.Value.transformation;
                     boxed.localRotation = quaternion.EulerZXY(m_Rotation * Math.Deg2Rad);
 
-                    m_Ptr.Value.transformation = boxed;
+                    Ptr.Value.transformation = boxed;
                 }
                 else transform.eulerAngles = value;
             }
@@ -121,28 +124,28 @@ namespace Point.Collections.SceneManagement.LowLevel
         {
             if (Enabled && !PointApplication.IsShutdown)
             {
-                var boxed = m_Ptr.Value.transformation;
+                var boxed = Ptr.Value.transformation;
                 boxed.localPosition = m_Position;
 
-                m_Ptr.Value.transformation = boxed;
+                Ptr.Value.transformation = boxed;
             }
             else transform.localPosition = m_Position;
 
             if (Enabled && !PointApplication.IsShutdown)
             {
-                var boxed = m_Ptr.Value.transformation;
+                var boxed = Ptr.Value.transformation;
                 boxed.localRotation = quaternion.EulerZXY(m_Rotation * Math.Deg2Rad);
 
-                m_Ptr.Value.transformation = boxed;
+                Ptr.Value.transformation = boxed;
             }
             else transform.eulerAngles = m_Rotation;
 
             if (Enabled && !PointApplication.IsShutdown)
             {
-                var boxed = m_Ptr.Value.transformation;
+                var boxed = Ptr.Value.transformation;
                 boxed.localScale = m_Scale;
 
-                m_Ptr.Value.transformation = boxed;
+                Ptr.Value.transformation = boxed;
             }
             else transform.localScale = m_Scale;
         }
@@ -150,24 +153,27 @@ namespace Point.Collections.SceneManagement.LowLevel
 
         public void Enable()
         {
-            if (m_Ptr.IsCreated || PointApplication.IsShutdown) return;
+            if (Enabled || PointApplication.IsShutdown) return;
 
-            m_Ptr = TransformSceneManager.Add(transform);
-            var boxed = m_Ptr.Value.transformation;
+            TransformSceneManager.Add(transform, out m_Buffer, out m_Index);
+            if (!m_Buffer.IsCreated) return;
+
+            var boxed = Ptr.Value.transformation;
             boxed.localPosition = m_Position;
             boxed.localRotation = quaternion.EulerZXY(m_Rotation * Math.Deg2Rad);
             boxed.localScale = m_Scale;
-            m_Ptr.Value.transformation = boxed;
+            Ptr.Value.transformation = boxed;
 
             OnInitialized();
         }
         public void Disable()
         {
-            if (!m_Ptr.IsCreated || PointApplication.IsShutdown) return;
+            if (!Enabled || PointApplication.IsShutdown) return;
 
-            TransformSceneManager.Remove(m_Ptr);
+            TransformSceneManager.Remove(Ptr);
 
-            m_Ptr = default;
+            m_Buffer = default;
+            m_Index = -1;
 
             "disable".ToLog();
         }

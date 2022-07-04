@@ -126,46 +126,47 @@ namespace Point.Collections.SceneManagement.LowLevel
 
         private unsafe void Resize()
         {
+            m_Matrices.ReadFromBuffer(m_MatricesGBuffer);
+
             int targetLength = m_Scene.length * 2;
 
+            m_Scene.Resize(targetLength);
             m_Matrices.Resize(targetLength);
 
-            GraphicsBuffer newTrGBuffer = new GraphicsBuffer(
-                GraphicsBuffer.Target.Structured, targetLength, UnsafeUtility.SizeOf<Transformation>());
-            m_TransformationGBuffer.Release();
-            m_TransformationGBuffer = newTrGBuffer;
+            //GraphicsBuffer newTrGBuffer = new GraphicsBuffer(
+            //    GraphicsBuffer.Target.Structured, targetLength, UnsafeUtility.SizeOf<Transformation>());
+            //m_TransformationGBuffer.Release();
+            //m_TransformationGBuffer = newTrGBuffer;
 
-            var newMatricsGBuffer = new GraphicsBuffer(
-                GraphicsBuffer.Target.Structured, targetLength, UnsafeUtility.SizeOf<float4x4>());
-            m_MatricesGBuffer.Release();
-            m_MatricesGBuffer = newMatricsGBuffer;
-
-            m_Scene.Resize(targetLength);
-
-            m_GetMatricesCS.SetConstantBuffer("_Transforms", m_TransformationGBuffer, 0,
-                m_TransformationGBuffer.count * m_TransformationGBuffer.stride);
-            m_GetMatricesCS.SetConstantBuffer("Result", m_MatricesGBuffer, 0,
-                m_MatricesGBuffer.count * m_MatricesGBuffer.stride);
+            //var newMatricsGBuffer = new GraphicsBuffer(
+            //    GraphicsBuffer.Target.Structured, targetLength, UnsafeUtility.SizeOf<float4x4>());
+            //m_MatricesGBuffer.Release();
+            //m_MatricesGBuffer = newMatricsGBuffer;
 
             "resized".ToLog();
         }
 
-        public static UnsafeReference<UnsafeTransform> Add(Transform tr)
+        public static void Add(Transform tr, 
+            out UnsafeAllocator<UnsafeTransformScene.Data> buffer, out int index)
         {
-            if (PointApplication.IsShutdown) return default;
+            if (PointApplication.IsShutdown)
+            {
+                buffer = default;
+                index = -1;
+                return;
+            }
 
             if (Instance.m_Scene.RequireResize())
             {
                 Instance.Resize();
+
+                buffer = default;
+                index = -1;
+                return;
             }
 
-            UnsafeReference<UnsafeTransform> ptr = Instance.m_Scene.AddTransform(new Transformation(tr));
-            if (!ptr.IsCreated)
-            {
-                "?? error".ToLogError();
-                Debug.Break();
-                return ptr;
-            }
+            index = Instance.m_Scene.AddTransform(new Transformation(tr));
+            buffer = Instance.m_Scene.Buffer;
 
             Renderer[] renderers = tr.GetComponentsInChildren<Renderer>();
             for (int i = 0; i < renderers.Length; i++)
@@ -184,11 +185,10 @@ namespace Point.Collections.SceneManagement.LowLevel
                 }
 
                 ren.enabled = false;
-                Instance.BuildModel(ptr, mesh, ren.sharedMaterials);
+                //Instance.BuildModel(ptr, mesh, ren.sharedMaterials);
             }
 
             Instance.m_ModifiedInThisFrame = true;
-            return ptr;
         }
         public static void Remove(UnsafeReference<UnsafeTransform> ptr)
         {
@@ -355,8 +355,9 @@ namespace Point.Collections.SceneManagement.LowLevel
                 return;
             }
 
-            UpdateBuffer();
-            UpdateCommand();
+            //UpdateBuffer();
+            //UpdateCommand();
+
             //ExecuteCommand();
 
             //for (int i = 0; i < m_Scene.count; i++)

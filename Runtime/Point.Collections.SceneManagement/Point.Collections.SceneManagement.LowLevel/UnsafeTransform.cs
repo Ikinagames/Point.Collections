@@ -37,96 +37,95 @@ using UnityEngine.Jobs;
 
 namespace Point.Collections.SceneManagement.LowLevel
 {
-#if UNITYENGINE
-    [BurstCompatible]
-#endif
-    public struct UnsafeTransform : IEquatable<UnsafeTransform>
-    {
-        public static UnsafeTransform Invalid => new UnsafeTransform(-1, default);
-        public struct ReadOnly
-        {
-            public readonly int hashCode;
-            public readonly float4x4 localToWorld, worldToLocal;
-            public readonly quaternion parentRotation;
-            public readonly float3 parentScale;
-            public readonly Transformation transformation;
+//#if UNITYENGINE
+//    [BurstCompatible]
+//#endif
+//    public struct UnsafeTransform : IEquatable<UnsafeTransform>
+//    {
+//        public static UnsafeTransform Invalid => new UnsafeTransform(-1, default);
+//        public struct ReadOnly
+//        {
+//            public readonly int hashCode;
+//            public readonly float4x4 localToWorld, worldToLocal;
+//            public readonly quaternion parentRotation;
+//            public readonly float3 parentScale;
+//            public readonly Transformation transformation;
 
-            public ReadOnly(UnsafeTransform tr)
-            {
-                hashCode = tr.hashCode;
-                if (tr.parent.IsCreated)
-                {
-                    var parentTr = tr.parent.Value.m_Transformation.Value;
-                    localToWorld = parentTr.localToWorld;
-                    worldToLocal = parentTr.worldToLocal;
-                    parentRotation = parentTr.localRotation;
-                    parentScale = parentTr.localScale;
-                }
-                else
-                {
-                    localToWorld = float4x4.identity;
-                    worldToLocal = float4x4.identity;
-                    parentRotation = quaternion.identity;
-                    parentScale = 1;
-                }
+//            public ReadOnly(UnsafeTransform tr)
+//            {
+//                hashCode = tr.hashCode;
+//                if (tr.parent.IsCreated)
+//                {
+//                    var parentTr = tr.parent.Value.m_Transformation.Value;
+//                    localToWorld = parentTr.localToWorld;
+//                    worldToLocal = parentTr.worldToLocal;
+//                    parentRotation = parentTr.localRotation;
+//                    parentScale = parentTr.localScale;
+//                }
+//                else
+//                {
+//                    localToWorld = float4x4.identity;
+//                    worldToLocal = float4x4.identity;
+//                    parentRotation = quaternion.identity;
+//                    parentScale = 1;
+//                }
 
-                transformation = tr.m_Transformation.Value;
-            }
-        }
+//                transformation = tr.m_Transformation.Value;
+//            }
+//        }
 
-        public readonly int index, hashCode;
+//        public readonly int index, hashCode;
 
-        private UnsafeReference<UnsafeTransform> parent;
-        private UnsafeReference<Transformation> m_Transformation;
+//        private UnsafeReference<UnsafeTransform> parent;
 
-        private AtomicOperator op;
+//        private AtomicOperator op;
 
-        public Transformation transformation
-        {
-            get
-            {
-                op.Enter();
-                var boxed = m_Transformation.Value;
-                op.Exit();
+//        public Transformation transformation
+//        {
+//            get
+//            {
+//                op.Enter();
+//                var boxed = m_Transformation.Value;
+//                op.Exit();
 
-                return boxed;
-            }
-            set
-            {
-                op.Enter();
-                m_Transformation.Value = value;
-                op.Exit();
-            }
-        }
+//                return boxed;
+//            }
+//            set
+//            {
+//                op.Enter();
+//                m_Transformation.Value = value;
+//                op.Exit();
+//            }
+//        }
 
-        public UnsafeTransform(int index, UnsafeReference<Transformation> tr)
-        {
-            this = default(UnsafeTransform);
-            this.index = index;
-            hashCode = CollectionUtility.CreateHashCode();
+//        public UnsafeTransform(int index, UnsafeReference<Transformation> tr)
+//        {
+//            this = default(UnsafeTransform);
+//            this.index = index;
+//            hashCode = CollectionUtility.CreateHashCode();
 
-            m_Transformation = tr;
-        }
-        public ReadOnly AsReadOnly()
-        {
-            op.Enter();
-            var temp = new ReadOnly(this);
-            op.Exit();
+//            m_Transformation = tr;
+//        }
+//        public ReadOnly AsReadOnly()
+//        {
+//            op.Enter();
+//            var temp = new ReadOnly(this);
+//            op.Exit();
 
-            return temp;
-        }
+//            return temp;
+//        }
 
-        public void SetParent(UnsafeReference<UnsafeTransform> parent)
-        {
-            op.Enter();
-            this.parent = parent;
-            op.Exit();
-        }
+//        public void SetParent(UnsafeReference<UnsafeTransform> parent)
+//        {
+//            op.Enter();
+//            this.parent = parent;
+//            op.Exit();
+//        }
 
-        public override int GetHashCode() => hashCode;
+//        public override int GetHashCode() => hashCode;
 
-        public bool Equals(UnsafeTransform other) => hashCode == other.hashCode;
-    }
+//        public bool Equals(UnsafeTransform other) => hashCode == other.hashCode;
+//    }
 
     [BurstCompatible]
     public struct UnsafeTransformScene : IValidation, IDisposable
@@ -134,42 +133,72 @@ namespace Point.Collections.SceneManagement.LowLevel
         public const int INIT_COUNT = 512;
 
         [BurstCompatible]
-        private struct Data : IDisposable
+        public struct Data : IDisposable
         {
-            public UnsafeAllocator<UnsafeTransform> buffer;
-            /// <summary>
-            /// <see cref="GraphicsBuffer"/>
-            /// </summary>
-            public UnsafeAllocator<Transformation> transformations;
-            public UnsafeFixedListWrapper<UnsafeTransform> transforms;
+            private UnsafeAllocator<Transformation> transformations;
+            private UnsafeAllocator<int> indices;
 
+            private UnsafeFixedListWrapper<int> indexList;
+            public UnsafeFixedListWrapper<Transformation> transforms;
+
+            public Data(int count, Allocator allocator)
+            {
+                transformations = new UnsafeAllocator<Transformation>(
+                    count,
+                    allocator);
+                indices = new UnsafeAllocator<int>(
+                    count,
+                    allocator);
+
+                indexList = new UnsafeFixedListWrapper<int>(indices, 0);
+                transforms = new UnsafeFixedListWrapper<Transformation>(transformations, 0);
+            }
+
+            public int GetEmptyIndex()
+            {
+                if (indexList.Length == 0)
+                {
+                    "resizeing".ToLog();
+                    Resize(transforms.Capacity * 2);
+                }
+
+                int index = indexList[0];
+                indexList.RemoveAtSwapback(0);
+
+                return index;
+            }
+
+            private void Resize(int length)
+            {
+                int prevLength = transformations.Length;
+
+                transformations.Resize(length);
+                indices.Resize(length);
+
+                indexList = new UnsafeFixedListWrapper<int>(
+                    indices, indexList.Length);
+                transforms = new UnsafeFixedListWrapper<Transformation>(
+                    transformations, prevLength);
+            }
             public void Dispose()
             {
-                buffer.Dispose();
                 transformations.Dispose();
+                indices.Dispose();
             }
         }
 
-        private UnsafeAllocator<Data> data;
+        private UnsafeAllocator<Data> m_Data;
         private JobHandle jobHandle;
 
-        public int length => data[0].buffer.Length;
-        public int count => data[0].transforms.Length;
+        public int length => m_Data[0].transforms.Capacity;
+        public int count => m_Data[0].transforms.Length;
 
-        public UnsafeAllocator<Transformation> transformations => data[0].transformations;
+        public UnsafeAllocator<Data> Buffer => m_Data;
 
         public unsafe UnsafeTransformScene(Allocator allocator, int initCount = INIT_COUNT)
         {
-            data = new UnsafeAllocator<Data>(1, allocator);
-
-            data[0].buffer = new UnsafeAllocator<UnsafeTransform>(
-                initCount,
-                allocator);
-            data[0].transformations = new UnsafeAllocator<Transformation>(
-                initCount,
-                allocator);
-            data[0].transforms = new UnsafeFixedListWrapper<UnsafeTransform>(data[0].buffer, 0);
-            //transformAccessArray = new TransformAccessArray(initCount);
+            m_Data = new UnsafeAllocator<Data>(1, allocator);
+            m_Data[0] = new Data(initCount, allocator);
 
             jobHandle = default(JobHandle);
         }
@@ -177,33 +206,22 @@ namespace Point.Collections.SceneManagement.LowLevel
         {
             Complete();
 
-            data[0].buffer.Resize(length);
-            data[0].transformations.Resize(length);
-            data[0].transforms = new UnsafeFixedListWrapper<UnsafeTransform>(
-                data[0].buffer, data[0].transforms.Length);
+            m_Data[0].Resize(length);
 
             jobHandle = default(JobHandle);
         }
         public void Resize()
         {
-            Resize(data[0].buffer.Length * 2);
+            Resize(length * 2);
         }
 
         public bool IsValid()
         {
-            return data.IsCreated;
+            return m_Data.IsCreated;
         }
-        public bool RequireResize()
-        {
-            if (data[0].transforms.Length >= data[0].buffer.Length ||
-                data[0].transforms.Length + 1 >= data[0].buffer.Length)
-            {
-                return true;
-            }
-            return false;
-        }
+        public bool RequireResize() => m_Data[0].transforms.IsFull;
 
-        public UnsafeReference<UnsafeTransform> AddTransform(Transformation transformation = default(Transformation))
+        public int AddTransform(Transformation transformation = default(Transformation))
         {
             if (RequireResize())
             {
@@ -218,33 +236,14 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             Assert.IsFalse(RequireResize(), "This Scene require resize but you didn\'t.");
 
-            int count = data[0].transforms.Length;
-            UnsafeReference<UnsafeTransform> ptr 
-                = data[0].transforms.AddNoResize(new UnsafeTransform(count, data[0].transformations.ElementAt(count)));
+            int count = m_Data[0].transforms.Length;
+            m_Data[0].transforms.AddNoResize(transformation));
 
-            $"tr added at {count}".ToLog();
-
-            return ptr;
+            return count;
         }
-        public int RemoveTransform(UnsafeReference<UnsafeTransform> ptr)
+        public int RemoveTransform(int index)
         {
-            if (!data[0].buffer.Contains(ptr))
-            {
-                UnityEngine.Debug.LogError($"?? not in the buffer {data[0].buffer.Ptr} ? {ptr}");
-                return -1;
-            }
-
-            int index = data[0].buffer.IndexOf(ptr);
-            if (index < 0)
-            {
-                UnityEngine.Debug.LogError($"?? not in the buffer {data[0].buffer.Ptr} ? {ptr}");
-                return -1;
-            }
-
-            UnsafeTransform tr = data[0].buffer[index];
-            index = data[0].transforms.IndexOf(tr);
-
-            data[0].transforms.RemoveAtSwapback(index);
+            m_Data[0].transforms.RemoveAtSwapback(index);
             
             return index;
         }
@@ -257,8 +256,8 @@ namespace Point.Collections.SceneManagement.LowLevel
         {
             Complete();
 
-            data[0].Dispose();
-            data.Dispose();
+            m_Data[0].Dispose();
+            m_Data.Dispose();
             //transformAccessArray.Dispose();
         }
     }

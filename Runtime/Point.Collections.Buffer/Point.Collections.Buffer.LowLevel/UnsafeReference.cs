@@ -213,6 +213,16 @@ namespace Point.Collections.Buffer.LowLevel
                 }
             }
         }
+        public ref T this[long index]
+        {
+            get
+            {
+                unsafe
+                {
+                    return ref *(Ptr + index);
+                }
+            }
+        }
 
         /// <inheritdoc cref="UnsafeReference.Ptr"/>
         public unsafe T* Ptr

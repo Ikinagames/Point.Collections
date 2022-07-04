@@ -75,6 +75,13 @@ namespace Point.Collections.Buffer.LowLevel
         public T Last => m_Buffer[m_Count - 1];
 
         public bool IsEmpty => !m_Buffer.IsCreated;
+        public bool IsFull
+        {
+            get
+            {
+                return m_Count >= Capacity;
+            }
+        }
 
         public T this[int index]
         {
