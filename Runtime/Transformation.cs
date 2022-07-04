@@ -21,6 +21,7 @@
 using UnityEngine;
 using Unity.Collections;
 using System;
+using System.Runtime.InteropServices;
 #if UNITY_MATHEMATICS
 using Unity.Mathematics;
 #else
@@ -39,16 +40,20 @@ namespace Point.Collections
     [BurstCompatible]
 #endif
     [Serializable]
+    //[StructLayout(LayoutKind.Explicit, Pack = 4, Size = 48)]
     public struct Transformation : ITransformation, IEquatable<Transformation>
     {
         public static Transformation identity => new Transformation(0, quaternion.identity, 0);
 
-        [JsonProperty(Order = 0, PropertyName = "localRotation")]
-        public quaternion localRotation;
+        //[FieldOffset(0)]
         [JsonProperty(Order = 1, PropertyName = "localPosition")]
         public float3 localPosition;
+        //[FieldOffset(12)]
         [JsonProperty(Order = 2, PropertyName = "localScale")]
         public float3 localScale;
+        //[FieldOffset(24)]
+        [JsonProperty(Order = 0, PropertyName = "localRotation")]
+        public quaternion localRotation;
 
 #if UNITYENGINE
 #if UNITY_COLLECTIONS

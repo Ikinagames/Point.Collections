@@ -29,34 +29,34 @@ namespace Point.Collections.Tests
 {
     public sealed class TransformSceneTests
     {
-        [Test]
-        public void PtrTest()
-        {
-            UnsafeAllocator<UnsafeTransform> temp1 = new UnsafeAllocator<UnsafeTransform>(1, Unity.Collections.Allocator.Temp);
+        //[Test]
+        //public void PtrTest()
+        //{
+        //    UnsafeAllocator<UnsafeTransform> temp1 = new UnsafeAllocator<UnsafeTransform>(1, Unity.Collections.Allocator.Temp);
 
-            UnsafeTransformScene scene = new UnsafeTransformScene(Unity.Collections.Allocator.Temp);
+        //    UnsafeTransformScene scene = new UnsafeTransformScene(Unity.Collections.Allocator.Temp);
 
-            scene.RemoveTransform(temp1.Ptr);
+        //    scene.RemoveTransform(temp1.Ptr);
 
-            GameObject obj = new GameObject();
+        //    GameObject obj = new GameObject();
 
-            var temp = scene.AddTransform(obj.transform);
-            scene.RemoveTransform(temp);
+        //    var temp = scene.AddTransform(obj.transform);
+        //    scene.RemoveTransform(temp);
 
-            //Unmanaged<UnsafeTransformScene>();
+        //    //Unmanaged<UnsafeTransformScene>();
 
-            scene.Dispose();
-        }
-        public void Unmanaged<T>() where T : unmanaged { }
-        [Test]
-        public void ResizeTest()
-        {
-            //Transform[] list = new Transform[0];
-            UnsafeTransformScene scene = new UnsafeTransformScene(Unity.Collections.Allocator.Temp);
-            scene.Resize();
+        //    scene.Dispose();
+        //}
+        //public void Unmanaged<T>() where T : unmanaged { }
+        //[Test]
+        //public void ResizeTest()
+        //{
+        //    //Transform[] list = new Transform[0];
+        //    UnsafeTransformScene scene = new UnsafeTransformScene(Unity.Collections.Allocator.Temp);
+        //    scene.Resize();
 
-            scene.Dispose();
-        }
+        //    scene.Dispose();
+        //}
     }
 }
 

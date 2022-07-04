@@ -527,6 +527,15 @@ namespace Point.Collections.Buffer.LowLevel
                 m_Buffer = t
             };
         }
+
+        public static implicit operator NativeArray<T>(UnsafeAllocator<T> t)
+        {
+            unsafe
+            {
+                return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+                    t.Ptr, t.Length, t.m_Buffer.m_Allocator);
+            }
+        }
     }
     public static class UnsafeAllocatorExtensions
     {

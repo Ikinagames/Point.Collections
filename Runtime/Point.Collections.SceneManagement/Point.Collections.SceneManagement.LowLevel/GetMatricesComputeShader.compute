@@ -1,0 +1,37 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+struct Transformation {
+    float3 localPosition;
+    float3 localScale;
+    float4 localRotation;
+};
+
+float3x3 getQuaternionMatrix(float4 value){
+    float4 desireValue = value + value;
+    uint3 rhs = uint3(2147483648u, 0u, 2147483648u);
+    uint3 rhs2 = uint3(2147483648u, 2147483648u, 0u);
+    uint3 rhs3 = uint3(0u, 2147483648u, 2147483648u);
+
+    float3x3 result;
+    result[0] = desireValue.y * asfloat(asuint(value.yxw) ^ rhs) -  desireValue.z * asfloat (asuint(value.zwx) ^ rhs3) + float3(1.0, 0.0, 0.0);
+    result[1] = desireValue.z * asfloat(asuint(value.wzy) ^ rhs2) - desireValue.x * asfloat(asuint(value.yxw) ^ rhs) +  float3(0.0, 1.0, 0.0);
+    result[2] = desireValue.x * asfloat(asuint(value.zwx) ^ rhs3) - desireValue.y * asfloat(asuint(value.wzy) ^ rhs2) + float3(0.0, 0.0, 1.0);
+
+    return result;
+}
+float4x4 TRS(float3 translation, float4 rotation, float3 scale){
+    float3x3 float3x = getQuaternionMatrix(rotation);
+    float4x4 mat = float4x4(float4(float3x[0] * scale.x, 0.0), float4(float3x[1] * scale.y, 0.0), float4(float3x[2] * scale.z, 0.0), float4(translation, 1.0));
+
+    return mat;
+}
+
+StructuredBuffer<Transformation> _Transforms;
+RWStructuredBuffer<float4x4> _Result;
+
+[numthreads(16,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    _Result[id.x] = TRS(_Transforms[id.x].localPosition, _Transforms[id.x].localRotation, _Transforms[id.x].localScale);
+}

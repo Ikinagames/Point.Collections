@@ -47,9 +47,12 @@ namespace Point.Collections.SceneManagement.LowLevel
             set
             {
                 m_Position = value;
-                if (Enabled)
+                if (Enabled && !PointApplication.IsShutdown)
                 {
-                    m_Ptr.Value.transformation.localPosition = m_Position;
+                    var boxed = m_Ptr.Value.transformation;
+                    boxed.localPosition = m_Position;
+
+                    m_Ptr.Value.transformation = boxed;
                 }
                 else transform.localPosition = value;
             }
@@ -61,9 +64,12 @@ namespace Point.Collections.SceneManagement.LowLevel
             {
                 m_Rotation = ((Quaternion)value).eulerAngles;
 
-                if (Enabled)
+                if (Enabled && !PointApplication.IsShutdown)
                 {
-                    m_Ptr.Value.transformation.localRotation = value;
+                    var boxed = m_Ptr.Value.transformation;
+                    boxed.localRotation = value;
+
+                    m_Ptr.Value.transformation = boxed;
                 }
                 else transform.localRotation = value;
             }
@@ -75,9 +81,12 @@ namespace Point.Collections.SceneManagement.LowLevel
             {
                 m_Scale = value;
 
-                if (Enabled)
+                if (Enabled && !PointApplication.IsShutdown)
                 {
-                    m_Ptr.Value.transformation.localScale = m_Scale;
+                    var boxed = m_Ptr.Value.transformation;
+                    boxed.localScale = m_Scale;
+
+                    m_Ptr.Value.transformation = boxed;
                 }
                 else transform.localScale = value;
             }
@@ -88,9 +97,12 @@ namespace Point.Collections.SceneManagement.LowLevel
             set
             {
                 m_Rotation = value;
-                if (Enabled)
+                if (Enabled && !PointApplication.IsShutdown)
                 {
-                    m_Ptr.Value.transformation.localRotation = quaternion.EulerZXY(m_Rotation * Math.Deg2Rad);
+                    var boxed = m_Ptr.Value.transformation;
+                    boxed.localRotation = quaternion.EulerZXY(m_Rotation * Math.Deg2Rad);
+
+                    m_Ptr.Value.transformation = boxed;
                 }
                 else transform.eulerAngles = value;
             }
@@ -107,22 +119,26 @@ namespace Point.Collections.SceneManagement.LowLevel
 
         public void Enable()
         {
-            if (m_Ptr.IsCreated) return;
+            if (m_Ptr.IsCreated || PointApplication.IsShutdown) return;
 
             m_Ptr = TransformSceneManager.Add(transform);
-            m_Ptr.Value.transformation.localPosition = m_Position;
-            m_Ptr.Value.transformation.localRotation = quaternion.EulerZXY(m_Rotation * Math.Deg2Rad);
-            m_Ptr.Value.transformation.localScale = m_Scale;
+            var boxed = m_Ptr.Value.transformation;
+            boxed.localPosition = m_Position;
+            boxed.localRotation = quaternion.EulerZXY(m_Rotation * Math.Deg2Rad);
+            boxed.localScale = m_Scale;
+            m_Ptr.Value.transformation = boxed;
 
             OnInitialized();
         }
         public void Disable()
         {
-            if (!m_Ptr.IsCreated) return;
+            if (!m_Ptr.IsCreated || PointApplication.IsShutdown) return;
 
             TransformSceneManager.Remove(m_Ptr);
 
             m_Ptr = default;
+
+            "disable".ToLog();
         }
 
         protected virtual void OnInitialized() { }
