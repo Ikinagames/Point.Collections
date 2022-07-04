@@ -44,10 +44,13 @@ namespace Point.Collections.SceneManagement.LowLevel
         private bool m_ModifiedInThisFrame = false;
         private UnsafeTransformScene m_Scene;
 
+        private UnsafeAllocator<float4x4> m_Matrices;
         private GraphicsBuffer m_TransformationGBuffer, m_MatricesGBuffer;
         
         protected override void OnInitialize()
         {
+            m_Matrices = new UnsafeAllocator<float4x4>(UnsafeTransformScene.INIT_COUNT, Allocator.Persistent);
+
             m_TransformationGBuffer = new GraphicsBuffer(
                 GraphicsBuffer.Target.Structured, UnsafeTransformScene.INIT_COUNT, UnsafeUtility.SizeOf<Transformation>());
             m_MatricesGBuffer = new GraphicsBuffer(
@@ -67,13 +70,13 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             m_Scene.Dispose();
 
+            m_Matrices.Dispose();
             m_TransformationGBuffer.Release();
             m_MatricesGBuffer.Release();
         }
         private void UpdateBuffer()
         {
-            NativeArray<Transformation> tr = m_Scene.transformations.ConvertToNativeArray();
-            m_TransformationGBuffer.SetData(tr);
+            m_Scene.transformations.CopyToBuffer(m_TransformationGBuffer);
 
             int csMain = m_GetMatricesCS.FindKernel("CSMain");
             {
@@ -87,6 +90,8 @@ namespace Point.Collections.SceneManagement.LowLevel
         private unsafe void Resize()
         {
             int targetLength = m_Scene.length * 2;
+
+            m_Matrices.Resize(targetLength);
 
             GraphicsBuffer newTrGBuffer = new GraphicsBuffer(
                 GraphicsBuffer.Target.Structured, targetLength, UnsafeUtility.SizeOf<Transformation>());
@@ -309,12 +314,10 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             UpdateBuffer();
 
-            float4x4[] temp = new float4x4[m_Scene.length];
-            m_MatricesGBuffer.GetData(temp);
-
+            m_Matrices.ReadFromBuffer(m_MatricesGBuffer);
             for (int i = 0; i < m_Scene.count; i++)
             {
-                $"{temp[i]}".ToLog();
+                $"{m_Matrices[i]}".ToLog();
             }
 
             ////m_Scene.Synchronize();

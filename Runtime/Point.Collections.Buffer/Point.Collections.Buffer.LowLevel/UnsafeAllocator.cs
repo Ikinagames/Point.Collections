@@ -40,6 +40,7 @@ using Point.Collections.Native;
 using Point.Collections.Threading;
 using System;
 using System.Collections.Generic;
+using System.Buffers;
 
 namespace Point.Collections.Buffer.LowLevel
 {
@@ -743,6 +744,46 @@ namespace Point.Collections.Buffer.LowLevel
 
             return arr;
         }
+
+        public static void CopyToBuffer<T>(this in UnsafeAllocator<T> t, UnityEngine.GraphicsBuffer buffer)
+            where T : unmanaged
+        {
+            buffer.SetData(t.ConvertToNativeArray());
+        }
+        public static void CopyToBuffer<T>(this in UnsafeAllocator<T> t, UnityEngine.ComputeBuffer buffer)
+            where T : unmanaged
+        {
+            buffer.SetData(t.ConvertToNativeArray());
+        }
+        [NotBurstCompatible]
+        public static unsafe void ReadFromBuffer<T>(this in UnsafeAllocator<T> t, UnityEngine.GraphicsBuffer buffer)
+            where T : unmanaged
+        {
+            T[] arr = ArrayPool<T>.Shared.Rent(t.Length);
+            buffer.GetData(arr);
+
+            fixed (T* ptr = arr)
+            {
+                UnsafeUtility.MemCpy(t.Ptr, ptr, t.Size);
+            }
+
+            ArrayPool<T>.Shared.Return(arr);
+        }
+        [NotBurstCompatible]
+        public static unsafe void ReadFromBuffer<T>(this in UnsafeAllocator<T> t, UnityEngine.ComputeBuffer buffer)
+            where T : unmanaged
+        {
+            T[] arr = ArrayPool<T>.Shared.Rent(t.Length);
+            buffer.GetData(arr);
+
+            fixed (T* ptr = arr)
+            {
+                UnsafeUtility.MemCpy(t.Ptr, ptr, t.Size);
+            }
+
+            ArrayPool<T>.Shared.Return(arr);
+        }
+
         public static UnsafeAllocator<T> ToUnsafeAllocator<T>(this in NativeArray<T> other, Allocator allocator) where T : unmanaged
         {
             unsafe
