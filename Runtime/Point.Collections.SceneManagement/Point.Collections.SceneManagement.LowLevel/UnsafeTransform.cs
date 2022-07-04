@@ -153,7 +153,7 @@ namespace Point.Collections.SceneManagement.LowLevel
                 indexList = new UnsafeFixedListWrapper<int>(indices, 0);
                 for (int i = 0; i < count; i++)
                 {
-                    indexList.AddNoResize(i);
+                    ReserveIndex(i);
                 }
                 //transforms = new UnsafeFixedListWrapper<Transformation>(transformations, 0);
             }
