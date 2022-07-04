@@ -124,27 +124,27 @@ namespace Point.Collections.SceneManagement.LowLevel
         //    Graphics.ExecuteCommandBuffer(m_CommandBuffer);
         //}
 
-        private unsafe void Resize()
-        {
-            m_Matrices.ReadFromBuffer(m_MatricesGBuffer);
+        //private unsafe void Resize()
+        //{
+        //    m_Matrices.ReadFromBuffer(m_MatricesGBuffer);
 
-            int targetLength = m_Scene.length * 2;
+        //    int targetLength = m_Scene.length * 2;
 
-            m_Scene.Resize(targetLength);
-            m_Matrices.Resize(targetLength);
+        //    m_Scene.Resize(targetLength);
+        //    m_Matrices.Resize(targetLength);
 
-            //GraphicsBuffer newTrGBuffer = new GraphicsBuffer(
-            //    GraphicsBuffer.Target.Structured, targetLength, UnsafeUtility.SizeOf<Transformation>());
-            //m_TransformationGBuffer.Release();
-            //m_TransformationGBuffer = newTrGBuffer;
+        //    //GraphicsBuffer newTrGBuffer = new GraphicsBuffer(
+        //    //    GraphicsBuffer.Target.Structured, targetLength, UnsafeUtility.SizeOf<Transformation>());
+        //    //m_TransformationGBuffer.Release();
+        //    //m_TransformationGBuffer = newTrGBuffer;
 
-            //var newMatricsGBuffer = new GraphicsBuffer(
-            //    GraphicsBuffer.Target.Structured, targetLength, UnsafeUtility.SizeOf<float4x4>());
-            //m_MatricesGBuffer.Release();
-            //m_MatricesGBuffer = newMatricsGBuffer;
+        //    //var newMatricsGBuffer = new GraphicsBuffer(
+        //    //    GraphicsBuffer.Target.Structured, targetLength, UnsafeUtility.SizeOf<float4x4>());
+        //    //m_MatricesGBuffer.Release();
+        //    //m_MatricesGBuffer = newMatricsGBuffer;
 
-            "resized".ToLog();
-        }
+        //    "resized".ToLog();
+        //}
 
         public static void Add(Transform tr, 
             out UnsafeAllocator<UnsafeTransformScene.Data> buffer, out int index)
@@ -156,14 +156,14 @@ namespace Point.Collections.SceneManagement.LowLevel
                 return;
             }
 
-            if (Instance.m_Scene.RequireResize())
-            {
-                Instance.Resize();
+            //if (Instance.m_Scene.RequireResize())
+            //{
+            //    Instance.Resize();
 
-                buffer = default;
-                index = -1;
-                return;
-            }
+            //    buffer = default;
+            //    index = -1;
+            //    return;
+            //}
 
             index = Instance.m_Scene.AddTransform(new Transformation(tr));
             buffer = Instance.m_Scene.Buffer;
@@ -190,11 +190,11 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             Instance.m_ModifiedInThisFrame = true;
         }
-        public static void Remove(UnsafeReference<UnsafeTransform> ptr)
+        public static void Remove(int ptr)
         {
             if (PointApplication.IsShutdown) return;
 
-            int index = Instance.m_Scene.RemoveTransform(ptr);
+            Instance.m_Scene.RemoveTransform(ptr);
 
             Instance.m_ModifiedInThisFrame = true;
         }
@@ -326,26 +326,26 @@ namespace Point.Collections.SceneManagement.LowLevel
 
         #endregion
 
-        private void BuildModel(UnsafeReference<UnsafeTransform> transform, 
-            Mesh mesh, Material[] materials)
-        {
-            for (int i = 0; i < materials.Length; i++)
-            {
-                if (!materials[i].enableInstancing)
-                {
-                    materials[i] = new Material(materials[i]);
-                    materials[i].enableInstancing = true;
-                }
+        //private void BuildModel(UnsafeReference<UnsafeTransform> transform, 
+        //    Mesh mesh, Material[] materials)
+        //{
+        //    for (int i = 0; i < materials.Length; i++)
+        //    {
+        //        if (!materials[i].enableInstancing)
+        //        {
+        //            materials[i] = new Material(materials[i]);
+        //            materials[i].enableInstancing = true;
+        //        }
 
-                BatchedData data = GetBatchedData(mesh, materials[i], i);
+        //        BatchedData data = GetBatchedData(mesh, materials[i], i);
 
-                UnsafeGraphicsModel model 
-                    = new UnsafeGraphicsModel(transform, false);
-                data.graphics.Add(model);
+        //        UnsafeGraphicsModel model 
+        //            = new UnsafeGraphicsModel(transform, false);
+        //        data.graphics.Add(model);
 
-                SetBatchedData(mesh, materials[i], data);
-            }
-        }
+        //        SetBatchedData(mesh, materials[i], data);
+        //    }
+        //}
         
         private void UpdateScene()
         {

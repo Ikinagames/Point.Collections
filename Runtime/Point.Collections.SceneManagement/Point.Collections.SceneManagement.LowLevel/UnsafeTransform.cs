@@ -135,7 +135,7 @@ namespace Point.Collections.SceneManagement.LowLevel
         [BurstCompatible]
         public struct Data : IDisposable
         {
-            private UnsafeAllocator<Transformation> transformations;
+            public UnsafeAllocator<Transformation> transformations;
             private UnsafeAllocator<int> indices;
 
             private UnsafeFixedListWrapper<int> indexList;
@@ -194,7 +194,8 @@ namespace Point.Collections.SceneManagement.LowLevel
         public int count => m_Data[0].transforms.Length;
 
         public UnsafeAllocator<Data> Buffer => m_Data;
-
+        public UnsafeAllocator<Transformation> transformations => Buffer[0].transformations;
+        
         public unsafe UnsafeTransformScene(Allocator allocator, int initCount = INIT_COUNT)
         {
             m_Data = new UnsafeAllocator<Data>(1, allocator);
@@ -202,50 +203,48 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             jobHandle = default(JobHandle);
         }
-        public unsafe void Resize(int length)
-        {
-            Complete();
+        //public unsafe void Resize(int length)
+        //{
+        //    Complete();
 
-            m_Data[0].Resize(length);
+        //    m_Data[0].Resize(length);
 
-            jobHandle = default(JobHandle);
-        }
-        public void Resize()
-        {
-            Resize(length * 2);
-        }
+        //    jobHandle = default(JobHandle);
+        //}
+        //public void Resize()
+        //{
+        //    Resize(length * 2);
+        //}
 
         public bool IsValid()
         {
             return m_Data.IsCreated;
         }
-        public bool RequireResize() => m_Data[0].transforms.IsFull;
+        //public bool RequireResize() => m_Data[0].transforms.IsFull;
 
         public int AddTransform(Transformation transformation = default(Transformation))
         {
-            if (RequireResize())
-            {
-                UnityEngine.Debug.LogError("require Resize");
-                Debug.Break();
-                return default;
-            }
+            //if (RequireResize())
+            //{
+            //    UnityEngine.Debug.LogError("require Resize");
+            //    Debug.Break();
+            //    return default;
+            //}
             if (transformation.Equals(default(Transformation)))
             {
                 transformation = Transformation.identity;
             }
 
-            Assert.IsFalse(RequireResize(), "This Scene require resize but you didn\'t.");
+            //Assert.IsFalse(RequireResize(), "This Scene require resize but you didn\'t.");
 
             int count = m_Data[0].transforms.Length;
-            m_Data[0].transforms.AddNoResize(transformation));
+            m_Data[0].transforms.AddNoResize(transformation);
 
             return count;
         }
-        public int RemoveTransform(int index)
+        public void RemoveTransform(int index)
         {
             m_Data[0].transforms.RemoveAtSwapback(index);
-            
-            return index;
         }
 
         public void Complete()
@@ -264,21 +263,21 @@ namespace Point.Collections.SceneManagement.LowLevel
 
     public struct UnsafeGraphicsModel
     {
-        private UnsafeReference<UnsafeTransform> transform;
+        private int transform;
 
-        public int index => transform.Value.index;
-        public float4x4 localToWorld => transform.Value.transformation.localToWorld;
-        public Bounds bounds
-        {
-            get
-            {
-                float3 pos = transform.Value.transformation.localPosition;
-                return new Bounds(pos, Vector3.one);
-            }
-        }
+        public int index => transform;
+        //public float4x4 localToWorld => transform.Value.transformation.localToWorld;
+        //public Bounds bounds
+        //{
+        //    get
+        //    {
+        //        float3 pos = transform.Value.transformation.localPosition;
+        //        return new Bounds(pos, Vector3.one);
+        //    }
+        //}
 
         public UnsafeGraphicsModel(
-            UnsafeReference<UnsafeTransform> transform, bool hasCollider)
+            int transform, bool hasCollider)
         {
             //if (hasCollider)
             //{
