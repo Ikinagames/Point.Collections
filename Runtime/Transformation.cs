@@ -77,7 +77,7 @@ namespace Point.Collections
         {
             get
             {
-                return new float4x4(new float3x3(localRotation), localPosition);
+                return float4x4.TRS(localPosition, localRotation, localScale);
             }
         }
         [JsonIgnore]

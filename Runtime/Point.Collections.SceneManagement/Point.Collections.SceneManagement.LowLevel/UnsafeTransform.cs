@@ -265,9 +265,18 @@ namespace Point.Collections.SceneManagement.LowLevel
 
     public struct UnsafeGraphicsModel
     {
-        //public Mesh mesh;
-        //public int subMeshIndex;
-        public UnsafeReference<UnsafeTransform> transform;
+        private UnsafeReference<UnsafeTransform> transform;
+
+        public int index => transform.Value.index;
+        public float4x4 localToWorld => transform.Value.transformation.localToWorld;
+        public Bounds bounds
+        {
+            get
+            {
+                float3 pos = transform.Value.transformation.localPosition;
+                return new Bounds(pos, Vector3.one);
+            }
+        }
 
         public UnsafeGraphicsModel(
             UnsafeReference<UnsafeTransform> transform, bool hasCollider)

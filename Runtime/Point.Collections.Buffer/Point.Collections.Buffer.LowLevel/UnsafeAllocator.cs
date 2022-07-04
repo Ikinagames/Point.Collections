@@ -796,6 +796,32 @@ namespace Point.Collections.Buffer.LowLevel
             }
         }
 #endif
+
+        public struct SharedArray<T> : IDisposable
+            where T : unmanaged
+        {
+            private T[] m_Array;
+            public T[] Array => m_Array;
+
+            public SharedArray(T[] arr)
+            {
+                m_Array = arr;
+            }
+            public void Dispose()
+            {
+                ArrayPool<T>.Shared.Return(m_Array);
+                m_Array = null;
+            }
+
+            public static implicit operator T[](SharedArray<T> t) => t.Array;
+        }
+        public static SharedArray<T> ToSharedArray<T>(this in UnsafeAllocator<T> t)
+            where T : unmanaged
+        {
+            SharedArray<T> arr = new SharedArray<T>(ArrayPool<T>.Shared.Rent(t.Length));
+            return arr;
+        }
+
         //////////////////////////////////////////////////////////////////////////////////////////
         /*                                End of Critical Section                               */
         //////////////////////////////////////////////////////////////////////////////////////////

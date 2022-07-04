@@ -22,8 +22,10 @@
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
+using Point.Collections.Buffer;
 using Point.Collections.Buffer.LowLevel;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -31,6 +33,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Rendering;
 
 namespace Point.Collections.SceneManagement.LowLevel
 {
@@ -44,11 +47,19 @@ namespace Point.Collections.SceneManagement.LowLevel
         private bool m_ModifiedInThisFrame = false;
         private UnsafeTransformScene m_Scene;
 
+        //private CommandBuffer m_CommandBuffer;
         private UnsafeAllocator<float4x4> m_Matrices;
         private GraphicsBuffer m_TransformationGBuffer, m_MatricesGBuffer;
-        
+
+
         protected override void OnInitialize()
         {
+//            m_CommandBuffer = new CommandBuffer();
+//#if UNITY_EDITOR
+//            m_CommandBuffer.name = "Point.TransformSceneManager";
+//#endif
+            //m_CommandBuffer.SetExecutionFlags(CommandBufferExecutionFlags.AsyncCompute);
+
             m_Matrices = new UnsafeAllocator<float4x4>(UnsafeTransformScene.INIT_COUNT, Allocator.Persistent);
 
             m_TransformationGBuffer = new GraphicsBuffer(
@@ -60,7 +71,6 @@ namespace Point.Collections.SceneManagement.LowLevel
             "set cbuffer".ToLog();
 
             // https://forum.unity.com/threads/compute-shader-buffer-rwbuffer-vs-structuredbuffer-rwstructuredbuffer.755672/
-
 
             PointApplication.OnLateUpdate += UpdateScene;
         }
@@ -84,9 +94,36 @@ namespace Point.Collections.SceneManagement.LowLevel
                 m_GetMatricesCS.SetBuffer(csMain, "_Result", m_MatricesGBuffer);
                 m_GetMatricesCS.Dispatch(csMain, 16, 1, 1);
             }
-            
-
         }
+        private void UpdateCommand()
+        {
+            // TODO : temp code
+            m_Matrices.ReadFromBuffer(m_MatricesGBuffer);
+
+            for (int i = 0; i < m_BatchedData.Count; i++)
+            {
+                Mesh mesh = m_BatchedData[i].key.meshMaterial.Mesh;
+                Material material = m_BatchedData[i].key.meshMaterial.Material;
+                int subMeshIndex = m_BatchedData[i].key.subMeshIndex;
+
+                Matrix4x4[] mats = ArrayPool<Matrix4x4>.Shared.Rent(m_BatchedData[i].graphics.Count);
+                for (int j = 0; j < m_BatchedData[i].graphics.Count; j++)
+                {
+                    int matrixIndex = m_BatchedData[i].graphics[j].index;
+                    mats[j] = m_Matrices[matrixIndex];
+                }
+
+                Graphics.DrawMeshInstanced(
+                    mesh, subMeshIndex, material, mats, m_BatchedData[i].graphics.Count);
+
+                ArrayPool<Matrix4x4>.Shared.Return(mats);
+            }
+        }
+        //private void ExecuteCommand()
+        //{
+        //    Graphics.ExecuteCommandBuffer(m_CommandBuffer);
+        //}
+
         private unsafe void Resize()
         {
             int targetLength = m_Scene.length * 2;
@@ -130,24 +167,25 @@ namespace Point.Collections.SceneManagement.LowLevel
                 return ptr;
             }
 
-            //Renderer[] renderers = tr.GetComponentsInChildren<Renderer>();
-            //for (int i = 0; i < renderers.Length; i++)
-            //{
-            //    Renderer ren = renderers[i];
+            Renderer[] renderers = tr.GetComponentsInChildren<Renderer>();
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                Renderer ren = renderers[i];
 
-            //    Mesh mesh;
-            //    if (ren is MeshRenderer meshRen)
-            //    {
-            //        mesh = meshRen.GetComponent<MeshFilter>().sharedMesh;
-            //    }
-            //    else
-            //    {
-            //        $"not support {ren.GetType().Name}".ToLog();
-            //        continue;
-            //    }
+                Mesh mesh;
+                if (ren is MeshRenderer meshRen)
+                {
+                    mesh = meshRen.GetComponent<MeshFilter>().sharedMesh;
+                }
+                else
+                {
+                    $"not support {ren.GetType().Name}".ToLog();
+                    continue;
+                }
 
-            //    Instance.BuildModel(ptr, mesh, ren.sharedMaterials);
-            //}
+                ren.enabled = false;
+                Instance.BuildModel(ptr, mesh, ren.sharedMaterials);
+            }
 
             Instance.m_ModifiedInThisFrame = true;
             return ptr;
@@ -160,8 +198,6 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             Instance.m_ModifiedInThisFrame = true;
         }
-
-        
 
         #region BatchedData
 
@@ -197,18 +233,18 @@ namespace Point.Collections.SceneManagement.LowLevel
 
         private struct BatchedDataKey : IEquatable<BatchedDataKey>
         {
-            public MeshMaterial key;
+            public MeshMaterial meshMaterial;
             public int subMeshIndex;
 
             public BatchedDataKey(MeshMaterial key, int meshIndex)
             {
-                this.key = key;
+                this.meshMaterial = key;
                 subMeshIndex = meshIndex;
             }
 
             public bool Equals(BatchedDataKey other)
             {
-                return key.Equals(other.key) && subMeshIndex == other.subMeshIndex;
+                return meshMaterial.Equals(other.meshMaterial) && subMeshIndex == other.subMeshIndex;
             }
         }
         private struct BatchedData
@@ -219,6 +255,7 @@ namespace Point.Collections.SceneManagement.LowLevel
         }
 
         private Dictionary<BatchedDataKey, int> m_BatchedDataHashMap = new Dictionary<BatchedDataKey, int>();
+
         private List<BatchedData> m_BatchedData = new List<BatchedData>();
 
         private static BatchedData GetBatchedData(Mesh mesh, Material material, int subMeshIndex)
@@ -258,8 +295,8 @@ namespace Point.Collections.SceneManagement.LowLevel
         }
         private static void SetupBatchedData(BatchedData data, ComputeBuffer argBuffer)
         {
-            Mesh mesh = data.key.key.Mesh;
-            Material material = data.key.key.Material;
+            Mesh mesh = data.key.meshMaterial.Mesh;
+            Material material = data.key.meshMaterial.Material;
 
             // 0 == number of triangle indices, 1 == population, others are only relevant if drawing submeshes.
             uint[] args = new uint[5]
@@ -294,6 +331,12 @@ namespace Point.Collections.SceneManagement.LowLevel
         {
             for (int i = 0; i < materials.Length; i++)
             {
+                if (!materials[i].enableInstancing)
+                {
+                    materials[i] = new Material(materials[i]);
+                    materials[i].enableInstancing = true;
+                }
+
                 BatchedData data = GetBatchedData(mesh, materials[i], i);
 
                 UnsafeGraphicsModel model 
@@ -313,12 +356,13 @@ namespace Point.Collections.SceneManagement.LowLevel
             }
 
             UpdateBuffer();
+            UpdateCommand();
+            //ExecuteCommand();
 
-            m_Matrices.ReadFromBuffer(m_MatricesGBuffer);
-            for (int i = 0; i < m_Scene.count; i++)
-            {
-                $"{m_Matrices[i]}".ToLog();
-            }
+            //for (int i = 0; i < m_Scene.count; i++)
+            //{
+            //    $"{m_Matrices[i]}".ToLog();
+            //}
 
             ////m_Scene.Synchronize();
             //JobHandle.ScheduleBatchedJobs();

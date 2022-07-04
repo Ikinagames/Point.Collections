@@ -116,6 +116,37 @@ namespace Point.Collections.SceneManagement.LowLevel
         {
             Disable();
         }
+#if UNITY_EDITOR
+        protected virtual void OnValidate()
+        {
+            if (Enabled && !PointApplication.IsShutdown)
+            {
+                var boxed = m_Ptr.Value.transformation;
+                boxed.localPosition = m_Position;
+
+                m_Ptr.Value.transformation = boxed;
+            }
+            else transform.localPosition = m_Position;
+
+            if (Enabled && !PointApplication.IsShutdown)
+            {
+                var boxed = m_Ptr.Value.transformation;
+                boxed.localRotation = quaternion.EulerZXY(m_Rotation * Math.Deg2Rad);
+
+                m_Ptr.Value.transformation = boxed;
+            }
+            else transform.eulerAngles = m_Rotation;
+
+            if (Enabled && !PointApplication.IsShutdown)
+            {
+                var boxed = m_Ptr.Value.transformation;
+                boxed.localScale = m_Scale;
+
+                m_Ptr.Value.transformation = boxed;
+            }
+            else transform.localScale = m_Scale;
+        }
+#endif
 
         public void Enable()
         {
