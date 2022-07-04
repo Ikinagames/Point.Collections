@@ -742,7 +742,6 @@ namespace Point.Collections.ResourceControl
             // 현재 로드된 에셋들의 HashMap 입니다.
             private Dictionary<AssetRuntimeKey, Promise<UnityEngine.Object>> m_Assets;
 
-
             public AssetBundle AssetBundle
             {
                 get => m_AssetBundle;

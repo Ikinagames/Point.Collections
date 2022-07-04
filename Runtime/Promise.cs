@@ -32,6 +32,7 @@ namespace Point.Collections
         private object m_Value;
         private Action<object> m_OnCompleted;
 
+        public object UserData { get; set; }
         public bool HasValue => m_Value != null;
         public object Value => m_Value;
 
@@ -96,6 +97,7 @@ namespace Point.Collections
         private bool m_IsCompleted;
         private Action<T> m_OnCompleted;
 
+        public object UserData { get; set; }
         public bool HasValue => m_IsCompleted;
         /// <inheritdoc cref="IPromise.Value"/>
         public T Value => m_Value;
