@@ -139,7 +139,7 @@ namespace Point.Collections.SceneManagement.LowLevel
             private UnsafeAllocator<int> indices;
 
             private UnsafeFixedListWrapper<int> indexList;
-            public UnsafeFixedListWrapper<Transformation> transforms;
+            //public UnsafeFixedListWrapper<Transformation> transforms;
 
             public Data(int count, Allocator allocator)
             {
@@ -151,7 +151,11 @@ namespace Point.Collections.SceneManagement.LowLevel
                     allocator);
 
                 indexList = new UnsafeFixedListWrapper<int>(indices, 0);
-                transforms = new UnsafeFixedListWrapper<Transformation>(transformations, 0);
+                for (int i = 0; i < count; i++)
+                {
+                    indexList.AddNoResize(i);
+                }
+                //transforms = new UnsafeFixedListWrapper<Transformation>(transformations, 0);
             }
 
             public int GetEmptyIndex()
@@ -159,13 +163,17 @@ namespace Point.Collections.SceneManagement.LowLevel
                 if (indexList.Length == 0)
                 {
                     "resizeing".ToLog();
-                    Resize(transforms.Capacity * 2);
+                    Resize(indexList.Capacity * 2);
                 }
 
                 int index = indexList[0];
                 indexList.RemoveAtSwapback(0);
 
                 return index;
+            }
+            public void ReserveIndex(int index)
+            {
+                indexList.AddNoResize(index);
             }
 
             private void Resize(int length)
@@ -177,8 +185,8 @@ namespace Point.Collections.SceneManagement.LowLevel
 
                 indexList = new UnsafeFixedListWrapper<int>(
                     indices, indexList.Length);
-                transforms = new UnsafeFixedListWrapper<Transformation>(
-                    transformations, prevLength);
+                //transforms = new UnsafeFixedListWrapper<Transformation>(
+                //    transformations, prevLength);
             }
             public void Dispose()
             {
@@ -190,8 +198,8 @@ namespace Point.Collections.SceneManagement.LowLevel
         private UnsafeAllocator<Data> m_Data;
         private JobHandle jobHandle;
 
-        public int length => m_Data[0].transforms.Capacity;
-        public int count => m_Data[0].transforms.Length;
+        //public int length => m_Data[0].transforms.Capacity;
+        //public int count => m_Data[0].transforms.Length;
 
         public UnsafeAllocator<Data> Buffer => m_Data;
         public UnsafeAllocator<Transformation> transformations => Buffer[0].transformations;
@@ -203,25 +211,12 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             jobHandle = default(JobHandle);
         }
-        //public unsafe void Resize(int length)
-        //{
-        //    Complete();
-
-        //    m_Data[0].Resize(length);
-
-        //    jobHandle = default(JobHandle);
-        //}
-        //public void Resize()
-        //{
-        //    Resize(length * 2);
-        //}
 
         public bool IsValid()
         {
             return m_Data.IsCreated;
         }
-        //public bool RequireResize() => m_Data[0].transforms.IsFull;
-
+        
         public int AddTransform(Transformation transformation = default(Transformation))
         {
             //if (RequireResize())
@@ -237,14 +232,17 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             //Assert.IsFalse(RequireResize(), "This Scene require resize but you didn\'t.");
 
-            int count = m_Data[0].transforms.Length;
-            m_Data[0].transforms.AddNoResize(transformation);
+            int index = m_Data[0].GetEmptyIndex();
+            m_Data[0].transformations[index] = transformation;
 
-            return count;
+            //int count = m_Data[0].transforms.Length;
+            //m_Data[0].transforms.AddNoResize(transformation);
+
+            return index;
         }
         public void RemoveTransform(int index)
         {
-            m_Data[0].transforms.RemoveAtSwapback(index);
+            m_Data[0].ReserveIndex(index);
         }
 
         public void Complete()
