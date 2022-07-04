@@ -527,15 +527,6 @@ namespace Point.Collections.Buffer.LowLevel
                 m_Buffer = t
             };
         }
-
-        public static implicit operator NativeArray<T>(UnsafeAllocator<T> t)
-        {
-            unsafe
-            {
-                return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
-                    t.Ptr, t.Length, t.m_Buffer.m_Allocator);
-            }
-        }
     }
     public static class UnsafeAllocatorExtensions
     {
@@ -730,6 +721,25 @@ namespace Point.Collections.Buffer.LowLevel
                 T* buffer = (T*)NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(arr);
                 UnsafeUtility.MemCpy(buffer, other.Ptr, other.Size);
             }
+
+            return arr;
+        }
+        /// <summary>
+        /// 임시 접근 어레이로 변환하여 반환합니다.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static unsafe NativeArray<T> ConvertToNativeArray<T>(this in UnsafeAllocator<T> t)
+            where T : unmanaged
+        {
+            NativeArray<T> arr = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+                    t.Ptr, t.Length, t.m_Buffer.m_Allocator);
+
+#if UNITY_EDITOR || ENABLE_UNITY_COLLECTIONS_CHECKS
+            DisposeSentinel.Create(out var safety, out var sentinel, 1, Allocator.Temp);
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref arr, safety);
+#endif
 
             return arr;
         }

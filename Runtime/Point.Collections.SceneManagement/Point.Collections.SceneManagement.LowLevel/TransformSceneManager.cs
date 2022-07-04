@@ -72,6 +72,9 @@ namespace Point.Collections.SceneManagement.LowLevel
         }
         private void UpdateBuffer()
         {
+            NativeArray<Transformation> tr = m_Scene.transformations.ConvertToNativeArray();
+            m_TransformationGBuffer.SetData(tr);
+
             int csMain = m_GetMatricesCS.FindKernel("CSMain");
             {
                 m_GetMatricesCS.SetBuffer(csMain, "_Transforms", m_TransformationGBuffer);
@@ -300,17 +303,18 @@ namespace Point.Collections.SceneManagement.LowLevel
         {
             if (m_ModifiedInThisFrame)
             {
-                UpdateBuffer();
                 m_ModifiedInThisFrame = false;
                 return;
             }
 
-            Transformation[] temp = new Transformation[m_Scene.length];
-            m_TransformationGBuffer.GetData(temp);
+            UpdateBuffer();
+
+            float4x4[] temp = new float4x4[m_Scene.length];
+            m_MatricesGBuffer.GetData(temp);
 
             for (int i = 0; i < m_Scene.count; i++)
             {
-                $"{temp[i].localPosition}".ToLog();
+                $"{temp[i]}".ToLog();
             }
 
             ////m_Scene.Synchronize();
