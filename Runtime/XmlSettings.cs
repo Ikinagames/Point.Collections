@@ -289,12 +289,6 @@ namespace Point.Collections
             {
                 objRoot.Add(
                     XmlParser.ConvertToXml(elementName, fieldInfo.GetValue(obj))
-
-                    //new XElement(
-                    //    elementName,
-                    //    //TypeHelper.GetDefaultValue(fieldInfo.FieldType).ToString()
-                    //    fieldInfo.GetValue(obj).ToString()
-                    //    )
                     );
                 Debug.Log($"not exist {elementName} adding");
                 return;
@@ -310,7 +304,7 @@ namespace Point.Collections
             }
             else
             {
-                Debug.Log($"{fieldInfo.Name}={value}({element.Value}) :: loaded");
+                $"{fieldInfo.Name}: {element.Value}".ToLog();
             }
 
             fieldInfo.SetValue(obj, value);

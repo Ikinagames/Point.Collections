@@ -41,7 +41,12 @@ namespace Point.Collections.Editor
             if (!Opened)
             {
                 var parent = property.GetParent();
-                var positionField = parent.FindPropertyRelative(attribute.PositionField);
+                SerializedProperty positionField;
+                if (parent == null) // Is Root
+                {
+                    positionField = property.serializedObject.FindProperty(attribute.PositionField);
+                }
+                else positionField = parent.FindPropertyRelative(attribute.PositionField);
 
                 Popup.Instance.SetProperty(property, 
                     positionField,

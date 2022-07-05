@@ -153,6 +153,7 @@ namespace Point.Collections.Editor
                         m_Rotation = new quaternion(rotProp.GetVector4());
                     }
                 }
+                else m_Rotation = Quaternion.identity;
             }
 
             private void OnSceneGUI(SceneView sceneView)
