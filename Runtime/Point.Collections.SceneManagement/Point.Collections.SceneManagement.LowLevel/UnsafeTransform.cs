@@ -202,9 +202,6 @@ namespace Point.Collections.SceneManagement.LowLevel
                     //$"{index} :: {count}".ToLog();
                     if (index >= count)
                     {
-                        // 5 , 4
-                        // 2
-                        // 5 - 2 = 3
                         $"corrected {index} -> {index - (index - count + 1)}".ToLog();
                         index -= (index - count + 1);
                     }
