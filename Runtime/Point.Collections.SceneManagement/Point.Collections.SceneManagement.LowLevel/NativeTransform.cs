@@ -133,8 +133,6 @@ namespace Point.Collections.SceneManagement.LowLevel
             TransformSceneManager.Remove(m_TransformInterface);
 
             m_TransformInterface = default;
-
-            "disable".ToLog();
         }
 
         protected virtual void OnInitialized() { }

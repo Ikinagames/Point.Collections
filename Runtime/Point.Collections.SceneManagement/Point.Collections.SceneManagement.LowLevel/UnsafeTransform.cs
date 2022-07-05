@@ -29,6 +29,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Jobs;
@@ -132,16 +133,20 @@ namespace Point.Collections.SceneManagement.LowLevel
     [BurstCompatible]
     public struct UnsafeTransformScene : IValidation, IDisposable
     {
-        public const int INIT_COUNT = 512;
+        public const int INIT_COUNT = 4096;
 
         [BurstCompatible]
         public struct Data : IDisposable
         {
+            private static ProfilerMarker GetTransformMarker = new ProfilerMarker(
+                ProfilerCategory.Scripts, "UnsafeTransformScene.Data.GetTransform");
+
             public UnsafeAllocator<Transformation> transformations;
             private UnsafeAllocator<int> indices;
 
             private UnsafeFixedListWrapper<int> indexList;
 
+            public int capacity => transformations.Length;
             public int count => transformations.Length - indexList.Length;
 
             public Data(int count, Allocator allocator)
@@ -160,7 +165,7 @@ namespace Point.Collections.SceneManagement.LowLevel
                 }
             }
 
-            public int GetEmptyIndex()
+            public int Add()
             {
                 if (RequireResize())
                 {
@@ -175,6 +180,8 @@ namespace Point.Collections.SceneManagement.LowLevel
             }
             public void ReserveIndex(int index)
             {
+                transformations.RemoveAtSwapBack(index);
+
                 indexList.InsertNoResize(0, index);
                 indexList.Sort(new Comparer());
             }
@@ -190,18 +197,29 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             public UnsafeReference<Transformation> GetTransform(int index)
             {
-                int count = index;
-                for (int i = 0; i < count; i++)
+                using (GetTransformMarker.Auto())
                 {
-                    bool found = indexList.FindFor(i, 0, i + 1);
-                    if (found)
+                    //$"{index} :: {count}".ToLog();
+                    if (index >= count)
                     {
-                        index--;
-                        //$"corrected {count} -> {index} :: {i} not found".ToLog();
+                        // 5 , 4
+                        // 2
+                        // 5 - 2 = 3
+                        $"corrected {index} -> {index - (index - count + 1)}".ToLog();
+                        index -= (index - count + 1);
                     }
+                    //for (int i = 0; i < count; i++)
+                    //{
+                    //    bool found = indexList.Contains(i);
+                    //    if (found)
+                    //    {
+                    //        index--;
+                    //        
+                    //    }
+                    //}
+                    
+                    return transformations.ElementAt(index);
                 }
-
-                return transformations.ElementAt(index);
             }
 
             public bool RequireResize() => indexList.Length == 0;
@@ -228,6 +246,7 @@ namespace Point.Collections.SceneManagement.LowLevel
 
         public UnsafeAllocator<Data> buffer => m_Data;
         public UnsafeAllocator<Transformation> transformations => buffer[0].transformations;
+        public int capacity => buffer[0].capacity;
         public int count => buffer[0].count;
         
         public unsafe UnsafeTransformScene(Allocator allocator, int initCount = INIT_COUNT)
@@ -246,7 +265,7 @@ namespace Point.Collections.SceneManagement.LowLevel
         }
 
         public bool RequireResize() => m_Data[0].RequireResize();
-        public void Resize() => m_Data[0].Resize();
+        public int Resize() => m_Data[0].Resize();
         public int AddTransform(Transformation transformation = default(Transformation))
         {
             if (transformation.Equals(default(Transformation)))
@@ -254,14 +273,17 @@ namespace Point.Collections.SceneManagement.LowLevel
                 transformation = Transformation.identity;
             }
 
-            int index = m_Data[0].GetEmptyIndex();
+            int index = m_Data[0].Add();
             m_Data[0].transformations[index] = transformation;
 
+            $"added {index}".ToLog();
             return index;
         }
         public void RemoveTransform(int index)
         {
             m_Data[0].ReserveIndex(index);
+
+            $"reserved {index}".ToLog();
         }
 
         public void Complete()
@@ -280,14 +302,21 @@ namespace Point.Collections.SceneManagement.LowLevel
 
     internal sealed class UnsafeBatchedScene : IDisposable
     {
+        private static readonly int 
+            s_GetMatrices_TR = Shader.PropertyToID("_Transforms"),
+            s_GetMatrices_Result = Shader.PropertyToID("_Result"),
+            s_Material_Matrices = Shader.PropertyToID("_Matrices");
         private readonly ComputeShader m_GetMatricesCS;
 
         public Bounds bounds;
 
-        private readonly MeshMaterial meshMaterial;
+        private readonly Mesh mesh;
+        private readonly Material material;
         private readonly int subMeshIndex;
         public readonly UnsafeTransformScene scene;
-        private readonly ComputeBuffer transformationBuffer, matricesBuffer, argumentBuffer;
+        private ComputeBuffer transformationBuffer, matricesBuffer, argumentBuffer;
+
+        private bool m_CountChanged = true;
 
         public UnsafeBatchedScene(
             ComputeShader getMatricesCS,
@@ -295,7 +324,8 @@ namespace Point.Collections.SceneManagement.LowLevel
         {
             m_GetMatricesCS = getMatricesCS;
 
-            meshMaterial = MeshMaterial.GetMeshMaterial(mesh, material);
+            this.mesh = mesh;
+            this.material = material;
             this.subMeshIndex = subMeshIndex;
             scene = new UnsafeTransformScene(Allocator.Persistent);
 
@@ -304,22 +334,49 @@ namespace Point.Collections.SceneManagement.LowLevel
             matricesBuffer = new ComputeBuffer(
                 UnsafeTransformScene.INIT_COUNT, UnsafeUtility.SizeOf<float4x4>(), ComputeBufferType.Structured);
             argumentBuffer = new ComputeBuffer(
-                5, sizeof(uint) * 5, ComputeBufferType.IndirectArguments);
+                5, sizeof(uint) * 5, ComputeBufferType.IndirectArguments, ComputeBufferMode.SubUpdates);
+
+            UpdateMaterial();
         }
 
         public int Add(Transformation tr)
         {
+            if (scene.RequireResize())
+            {
+                int newLength = scene.Resize();
+
+                transformationBuffer.Dispose();
+                matricesBuffer.Dispose();
+
+                transformationBuffer = new ComputeBuffer(
+                    newLength, UnsafeUtility.SizeOf<Transformation>(), ComputeBufferType.Structured);
+                matricesBuffer = new ComputeBuffer(
+                    newLength, UnsafeUtility.SizeOf<float4x4>(), ComputeBufferType.Structured);
+
+                UpdateMaterial();
+            }
+
             int index = scene.AddTransform(tr);
 
+            m_CountChanged = true;
             return index;
         }
         public void Remove(int index)
         {
             scene.RemoveTransform(index);
+
+            m_CountChanged = true;
+        }
+
+        private void UpdateMaterial()
+        {
+            material.SetBuffer(s_Material_Matrices, matricesBuffer);
         }
 
         private void SetupArgumentBuffer(Mesh mesh)
         {
+            if (!m_CountChanged) return;
+
             NativeArray<uint> arr = argumentBuffer.BeginWrite<uint>(0, 5);
             arr[0] = mesh.GetIndexCount(subMeshIndex);
             arr[1] = (uint)scene.count;
@@ -327,30 +384,26 @@ namespace Point.Collections.SceneManagement.LowLevel
             arr[3] = (uint)mesh.GetBaseVertex(subMeshIndex);
             arr[4] = 0;
             argumentBuffer.EndWrite<uint>(5);
+
+            m_CountChanged = false;
         }
-        private void UpdateMatrices(Material material)
-        {
-            material.SetBuffer("_Matrices", matricesBuffer);
-        }
+        
         private void Setup(Mesh mesh, Material material)
         {
             SetupArgumentBuffer(mesh);
-            UpdateMatrices(material);
+            //UpdateMatrices(material);
         }
 
         private void UpdateBuffer()
         {
             scene.transformations.CopyToBuffer(transformationBuffer);
-            m_GetMatricesCS.SetBuffer(0, "_Transforms", transformationBuffer);
-            m_GetMatricesCS.SetBuffer(0, "_Result", matricesBuffer);
-            m_GetMatricesCS.Dispatch(0, 16, 1, 1);
+            m_GetMatricesCS.SetBuffer(0, s_GetMatrices_TR, transformationBuffer);
+            m_GetMatricesCS.SetBuffer(0, s_GetMatrices_Result, matricesBuffer);
+            m_GetMatricesCS.Dispatch(0, 32, 1, 1);
         }
 
         public void Draw()
         {
-            Mesh mesh = meshMaterial.Mesh;
-            Material material = meshMaterial.Material;
-
             UpdateBuffer();
 
             int count = scene.count;
@@ -361,19 +414,18 @@ namespace Point.Collections.SceneManagement.LowLevel
             for (int i = 0; i < count; i++)
             {
                 mats[i] = rawMats[i];
+                //$"{mats[i]}".ToLog();
             }
             ArrayPool<float4x4>.Shared.Return(rawMats);
 
             Graphics.DrawMeshInstanced(
-                mesh, subMeshIndex, material, mats
+                mesh, subMeshIndex, material, mats, count
                 );
+            //$"{count} drawed".ToLog();
             ArrayPool<Matrix4x4>.Shared.Return(mats);
         }
         public void DrawIndirect()
         {
-            Mesh mesh = meshMaterial.Mesh;
-            Material material = meshMaterial.Material;
-
             UpdateBuffer();
             Setup(mesh, material);
 

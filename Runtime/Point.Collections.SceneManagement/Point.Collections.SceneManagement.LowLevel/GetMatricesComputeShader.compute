@@ -41,7 +41,7 @@ float4x4 TRS(float3 translation, float4 rotation, float3 scale){
 StructuredBuffer<Transformation> _Transforms;
 RWStructuredBuffer<float4x4> _Result;
 
-[numthreads(16,1,1)]
+[numthreads(32,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     _Result[id.x] = TRS(_Transforms[id.x].localPosition, _Transforms[id.x].localRotation, _Transforms[id.x].localScale);

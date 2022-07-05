@@ -31,6 +31,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
@@ -62,6 +63,12 @@ namespace Point.Collections.SceneManagement.LowLevel
         }
         public struct TransformInterface : IValidation
         {
+            private static ProfilerMarker
+                SetPositionGroupMarker = new ProfilerMarker(
+                    ProfilerCategory.Scripts, "TransformSceneManager.TransformInterface.SetPosition (Group)"),
+                SetPositionMarker = new ProfilerMarker(
+                    ProfilerCategory.Scripts, "TransformSceneManager.TransformInterface.SetPosition");
+
             private SceneKey[][] m_Indices;
 
             public TransformInterface(SceneKey[][] indices)
@@ -76,20 +83,27 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             public void SetPosition(float3 pos)
             {
-                for (int i = 0; i < m_Indices.Length; i++)
+                using (SetPositionGroupMarker.Auto())
                 {
-                    SetPosition(i, pos);
+                    for (int i = 0; i < m_Indices.Length; i++)
+                    {
+                        SetPosition(i, pos);
+                    }
                 }
             }
             public void SetPosition(int index, float3 pos)
             {
-                for (int i = 0; i < m_Indices[index].Length; i++)
+                using (SetPositionMarker.Auto())
                 {
-                    BatchedKey key = m_Indices[index][i].batchedKey;
-                    int sceneIndex = m_Indices[index][i].sceneIndex;
-
-                    UnsafeBatchedScene data = Instance.m_BatchedDataMap[key];
-                    data.scene.GetTransform(sceneIndex).Value.localPosition = pos;
+                    for (int i = 0; i < m_Indices[index].Length; i++)
+                    {
+                        UnsafeBatchedScene data = Instance.m_BatchedDataMap[
+                            m_Indices[index][i].batchedKey
+                            ];
+                        data.scene
+                            .GetTransform(m_Indices[index][i].sceneIndex)
+                            .Value.localPosition = pos;
+                    }
                 }
             }
             public void SetRotation(quaternion rot)
@@ -211,6 +225,12 @@ namespace Point.Collections.SceneManagement.LowLevel
 
             for (int i = 0; i < materials.Length; i++)
             {
+                if (!materials[i].enableInstancing)
+                {
+                    //materials[i] = new Material(materials[i]);
+                    materials[i].enableInstancing = true;
+                }
+
                 BatchedKey key = new BatchedKey(mesh, materials[i], i);
                 if (!m_BatchedDataMap.TryGetValue(key, out UnsafeBatchedScene data))
                 {
@@ -227,21 +247,6 @@ namespace Point.Collections.SceneManagement.LowLevel
             }
 
             return indices;
-
-            //for (int i = 0; i < materials.Length; i++)
-            //{
-            //    if (!materials[i].enableInstancing)
-            //    {
-            //        materials[i] = new Material(materials[i]);
-            //        materials[i].enableInstancing = true;
-            //    }
-
-            //    BatchedData data = GetBatchedData(mesh, materials[i], i);
-
-            //    UnsafeGraphicsModel model
-            //        = new UnsafeGraphicsModel(transform, false);
-            //    data.graphics.Add(model);
-            //}
         }
 
         private void UpdateScene()
@@ -252,6 +257,11 @@ namespace Point.Collections.SceneManagement.LowLevel
                 return;
             }
 
+
+            for (int i = 0; i < m_BatchedData.Count; i++)
+            {
+                m_BatchedData[i].DrawIndirect();
+            }
         }
     }
 }

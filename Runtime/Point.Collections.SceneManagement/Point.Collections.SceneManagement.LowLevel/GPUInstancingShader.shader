@@ -13,15 +13,18 @@ Shader "Unlit/GPUInstancingShader"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
 
             #include "UnityCG.cginc"
 
             struct appdata_t {
                 float4 vertex   : POSITION;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
                 float4 color    : COLOR;
             };
             struct v2f {
                 float4 vertex   : SV_POSITION;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
                 float4 color    : COLOR;
             };
 
