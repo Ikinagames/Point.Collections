@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2019_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER && UNITY_COLLECTIONS
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
@@ -22,9 +22,6 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-#endif
-#else
-#define POINT_COLLECTIONS_NATIVE
 #endif
 
 namespace Point.Collections.Burst
@@ -165,3 +162,5 @@ namespace Point.Collections.Burst
         }
     }
 }
+
+#endif

@@ -104,6 +104,7 @@ namespace Point.Collections
 
             public override GameObject Object => m_Object;
         }
+#if UNITY_COLLECTIONS
         [Serializable]
         public sealed class PoolReferece : Pool
         {
@@ -127,10 +128,13 @@ namespace Point.Collections
                 }
             }
         }
+#endif
 
         [FormerlySerializedAs("m_GameObjects")]
         [SerializeField] private ArrayWrapper<PoolDirect> m_DirectReferences = Array.Empty<PoolDirect>();
+#if UNITY_COLLECTIONS
         [SerializeField] private ArrayWrapper<PoolReferece> m_References = Array.Empty<PoolReferece>();
+#endif
 
         private Dictionary<Hash, Pool> m_HashMap = new Dictionary<Hash, Pool>();
 
@@ -153,6 +157,7 @@ namespace Point.Collections
                     m_HashMap[friendlyName] = m_DirectReferences[i];
                 }
             }
+#if UNITY_COLLECTIONS
             for (int i = 0; i < m_References.Length; i++)
             {
                 m_References[i].Initialize(this);
@@ -163,8 +168,9 @@ namespace Point.Collections
                     m_HashMap[friendlyName] = m_References[i];
                 }
             }
+#endif
         }
-
+#if UNITY_COLLECTIONS
         public void Register(IList<PoolReferece> pools)
         {
             int count = m_References.Count;
@@ -182,6 +188,7 @@ namespace Point.Collections
 
             //return count;
         }
+#endif
 
         //public GameObject FindObject(string friendlyName)
         //{

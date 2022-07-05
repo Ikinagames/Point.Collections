@@ -18,9 +18,9 @@
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
-#if UNITY_COLLECTIONS
+#if !UNITY_COLLECTIONS
+using FixedString128Bytes = Point.Collections.FixedChar128Bytes;
 #endif
-
 
 using System;
 using System.Collections.Generic;

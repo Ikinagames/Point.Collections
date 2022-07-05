@@ -19,6 +19,9 @@
 #endif
 #define UNITYENGINE
 using Unity.Collections;
+#if !UNITY_COLLECTIONS
+using FixedString512Bytes = Point.Collections.FixedChar512Bytes;
+#endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
@@ -31,7 +34,7 @@ namespace Point.Collections.Threading
     /// <summary>
     /// Thread 관련 각종 작업을 할 수 있는 구조체입니다.
     /// </summary>
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
     public struct ThreadInfo : IEmpty, IEquatable<ThreadInfo>, IEquatable<Thread>
@@ -55,10 +58,14 @@ namespace Point.Collections.Threading
         /// <summary>
         /// 현재 스레드의 이름입니다.
         /// </summary>
+#if UNITY_COLLECTIONS
         [NotBurstCompatible]
+#endif
         public string Name => m_Name.ToString();
 
+#if UNITY_COLLECTIONS
         [NotBurstCompatible]
+#endif
 #endif
         public ThreadInfo(Thread thread)
         {
@@ -88,7 +95,7 @@ namespace Point.Collections.Threading
 
             return true;
         }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         [NotBurstCompatible]
 #endif
         public bool Equals(Thread other)
@@ -102,7 +109,7 @@ namespace Point.Collections.Threading
 
             return true;
         }
-#if UNITYENGINE
+#if UNITYENGINE && UNITY_COLLECTIONS
         [NotBurstCompatible]
 #endif
         public override string ToString()

@@ -75,6 +75,7 @@ namespace Point.Collections.Burst
 
 			*output = hash;
         }
+#if UNITY_COLLECTIONS
         [BurstCompile]
         public static void fnv1a32_str(in FixedString4096Bytes str, uint* output)
         {
@@ -94,6 +95,7 @@ namespace Point.Collections.Burst
 
 			*output = hash;
         }
+#endif
 
         [BurstDiscard]
         public static void fnv1a64_str(in string str, ulong* output)

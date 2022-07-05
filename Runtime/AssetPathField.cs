@@ -46,7 +46,7 @@ namespace Point.Collections
         [SerializeField] protected string p_AssetPath = string.Empty;
         [SerializeField] protected string p_SubAssetName = string.Empty;
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2020_1_OR_NEWER && UNITY_COLLECTIONS
         [NonSerialized] protected AssetInfo p_AssetInfo;
 #endif
 
@@ -92,7 +92,7 @@ namespace Point.Collections
             }
         }
 #endif
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2020_1_OR_NEWER && UNITY_COLLECTIONS
         public AssetInfo Asset
         {
             get
@@ -123,7 +123,7 @@ namespace Point.Collections
         }
         ~AssetPathField()
         {
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2020_1_OR_NEWER && UNITY_COLLECTIONS
             if (p_AssetInfo.IsValid())
             {
                 p_AssetInfo.Reserve();
@@ -173,7 +173,7 @@ namespace Point.Collections
             return UnityEditor.AssetDatabase.GetDependencies(p_AssetPath);
         }
 #endif
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2020_1_OR_NEWER && UNITY_COLLECTIONS
         public AssetInfo LoadAsset()
         {
             if (p_AssetInfo.IsValid()) return p_AssetInfo;
@@ -253,7 +253,7 @@ namespace Point.Collections
             }
         }
 #endif
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2020_1_OR_NEWER && UNITY_COLLECTIONS
         public new AssetInfo<T> Asset
         {
             get
@@ -274,7 +274,7 @@ namespace Point.Collections
 
         public AssetPathField(string path) : base(path) { }
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2020_1_OR_NEWER && UNITY_COLLECTIONS
         public new AssetInfo<T> LoadAsset()
         {
             if (p_AssetInfo.IsValid()) return (AssetInfo<T>)p_AssetInfo;

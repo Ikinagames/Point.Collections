@@ -784,7 +784,9 @@ namespace Point.Collections.Buffer.LowLevel
         {
             buffer.SetData(t.ConvertToNativeArray());
         }
+#if UNITY_COLLECTIONS
         [NotBurstCompatible]
+#endif
         public static unsafe void ReadFromBuffer<T>(this in UnsafeAllocator<T> t, UnityEngine.GraphicsBuffer buffer)
             where T : unmanaged
         {
@@ -798,7 +800,9 @@ namespace Point.Collections.Buffer.LowLevel
 
             ArrayPool<T>.Shared.Return(arr);
         }
+#if UNITY_COLLECTIONS
         [NotBurstCompatible]
+#endif
         public static unsafe void ReadFromBuffer<T>(this in UnsafeAllocator<T> t, UnityEngine.ComputeBuffer buffer)
             where T : unmanaged
         {

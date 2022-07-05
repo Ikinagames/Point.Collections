@@ -13,16 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2019_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER && UNITY_COLLECTIONS
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
 #if UNITY_COLLECTIONS
 using Unity.Collections;
-#endif
-#else
-#define POINT_COLLECTIONS_NATIVE
 #endif
 
 using Point.Collections.Burst;
@@ -110,3 +107,5 @@ namespace Point.Collections
         public override int GetHashCode() => Convert.ToInt32(m_Hash);
     }
 }
+
+#endif

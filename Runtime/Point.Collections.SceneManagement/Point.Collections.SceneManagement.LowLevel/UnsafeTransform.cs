@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2020_1_OR_NEWER && UNITY_COLLECTIONS
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
@@ -34,9 +34,6 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Jobs;
 using UnityEngine.Rendering;
-#else
-#define POINT_COLLECTIONS_NATIVE
-#endif
 
 namespace Point.Collections.SceneManagement.LowLevel
 {
@@ -471,3 +468,5 @@ namespace Point.Collections.SceneManagement.LowLevel
         }
     }
 }
+
+#endif

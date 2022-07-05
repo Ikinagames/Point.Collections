@@ -13,11 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2020_1_OR_NEWER && UNITY_COLLECTIONS
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
 #define UNITYENGINE
+
+#if !UNITY_COLLECTIONS
+using FixedString512Bytes = Point.Collections.FixedChar512Bytes;
+#endif
 
 using Point.Collections.Buffer.LowLevel;
 using System;
@@ -28,7 +32,9 @@ using Unity.Jobs;
 
 namespace Point.Collections.ResourceControl.LowLevel
 {
+#if UNITY_COLLECTIONS
     [BurstCompatible]
+#endif
     [Guid("14ad9ef9-3c7c-4e60-96a3-2f3d602f9846")]
     internal struct UnsafeAssetBundleInfo : IValidation, IEquatable<UnsafeAssetBundleInfo>, IDisposable
     {

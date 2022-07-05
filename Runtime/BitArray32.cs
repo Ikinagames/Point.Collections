@@ -30,7 +30,7 @@ using System.Runtime.InteropServices;
 
 namespace Point.Collections
 {
-#if UNITYENGINE && UNITY_BURST
+#if UNITYENGINE && UNITY_COLLECTIONS
     [BurstCompatible]
 #endif
     [StructLayout(LayoutKind.Sequential)]
@@ -130,14 +130,14 @@ namespace Point.Collections
             }
         }
 
-#if UNITYENGINE && UNITY_BURST
+#if UNITYENGINE && UNITY_COLLECTIONS
         [NotBurstCompatible]
 #endif
         public override string ToString()
         {
             return Convert.ToString(Value, 2);
         }
-#if UNITYENGINE && UNITY_BURST
+#if UNITYENGINE && UNITY_COLLECTIONS
         [NotBurstCompatible]
 #endif
         public override bool Equals(object obj)

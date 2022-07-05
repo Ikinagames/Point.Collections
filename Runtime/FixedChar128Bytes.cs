@@ -19,13 +19,13 @@
 #endif
 #define UNITYENGINE
 #if UNITY_COLLECTIONS
-using System;
 using Unity.Collections;
 #endif
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
+using System;
 
 namespace Point.Collections
 {
