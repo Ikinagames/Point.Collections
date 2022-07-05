@@ -172,7 +172,7 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
         public static void Sort<T, U>(in UnsafeReference<T> buffer, in int length, U comparer)
             where T : unmanaged
-            where U : unmanaged, IComparer<T>
+            where U : IComparer<T>
         {
             for (int i = 0; i + 1 < length; i++)
             {

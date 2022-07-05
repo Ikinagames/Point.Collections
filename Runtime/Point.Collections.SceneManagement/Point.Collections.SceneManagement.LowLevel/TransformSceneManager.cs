@@ -45,130 +45,130 @@ namespace Point.Collections.SceneManagement.LowLevel
         protected override bool HideInInspector => base.HideInInspector;
 
         private bool m_ModifiedInThisFrame = false;
-        private UnsafeTransformScene m_Scene;
+        private List<UnsafeBatchedScene> m_BatchedData = new List<UnsafeBatchedScene>();
+        private Dictionary<BatchedKey, UnsafeBatchedScene> m_BatchedDataMap = new Dictionary<BatchedKey, UnsafeBatchedScene>();
+        
+        public struct BatchedKey : IEquatable<BatchedKey>
+        {
+            private readonly MeshMaterial meshMaterial;
+            private readonly int subMeshIndex;
 
-        //private CommandBuffer m_CommandBuffer;
-        private UnsafeAllocator<float4x4> m_Matrices;
-        private GraphicsBuffer m_TransformationGBuffer, m_MatricesGBuffer;
+            public BatchedKey(Mesh mesh, Material material, int subMeshIndex)
+            {
+                meshMaterial = MeshMaterial.GetMeshMaterial(mesh, material);
+                this.subMeshIndex = subMeshIndex;
+            }
+            public bool Equals(BatchedKey other) => meshMaterial.Equals(other.meshMaterial) && subMeshIndex == other.subMeshIndex;
+        }
+        public struct TransformInterface : IValidation
+        {
+            private SceneKey[][] m_Indices;
 
+            public TransformInterface(SceneKey[][] indices)
+            {
+                m_Indices = indices;
+            }
+
+            public bool IsValid()
+            {
+                return m_Indices != null && m_Indices.Length > 0;
+            }
+
+            public void SetPosition(float3 pos)
+            {
+                for (int i = 0; i < m_Indices.Length; i++)
+                {
+                    SetPosition(i, pos);
+                }
+            }
+            public void SetPosition(int index, float3 pos)
+            {
+                for (int i = 0; i < m_Indices[index].Length; i++)
+                {
+                    BatchedKey key = m_Indices[index][i].batchedKey;
+                    int sceneIndex = m_Indices[index][i].sceneIndex;
+
+                    UnsafeBatchedScene data = Instance.m_BatchedDataMap[key];
+                    data.scene.GetTransform(sceneIndex).Value.localPosition = pos;
+                }
+            }
+            public void SetRotation(quaternion rot)
+            {
+                for (int i = 0; i < m_Indices.Length; i++)
+                {
+                    SetRotation(i, rot);
+                }
+            }
+            public void SetRotation(int index, quaternion rot)
+            {
+                for (int i = 0; i < m_Indices[index].Length; i++)
+                {
+                    BatchedKey key = m_Indices[index][i].batchedKey;
+                    int sceneIndex = m_Indices[index][i].sceneIndex;
+
+                    UnsafeBatchedScene data = Instance.m_BatchedDataMap[key];
+                    data.scene.GetTransform(sceneIndex).Value.localRotation = rot;
+                }
+            }
+            public void SetScale(float3 scale)
+            {
+                for (int i = 0; i < m_Indices.Length; i++)
+                {
+                    SetScale(i, scale);
+                }
+            }
+            public void SetScale(int index, float3 scale)
+            {
+                for (int i = 0; i < m_Indices[index].Length; i++)
+                {
+                    BatchedKey key = m_Indices[index][i].batchedKey;
+                    int sceneIndex = m_Indices[index][i].sceneIndex;
+
+                    UnsafeBatchedScene data = Instance.m_BatchedDataMap[key];
+                    data.scene.GetTransform(sceneIndex).Value.localScale = scale;
+                }
+            }
+
+            public void Release()
+            {
+                for (int i = 0; i < m_Indices.Length; i++)
+                {
+                    for (int j = 0; j < m_Indices[i].Length; j++)
+                    {
+                        BatchedKey key = m_Indices[i][j].batchedKey;
+                        int sceneIndex = m_Indices[i][j].sceneIndex;
+
+                        UnsafeBatchedScene data = Instance.m_BatchedDataMap[key];
+
+                        data.Remove(sceneIndex);
+                    }
+                }
+            }
+        }
 
         protected override void OnInitialize()
         {
-//            m_CommandBuffer = new CommandBuffer();
-//#if UNITY_EDITOR
-//            m_CommandBuffer.name = "Point.TransformSceneManager";
-//#endif
-            //m_CommandBuffer.SetExecutionFlags(CommandBufferExecutionFlags.AsyncCompute);
-
-            m_Matrices = new UnsafeAllocator<float4x4>(UnsafeTransformScene.INIT_COUNT, Allocator.Persistent);
-
-            m_TransformationGBuffer = new GraphicsBuffer(
-                GraphicsBuffer.Target.Structured, UnsafeTransformScene.INIT_COUNT, UnsafeUtility.SizeOf<Transformation>());
-            m_MatricesGBuffer = new GraphicsBuffer(
-                GraphicsBuffer.Target.Structured, UnsafeTransformScene.INIT_COUNT, UnsafeUtility.SizeOf<float4x4>());
-            m_Scene = new UnsafeTransformScene(Allocator.Persistent);
-
-            "set cbuffer".ToLog();
-
-            // https://forum.unity.com/threads/compute-shader-buffer-rwbuffer-vs-structuredbuffer-rwstructuredbuffer.755672/
-
             PointApplication.OnLateUpdate += UpdateScene;
         }
         protected override void OnShutdown()
         {
             PointApplication.OnLateUpdate -= UpdateScene;
 
-            m_Scene.Dispose();
-
-            m_Matrices.Dispose();
-            m_TransformationGBuffer.Release();
-            m_MatricesGBuffer.Release();
-        }
-        private void UpdateBuffer()
-        {
-            m_Scene.transformations.CopyToBuffer(m_TransformationGBuffer);
-
-            int csMain = m_GetMatricesCS.FindKernel("CSMain");
-            {
-                m_GetMatricesCS.SetBuffer(csMain, "_Transforms", m_TransformationGBuffer);
-                m_GetMatricesCS.SetBuffer(csMain, "_Result", m_MatricesGBuffer);
-                m_GetMatricesCS.Dispatch(csMain, 16, 1, 1);
-            }
-        }
-        private void UpdateCommand()
-        {
-            // TODO : temp code
-            m_Matrices.ReadFromBuffer(m_MatricesGBuffer);
-
             for (int i = 0; i < m_BatchedData.Count; i++)
             {
-                Mesh mesh = m_BatchedData[i].key.meshMaterial.Mesh;
-                Material material = m_BatchedData[i].key.meshMaterial.Material;
-                int subMeshIndex = m_BatchedData[i].key.subMeshIndex;
-
-                Matrix4x4[] mats = ArrayPool<Matrix4x4>.Shared.Rent(m_BatchedData[i].graphics.Count);
-                for (int j = 0; j < m_BatchedData[i].graphics.Count; j++)
-                {
-                    int matrixIndex = m_BatchedData[i].graphics[j].index;
-                    mats[j] = m_Matrices[matrixIndex];
-                }
-
-                Graphics.DrawMeshInstanced(
-                    mesh, subMeshIndex, material, mats, m_BatchedData[i].graphics.Count);
-
-                ArrayPool<Matrix4x4>.Shared.Return(mats);
+                m_BatchedData[i].Dispose();
             }
         }
-        //private void ExecuteCommand()
-        //{
-        //    Graphics.ExecuteCommandBuffer(m_CommandBuffer);
-        //}
 
-        //private unsafe void Resize()
-        //{
-        //    m_Matrices.ReadFromBuffer(m_MatricesGBuffer);
-
-        //    int targetLength = m_Scene.length * 2;
-
-        //    m_Scene.Resize(targetLength);
-        //    m_Matrices.Resize(targetLength);
-
-        //    //GraphicsBuffer newTrGBuffer = new GraphicsBuffer(
-        //    //    GraphicsBuffer.Target.Structured, targetLength, UnsafeUtility.SizeOf<Transformation>());
-        //    //m_TransformationGBuffer.Release();
-        //    //m_TransformationGBuffer = newTrGBuffer;
-
-        //    //var newMatricsGBuffer = new GraphicsBuffer(
-        //    //    GraphicsBuffer.Target.Structured, targetLength, UnsafeUtility.SizeOf<float4x4>());
-        //    //m_MatricesGBuffer.Release();
-        //    //m_MatricesGBuffer = newMatricsGBuffer;
-
-        //    "resized".ToLog();
-        //}
-
-        public static void Add(Transform tr, 
-            out UnsafeAllocator<UnsafeTransformScene.Data> buffer, out int index)
+        public static TransformInterface Add(Transform tr)
         {
             if (PointApplication.IsShutdown)
             {
-                buffer = default;
-                index = -1;
-                return;
+                return default;
             }
 
-            //if (Instance.m_Scene.RequireResize())
-            //{
-            //    Instance.Resize();
-
-            //    buffer = default;
-            //    index = -1;
-            //    return;
-            //}
-
-            index = Instance.m_Scene.AddTransform(new Transformation(tr));
-            buffer = Instance.m_Scene.Buffer;
-
             Renderer[] renderers = tr.GetComponentsInChildren<Renderer>();
+            SceneKey[][] vs = new SceneKey[renderers.Length][];
             for (int i = 0; i < renderers.Length; i++)
             {
                 Renderer ren = renderers[i];
@@ -185,168 +185,65 @@ namespace Point.Collections.SceneManagement.LowLevel
                 }
 
                 ren.enabled = false;
-                //Instance.BuildModel(ptr, mesh, ren.sharedMaterials);
+                vs[i] = Instance.BuildModel(mesh, ren.sharedMaterials, new Transformation(tr));
             }
 
             Instance.m_ModifiedInThisFrame = true;
+            return new TransformInterface(vs);
         }
-        public static void Remove(int ptr)
+        public static void Remove(TransformInterface ptr)
         {
             if (PointApplication.IsShutdown) return;
 
-            Instance.m_Scene.RemoveTransform(ptr);
+            ptr.Release();
 
             Instance.m_ModifiedInThisFrame = true;
         }
 
-        #region BatchedData
-
-        private struct MeshMaterial : IEquatable<MeshMaterial>
+        public struct SceneKey
         {
-            private static Dictionary<int, Material> s_MaterialMap = new Dictionary<int, Material>();
-            private static Dictionary<int, Mesh> s_MeshMap = new Dictionary<int, Mesh>();
-
-            private readonly int mesh;
-            private readonly int material;
-
-            public Mesh Mesh => s_MeshMap[mesh];
-            public Material Material => s_MaterialMap[material];
-
-            public MeshMaterial(Mesh mesh, Material material)
-            {
-                this.mesh = mesh.GetInstanceID();
-                this.material = material.GetInstanceID();
-                Mesh.GetNativeIndexBufferPtr();
-            }
-
-            public bool Equals(MeshMaterial other) 
-                => mesh == other.mesh && material == other.material;
-
-            public static MeshMaterial GetMeshMaterialKey(Mesh mesh, Material material)
-            {
-                s_MaterialMap[material.GetInstanceID()] = material;
-                s_MeshMap[mesh.GetInstanceID()] = mesh;
-
-                return new MeshMaterial(mesh, material);
-            }
+            public BatchedKey batchedKey;
+            public int sceneIndex;
         }
-
-        private struct BatchedDataKey : IEquatable<BatchedDataKey>
+        private SceneKey[] BuildModel(Mesh mesh, Material[] materials, Transformation tr)
         {
-            public MeshMaterial meshMaterial;
-            public int subMeshIndex;
+            SceneKey[] indices = new SceneKey[materials.Length];
 
-            public BatchedDataKey(MeshMaterial key, int meshIndex)
+            for (int i = 0; i < materials.Length; i++)
             {
-                this.meshMaterial = key;
-                subMeshIndex = meshIndex;
-            }
-
-            public bool Equals(BatchedDataKey other)
-            {
-                return meshMaterial.Equals(other.meshMaterial) && subMeshIndex == other.subMeshIndex;
-            }
-        }
-        private struct BatchedData
-        {
-            public BatchedDataKey key;
-
-            public List<UnsafeGraphicsModel> graphics;
-        }
-
-        private Dictionary<BatchedDataKey, int> m_BatchedDataHashMap = new Dictionary<BatchedDataKey, int>();
-
-        private List<BatchedData> m_BatchedData = new List<BatchedData>();
-
-        private static BatchedData GetBatchedData(Mesh mesh, Material material, int subMeshIndex)
-        {
-            BatchedDataKey key = new BatchedDataKey(MeshMaterial.GetMeshMaterialKey(mesh, material), subMeshIndex);
-
-            if (!Instance.m_BatchedDataHashMap.TryGetValue(key, out int index))
-            {
-                index = Instance.m_BatchedData.Count;
-                Instance.m_BatchedData.Add(new BatchedData
+                BatchedKey key = new BatchedKey(mesh, materials[i], i);
+                if (!m_BatchedDataMap.TryGetValue(key, out UnsafeBatchedScene data))
                 {
-                    key = key,
-                    graphics = new List<UnsafeGraphicsModel>()
-                });
-                Instance.m_BatchedDataHashMap.Add(key, index);
+                    data = new UnsafeBatchedScene(m_GetMatricesCS, mesh, materials[i], i);
+                    m_BatchedData.Add(data);
+                    m_BatchedDataMap.Add(key, data);
+                }
+
+                indices[i] = new SceneKey
+                {
+                    batchedKey = key,
+                    sceneIndex = data.Add(tr)
+                };
             }
 
-            return Instance.m_BatchedData[index];
-        }
-        private static void SetBatchedData(Mesh mesh, Material material, BatchedData data)
-        {
-            if (!Instance.m_BatchedDataHashMap.TryGetValue(data.key, out int index))
-            {
-                Assert.IsTrue(false);
-            }
+            return indices;
 
-            Instance.m_BatchedData[index] = data;
-        }
+            //for (int i = 0; i < materials.Length; i++)
+            //{
+            //    if (!materials[i].enableInstancing)
+            //    {
+            //        materials[i] = new Material(materials[i]);
+            //        materials[i].enableInstancing = true;
+            //    }
 
-        // https://toqoz.fyi/thousands-of-meshes.html
-        private static void SetupBuffers()
-        {
-            GraphicsBuffer argGBuffer = new GraphicsBuffer(
-                GraphicsBuffer.Target.IndirectArguments, 1, 5 * sizeof(uint));
+            //    BatchedData data = GetBatchedData(mesh, materials[i], i);
 
-            Graphics.DrawMeshInstancedIndirect(null, 0, null, default, argGBuffer);
-        }
-        private static void SetupBatchedData(BatchedData data, ComputeBuffer argBuffer)
-        {
-            Mesh mesh = data.key.meshMaterial.Mesh;
-            Material material = data.key.meshMaterial.Material;
-
-            // 0 == number of triangle indices, 1 == population, others are only relevant if drawing submeshes.
-            uint[] args = new uint[5]
-            {
-                (uint)mesh.GetIndexCount(data.key.subMeshIndex),
-                (uint)data.graphics.Count,
-                (uint)mesh.GetIndexStart(data.key.subMeshIndex),
-                (uint)mesh.GetBaseVertex(data.key.subMeshIndex),
-                0
-            };
-
-            //material.set
-        }
-        private void SendDrawCalls()
-        {
-            for (int i = 0; i < m_BatchedData.Count; i++)
-            {
-                BatchedData data = m_BatchedData[i];
-                //Material material = data.key.Material;
-
-                GraphicsBuffer gbuffer = new GraphicsBuffer(GraphicsBuffer.Target.Vertex, 1, sizeof(int));
-                //gbuffer.SetData<int>(,);
-                //Graphics.drawmesh
-                //float4x4.TRS
-            }
+            //    UnsafeGraphicsModel model
+            //        = new UnsafeGraphicsModel(transform, false);
+            //    data.graphics.Add(model);
+            //}
         }
 
-        #endregion
-
-        //private void BuildModel(UnsafeReference<UnsafeTransform> transform, 
-        //    Mesh mesh, Material[] materials)
-        //{
-        //    for (int i = 0; i < materials.Length; i++)
-        //    {
-        //        if (!materials[i].enableInstancing)
-        //        {
-        //            materials[i] = new Material(materials[i]);
-        //            materials[i].enableInstancing = true;
-        //        }
-
-        //        BatchedData data = GetBatchedData(mesh, materials[i], i);
-
-        //        UnsafeGraphicsModel model 
-        //            = new UnsafeGraphicsModel(transform, false);
-        //        data.graphics.Add(model);
-
-        //        SetBatchedData(mesh, materials[i], data);
-        //    }
-        //}
-        
         private void UpdateScene()
         {
             if (m_ModifiedInThisFrame)
@@ -355,18 +252,6 @@ namespace Point.Collections.SceneManagement.LowLevel
                 return;
             }
 
-            //UpdateBuffer();
-            //UpdateCommand();
-
-            //ExecuteCommand();
-
-            //for (int i = 0; i < m_Scene.count; i++)
-            //{
-            //    $"{m_Matrices[i]}".ToLog();
-            //}
-
-            ////m_Scene.Synchronize();
-            //JobHandle.ScheduleBatchedJobs();
         }
     }
 }

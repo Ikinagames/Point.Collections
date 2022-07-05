@@ -21,6 +21,7 @@
 using Point.Collections.Buffer.LowLevel;
 using Point.Collections.Threading;
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst;
@@ -31,6 +32,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Jobs;
+using UnityEngine.Rendering;
 #else
 #define POINT_COLLECTIONS_NATIVE
 #endif
@@ -139,7 +141,8 @@ namespace Point.Collections.SceneManagement.LowLevel
             private UnsafeAllocator<int> indices;
 
             private UnsafeFixedListWrapper<int> indexList;
-            //public UnsafeFixedListWrapper<Transformation> transforms;
+
+            public int count => transformations.Length - indexList.Length;
 
             public Data(int count, Allocator allocator)
             {
@@ -153,14 +156,13 @@ namespace Point.Collections.SceneManagement.LowLevel
                 indexList = new UnsafeFixedListWrapper<int>(indices, 0);
                 for (int i = 0; i < count; i++)
                 {
-                    ReserveIndex(i);
+                    indexList.AddNoResize(i);
                 }
-                //transforms = new UnsafeFixedListWrapper<Transformation>(transformations, 0);
             }
 
             public int GetEmptyIndex()
             {
-                if (indexList.Length == 0)
+                if (RequireResize())
                 {
                     "resizeing".ToLog();
                     Resize(indexList.Capacity * 2);
@@ -173,20 +175,46 @@ namespace Point.Collections.SceneManagement.LowLevel
             }
             public void ReserveIndex(int index)
             {
-                indexList.AddNoResize(index);
+                indexList.InsertNoResize(0, index);
+                indexList.Sort(new Comparer());
+            }
+            private struct Comparer : IComparer<int>
+            {
+                public int Compare(int x, int y)
+                {
+                    if (x < y) return -1;
+                    else if (x > y) return 1;
+                    return 0;
+                }
             }
 
-            private void Resize(int length)
+            public UnsafeReference<Transformation> GetTransform(int index)
             {
-                int prevLength = transformations.Length;
+                int count = index;
+                for (int i = 0; i < count; i++)
+                {
+                    bool found = indexList.FindFor(i, 0, i + 1);
+                    if (found)
+                    {
+                        index--;
+                        //$"corrected {count} -> {index} :: {i} not found".ToLog();
+                    }
+                }
 
+                return transformations.ElementAt(index);
+            }
+
+            public bool RequireResize() => indexList.Length == 0;
+            public int Resize() => Resize(indexList.Capacity * 2);
+            public int Resize(int length)
+            {
                 transformations.Resize(length);
                 indices.Resize(length);
 
                 indexList = new UnsafeFixedListWrapper<int>(
                     indices, indexList.Length);
-                //transforms = new UnsafeFixedListWrapper<Transformation>(
-                //    transformations, prevLength);
+
+                return length;
             }
             public void Dispose()
             {
@@ -198,11 +226,9 @@ namespace Point.Collections.SceneManagement.LowLevel
         private UnsafeAllocator<Data> m_Data;
         private JobHandle jobHandle;
 
-        //public int length => m_Data[0].transforms.Capacity;
-        //public int count => m_Data[0].transforms.Length;
-
-        public UnsafeAllocator<Data> Buffer => m_Data;
-        public UnsafeAllocator<Transformation> transformations => Buffer[0].transformations;
+        public UnsafeAllocator<Data> buffer => m_Data;
+        public UnsafeAllocator<Transformation> transformations => buffer[0].transformations;
+        public int count => buffer[0].count;
         
         public unsafe UnsafeTransformScene(Allocator allocator, int initCount = INIT_COUNT)
         {
@@ -212,31 +238,24 @@ namespace Point.Collections.SceneManagement.LowLevel
             jobHandle = default(JobHandle);
         }
 
+        public UnsafeReference<Transformation> GetTransform(int index) => buffer[0].GetTransform(index);
+
         public bool IsValid()
         {
             return m_Data.IsCreated;
         }
-        
+
+        public bool RequireResize() => m_Data[0].RequireResize();
+        public void Resize() => m_Data[0].Resize();
         public int AddTransform(Transformation transformation = default(Transformation))
         {
-            //if (RequireResize())
-            //{
-            //    UnityEngine.Debug.LogError("require Resize");
-            //    Debug.Break();
-            //    return default;
-            //}
             if (transformation.Equals(default(Transformation)))
             {
                 transformation = Transformation.identity;
             }
 
-            //Assert.IsFalse(RequireResize(), "This Scene require resize but you didn\'t.");
-
             int index = m_Data[0].GetEmptyIndex();
             m_Data[0].transformations[index] = transformation;
-
-            //int count = m_Data[0].transforms.Length;
-            //m_Data[0].transforms.AddNoResize(transformation);
 
             return index;
         }
@@ -259,31 +278,147 @@ namespace Point.Collections.SceneManagement.LowLevel
         }
     }
 
-    public struct UnsafeGraphicsModel
+    internal sealed class UnsafeBatchedScene : IDisposable
     {
-        private int transform;
+        private readonly ComputeShader m_GetMatricesCS;
 
-        public int index => transform;
-        //public float4x4 localToWorld => transform.Value.transformation.localToWorld;
-        //public Bounds bounds
-        //{
-        //    get
-        //    {
-        //        float3 pos = transform.Value.transformation.localPosition;
-        //        return new Bounds(pos, Vector3.one);
-        //    }
-        //}
+        public Bounds bounds;
 
-        public UnsafeGraphicsModel(
-            int transform, bool hasCollider)
+        private readonly MeshMaterial meshMaterial;
+        private readonly int subMeshIndex;
+        public readonly UnsafeTransformScene scene;
+        private readonly ComputeBuffer transformationBuffer, matricesBuffer, argumentBuffer;
+
+        public UnsafeBatchedScene(
+            ComputeShader getMatricesCS,
+            Mesh mesh, Material material, int subMeshIndex)
         {
-            //if (hasCollider)
-            //{
-            //    // https://docs.unity3d.com/ScriptReference/Physics.BakeMesh.html
-            //    Physics.BakeMesh(mesh.GetInstanceID(), false);
-            //}
+            m_GetMatricesCS = getMatricesCS;
 
-            this.transform = transform;
+            meshMaterial = MeshMaterial.GetMeshMaterial(mesh, material);
+            this.subMeshIndex = subMeshIndex;
+            scene = new UnsafeTransformScene(Allocator.Persistent);
+
+            transformationBuffer = new ComputeBuffer(
+                UnsafeTransformScene.INIT_COUNT, UnsafeUtility.SizeOf<Transformation>(), ComputeBufferType.Structured);
+            matricesBuffer = new ComputeBuffer(
+                UnsafeTransformScene.INIT_COUNT, UnsafeUtility.SizeOf<float4x4>(), ComputeBufferType.Structured);
+            argumentBuffer = new ComputeBuffer(
+                5, sizeof(uint) * 5, ComputeBufferType.IndirectArguments);
+        }
+
+        public int Add(Transformation tr)
+        {
+            int index = scene.AddTransform(tr);
+
+            return index;
+        }
+        public void Remove(int index)
+        {
+            scene.RemoveTransform(index);
+        }
+
+        private void SetupArgumentBuffer(Mesh mesh)
+        {
+            NativeArray<uint> arr = argumentBuffer.BeginWrite<uint>(0, 5);
+            arr[0] = mesh.GetIndexCount(subMeshIndex);
+            arr[1] = (uint)scene.count;
+            arr[2] = mesh.GetIndexStart(subMeshIndex);
+            arr[3] = (uint)mesh.GetBaseVertex(subMeshIndex);
+            arr[4] = 0;
+            argumentBuffer.EndWrite<uint>(5);
+        }
+        private void UpdateMatrices(Material material)
+        {
+            material.SetBuffer("_Matrices", matricesBuffer);
+        }
+        private void Setup(Mesh mesh, Material material)
+        {
+            SetupArgumentBuffer(mesh);
+            UpdateMatrices(material);
+        }
+
+        private void UpdateBuffer()
+        {
+            scene.transformations.CopyToBuffer(transformationBuffer);
+            m_GetMatricesCS.SetBuffer(0, "_Transforms", transformationBuffer);
+            m_GetMatricesCS.SetBuffer(0, "_Result", matricesBuffer);
+            m_GetMatricesCS.Dispatch(0, 16, 1, 1);
+        }
+
+        public void Draw()
+        {
+            Mesh mesh = meshMaterial.Mesh;
+            Material material = meshMaterial.Material;
+
+            UpdateBuffer();
+
+            int count = scene.count;
+            float4x4[] rawMats = ArrayPool<float4x4>.Shared.Rent(count);
+            matricesBuffer.GetData(rawMats, 0, 0, count);
+
+            Matrix4x4[] mats = ArrayPool<Matrix4x4>.Shared.Rent(count);
+            for (int i = 0; i < count; i++)
+            {
+                mats[i] = rawMats[i];
+            }
+            ArrayPool<float4x4>.Shared.Return(rawMats);
+
+            Graphics.DrawMeshInstanced(
+                mesh, subMeshIndex, material, mats
+                );
+            ArrayPool<Matrix4x4>.Shared.Return(mats);
+        }
+        public void DrawIndirect()
+        {
+            Mesh mesh = meshMaterial.Mesh;
+            Material material = meshMaterial.Material;
+
+            UpdateBuffer();
+            Setup(mesh, material);
+
+            Graphics.DrawMeshInstancedIndirect(
+                mesh, subMeshIndex, material, bounds, argumentBuffer
+                );
+        }
+
+        public void Dispose()
+        {
+            transformationBuffer.Dispose();
+            matricesBuffer.Dispose();
+            argumentBuffer.Dispose();
+
+            scene.Dispose();
+        }
+    }
+
+    struct MeshMaterial : IEquatable<MeshMaterial>
+    {
+        private static Dictionary<int, Material> s_MaterialMap = new Dictionary<int, Material>();
+        private static Dictionary<int, Mesh> s_MeshMap = new Dictionary<int, Mesh>();
+
+        private readonly int mesh;
+        private readonly int material;
+
+        public Mesh Mesh => s_MeshMap[mesh];
+        public Material Material => s_MaterialMap[material];
+
+        public MeshMaterial(Mesh mesh, Material material)
+        {
+            this.mesh = mesh.GetInstanceID();
+            this.material = material.GetInstanceID();
+            Mesh.GetNativeIndexBufferPtr();
+        }
+
+        public bool Equals(MeshMaterial other)
+            => mesh == other.mesh && material == other.material;
+
+        public static MeshMaterial GetMeshMaterial(Mesh mesh, Material material)
+        {
+            s_MaterialMap[material.GetInstanceID()] = material;
+            s_MeshMap[mesh.GetInstanceID()] = mesh;
+
+            return new MeshMaterial(mesh, material);
         }
     }
 }

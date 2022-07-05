@@ -27,6 +27,8 @@ using Unity.Collections.LowLevel.Unsafe;
 using System;
 using System.Collections.Generic;
 using Point.Collections.Native;
+using UnityEngine.Assertions;
+using Unity.Mathematics;
 
 namespace Point.Collections.Buffer.LowLevel
 {
@@ -85,7 +87,14 @@ namespace Point.Collections.Buffer.LowLevel
 
         public T this[int index]
         {
-            get { return m_Buffer[index]; }
+            get
+            {
+#if UNITY_EDITOR
+                Assert.IsFalse(index < 0);
+                Assert.IsTrue(index < Capacity);
+#endif
+                return m_Buffer[index];
+            }
             set { m_Buffer[index] = value; }
         }
         public T this[uint index]
@@ -135,6 +144,23 @@ namespace Point.Collections.Buffer.LowLevel
 
         public ref T ElementAt(int index) => ref m_Buffer[index];
         public ref T ElementAt(uint index) => ref m_Buffer[index];
+
+        public UnsafeReference<T> InsertNoResize(int index, T element)
+        {
+            if (m_Count >= Capacity)
+            {
+                throw new Exception();
+            }
+
+            m_Count++;
+            for (int i = m_Count - 1; i >= index; i--)
+            {
+                m_Buffer[i] = m_Buffer[i - 1];
+            }
+            m_Buffer[index] = element;
+
+            return m_Buffer + index;
+        }
         public UnsafeReference<T> AddNoResize(T element)
         {
             if (m_Count >= Capacity)
@@ -246,12 +272,24 @@ namespace Point.Collections.Buffer.LowLevel
 
         public static void Sort<T, U>(this ref UnsafeFixedListWrapper<T> t, U comparer)
             where T : unmanaged
-            where U : unmanaged, IComparer<T>
+            where U : IComparer<T>
         {
             unsafe
             {
                 UnsafeBufferUtility.Sort<T, U>(t.m_Buffer, t.Length, comparer);
             }
+        }
+        public static unsafe bool FindFor<T, U>(this ref UnsafeFixedListWrapper<T> t, U item, 
+            int start, int end)
+            where T : unmanaged, IEquatable<U>
+            where U : unmanaged
+        {
+            end = math.min(end, t.Capacity);
+            for (int i = start; i < end; i++)
+            {
+                if (t[i].Equals(item)) return true;
+            }
+            return false;
         }
         public static int BinarySearch<T, TComparer>(this ref UnsafeFixedListWrapper<T> t, T value, TComparer comparer)
             where T : unmanaged
