@@ -249,12 +249,20 @@ namespace Point.Collections
             {
                 foreach (var item in xml.Elements())
                 {
-                    element.Add(item);
+                    if (element.Element(item.Name) != null)
+                    {
+                        element.Element(item.Name).Value = item.Value;
+                    }
+                    else element.Add(item);
+
+                    $"{element.Name}: {item.Name}:{item.Value}".ToLog();
                 }
             }
-            else element.Value = xml.Value;
-
-            $"{element.Name}: {element.Value}".ToLog();
+            else
+            {
+                element.Value = xml.Value;
+                $"{element.Name}: {element.Value}".ToLog();
+            }
         }
         private static void LoadValue(XElement objRoot, FieldInfo fieldInfo, object obj)
         {
@@ -293,7 +301,17 @@ namespace Point.Collections
             }
 
             object value = XmlParser.ConvertToObject(fieldInfo.FieldType, element);
-            Debug.Log($"{fieldInfo.Name}={value}({element.Value}) :: loaded");
+            if (element.HasElements)
+            {
+                foreach (var item in element.Elements())
+                {
+                    $"{fieldInfo.Name}: {item.Name}:{item.Value}".ToLog();
+                }
+            }
+            else
+            {
+                Debug.Log($"{fieldInfo.Name}={value}({element.Value}) :: loaded");
+            }
 
             fieldInfo.SetValue(obj, value);
         }

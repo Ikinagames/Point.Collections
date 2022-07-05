@@ -92,6 +92,7 @@ namespace Point.Collections
                     keyType = type.GenericTypeArguments[0],
                     valueType = type.GenericTypeArguments[1];
 
+                $"{xml}".ToLog();
                 foreach (var item in xml.Elements())
                 {
                     TypeConverter 
@@ -101,7 +102,7 @@ namespace Point.Collections
                         key = keyConvertor.ConvertFrom(item.Name.ToString().Substring(1)),
                         value = valueConvertor.ConvertFrom(item.Value);
 
-                    dictionary.Add(key, value);
+                    dictionary[key] = value;
                 }
 
                 return dictionary;
