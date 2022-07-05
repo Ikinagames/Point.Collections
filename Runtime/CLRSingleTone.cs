@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Ikina Games
+﻿// Copyright 2022 Ikina Games
 // Author : Seung Ha Kim (Syadeu)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,19 +30,33 @@ namespace Point.Collections
             {
                 if (s_Instance == null)
                 {
-                    s_Instance = new T();
-
-                    (s_Instance as CLRSingleTone<T>).OnInitialize();
+                    s_Instance = Initialize();
                 }
                 return s_Instance;
             }
         }
+        public static T Initialize()
+        {
+            if (s_Instance == null)
+            {
+                s_Instance = new T();
+
+                (s_Instance as CLRSingleTone<T>).OnInitialize();
+                PointApplication.OnApplicationShutdown += (s_Instance as IDisposable).Dispose;
+            }
+            return s_Instance;
+        }
+
+        
+
         ~CLRSingleTone()
         {
             ((IDisposable)this).Dispose();
         }
         void IDisposable.Dispose()
         {
+            PointApplication.OnApplicationShutdown -= (this as IDisposable).Dispose;
+
             OnDispose();
         }
 

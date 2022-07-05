@@ -61,7 +61,7 @@ namespace Point.Collections
                     if (!settingFields[i].IsStatic) continue;
 
                     FieldInfo field = settingFields[i];
-                    SetValue(element, field, null);
+                    LoadValue(element, field, null);
 
                     hasValue |= true;
                 }
@@ -203,11 +203,6 @@ namespace Point.Collections
                 .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
                 .Where(target =>
                 {
-                    if (target.IsPrivate)
-                    {
-                        return target.GetCustomAttribute<SerializeField>() != null || target.GetCustomAttribute<XmlFieldAttribute>() != null;
-                    }
-
                     return target.GetCustomAttribute<XmlFieldAttribute>() != null;
                 })
                 .ToArray();
@@ -249,9 +244,19 @@ namespace Point.Collections
                 return;
             }
 
-            element.Value = XmlParser.ConvertToXml(elementName, fieldInfo.GetValue(obj)).Value;
+            XElement xml = XmlParser.ConvertToXml(elementName, fieldInfo.GetValue(obj));
+            if (xml.HasElements)
+            {
+                foreach (var item in xml.Elements())
+                {
+                    element.Add(item);
+                }
+            }
+            else element.Value = xml.Value;
+
+            $"{element.Name}: {element.Value}".ToLog();
         }
-        private static void SetValue(XElement objRoot, FieldInfo fieldInfo, object obj)
+        private static void LoadValue(XElement objRoot, FieldInfo fieldInfo, object obj)
         {
             if (!ValidateFieldType(fieldInfo))
             {
@@ -288,7 +293,7 @@ namespace Point.Collections
             }
 
             object value = XmlParser.ConvertToObject(fieldInfo.FieldType, element);
-            //Debug.Log($"{fieldInfo.Name}={value} :: loaded");
+            Debug.Log($"{fieldInfo.Name}={value}({element.Value}) :: loaded");
 
             fieldInfo.SetValue(obj, value);
         }
@@ -349,7 +354,7 @@ namespace Point.Collections
             IEnumerable<FieldInfo> fieldsIter = GetSettingFields(t);
             foreach (FieldInfo fieldInfo in fieldsIter)
             {
-                SetValue(objRoot, fieldInfo, obj);
+                LoadValue(objRoot, fieldInfo, obj);
             }
 
             //Debug.Log(doc.ToString());
@@ -363,7 +368,7 @@ namespace Point.Collections
             IEnumerable<FieldInfo> fieldsIter = GetSettingFields(t);
             foreach (FieldInfo fieldInfo in fieldsIter)
             {
-                SetValue(objRoot, fieldInfo, obj);
+                LoadValue(objRoot, fieldInfo, obj);
             }
 
             //Debug.Log(doc.ToString());

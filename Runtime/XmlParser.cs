@@ -24,7 +24,9 @@
 
 using System;
 using System.Collections;
+using System.ComponentModel;
 using System.Xml.Linq;
+using UnityEngine;
 
 namespace Point.Collections
 {
@@ -48,8 +50,16 @@ namespace Point.Collections
                 var iter = dictionary.GetEnumerator();
                 while (iter.MoveNext())
                 {
-                    XElement item = new XElement(iter.Key.ToString(), iter.Value.ToString());
-                    root.Add(item);
+                    try
+                    {
+                        XElement item = new XElement("_" + iter.Key.ToString(), iter.Value.ToString());
+                        root.Add(item);
+                    }
+                    catch (Exception ex)
+                    {
+                        $"{iter.Key}".ToLogError();
+                        Debug.LogException(ex);
+                    }
                 }
 
                 return root;
@@ -84,9 +94,12 @@ namespace Point.Collections
 
                 foreach (var item in xml.Elements())
                 {
+                    TypeConverter 
+                        keyConvertor = TypeDescriptor.GetConverter(keyType),
+                        valueConvertor = TypeDescriptor.GetConverter(valueType);
                     object
-                        key = Convert.ChangeType(item.Name.ToString(), keyType),
-                        value = Convert.ChangeType(item.Value, valueType);
+                        key = keyConvertor.ConvertFrom(item.Name.ToString().Substring(1)),
+                        value = valueConvertor.ConvertFrom(item.Value);
 
                     dictionary.Add(key, value);
                 }

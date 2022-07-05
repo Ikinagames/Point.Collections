@@ -30,14 +30,40 @@ using FixedString512Bytes = Point.Collections.FixedChar512Bytes;
 using Newtonsoft.Json;
 using System;
 using System.Runtime.InteropServices;
+using System.ComponentModel;
+using System.Globalization;
 
 namespace Point.Collections
 {
     [Serializable]
     [JsonConverter(typeof(IO.Json.HashJsonConverter))]
+    [TypeConverter(typeof(HashTypeConverter))]
     [Guid("acdb109b-3a13-4ea2-8835-ef97b416cbb7")]
     public struct Hash : IEquatable<Hash>, IConvertible, IEmpty
     {
+        private class HashTypeConverter : TypeConverter
+        {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
+            }
+
+            public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+            {
+                string casted = value as string;
+                return !casted.IsNullOrEmpty()
+                    ? (Hash)casted
+                    : base.ConvertFrom(context, culture, value);
+            }
+            public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+            {
+                Hash casted = (Hash)value;
+                return destinationType == typeof(string) && !casted.IsEmpty()
+                    ? casted.ToString()
+                    : base.ConvertTo(context, culture, value, destinationType);
+            }
+        }
+
         public static Hash Empty => new Hash(0);
         public static Hash NewHash()
         {
@@ -126,8 +152,18 @@ namespace Point.Collections
         {
             string str = string.Empty;
             str += m_Value;
+
+            return str;
+        }
+        public string ToString(bool debug)
+        {
+            string str = string.Empty;
+            str += m_Value;
 #if DEBUG_MODE
-            str += $"({m_Key})";
+            if (debug && !m_Key.IsEmpty)
+            {
+                str += $"({m_Key})";
+            }
 #endif
 
             return str;
@@ -169,5 +205,10 @@ namespace Point.Collections
         public static Hash operator |(Hash x, Hash y) => new Hash(x.m_Value | y.m_Value);
 
         public static implicit operator uint(Hash hash) => hash.m_Value;
+        public static explicit operator Hash(string t)
+        {
+            if (!uint.TryParse(t, out uint result)) return Hash.Empty;
+            return new Hash(result);
+        }
     }
 }
