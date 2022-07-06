@@ -23,6 +23,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
+using UnityEngine.UIElements;
 
 namespace Point.Collections
 {
@@ -40,6 +42,17 @@ namespace Point.Collections
             get
             {
                 return Lines[index];
+            }
+        }
+        public string this[int index, int innerIndex]
+        {
+            get
+            {
+                return Lines[index][innerIndex];
+            }
+            set
+            {
+                Lines[index][innerIndex] = value;
             }
         }
 
@@ -66,6 +79,25 @@ namespace Point.Collections
 
             m_Lines = lines.ToArray();
             OnLineConstructed(m_Lines);
+        }
+
+        public StringBuilder Build()
+        {
+            StringBuilder b = new StringBuilder();
+            for (int i = 0; i < m_Lines.Length; i++)
+            {
+                string line = string.Empty;
+                for (int j = 0; j < m_Lines[i].Length; j++)
+                {
+                    if (!line.IsNullOrEmpty()) line += m_Seperator;
+
+                    line += m_Lines[i][j];
+                }
+
+                b.AppendLine(line);
+            }
+
+            return b;
         }
 
         protected virtual void OnProcessLine(int index, string raw, string[] elements) { }
