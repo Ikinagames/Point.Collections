@@ -138,7 +138,7 @@ namespace Point.Collections.Editor
         public static GameObject GetPrefabAsset(UnityEngine.Object obj)
         {
             string assetPath;
-            if (PrefabUtility.IsPartOfAnyPrefab(obj))
+            if (obj != null && PrefabUtility.IsPartOfAnyPrefab(obj))
             {
                 if (PrefabUtility.IsPartOfPrefabInstance(obj))
                 {
