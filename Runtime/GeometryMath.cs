@@ -28,7 +28,9 @@ using math = Point.Collections.Math;
 #define POINT_COLLECTIONS_NATIVE
 #endif
 
+using Unity.Mathematics;
 using UnityEngine;
+using static Unity.Mathematics.math;
 
 namespace Point.Collections
 {
@@ -36,12 +38,19 @@ namespace Point.Collections
     {
         public static Bounds GetOcculusionBounds(GameObject obj)
         {
-            Bounds bounds = new Bounds();
+            Bounds localBounds = new Bounds();
             foreach (var item in obj.GetComponentsInChildren<Renderer>())
             {
-                bounds.Encapsulate(item.localBounds);
+                localBounds.Encapsulate(item.localBounds);
             }
-            return bounds;
+
+            float4x4 mat = obj.transform.localToWorldMatrix;
+
+            Bounds worldBounds = new Bounds(mul(mat, float4((float3)localBounds.center, 1)).xyz, Vector3.zero);
+            worldBounds.Encapsulate(mul(mat, float4(localBounds.min, 1)).xyz);
+            worldBounds.Encapsulate(mul(mat, float4(localBounds.max, 1)).xyz);
+
+            return worldBounds;
         }
     }
 }
