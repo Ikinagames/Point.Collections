@@ -2,7 +2,7 @@ Shader "Unlit/GPUInstancingShader"
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
+        [NoScaleOffset] _MainTex ("Texture", 2D) = "white" {}
     }
     SubShader
     {

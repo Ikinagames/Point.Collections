@@ -29,7 +29,7 @@ namespace Point.Collections.SceneManagement.LowLevel
         [SerializeField] private bool m_Lerp;
         [SerializeField] private Vector3 m_TargetPosition;
 
-        public override bool EnableOnAwake => false;
+        public override bool EnableOnAwake => true;
 
         private void Start()
         {
