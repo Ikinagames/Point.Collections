@@ -62,6 +62,10 @@ namespace Point.Collections.Editor
             return true;
         }
     }
+    /// <summary>
+    /// <inheritdoc cref="SearchProviderBase"/>
+    /// </summary>
+    /// <typeparam name="TTarget"></typeparam>
     public abstract class SearchProviderBase<TTarget> : ScriptableObject, ISearchWindowProvider
     {
         public event Action<Entry, SearchWindowContext> OnSelected;
@@ -70,6 +74,8 @@ namespace Point.Collections.Editor
 
         public sealed class Entry : SearchTreeEntry
         {
+            public static Entry Empty => new Entry(CoreGUI.EmptyContent) { level = 1 };
+
             public new TTarget userData
             {
                 get => (TTarget)base.userData;

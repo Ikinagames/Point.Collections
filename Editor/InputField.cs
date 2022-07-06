@@ -67,6 +67,17 @@ namespace Point.Collections.Editor
             private Label m_Label;
             private Image m_Icon;
 
+            public string itemText
+            {
+                get => m_Label.text;
+                set => m_Label.text = value;
+            }
+            public Texture itemIcon
+            {
+                get => m_Icon.image;
+                set => m_Icon.image = value;
+            }
+
             public InputFieldDisplay(InputField field)
             {
                 AddToClassList(ussClassName);
@@ -85,15 +96,8 @@ namespace Point.Collections.Editor
                 };
                 m_Label.AddToClassList(labelUssClassName);
 
-                Update();
                 Add(m_Icon);
                 Add(m_Label);
-            }
-
-            public void Update()
-            {
-                m_Icon.image = m_Field.itemIcon;
-                m_Label.text = m_Field.itemText;
             }
         }
         private sealed class FieldSelector : VisualElement
@@ -127,6 +131,9 @@ namespace Point.Collections.Editor
         private InputFieldDisplay m_Display;
         private FieldSelector m_Selector;
 
+        /// <summary>
+        /// <see cref="SearchProviderBase"/>
+        /// </summary>
         public event Action OnSelectorOpen;
         private readonly Action m_AsyncOnProjectOrHierarchyChangedCallback;
         private readonly Action m_OnProjectOrHierarchyChangedCallback;
@@ -136,8 +143,16 @@ namespace Point.Collections.Editor
             get => m_Label.text;
             set => m_Label.text = value;
         }
-        public Texture itemIcon { get; set; }
-        public string itemText { get; set; }
+        public Texture itemIcon
+        {
+            get => m_Display.itemIcon;
+            set => m_Display.itemIcon = value;
+        }
+        public string itemText
+        {
+            get => m_Display.itemText;
+            set => m_Display.itemText = value;
+        }
 
         public override VisualElement contentContainer => null;
 
@@ -151,8 +166,6 @@ namespace Point.Collections.Editor
             m_Label = new Label(text);
             m_Label.AddToClassList(labelUssBaseClassName);
             m_Label.AddToClassList(labelUssClassName);
-            this.itemIcon = itemIcon;
-            this.itemText = itemText;
 
             m_Display = new InputFieldDisplay(this);
             m_Display.AddToClassList(inputUssBaseClassName);
@@ -176,7 +189,7 @@ namespace Point.Collections.Editor
             };
             m_OnProjectOrHierarchyChangedCallback = delegate
             {
-                m_Display.Update();
+                //m_Display.Update();
             };
             RegisterCallback<AttachToPanelEvent>(delegate
             {
@@ -188,6 +201,9 @@ namespace Point.Collections.Editor
                 EditorApplication.projectChanged -= m_AsyncOnProjectOrHierarchyChangedCallback;
                 EditorApplication.hierarchyChanged -= m_AsyncOnProjectOrHierarchyChangedCallback;
             });
+
+            this.itemIcon = itemIcon;
+            this.itemText = itemText;
         }
 
         public void ShowSelector()
@@ -202,8 +218,6 @@ namespace Point.Collections.Editor
                 obj, TypeHelper.TypeOf<TType>.Type);
             itemIcon = gUIContent.image;
             itemText = gUIContent.text;
-
-            m_Display.Update();
         }
         public void SetItem<TType>(string text, TType obj) where TType : UnityEngine.Object
         {
@@ -211,15 +225,11 @@ namespace Point.Collections.Editor
                 obj, TypeHelper.TypeOf<TType>.Type);
             itemIcon = gUIContent.image;
             itemText = text;
-
-            m_Display.Update();
         }
         public void SetItem(Texture icon, string text)
         {
             itemIcon = icon;
             itemText = text;
-
-            m_Display.Update();
         }
 
         protected virtual void OnShowSelector() { }
