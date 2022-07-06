@@ -52,14 +52,23 @@ namespace Point.Collections
             using (StringReader st = new StringReader(text))
             {
                 string line = null;
+                int index = 0;
                 while ((line = st.ReadLine()) != null)
                 {
                     string[] row = line.Split(m_Seperator, options);
+
+                    OnProcessLine(index, line, row);
+
                     lines.Add(row);
+                    index++;
                 }
             }
 
             m_Lines = lines.ToArray();
+            OnLineConstructed(m_Lines);
         }
+
+        protected virtual void OnProcessLine(int index, string raw, string[] elements) { }
+        protected virtual void OnLineConstructed(string[][] lines) { }
     }
 }
