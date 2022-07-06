@@ -17,7 +17,6 @@
 #define DEBUG_MODE
 
 #if UNITY_MATHEMATICS
-using System.Collections.Generic;
 using Unity.Mathematics;
 #endif
 using UnityEditor;
@@ -91,7 +90,6 @@ namespace Point.Collections.Editor
 
         protected virtual void OnButtonClick(SerializedProperty property) { }
     }
-
 }
 
 #endif
