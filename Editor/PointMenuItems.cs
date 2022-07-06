@@ -44,7 +44,8 @@ namespace Point.Collections.Editor
         {
             const string title = "Point Framework Setup Wizard";
 
-            CoreGUI.EditorWindow.OpenWindowAtCenterSafe<PointSetupWizard>(title, true, new Vector2(600, 500));
+            CoreGUI.EditorWindow.OpenWindowAtCenterSafe<PointSetupWizard>(title, true, 
+                new Vector2(600, 500));
         }
 
         [MenuItem("Point/Utils/Capture Current Game Screen", priority = 500)]
