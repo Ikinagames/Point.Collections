@@ -156,6 +156,8 @@ namespace Point.Collections.Editor
 
         public override VisualElement contentContainer => null;
 
+        public event Action OnFieldMouseClicked;
+
         public InputField() : this("LABEL", CoreGUI.EmptyIcon, "ITEMTEXT") { }
         public InputField(string text, Texture itemIcon, string itemText)
         {
@@ -171,12 +173,13 @@ namespace Point.Collections.Editor
             m_Display.AddToClassList(inputUssBaseClassName);
             m_Display.AddToClassList(inputUssClassName);
             m_Display.AddToClassList(objectUssClassName);
+            m_Display.RegisterCallback<MouseDownEvent>(OnFieldMouseClickEvent);
             {
                 m_Selector = new FieldSelector(this);
                 m_Selector.AddToClassList(selectorUssClassName);
 
-                m_Display.Add(m_Selector);
             }
+            m_Display.Add(m_Selector);
 
             hierarchy.Add(m_Label);
             hierarchy.Add(m_Display);
@@ -204,6 +207,11 @@ namespace Point.Collections.Editor
 
             this.itemIcon = itemIcon;
             this.itemText = itemText;
+        }
+
+        private void OnFieldMouseClickEvent(MouseDownEvent ev)
+        {
+            OnFieldMouseClicked?.Invoke();
         }
 
         public void ShowSelector()
