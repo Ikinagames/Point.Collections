@@ -177,11 +177,9 @@ namespace Point.Collections.ResourceControl
             m_InstanceID = instanceID;
             this.m_Key = key;
         }
-        internal unsafe AssetInfo(
-            UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash instanceID, AssetRuntimeKey key
 #if UNITY_EDITOR
-            , bool editorOnly
-#endif
+        internal unsafe AssetInfo(
+            UnsafeReference<UnsafeAssetBundleInfo> bundle, Hash instanceID, AssetRuntimeKey key, bool editorOnly
             )
         {
             this = default(AssetInfo);
@@ -189,11 +187,8 @@ namespace Point.Collections.ResourceControl
             m_BundlePointer = bundle;
             m_InstanceID = instanceID;
             this.m_Key = key;
-#if UNITY_EDITOR
             m_EditorOnly = editorOnly;
-#endif
         }
-#if UNITY_EDITOR
         internal unsafe AssetInfo(AssetRuntimeKey key, bool editorOnly)
         {
             if (!editorOnly)
