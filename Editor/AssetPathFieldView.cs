@@ -111,7 +111,9 @@ namespace Point.Collections.Editor
         public AssetPathFieldView()
         {
             styleSheets.Add(CoreGUI.VisualElement.DefaultStyleSheet);
-            style.flexGrow = 1;
+            AddToClassList(ussBaseClassName);
+            AddToClassList(ussClassName);
+            //style.flexGrow = 1;
             style.maxWidth = new StyleLength(new Length(100, LengthUnit.Percent));
             style.flexDirection = FlexDirection.Row;
 

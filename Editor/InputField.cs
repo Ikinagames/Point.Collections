@@ -63,6 +63,7 @@ namespace Point.Collections.Editor
             private const string iconUssClassName = ussClassName + "__icon";
             private const string labelUssClassName = ussClassName + "__label";
 
+            private VisualElement m_Display;
             private InputField m_Field;
             private Label m_Label;
             private Image m_Icon;
@@ -80,7 +81,11 @@ namespace Point.Collections.Editor
 
             public InputFieldDisplay(InputField field)
             {
-                AddToClassList(ussClassName);
+                m_Display = new VisualElement();
+                m_Display.AddToClassList(ussClassName);
+                m_Display.AddToClassList(objectUssClassName);
+
+                Add(m_Display);
 
                 m_Field = field;
 
@@ -96,8 +101,8 @@ namespace Point.Collections.Editor
                 };
                 m_Label.AddToClassList(labelUssClassName);
 
-                Add(m_Icon);
-                Add(m_Label);
+                m_Display.Add(m_Icon);
+                m_Display.Add(m_Label);
             }
         }
         private sealed class FieldSelector : VisualElement
@@ -172,7 +177,6 @@ namespace Point.Collections.Editor
             m_Display = new InputFieldDisplay(this);
             m_Display.AddToClassList(inputUssBaseClassName);
             m_Display.AddToClassList(inputUssClassName);
-            m_Display.AddToClassList(objectUssClassName);
             m_Display.RegisterCallback<MouseDownEvent>(OnFieldMouseClickEvent);
             {
                 m_Selector = new FieldSelector(this);
