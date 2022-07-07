@@ -741,6 +741,12 @@ namespace Point.Collections.Editor
             }
             public static VE Space() => Space(14, LengthUnit.Pixel);
 
+            public static PropertyField PropertyField(string label, SerializedProperty property)
+            {
+                var field = PropertyField(property);
+                field.label = label;
+                return field;
+            }
             public static PropertyField PropertyField(SerializedProperty property)
             {
                 PropertyField field = new PropertyField(property);
