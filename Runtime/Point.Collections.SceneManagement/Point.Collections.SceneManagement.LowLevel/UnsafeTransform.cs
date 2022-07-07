@@ -21,7 +21,9 @@
 using Point.Collections.Buffer.LowLevel;
 using Point.Collections.Threading;
 using System;
+#if SYSTEM_BUFFER
 using System.Buffers;
+#endif
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst;
@@ -401,22 +403,36 @@ namespace Point.Collections.SceneManagement.LowLevel
             UpdateBuffer();
 
             int count = scene.count;
-            float4x4[] rawMats = ArrayPool<float4x4>.Shared.Rent(count);
+            float4x4[] rawMats
+#if SYSTEM_BUFFER
+                = ArrayPool<float4x4>.Shared.Rent(count);
+#else
+                = new float4x4[count];
+#endif
             matricesBuffer.GetData(rawMats, 0, 0, count);
 
-            Matrix4x4[] mats = ArrayPool<Matrix4x4>.Shared.Rent(count);
+            Matrix4x4[] mats
+#if SYSTEM_BUFFER
+                = ArrayPool<Matrix4x4>.Shared.Rent(count);
+#else
+                = new Matrix4x4[count];
+#endif
             for (int i = 0; i < count; i++)
             {
                 mats[i] = rawMats[i];
                 //$"{mats[i]}".ToLog();
             }
+#if SYSTEM_BUFFER
             ArrayPool<float4x4>.Shared.Return(rawMats);
+#endif
 
             Graphics.DrawMeshInstanced(
                 mesh, subMeshIndex, material, mats, count
                 );
             //$"{count} drawed".ToLog();
+#if SYSTEM_BUFFER
             ArrayPool<Matrix4x4>.Shared.Return(mats);
+#endif
         }
         public void DrawIndirect()
         {

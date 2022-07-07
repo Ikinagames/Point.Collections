@@ -56,7 +56,11 @@ namespace Point.Collections
             }
         }
 
-        public TextParser(char seperator, string text, StringSplitOptions options = StringSplitOptions.RemoveEmptyEntries)
+        public TextParser(char seperator, string text
+#if UNITY_2021_1_OR_NEWER
+            , StringSplitOptions options = StringSplitOptions.RemoveEmptyEntries
+#endif
+            )
         {
             m_Seperator = seperator;
             m_Text = text;
@@ -68,7 +72,11 @@ namespace Point.Collections
                 int index = 0;
                 while ((line = st.ReadLine()) != null)
                 {
-                    string[] row = line.Split(m_Seperator, options);
+                    string[] row = line.Split(m_Seperator
+#if UNITY_2021_1_OR_NEWER
+                        , options
+#endif
+                        );
 
                     OnProcessLine(index, line, row);
 

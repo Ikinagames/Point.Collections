@@ -22,7 +22,6 @@
 using Point.Collections.Buffer;
 using Point.Collections.Buffer.LowLevel;
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;

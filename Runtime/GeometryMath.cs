@@ -41,7 +41,13 @@ namespace Point.Collections
             Bounds localBounds = new Bounds();
             foreach (var item in obj.GetComponentsInChildren<Renderer>())
             {
-                localBounds.Encapsulate(item.localBounds);
+                localBounds.Encapsulate(
+#if UNITY_2021_1_OR_NEWER
+                    item.localBounds
+#else
+                    item.bounds
+#endif
+                    );
             }
 
             float4x4 mat = obj.transform.localToWorldMatrix;

@@ -349,12 +349,16 @@ namespace Point.Collections.Editor
             private bool m_Opened;
 
             private bool
+                systemBuffer,
+
                 pointEnableTests,
 
                 unityEnhancedTouch,
                 unityCollectionsCheck,
                 behaviorTree;
             private const string
+                systemBufferSymbol = "SYSTEM_BUFFER",
+
                 pointEnableTestsSymbol = "POINT_INCLUDE_TESTS",
 
                 unityEnhancedTouchSymbol = "POINT_ENHANCEDTOUCH",
@@ -371,6 +375,7 @@ namespace Point.Collections.Editor
             {
                 m_Menu = menu;
 
+                CheckSymbol(ref systemBuffer, systemBufferSymbol);
                 CheckSymbol(ref pointEnableTests, pointEnableTestsSymbol);
                 CheckSymbol(ref unityCollectionsCheck, unityCollectionsCheckSymbol);
                 CheckSymbol(ref unityEnhancedTouch, unityEnhancedTouchSymbol);
@@ -386,6 +391,7 @@ namespace Point.Collections.Editor
                 using (new EditorGUI.IndentLevelScope())
                 using (new CoreGUI.BoxBlock(Color.white))
                 {
+                    DrawSymbol(ref systemBuffer, systemBufferSymbol);
                     DrawSymbol(ref pointEnableTests, pointEnableTestsSymbol);
                     DrawSymbol(ref unityCollectionsCheck, unityCollectionsCheckSymbol);
                     DrawSymbol(ref unityEnhancedTouch, unityEnhancedTouchSymbol);

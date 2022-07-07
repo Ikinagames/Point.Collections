@@ -40,7 +40,9 @@ using Point.Collections.Native;
 using Point.Collections.Threading;
 using System;
 using System.Collections.Generic;
+#if SYSTEM_BUFFER
 using System.Buffers;
+#endif
 
 namespace Point.Collections.Buffer.LowLevel
 {
@@ -790,7 +792,12 @@ namespace Point.Collections.Buffer.LowLevel
         public static unsafe void ReadFromBuffer<T>(this in UnsafeAllocator<T> t, UnityEngine.GraphicsBuffer buffer)
             where T : unmanaged
         {
-            T[] arr = ArrayPool<T>.Shared.Rent(t.Length);
+            T[] arr
+#if SYSTEM_BUFFER
+                = ArrayPool<T>.Shared.Rent(t.Length);
+#else
+                = new T[t.Length];
+#endif
             buffer.GetData(arr);
 
             fixed (T* ptr = arr)
@@ -798,7 +805,9 @@ namespace Point.Collections.Buffer.LowLevel
                 UnsafeUtility.MemCpy(t.Ptr, ptr, t.Size);
             }
 
+#if SYSTEM_BUFFER
             ArrayPool<T>.Shared.Return(arr);
+#endif
         }
 #if UNITY_COLLECTIONS
         [NotBurstCompatible]
@@ -806,7 +815,12 @@ namespace Point.Collections.Buffer.LowLevel
         public static unsafe void ReadFromBuffer<T>(this in UnsafeAllocator<T> t, UnityEngine.ComputeBuffer buffer)
             where T : unmanaged
         {
-            T[] arr = ArrayPool<T>.Shared.Rent(t.Length);
+            T[] arr
+#if SYSTEM_BUFFER
+                = ArrayPool<T>.Shared.Rent(t.Length);
+#else
+                = new T[t.Length];
+#endif
             buffer.GetData(arr);
 
             fixed (T* ptr = arr)
@@ -814,7 +828,9 @@ namespace Point.Collections.Buffer.LowLevel
                 UnsafeUtility.MemCpy(t.Ptr, ptr, t.Size);
             }
 
+#if SYSTEM_BUFFER
             ArrayPool<T>.Shared.Return(arr);
+#endif
         }
 
         public static UnsafeAllocator<T> ToUnsafeAllocator<T>(this in NativeArray<T> other, Allocator allocator) where T : unmanaged
@@ -830,6 +846,7 @@ namespace Point.Collections.Buffer.LowLevel
         }
 #endif
 
+#if SYSTEM_BUFFER
         public struct SharedArray<T> : IDisposable
             where T : unmanaged
         {
@@ -854,6 +871,7 @@ namespace Point.Collections.Buffer.LowLevel
             SharedArray<T> arr = new SharedArray<T>(ArrayPool<T>.Shared.Rent(t.Length));
             return arr;
         }
+#endif
 
         //////////////////////////////////////////////////////////////////////////////////////////
         /*                                End of Critical Section                               */

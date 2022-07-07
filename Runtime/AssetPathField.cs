@@ -134,7 +134,7 @@ namespace Point.Collections
         public bool IsInResourceFolder()
         {
             const string c_Str = "resources";
-            var vs = p_AssetPath.Split('/', StringSplitOptions.None);
+            var vs = p_AssetPath.Split('/');
             for (int i = 0; i < vs.Length; i++)
             {
                 if (vs[0].ToLowerInvariant().Contains(c_Str)) return true;
