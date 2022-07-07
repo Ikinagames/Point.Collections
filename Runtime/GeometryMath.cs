@@ -39,15 +39,21 @@ namespace Point.Collections
         public static Bounds GetOcculusionBounds(GameObject obj)
         {
             Bounds localBounds = new Bounds();
+            float4x4 world2Local = obj.transform.worldToLocalMatrix;
             foreach (var item in obj.GetComponentsInChildren<Renderer>())
             {
-                localBounds.Encapsulate(
+                Bounds targetBounds =
 #if UNITY_2021_1_OR_NEWER
                     item.localBounds
 #else
                     item.bounds
 #endif
-                    );
+                    ;
+                //Bounds temp = new Bounds(
+                //    mul(world2Local, float4(targetBounds.center, 1)).xyz, 
+                //    targetBounds.size);
+
+                localBounds.Encapsulate(targetBounds);
             }
 
             float4x4 mat = obj.transform.localToWorldMatrix;
