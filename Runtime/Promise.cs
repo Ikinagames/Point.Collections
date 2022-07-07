@@ -24,10 +24,12 @@
 
 using Point.Collections.ResourceControl;
 using System;
+using System.Collections;
+using UnityEngine;
 
 namespace Point.Collections
 {
-    public class Promise : IPromise, IDisposable
+    public class Promise : CustomYieldInstruction, IPromise, IDisposable
     {
         private object m_Value;
         private Action<object> m_OnCompleted;
@@ -35,6 +37,7 @@ namespace Point.Collections
         public object UserData { get; set; }
         public bool HasValue => m_Value != null;
         public object Value => m_Value;
+        public override bool keepWaiting => m_Value == null;
 
         /// <summary>
         /// 작업이 완료되고 값이 할당될 때 실행되는 이벤트입니다.
@@ -91,7 +94,7 @@ namespace Point.Collections
             m_OnCompleted = null;
         }
     }
-    public class Promise<T> : IPromise, IDisposable
+    public class Promise<T> : CustomYieldInstruction, IPromise, IDisposable
     {
         private T m_Value;
         private bool m_IsCompleted;
@@ -102,6 +105,7 @@ namespace Point.Collections
         /// <inheritdoc cref="IPromise.Value"/>
         public T Value => m_Value;
         object IPromise.Value => m_Value;
+        public override bool keepWaiting => m_Value == null;
 
         /// <inheritdoc cref="Promise.OnCompleted"/>
         public event Action<T> OnCompleted
@@ -140,6 +144,31 @@ namespace Point.Collections
 
             m_IsCompleted = false;
         }
+        public Promise(IEnumerator coroutine)
+        {
+            m_IsCompleted = false;
+
+            PointApplication.Instance.StartCoroutine(Coroutine(coroutine));
+        }
+        private IEnumerator Coroutine(IEnumerator target)
+        {
+            yield return PointApplication.Instance.StartCoroutine(target);
+
+            Timer timer = Timer.Start();
+            while (m_Value == null)
+            {
+                if (timer.IsExceeded(5f))
+                {
+                    "err?".ToLogError();
+                    break;
+                }
+
+                yield return null;
+            }
+
+            m_IsCompleted = true;
+        }
+
         ~Promise()
         {
             Dispose();

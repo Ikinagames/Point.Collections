@@ -63,6 +63,10 @@ namespace Point.Collections
 #if UNITY_EDITOR
         // What we use in editor to select the scene
         [SerializeField] private Object sceneAsset;
+
+        /// <summary>
+        /// Editor Only
+        /// </summary>
         private bool IsValidSceneAsset
         {
             get
@@ -103,6 +107,9 @@ namespace Point.Collections
         }
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// Editor Only
+        /// </summary>
         public bool IsInBuild
         {
             get
