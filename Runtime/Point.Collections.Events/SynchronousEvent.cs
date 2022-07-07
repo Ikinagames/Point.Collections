@@ -24,6 +24,7 @@
 
 using Point.Collections.Buffer;
 using Point.Collections.Diagnostics;
+using Point.Collections.Threading;
 using System;
 
 namespace Point.Collections.Events
@@ -32,6 +33,8 @@ namespace Point.Collections.Events
         , IStackDebugger
         where TEvent : class, ISynchronousEvent, new()
     {
+        private static AtomicOperator s_Op = new AtomicOperator();
+
         #region Pool
 
         private static readonly ObjectPool<TEvent> 
@@ -59,12 +62,16 @@ namespace Point.Collections.Events
 
         protected static TEvent Dequeue()
         {
-            return s_Pool.Get();
+            s_Op.Enter();
+            var obj = s_Pool.Get();
+            s_Op.Exit();
+
+            return obj;
         }
-        public static void ReserveEvent(TEvent ev)
-        {
-            ev.Reserve();
-        }
+        //public static void ReserveEvent(TEvent ev)
+        //{
+        //    ev.Reserve();
+        //}
 
         #endregion
 
