@@ -84,7 +84,7 @@ namespace Point.Collections.ResourceControl
 #if UNITY_COLLECTIONS
         [NotBurstCompatible]
 #endif
-        public override string ToString() => m_Key.ToString();
+        public override string ToString() => m_Key.ToString(true);
     }
 }
 
