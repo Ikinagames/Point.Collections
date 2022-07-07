@@ -68,14 +68,20 @@ namespace Point.Collections.Editor
             return RootVisualElement;
         }
 
+        protected VisualElement CreateHeaderLabel()
+        {
+            Label label = CoreGUI.VisualElement.Label(GetHeaderName(), 20);
+            label.style.unityFontStyleAndWeight = FontStyle.Bold;
+            return label;
+        }
+
         protected virtual VisualElement CreateVisualElement()
         {
             VisualElement root = new VisualElement();
             var prop = serializedObject.GetIterator();
             prop.NextVisible(true);
 
-            var label = CoreGUI.VisualElement.Label(GetHeaderName(), 20);
-            label.style.unityFontStyleAndWeight = FontStyle.Bold;
+            VisualElement label = CreateHeaderLabel();
             root.Add(label);
 
             //var scriptProp = prop.Copy();
