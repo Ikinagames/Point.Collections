@@ -131,16 +131,7 @@ namespace Point.Collections.Events
 
         #endregion
 
-        /// <summary>
-        /// 이벤트 <typeparamref name="TEvent"/> 를 호출합니다.
-        /// </summary>
-        /// <remarks>
-        /// 이벤트가 즉시 발생되는 것이 아닌, 실제로는 다음 프레임에 발생합니다.
-        /// </remarks>
-        /// <typeparam name="TEvent"></typeparam>
-        /// <param name="ev"></param>
-        public void LocalPostEvent<TEvent>(TEvent ev)
-            where TEvent : SynchronousEvent<TEvent>, new()
+        private void LocalPostEvent(ISynchronousEvent ev)
         {
             PointHelper.AssertMainThread();
 
@@ -155,8 +146,7 @@ namespace Point.Collections.Events
 #endif
             m_Events.Enqueue(ev);
         }
-        public void LocalPostEvent<TEvent>(TEvent ev, object ctx)
-            where TEvent : SynchronousEvent<TEvent>, new()
+        private void LocalPostEvent(ISynchronousEvent ev, object ctx)
         {
             PointHelper.AssertMainThread();
 
@@ -172,7 +162,15 @@ namespace Point.Collections.Events
 #endif
             m_Events.Enqueue(ev);
         }
-        /// <inheritdoc cref="LocalPostEvent{TEvent}(TEvent)"/>
+
+        /// <summary>
+        /// 이벤트 <typeparamref name="TEvent"/> 를 호출합니다.
+        /// </summary>
+        /// <remarks>
+        /// 이벤트가 즉시 발생되는 것이 아닌, 실제로는 다음 프레임에 발생합니다.
+        /// </remarks>
+        /// <typeparam name="TEvent"></typeparam>
+        /// <param name="ev"></param>
         public static void PostEvent<TEvent>(TEvent ev)
             where TEvent : SynchronousEvent<TEvent>, new()
         {
@@ -189,6 +187,12 @@ namespace Point.Collections.Events
 #endif
             Instance.m_Events.Enqueue(ev);
         }
+        /// <summary>
+        /// <inheritdoc cref="PostEvent{TEvent}(TEvent)"/>
+        /// </summary>
+        /// <typeparam name="TEvent"></typeparam>
+        /// <param name="ev"></param>
+        /// <param name="ctx"></param>
         public static void PostEvent<TEvent>(TEvent ev, object ctx)
             where TEvent : SynchronousEvent<TEvent>, new()
         {
@@ -207,7 +211,7 @@ namespace Point.Collections.Events
             Instance.m_Events.Enqueue(ev);
         }
 
-        public void LocalAddEvent<TEvent>(Action<TEvent> action)
+        private void LocalAddEvent<TEvent>(Action<TEvent> action)
             where TEvent : SynchronousEvent<TEvent>, new()
         {
             PointHelper.AssertMainThread();
@@ -226,6 +230,25 @@ namespace Point.Collections.Events
 
             EventDescription<TEvent> description = (EventDescription<TEvent>)desc;
             description.action += action;
+        }
+        private void LocalRemoveEvent<TEvent>(Action<TEvent> action)
+            where TEvent : SynchronousEvent<TEvent>, new()
+        {
+            PointHelper.AssertMainThread();
+
+            if (PointApplication.IsShutdown)
+            {
+                // TODO : 
+                return;
+            }
+
+            if (!m_EventActions.TryGetValue(TypeHelper.TypeOf<TEvent>.Type, out var desc))
+            {
+                return;
+            }
+
+            EventDescription<TEvent> description = (EventDescription<TEvent>)desc;
+            description.action -= action;
         }
         public static void AddEvent<TEvent>(Action<TEvent> action)
             where TEvent : SynchronousEvent<TEvent>, new()
@@ -246,25 +269,6 @@ namespace Point.Collections.Events
 
             EventDescription<TEvent> description = (EventDescription<TEvent>)desc;
             description.action += action;
-        }
-        public void LocalRemoveEvent<TEvent>(Action<TEvent> action)
-            where TEvent : SynchronousEvent<TEvent>, new()
-        {
-            PointHelper.AssertMainThread();
-
-            if (PointApplication.IsShutdown)
-            {
-                // TODO : 
-                return;
-            }
-
-            if (!m_EventActions.TryGetValue(TypeHelper.TypeOf<TEvent>.Type, out var desc))
-            {
-                return;
-            }
-
-            EventDescription<TEvent> description = (EventDescription<TEvent>)desc;
-            description.action -= action;
         }
         public static void RemoveEvent<TEvent>(Action<TEvent> action)
             where TEvent : SynchronousEvent<TEvent>, new()
@@ -337,6 +341,51 @@ namespace Point.Collections.Events
                 }
             }
 
+            /// <inheritdoc cref="EventBroadcaster.PostEvent{TEvent}(TEvent)"/>
+            public void PostEvent<TEvent>(TEvent ev) where TEvent : SynchronousEvent<TEvent>, new()
+                => m_Broadcaster.LocalPostEvent(ev);
+            /// <inheritdoc cref="EventBroadcaster.PostEvent{TEvent}(TEvent, object)"/>
+            public void PostEvent<TEvent>(TEvent ev, object ctx) where TEvent : SynchronousEvent<TEvent>, new()
+                => m_Broadcaster.LocalPostEvent(ev, ctx);
+
+            public void AddEvent<TEvent>(Action<TEvent> action) where TEvent : SynchronousEvent<TEvent>, new()
+            {
+                PointHelper.AssertMainThread();
+
+                if (PointApplication.IsShutdown)
+                {
+                    // TODO : 
+                    return;
+                }
+
+                if (!m_Broadcaster.m_EventActions.TryGetValue(TypeHelper.TypeOf<TEvent>.Type, out var desc))
+                {
+                    desc = new EventDescription<TEvent>();
+                    m_Broadcaster.m_EventActions.Add(TypeHelper.TypeOf<TEvent>.Type, desc);
+                }
+
+                EventDescription<TEvent> description = (EventDescription<TEvent>)desc;
+                description.action += action;
+            }
+            public void RemoveEvent<TEvent>(Action<TEvent> action) where TEvent : SynchronousEvent<TEvent>, new()
+            {
+                PointHelper.AssertMainThread();
+
+                if (PointApplication.IsShutdown)
+                {
+                    // TODO : 
+                    return;
+                }
+
+                if (!m_Broadcaster.m_EventActions.TryGetValue(TypeHelper.TypeOf<TEvent>.Type, out var desc))
+                {
+                    return;
+                }
+
+                EventDescription<TEvent> description = (EventDescription<TEvent>)desc;
+                description.action -= action;
+            }
+
             public void Dispose()
             {
                 m_Broadcaster.Dispose();
@@ -390,5 +439,11 @@ namespace Point.Collections.Events
         /// </summary>
         /// <param name="ev"></param>
         void RedirectEvent(ISynchronousEvent ev);
+
+        void PostEvent<TEvent>(TEvent ev) where TEvent : SynchronousEvent<TEvent>, new();
+        void PostEvent<TEvent>(TEvent ev, object ctx) where TEvent : SynchronousEvent<TEvent>, new();
+
+        public void AddEvent<TEvent>(Action<TEvent> action) where TEvent : SynchronousEvent<TEvent>, new();
+        public void RemoveEvent<TEvent>(Action<TEvent> action) where TEvent : SynchronousEvent<TEvent>, new();
     }
 }
