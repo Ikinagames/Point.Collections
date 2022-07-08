@@ -114,6 +114,10 @@ namespace Point.Collections.Events
             m_ContextObject = null;
             m_Reserved = true;
         }
+        ISynchronousEvent ISynchronousEvent.Copy()
+        {
+            return Copy();
+        }
         bool IValidation.IsValid() => IsValid();
 
         void IDisposable.Dispose()
@@ -145,6 +149,7 @@ namespace Point.Collections.Events
         /// </summary>
         protected virtual void Execute() { }
         protected virtual void OnReserve() { }
+        protected virtual ISynchronousEvent Copy() { throw new NotImplementedException(); }
         protected virtual bool IsValid() => true;
     }
 }

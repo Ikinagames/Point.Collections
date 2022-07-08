@@ -293,6 +293,60 @@ namespace Point.Collections.Events
             RemoveEvent<TestEvent>((ev) => { });
         }
 
+        private sealed class LocalEventBroadcaster : ILocalEventBroadcaster, IDisposable
+        {
+            private EventBroadcaster m_Broadcaster;
+
+            public EventBroadcaster LocalBroadcaster => m_Broadcaster;
+
+            public LocalEventBroadcaster()
+            {
+                m_Broadcaster = new EventBroadcaster();
+            }
+
+            public void RedirectEvent(ISynchronousEvent ev)
+            {
+                try
+                {
+                    ISynchronousEvent copiedEv = ev.Copy();
+
+                    PointHelper.AssertMainThread();
+
+                    if (PointApplication.IsShutdown)
+                    {
+                        // TODO : 
+                        return;
+                    }
+
+#if DEBUG_MODE
+                    ((IStackDebugger)copiedEv).SetStackFrame(ScriptUtils.GetCallerFrame(1));
+#endif
+                    m_Broadcaster.m_Events.Enqueue(copiedEv);
+                }
+                catch (NotImplementedException)
+                {
+                    PointHelper.LogError(Channel.Collections,
+                        $"Event({TypeHelper.ToString(ev.GetType())}) has no implement of Copy() Method. " +
+                        $"To execute local broadcasting, you need to implement first." +
+                        $"This Event has been ignored.");
+                    UnityEngine.Debug.Break();
+                }
+                catch (Exception ex)
+                {
+                    UnityEngine.Debug.LogException(ex);
+                }
+            }
+
+            public void Dispose()
+            {
+                m_Broadcaster.Dispose();
+            }
+        }
+        public static ILocalEventBroadcaster CreateLocalBroadcaster()
+        {
+            return new LocalEventBroadcaster();
+        }
+
         #region Inner Classes
 
         private abstract class EventDescriptionBase
@@ -325,5 +379,16 @@ namespace Point.Collections.Events
         }
 
         #endregion
+    }
+
+    public interface ILocalEventBroadcaster : IDisposable
+    {
+        EventBroadcaster LocalBroadcaster { get; }
+
+        /// <summary>
+        /// 전역 이벤트를 로컬로 재방송합니다.
+        /// </summary>
+        /// <param name="ev"></param>
+        void RedirectEvent(ISynchronousEvent ev);
     }
 }

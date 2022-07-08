@@ -53,7 +53,7 @@ namespace Point.Collections
         {
             ((IDisposable)this).Dispose();
         }
-        void IDisposable.Dispose()
+        public void Dispose()
         {
             PointApplication.OnApplicationShutdown -= (this as IDisposable).Dispose;
 

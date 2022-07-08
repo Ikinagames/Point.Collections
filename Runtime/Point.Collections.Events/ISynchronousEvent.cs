@@ -48,5 +48,7 @@ namespace Point.Collections.Events
         /// 이벤트가 반환될 때 실행되는 메소드입니다.
         /// </summary>
         void OnReserve();
+
+        ISynchronousEvent Copy();
     }
 }
