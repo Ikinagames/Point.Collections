@@ -41,27 +41,7 @@ namespace Point.Collections
             Bounds worldBounds = new Bounds(obj.transform.position, Vector3.zero);
             foreach (var item in obj.GetComponentsInChildren<Renderer>())
             {
-                float4x4 itemMat = item.transform.localToWorldMatrix;
-                Bounds targetBounds =
-#if UNITY_2021_1_OR_NEWER
-                    item.localBounds
-#else
-                    item.bounds
-#endif
-                    ;
-                float3 
-                    min = targetBounds.min,
-                    max = targetBounds.max;
-                targetBounds = new Bounds(
-                    mul(itemMat, float4(targetBounds.center, 1)).xyz,
-                    Vector3.zero
-                    );
-                targetBounds.Encapsulate(
-                    mul(itemMat, float4(min, 1)).xyz);
-                targetBounds.Encapsulate(
-                    mul(itemMat, float4(max, 1)).xyz);
-
-                worldBounds.Encapsulate(targetBounds);
+                worldBounds.Encapsulate(item.bounds);
             }
 
             return worldBounds;
