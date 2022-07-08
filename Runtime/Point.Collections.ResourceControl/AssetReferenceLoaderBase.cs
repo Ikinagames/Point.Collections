@@ -28,6 +28,7 @@
 #if !UNITYENGINE_OLD
 
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 #if UNITY_ADDRESSABLES
@@ -36,6 +37,10 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Point.Collections.ResourceControl
 {
+    /// <summary>
+    /// 에셋을 프리로드 할 수 있는 로더의 기본 클래스입니다.
+    /// </summary>
+    /// <typeparam name="TObject"></typeparam>
     public abstract class AssetReferenceLoaderBase<TObject> : PointMonobehaviour
         where TObject : UnityEngine.Object
     {
@@ -43,6 +48,9 @@ namespace Point.Collections.ResourceControl
         public sealed class Asset : IValidation
         {
             [SerializeField] private AssetIndex m_Asset;
+            /// <summary>
+            /// <see cref="m_Asset"/> 의 로드가 완료되었을 때 실행되는 콜백입니다.
+            /// </summary>
             [SerializeField] private UnityEvent<TObject> m_OnCompleted;
 
             public bool IsValid() => m_Asset.IsValid();
@@ -97,15 +105,41 @@ namespace Point.Collections.ResourceControl
             }
         }
 
+        /// <summary>
+        /// <see cref="MonoBehaviour"/> 가 시작할 떄 로드를 시작할 것인지 결정합니다.
+        /// </summary>
         [SerializeField] private bool m_StartOnAwake = true;
+        /// <summary>
+        /// 로드를 시작하기 전, 해당 <see cref="AssetBundle"/> 이 <see cref="ResourceManager"/> 에 등록되었는지 확인하고, 
+        /// 등록된 후에 로드를 시작할 지 결정합니다.
+        /// </summary>
+        [SerializeField] private ArrayWrapper<AssetBundleName> m_WaitForBundleLoads = ArrayWrapper<AssetBundleName>.Empty;
+
+        [Space]
         [SerializeField] private ArrayWrapper<Asset> m_Assets = ArrayWrapper<Asset>.Empty;
         [SerializeField] private UnityEvent m_OnAssetLoadCompleted;
 
         private int m_TotalAssetLoadedCounter = 0, m_Counter;
 
-        protected virtual void OnEnable()
+        protected IEnumerator Start()
         {
-            if (!m_StartOnAwake) return;
+            if (!m_StartOnAwake) yield break;
+
+            Timer timer;
+            for (int i = 0; i < m_WaitForBundleLoads.Length; i++)
+            {
+                timer = Timer.Start();
+                while (!ResourceManager.IsLoadedAssetBundle(m_WaitForBundleLoads[i]))
+                {
+                    if (timer.IsExceeded(10f))
+                    {
+                        $"{m_WaitForBundleLoads[i]} waiting more than 10 seconds".ToLogError();
+                        timer = Timer.Start();
+                    }
+
+                    yield return null;
+                }
+            }
 
             LoadAssets();
         }

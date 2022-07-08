@@ -82,7 +82,7 @@ namespace Point.Collections.ResourceControl
                         m_Key.ToString().ToLowerInvariant(),
                         m_SubAssetName.ToString());
                 }
-                else key = m_Key.ToString();
+                else key = m_Key.ToString().ToLowerInvariant();
 
                 return new AssetRuntimeKey(key);
             }

@@ -39,6 +39,7 @@ using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using System.Text.RegularExpressions;
 using UnityEngine.Assertions;
+using Point.Collections.Events;
 #if UNITY_ADDRESSABLES
 using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
@@ -1031,9 +1032,12 @@ namespace Point.Collections.ResourceControl
                 }
             }
 
+            AssetBundleInfo bundleInfo = GetAssetBundleInfo(in index);
+            EventBroadcaster.PostEvent(OnAssetBundleRegisteredEvent.GetEvent(bundleInfo));
+
             //
             PointHelper.Log(Channel.Collections, $"AssetBundle({uri}) Registered.");
-            return GetAssetBundleInfo(in index);
+            return bundleInfo;
         }
         /// <summary>
         /// 사용자가 미리 메모리에 로드한 <see cref="AssetBundle"/> 을 리소스 매니저에 등록합니다.
@@ -1077,6 +1081,8 @@ namespace Point.Collections.ResourceControl
                 UpdateAssetInfos(bundleInfo.m_Pointer, assetBundle);
             }
 
+            EventBroadcaster.PostEvent(OnAssetBundleRegisteredEvent.GetEvent(bundleInfo));
+
             return bundleInfo;
         }
         public static void UnregisterAssetBundle(AssetBundleInfo assetBundle)
@@ -1103,6 +1109,15 @@ namespace Point.Collections.ResourceControl
             Instance.m_AssetBundles[index] = null;
         }
 
+        public static bool IsLoadedAssetBundle(AssetBundleName name)
+        {
+            for (int i = 0; i < Instance.m_AssetBundles.Count; i++)
+            {
+                AssetContainer target = Instance.m_AssetBundles[i];
+                if (target.AssetBundle.name.Equals(name.ToString())) return true;
+            }
+            return false;
+        }
         /// <summary>
         /// 해당 키의 에셋의 에셋번들을 반환합니다.
         /// </summary>
