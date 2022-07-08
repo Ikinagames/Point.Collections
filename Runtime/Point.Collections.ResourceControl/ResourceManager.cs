@@ -115,7 +115,7 @@ namespace Point.Collections.ResourceControl
                 if (name.IsNullOrEmpty())
                 {
                     PointHelper.LogError(Channel.Collections,
-                        $"Cannot load an empty named AssetBundle. This is not allowed.");
+                        $"Cannot load an empty named AssetBundle. This is not allowed.", ResourceHashMap.Instance);
                     continue;
                 }
 #endif
