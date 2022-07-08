@@ -23,6 +23,7 @@
 #endif
 
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Unity.Collections;
 using UnityEngine;
@@ -68,15 +69,46 @@ namespace Point.Collections.ResourceControl
         }
         public AssetRuntimeKey RuntimeKey => new AssetRuntimeKey(FNV1a32.Calculate(((IKeyEvaluator)this).RuntimeKey.ToString()));
 #else
-        public AssetRuntimeKey RuntimeKey => new AssetRuntimeKey(FNV1a32.Calculate(m_Key.ToString().ToLowerInvariant()));
+        public AssetRuntimeKey RuntimeKey
+        {
+            get
+            {
+                const string c_Format = "{0}[{1}";
+
+                string key;
+                if (!m_SubAssetName.IsEmpty)
+                {
+                    key = string.Format(c_Format,
+                        m_Key.ToString().ToLowerInvariant(),
+                        m_SubAssetName.ToString());
+                }
+                else key = m_Key.ToString();
+
+                return new AssetRuntimeKey(FNV1a32.Calculate(key));
+            }
+        }
 #endif
         public bool IsSubAsset => !m_SubAssetName.IsEmpty;
 #if UNITY_EDITOR
-        public UnityEngine.Object editorAsset
+        public UnityEngine.Object editorMainAsset
         {
             get
             {
                 return UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(m_Key.ToString());
+            }
+        }
+        public UnityEngine.Object editorAsset
+        {
+            get
+            {
+                if (!IsSubAsset) return editorMainAsset;
+
+                string subAssetName = m_SubAssetName.ToString();
+                var found = UnityEditor.AssetDatabase
+                    .LoadAllAssetsAtPath(m_Key.ToString())
+                    .Where(t => t.name.Equals(subAssetName));
+
+                return found.Any() ? found.First() : null;
             }
         }
 #endif

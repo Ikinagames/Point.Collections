@@ -38,13 +38,24 @@ namespace Point.Collections.ResourceControl.Editor
 
         public static string NicifyDisplayName(AddressableAsset asset)
         {
+            AssetReference assetReference = asset.AssetReference;
+            UnityEngine.Object obj = asset.AssetReference.editorAsset;
+
             if (asset.FriendlyName.IsNullOrEmpty())
             {
-                return asset.EditorAsset.name;
+                if (assetReference.IsSubAsset)
+                {
+                    return $"{assetReference.editorMainAsset.name}({obj.name})";
+                }
+                return obj.name;
             }
 
             const string c_Format = "{0}({1})";
-            return string.Format(c_Format, asset.FriendlyName, asset.EditorAsset.name);
+            if (assetReference.IsSubAsset)
+            {
+                return string.Format(c_Format, assetReference.editorMainAsset.name, asset.FriendlyName);
+            }
+            return string.Format(c_Format, asset.FriendlyName, obj.name);
         }
 
         private static class Helper

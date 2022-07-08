@@ -40,6 +40,7 @@ namespace Point.Collections.ResourceControl.Editor
 
             public AssetReferenceVE(SerializedProperty property)
             {
+                m_Object = property.serializedObject.targetObject;
                 SerializedProperty
                     keyProp = property.FindPropertyRelative("m_Key"),
                     subProp = property.FindPropertyRelative("m_SubAssetName");
