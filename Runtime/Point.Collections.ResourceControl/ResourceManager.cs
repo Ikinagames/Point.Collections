@@ -1229,6 +1229,84 @@ namespace Point.Collections.ResourceControl
             
             return LoadAsset(p, in key);
         }
+        /// <inheritdoc cref="LoadAsset(in FixedString512Bytes)"/>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static AssetInfo LoadAsset(in string key) => LoadAsset((FixedString512Bytes)key);
+        /// <inheritdoc cref="LoadAsset(in FixedString512Bytes)"/>
+        /// <param name="assetReference"></param>
+        /// <returns></returns>
+        public static AssetInfo LoadAsset(in AssetReference assetReference)
+        {
+            PointHelper.AssertMainThread();
+            Instance.m_MapingJobHandle.Complete();
+
+            AssetRuntimeKey hash = assetReference.RuntimeKey;
+            Mapped index;
+            if (!Instance.m_MappedAssets.ContainsKey(hash))
+            {
+#if UNITY_EDITOR
+                string bundleName;
+                AssetInfo asset;
+                try
+                {
+                    bundleName = UnityEditor.AssetDatabase.GetImplicitAssetBundleName(hash.Key.Key);
+                    if (bundleName.IsNullOrEmpty())
+                    {
+                        PointHelper.LogError(LogChannel.Collections,
+                            $"Asset({hash.Key.ToString(true)}) is not registered. This asset is not in any AssetBundle at all.");
+
+                        return new AssetInfo(hash, true);
+                    }
+
+                    int bundleIndex = Instance.m_AssetBundles.FindIndex(t => t.AssetBundle.name.ToLowerInvariant().Equals(bundleName.ToLowerInvariant()));
+
+                    if (bundleIndex < 0)
+                    {
+                        PointHelper.LogError(LogChannel.Collections,
+                            $"Asset({hash.Key.ToString(true)}) is not registered. This asset is in the AssetBundle({bundleName}) but you didn\'t registered.");
+
+                        return new AssetInfo(hash, true);
+                        //return AssetInfo.Invalid;
+                    }
+
+                    var bundleP = GetUnsafeAssetBundleInfo(bundleIndex);
+                    asset = LoadAsset(bundleP, hash);
+                    if (asset.IsValid())
+                    {
+                        "loaded only in editor".ToLogError();
+
+                        return asset;
+                    }
+                }
+                catch (Exception)
+                {
+                    bundleName = "ERROR, Unknown";
+                }
+
+                $"Cannot found asset {hash} at AssetBundle({bundleName}). This is not allowed at runtime.".ToLogError(LogChannel.Collections);
+
+                asset = new AssetInfo(hash, true);
+                return asset;
+#else
+                return AssetInfo.Invalid;
+#endif
+            }
+
+            index = Instance.m_MappedAssets[hash];
+
+            if (!Instance.m_AssetBundleInfos[index.bundleIndex].loaded)
+            {
+                PointHelper.LogError(LogChannel.Collections,
+                    $"Cound not load asset {hash.Key.ToString(true)}. Target AssetBundle is not loaded.");
+
+                return AssetInfo.Invalid;
+            }
+
+            UnsafeReference<UnsafeAssetBundleInfo> p = GetUnsafeAssetBundleInfo(in index.bundleIndex);
+
+            return LoadAsset(p, in hash);
+        }
 #endif
     }
 

@@ -135,6 +135,10 @@ namespace Point.Collections.ResourceControl
             return ResourceManager.LoadAssetAsync<TObject>(this);
         }
 #endif
+        public AssetInfo LoadAsset()
+        {
+            return ResourceManager.LoadAsset(in this);
+        }
 
         public bool Equals(AssetReference other) => m_Key.Equals(other.m_Key);
         public override string ToString()

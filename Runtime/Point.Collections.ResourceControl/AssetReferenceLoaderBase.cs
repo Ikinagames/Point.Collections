@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_2019_1_OR_NEWER && UNITY_ADDRESSABLES
+#if UNITY_2019_1_OR_NEWER
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !POINT_DISABLE_CHECKS
 #define DEBUG_MODE
 #endif
@@ -30,7 +30,9 @@
 using System;
 using UnityEngine;
 using UnityEngine.Events;
+#if UNITY_ADDRESSABLES
 using UnityEngine.ResourceManagement.AsyncOperations;
+#endif
 
 namespace Point.Collections.ResourceControl
 {
@@ -43,12 +45,14 @@ namespace Point.Collections.ResourceControl
             [SerializeField] private AssetIndex m_Asset;
             [SerializeField] private UnityEvent<TObject> m_OnCompleted;
 
+            public bool IsValid() => m_Asset.IsValid();
+
+#if UNITY_ADDRESSABLES
             [NonSerialized] private bool m_IsLoaded;
             [NonSerialized] private AsyncOperationHandle<TObject> m_LoadHandle;
 
             public AssetIndex AssetIndex => m_Asset;
 
-            public bool IsValid() => m_Asset.IsValid();
 
             public bool TryLoadAsync(out AsyncOperationHandle<TObject> handle)
             {
@@ -86,13 +90,22 @@ namespace Point.Collections.ResourceControl
 
                 m_IsLoaded = false;
             }
+#endif
+            public AssetInfo Load()
+            {
+                return m_Asset.AssetReference.LoadAsset();
+            }
         }
 
-        [SerializeField]
-        protected Asset[] m_Assets = Array.Empty<Asset>();
+        [SerializeField] protected Asset[] m_Assets = Array.Empty<Asset>();
+        [SerializeField] private UnityEvent m_OnAssetLoadCompleted;
+
+        private int m_TotalAssetLoadedCounter = 0, m_Counter;
 
         protected virtual void Awake()
         {
+            m_TotalAssetLoadedCounter = m_Assets.Length;
+#if UNITY_ADDRESSABLES
             AsyncOperationHandle<TObject> handle;
             for (int i = 0; i < m_Assets.Length; i++)
             {
@@ -112,20 +125,50 @@ namespace Point.Collections.ResourceControl
 
                 handle.Completed += M_LoadHandle_Completed;
             }
-        }
-        protected virtual void OnDestroy()
-        {
+#else
             for (int i = 0; i < m_Assets.Length; i++)
             {
-                m_Assets[i].Release();
-            }
-        }
+                AssetInfo assetInfo = m_Assets[i].Load();
+#if UNITY_EDITOR
+                if (!assetInfo.IsValid())
+                {
+                    $"Asset(Index of {i}) is not valid. This is not allowed.".ToLogError();
 
+                    m_TotalAssetLoadedCounter--;
+                }
+#endif
+                assetInfo.OnLoaded += AssetInfo_OnLoaded;
+            }
+#endif
+        }
+#if UNITY_ADDRESSABLES
         private void M_LoadHandle_Completed(AsyncOperationHandle<TObject> obj)
         {
             TObject result = obj.Result;
 
             OnLoadCompleted(result);
+        }
+#else
+        private void AssetInfo_OnLoaded(UnityEngine.Object obj)
+        {
+            m_Counter++;
+            OnLoadCompleted(obj as TObject);
+
+            if (m_TotalAssetLoadedCounter == m_Counter)
+            {
+                m_OnAssetLoadCompleted?.Invoke();
+            }
+        }
+#endif
+
+        protected virtual void OnDestroy()
+        {
+#if UNITY_ADDRESSABLES
+            for (int i = 0; i < m_Assets.Length; i++)
+            {
+                m_Assets[i].Release();
+            }
+#endif
         }
 
         protected virtual void OnLoadCompleted(TObject obj) { }
