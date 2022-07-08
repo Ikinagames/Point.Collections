@@ -310,10 +310,23 @@ namespace Point.Collections.Events
 
             public void RedirectEvent(ISynchronousEvent ev)
             {
+                ISynchronousEvent copiedEv;
                 try
                 {
-                    ISynchronousEvent copiedEv = ev.Copy();
+                    copiedEv = ev.Copy();
+                }
+                catch (NotImplementedException)
+                {
+                    PointHelper.LogError(Channel.Collections,
+                        $"Event({TypeHelper.ToString(ev.GetType())}) has no implement of Copy() Method. " +
+                        $"To execute local broadcasting, you need to implement first." +
+                        $"This Event has been ignored.");
+                    UnityEngine.Debug.Break();
+                    return;
+                }
 
+                try
+                {
                     PointHelper.AssertMainThread();
 
                     if (PointApplication.IsShutdown)
@@ -326,14 +339,6 @@ namespace Point.Collections.Events
                     ((IStackDebugger)copiedEv).SetStackFrame(ScriptUtils.GetCallerFrame(1));
 #endif
                     m_Broadcaster.m_Events.Enqueue(copiedEv);
-                }
-                catch (NotImplementedException)
-                {
-                    PointHelper.LogError(Channel.Collections,
-                        $"Event({TypeHelper.ToString(ev.GetType())}) has no implement of Copy() Method. " +
-                        $"To execute local broadcasting, you need to implement first." +
-                        $"This Event has been ignored.");
-                    UnityEngine.Debug.Break();
                 }
                 catch (Exception ex)
                 {
