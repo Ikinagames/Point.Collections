@@ -163,49 +163,6 @@ namespace Point.Collections.Editor
         {
             this.label = label;
         }
-//        public ListContainerView(string text, string tooltip, SerializedProperty array) : this()
-//        {
-//            if (!text.IsNullOrEmpty())
-//            {
-//                m_HeaderLabel.text = text;
-//                if (!tooltip.IsNullOrEmpty())
-//                {
-//                    m_HeaderLabel.tooltip = tooltip;
-//#if UNITY_2020_1_OR_NEWER
-//                    m_HeaderLabel.displayTooltipWhenElided = true;
-//#endif
-//                }
-//            }
-
-//            if (array != null && array.isArray)
-//            {
-//                m_BindedArrayProperty = array;
-//                m_HeaderLabel.RegisterCallback<MouseDownEvent>(OnExpandProperty);
-
-//                for (int i = 0; i < m_BindedArrayProperty.arraySize; i++)
-//                {
-//                    var prop = m_BindedArrayProperty.GetArrayElementAtIndex(i);
-//                    PropertyField field = new PropertyField(prop);
-
-//                    Add(field);
-//                }
-
-//                isExpanded = m_BindedArrayProperty.isExpanded;
-//            }
-//        }
-//        public ListContainerView(string text, SerializedProperty array) : this(text, string.Empty, array)
-//        {
-//        }
-//        public ListContainerView(SerializedProperty array)
-//            : this(array.displayName, array.tooltip, array)
-//        {
-//        }
-
-        //private void OnExpandProperty(MouseDownEvent t)
-        //{
-        //    m_BindedArrayProperty.isExpanded = !m_BindedArrayProperty.isExpanded;
-        //    m_BindedArrayProperty.serializedObject.ApplyModifiedProperties();
-        //}
         private void OnExpand(MouseDownEvent t)
         {
             isExpanded = !isExpanded;
