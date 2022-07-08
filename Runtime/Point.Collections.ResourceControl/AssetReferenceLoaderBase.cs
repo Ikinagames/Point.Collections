@@ -53,14 +53,14 @@ namespace Point.Collections.ResourceControl
             /// </summary>
             [SerializeField] private UnityEvent<TObject> m_OnCompleted;
 
-            public bool IsValid() => m_Asset.IsValid();
-
-#if UNITY_ADDRESSABLES
             [NonSerialized] private bool m_IsLoaded;
-            [NonSerialized] private AsyncOperationHandle<TObject> m_LoadHandle;
 
             public AssetIndex AssetIndex => m_Asset;
 
+            public bool IsValid() => m_Asset.IsValid();
+
+#if UNITY_ADDRESSABLES
+            [NonSerialized] private AsyncOperationHandle<TObject> m_LoadHandle;
 
             public bool TryLoadAsync(out AsyncOperationHandle<TObject> handle)
             {
@@ -90,18 +90,28 @@ namespace Point.Collections.ResourceControl
 
                 m_OnCompleted?.Invoke(result);
             }
+#else
+            [NonSerialized] private AssetInfo m_AssetInfo;
+
+            public AssetInfo Load()
+            {
+                if (m_IsLoaded) return m_AssetInfo;
+
+                m_IsLoaded = true;
+                m_AssetInfo = m_Asset.AssetReference.LoadAsset();
+                return m_AssetInfo;
+            }
+#endif
             public void Release()
             {
                 if (!m_IsLoaded) return;
 
+#if UNITY_ADDRESSABLES
                 ResourceManager.Release(m_LoadHandle);
-
-                m_IsLoaded = false;
-            }
+#else
+                m_AssetInfo.Reserve();
 #endif
-            public AssetInfo Load()
-            {
-                return m_Asset.AssetReference.LoadAsset();
+                m_IsLoaded = false;
             }
         }
 
@@ -207,12 +217,10 @@ namespace Point.Collections.ResourceControl
 
         protected virtual void OnDestroy()
         {
-#if UNITY_ADDRESSABLES
             for (int i = 0; i < m_Assets.Length; i++)
             {
                 m_Assets[i].Release();
             }
-#endif
         }
 
         protected virtual void OnLoadAsset(Asset asset) { }
