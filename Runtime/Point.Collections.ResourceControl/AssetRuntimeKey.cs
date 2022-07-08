@@ -50,7 +50,7 @@ namespace Point.Collections.ResourceControl
                 return;
             }
 
-            m_Key = new Hash(path.ToLowerInvariant());
+            m_Key = new Hash(path);
         }
 #if UNITY_COLLECTIONS
         public AssetRuntimeKey(FixedString512Bytes path)

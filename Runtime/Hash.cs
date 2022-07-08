@@ -99,9 +99,17 @@ namespace Point.Collections
         }
         public Hash(string key)
         {
+            this = default(Hash);
             m_Value = FNV1a32.Calculate(key);
 #if DEBUG_MODE
-            m_Key = key;
+            try
+            {
+                m_Key = key;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
 #endif
         }
 #if UNITYENGINE && UNITY_COLLECTIONS

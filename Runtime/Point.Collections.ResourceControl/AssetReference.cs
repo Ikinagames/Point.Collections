@@ -73,7 +73,7 @@ namespace Point.Collections.ResourceControl
         {
             get
             {
-                const string c_Format = "{0}[{1}";
+                const string c_Format = "{0}[{1}]";
 
                 string key;
                 if (!m_SubAssetName.IsEmpty)
@@ -84,11 +84,13 @@ namespace Point.Collections.ResourceControl
                 }
                 else key = m_Key.ToString();
 
-                return new AssetRuntimeKey(FNV1a32.Calculate(key));
+                return new AssetRuntimeKey(key);
             }
         }
 #endif
         public bool IsSubAsset => !m_SubAssetName.IsEmpty;
+        public FixedString128Bytes Key => m_Key;
+        public FixedString128Bytes SubAssetName => m_SubAssetName;
 #if UNITY_EDITOR
         public UnityEngine.Object editorMainAsset
         {

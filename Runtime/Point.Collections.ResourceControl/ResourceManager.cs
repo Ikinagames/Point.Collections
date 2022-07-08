@@ -38,6 +38,7 @@ using Unity.Jobs;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using System.Text.RegularExpressions;
+using UnityEngine.Assertions;
 #if UNITY_ADDRESSABLES
 using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
@@ -295,11 +296,14 @@ namespace Point.Collections.ResourceControl
 
         internal static unsafe AssetContainer GetAssetBundle(in int index)
         {
-            //if (Instance.m_AssetBundles[index] == null)
-            //{
-            //    Instance.m_AssetBundles[index] = new AssetContainer();
-            //}
-            return Instance.m_AssetBundles[index];
+            List<AssetContainer> list = Instance.m_AssetBundles;
+            if (list == null)
+            {
+                "cannot access while shutdown".ToLogError();
+                return null;
+            }
+
+            return list[index];
         }
 
         internal static unsafe Promise<AssetBundle> LoadAssetBundle(UnsafeAssetBundleInfo* p)
@@ -755,7 +759,7 @@ namespace Point.Collections.ResourceControl
                 m_Assets = new Dictionary<AssetRuntimeKey, Promise<UnityEngine.Object>>();
             }
 
-            private bool IsSubAssetKey(string value, out string key, out string subAssetName)
+            internal static bool IsSubAssetKey(string value, out string key, out string subAssetName)
             {
                 var match = s_SubAssetRegex.Match(value);
                 if (match.Success)
@@ -779,7 +783,7 @@ namespace Point.Collections.ResourceControl
                     // If main asset
                     if (Path.GetFileNameWithoutExtension(key).ToLowerInvariant().Equals(objs[i].name.ToLowerInvariant()))
                     {
-                        tempHash = new AssetRuntimeKey(key);
+                        tempHash = new AssetRuntimeKey(key.ToLowerInvariant());
                     }
                     else
                     {
@@ -803,7 +807,7 @@ namespace Point.Collections.ResourceControl
                         // If main asset
                         if (Path.GetFileNameWithoutExtension(key).ToLowerInvariant().Equals(objs[i].name.ToLowerInvariant()))
                         {
-                            tempHash = new AssetRuntimeKey(key);
+                            tempHash = new AssetRuntimeKey(key.ToLowerInvariant());
                         }
                         else
                         {
@@ -835,7 +839,7 @@ namespace Point.Collections.ResourceControl
             }
             public Promise<UnityEngine.Object> LoadAsset(string key)
             {
-                AssetRuntimeKey hash = new AssetRuntimeKey(key);
+                AssetRuntimeKey hash = new AssetRuntimeKey(key.ToLowerInvariant());
 
                 if (m_Assets.TryGetValue(hash, out Promise<UnityEngine.Object> promise))
                 {
@@ -859,7 +863,7 @@ namespace Point.Collections.ResourceControl
             }
             public Promise<UnityEngine.Object> LoadAssetAsync(string key)
             {
-                AssetRuntimeKey hash = new AssetRuntimeKey(key);
+                AssetRuntimeKey hash = new AssetRuntimeKey(key.ToLowerInvariant());
 
                 if (m_Assets.TryGetValue(hash, out Promise<UnityEngine.Object> promise))
                 {
@@ -882,7 +886,7 @@ namespace Point.Collections.ResourceControl
             }
             public void UnloadAsset(string key)
             {
-                AssetRuntimeKey hash = new AssetRuntimeKey(key);
+                AssetRuntimeKey hash = new AssetRuntimeKey(key.ToLowerInvariant());
 
                 if (!m_Assets.TryGetValue(hash, out Promise<UnityEngine.Object> promise))
                 {
@@ -1250,7 +1254,7 @@ namespace Point.Collections.ResourceControl
                 AssetInfo asset;
                 try
                 {
-                    bundleName = UnityEditor.AssetDatabase.GetImplicitAssetBundleName(hash.Key.Key);
+                    bundleName = UnityEditor.AssetDatabase.GetImplicitAssetBundleName(assetReference.Key.ToString());
                     if (bundleName.IsNullOrEmpty())
                     {
                         PointHelper.LogError(LogChannel.Collections,
@@ -1279,12 +1283,14 @@ namespace Point.Collections.ResourceControl
                         return asset;
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     bundleName = "ERROR, Unknown";
+                    Debug.LogException(ex);
                 }
 
-                $"Cannot found asset {hash} at AssetBundle({bundleName}). This is not allowed at runtime.".ToLogError(LogChannel.Collections);
+                PointHelper.LogError(Channel.Collections,
+                    $"Cannot found asset {hash.Key.ToString(true)} at AssetBundle({bundleName}). This is not allowed at runtime.");
 
                 asset = new AssetInfo(hash, true);
                 return asset;

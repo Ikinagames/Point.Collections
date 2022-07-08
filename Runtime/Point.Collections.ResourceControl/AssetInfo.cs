@@ -79,7 +79,23 @@ namespace Point.Collections.ResourceControl
             get
             {
 #if UNITY_EDITOR
-                if (m_EditorOnly) return UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(m_Key.Key.Key);
+                if (m_EditorOnly)
+                {
+                    string key = m_Key.Key.Key;
+                    if (key.IsNullOrEmpty())
+                    {
+                        PointHelper.LogError(Channel.Collections,
+                            $"Fatal error. Cannot load an empty key.");
+                        return null;
+                    }
+
+                    if (ResourceManager.AssetContainer.IsSubAssetKey(key, 
+                        out string mainKey, out string subAssetName))
+                    {
+                        return new AssetReference(mainKey, subAssetName).editorAsset;
+                    }
+                    return UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(key);
+                }
 #endif
                 this.ThrowIfIsNotValid();
 
@@ -311,7 +327,23 @@ namespace Point.Collections.ResourceControl
             get
             {
 #if UNITY_EDITOR
-                if (m_EditorOnly) return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(m_Key.Key.Key);
+                if (m_EditorOnly)
+                {
+                    string key = m_Key.Key.Key;
+                    if (key.IsNullOrEmpty())
+                    {
+                        PointHelper.LogError(Channel.Collections,
+                            $"Fatal error. Cannot load an empty key.");
+                        return null;
+                    }
+
+                    if (ResourceManager.AssetContainer.IsSubAssetKey(key,
+                        out string mainKey, out string subAssetName))
+                    {
+                        return new AssetReference(mainKey, subAssetName).editorAsset as T;
+                    }
+                    return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(key);
+                }
 #endif
                 ((AssetInfo)this).ThrowIfIsNotValid();
 
@@ -471,6 +503,8 @@ namespace Point.Collections.ResourceControl
 #if UNITY_EDITOR
             if (m_EditorOnly) return;
 #endif
+            if (PointApplication.IsShutdown) return;
+
             ((AssetInfo)this).ThrowIfIsNotValid();
 
             ResourceManager.Reserve(m_BundlePointer, this);

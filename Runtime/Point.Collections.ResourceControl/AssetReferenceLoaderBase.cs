@@ -162,6 +162,7 @@ namespace Point.Collections.ResourceControl
         {
             m_Counter++;
             OnLoadCompleted(obj as TObject);
+            $"{obj.name} has loaded".ToLog();
 
             if (m_TotalAssetLoadedCounter == m_Counter)
             {
