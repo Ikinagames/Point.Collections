@@ -398,6 +398,9 @@ namespace Point.Collections.ResourceControl
             => UnloadAssetBundle((UnsafeAssetBundleInfo*)UnsafeUtility.AddressOf(ref p), unloadAllLoadedObjects);
         internal static unsafe void UnloadAssetBundle(UnsafeAssetBundleInfo* p, bool unloadAllLoadedObjects)
         {
+            // TODO : 뭔가 더 좋은 방법이?
+            if (PointApplication.IsShutdown) return;
+
             int index = p->index;
 
             p->loaded = false;
