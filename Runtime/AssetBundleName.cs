@@ -25,6 +25,7 @@
 #endif
 
 using System;
+using Unity.Collections;
 
 namespace Point.Collections
 {
@@ -32,11 +33,11 @@ namespace Point.Collections
     public struct AssetBundleName : IEmpty, IEquatable<AssetBundleName>, IEquatable<string>
     {
         [UnityEngine.SerializeField]
-        private UnityEngine.PropertyName m_Name;
+        private FixedString128Bytes m_Name;
 
         public AssetBundleName(string name)
         {
-            m_Name = new UnityEngine.PropertyName(name);
+            m_Name = name;
         }
 
         public bool IsEmpty() => m_Name.Equals(string.Empty);

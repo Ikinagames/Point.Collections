@@ -22,7 +22,9 @@
 using Point.Collections.Editor;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
+using Unity.Collections;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -54,10 +56,29 @@ namespace Point.Collections.ResourceControl.Editor
             }
         }
 #endif
+        string TargetAssetBundleName
+        {
+            get
+            {
+                string str = SerializedPropertyHelper.ReadFixedString128Bytes(
+                    m_AssetBundleProperty.FindPropertyRelative("m_Name")
+                    ).ToString();
+                return str;
+            }
+        }
+        bool IsBindedToAssetBundle
+        {
+            get
+            {
+                if (TargetAssetBundleName.IsNullOrEmpty()) return false;
+                return true;
+            }
+        }
 
-        private SerializedProperty m_GroupProperty;
+        private SerializedProperty m_AssetBundleProperty;
         private SerializedProperty m_AssetListProperty;
 #if UNITY_ADDRESSABLES
+        private SerializedProperty m_GroupProperty;
         private SerializedProperty m_GroupNameProperty;
 #endif
 
@@ -71,10 +92,11 @@ namespace Point.Collections.ResourceControl.Editor
         }
         private void Validate()
         {
-            m_GroupProperty = serializedObject.FindProperty("m_Group");
 #if UNITY_ADDRESSABLES
+            m_GroupProperty = serializedObject.FindProperty("m_Group");
             m_GroupNameProperty = GroupReferencePropertyDrawer.Helper.GetCatalogName(m_GroupProperty);
 #endif
+            m_AssetBundleProperty = serializedObject.FindProperty("m_AssetBundle");
             m_AssetListProperty = serializedObject.FindProperty("m_AssetList");
 #if UNITY_ADDRESSABLES
             AddressableAssetGroup addressableAssetGroup = GetGroup(m_GroupNameProperty);
@@ -94,6 +116,48 @@ namespace Point.Collections.ResourceControl.Editor
             }
             m_RequireRebuild = false;
 #endif
+
+            if (!IsBindedToAssetBundle)
+            {
+                m_RequireRebuild = false;
+            }
+            else
+            {
+                if (!Validate(TargetAssetBundleName, target))
+                {
+                    m_RequireRebuild = true;
+                    return;
+                }
+                m_RequireRebuild = false;
+            }
+        }
+        private static bool Validate(string assetBundleName, ResourceList list)
+        {
+            var objs = AssetDatabase
+                .GetAssetPathsFromAssetBundle(assetBundleName)
+                .Select(AssetDatabase.LoadAssetAtPath<UnityEngine.Object>);
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (objs.Contains(list[i].editorAsset)) continue;
+
+                return false;
+            }
+            return true;
+        } 
+        public static void Rebuild(string assetBundleName, ResourceList list)
+        {
+            var objs = AssetDatabase
+                .GetAssetPathsFromAssetBundle(assetBundleName)
+                .Select(AssetDatabase.LoadAssetAtPath<UnityEngine.Object>)
+                .ToArray();
+
+            list.Clear();
+            for (int i = 0; i < objs.Length; i++)
+            {
+                list.AddAsset(string.Empty, objs[i]);
+            }
+            EditorUtility.SetDirty(list);
         }
         public static void Rebuild(ResourceList list)
         {
@@ -126,6 +190,11 @@ namespace Point.Collections.ResourceControl.Editor
                 target.AddAsset(string.Empty, entries[i].TargetAsset);
             }
 #endif
+            if (IsBindedToAssetBundle)
+            {
+                Rebuild(TargetAssetBundleName, target);
+            }
+
             EditorUtility.SetDirty(target);
             serializedObject.ApplyModifiedProperties();
             serializedObject.Update();
@@ -162,7 +231,9 @@ namespace Point.Collections.ResourceControl.Editor
         }
         protected override void SetupVisualElement(VisualElement root)
         {
-            PropertyField groupField = root.Q<PropertyField>("GroupName");
+            PropertyField 
+                assetBundleField = root.Q<PropertyField>("AssetBundle"),
+                groupField = root.Q<PropertyField>("GroupName");
             VisualElement 
                 assetContainer = root.Q("AssetContainer"),
                 headerContainer = assetContainer.Q("HeaderContainer"),
@@ -190,9 +261,16 @@ namespace Point.Collections.ResourceControl.Editor
                 {
                     headerLabel.text = "Assets";
 
-                    rebuildBtt.style.Hide(true);
-                    addBtt.SetEnabled(true);
-                    removeBtt.SetEnabled(true);
+                    if (IsBindedToAssetBundle)
+                    {
+
+                    }
+                    else
+                    {
+                        rebuildBtt.style.Hide(true);
+                        addBtt.SetEnabled(true);
+                        removeBtt.SetEnabled(true);
+                    }
                 }
             };
             onGroupValueChanged.Invoke();

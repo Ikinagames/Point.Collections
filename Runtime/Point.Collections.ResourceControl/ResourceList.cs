@@ -38,6 +38,7 @@ namespace Point.Collections.ResourceControl
 #if UNITY_ADDRESSABLES
         [SerializeField] private GroupReference m_Group;
 #endif
+        [SerializeField] private AssetBundleName m_AssetBundle;
         [SerializeField] private List<AddressableAsset> m_AssetList = new List<AddressableAsset>();
 
         public int Count => m_AssetList.Count;
@@ -92,12 +93,11 @@ namespace Point.Collections.ResourceControl
         public void AddAsset(string name, UnityEngine.Object obj)
         {
             string path = UnityEditor.AssetDatabase.GetAssetPath(obj);
-#if !UNITY_2020_1_OR_NEWER
-            var guid = UnityEditor.AssetDatabase.GUIDToAssetPath(path);
-#else
-            var guid = UnityEditor.AssetDatabase.GUIDFromAssetPath(path);
-#endif
-            AddressableAsset temp = new AddressableAsset(name, guid.ToString());
+            if (UnityEditor.AssetDatabase.IsSubAsset(obj))
+            {
+                path += $"[{obj.name}]";
+            }
+            AddressableAsset temp = new AddressableAsset(name, path);
 
             m_AssetList.Add(temp);
         }

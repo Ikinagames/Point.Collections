@@ -17,26 +17,49 @@
 #define DEBUG_MODE
 
 using System;
+using System.Linq;
+using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
 
 namespace Point.Collections.Editor
 {
-    //[CustomPropertyDrawer(typeof(AssetBundleName))]
+    [CustomPropertyDrawer(typeof(AssetBundleName))]
     internal sealed class AssetBundleNamePropertyDrawer : PropertyDrawer<AssetBundleName>
     {
         private string[] m_AssetBundleNames = Array.Empty<string>();
 
         protected override void OnInitialize(SerializedProperty property)
         {
-            m_AssetBundleNames = AssetDatabase.GetAllAssetBundleNames();
+            var names = AssetDatabase.GetAllAssetBundleNames().ToList();
+            names.Insert(0, "None");
+            m_AssetBundleNames = names.ToArray();
 
             base.OnInitialize(property);
         }
 
         protected override void OnPropertyGUI(ref AutoRect rect, SerializedProperty property, GUIContent label)
         {
-            base.OnPropertyGUI(ref rect, property, label);
+            string str = SerializedPropertyHelper.ReadFixedString128Bytes(property.FindPropertyRelative("m_Name")).ToString();
+            int index = Array.IndexOf(m_AssetBundleNames, str);
+            if (index < 0) index = 0;
+
+            using (var changed = new EditorGUI.ChangeCheckScope())
+            {
+                index = EditorGUI.Popup(rect.Pop(), property.displayName, index, m_AssetBundleNames);
+
+                if (changed.changed)
+                {
+                    string target;
+                    if (index == 0) target = string.Empty;
+                    else
+                    {
+                        target = m_AssetBundleNames[index];
+                    }
+
+                    SerializedPropertyHelper.SetFixedString128Bytes(property.FindPropertyRelative("m_Name"), target);
+                }
+            }
         }
     }
 }

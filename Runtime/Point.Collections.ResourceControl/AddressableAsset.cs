@@ -47,6 +47,7 @@ namespace Point.Collections.ResourceControl
         public AssetReference AssetReference => m_AssetReference;
 #endif
 #if UNITY_EDITOR
+        [Obsolete("Use AssetReference.editorAsset")]
         public UnityEngine.Object EditorAsset => m_AssetReference.editorAsset;
 #endif
 
