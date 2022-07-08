@@ -38,10 +38,10 @@ namespace Point.Collections
     {
         public static Bounds GetOcculusionBounds(GameObject obj)
         {
-            Bounds localBounds = new Bounds();
-            float4x4 world2Local = obj.transform.worldToLocalMatrix;
+            Bounds worldBounds = new Bounds(obj.transform.position, Vector3.zero);
             foreach (var item in obj.GetComponentsInChildren<Renderer>())
             {
+                float4x4 itemMat = item.transform.localToWorldMatrix;
                 Bounds targetBounds =
 #if UNITY_2021_1_OR_NEWER
                     item.localBounds
@@ -49,18 +49,20 @@ namespace Point.Collections
                     item.bounds
 #endif
                     ;
-                //Bounds temp = new Bounds(
-                //    mul(world2Local, float4(targetBounds.center, 1)).xyz, 
-                //    targetBounds.size);
+                float3 
+                    min = targetBounds.min,
+                    max = targetBounds.max;
+                targetBounds = new Bounds(
+                    mul(itemMat, float4(targetBounds.center, 1)).xyz,
+                    Vector3.zero
+                    );
+                targetBounds.Encapsulate(
+                    mul(itemMat, float4(min, 1)).xyz);
+                targetBounds.Encapsulate(
+                    mul(itemMat, float4(max, 1)).xyz);
 
-                localBounds.Encapsulate(targetBounds);
+                worldBounds.Encapsulate(targetBounds);
             }
-
-            float4x4 mat = obj.transform.localToWorldMatrix;
-
-            Bounds worldBounds = new Bounds(mul(mat, float4((float3)localBounds.center, 1)).xyz, Vector3.zero);
-            worldBounds.Encapsulate(mul(mat, float4(localBounds.min, 1)).xyz);
-            worldBounds.Encapsulate(mul(mat, float4(localBounds.max, 1)).xyz);
 
             return worldBounds;
         }
