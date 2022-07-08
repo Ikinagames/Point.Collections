@@ -97,12 +97,19 @@ namespace Point.Collections.ResourceControl
             }
         }
 
-        [SerializeField] protected Asset[] m_Assets = Array.Empty<Asset>();
+        [SerializeField] private bool m_StartOnAwake = true;
+        [SerializeField] private ArrayWrapper<Asset> m_Assets = ArrayWrapper<Asset>.Empty;
         [SerializeField] private UnityEvent m_OnAssetLoadCompleted;
 
         private int m_TotalAssetLoadedCounter = 0, m_Counter;
 
-        protected virtual void Awake()
+        protected virtual void OnEnable()
+        {
+            if (!m_StartOnAwake) return;
+
+            LoadAssets();
+        }
+        public void LoadAssets()
         {
             m_TotalAssetLoadedCounter = m_Assets.Length;
 #if UNITY_ADDRESSABLES
@@ -128,6 +135,7 @@ namespace Point.Collections.ResourceControl
 #else
             for (int i = 0; i < m_Assets.Length; i++)
             {
+                OnLoadAsset(m_Assets[i]);
                 AssetInfo assetInfo = m_Assets[i].Load();
 #if UNITY_EDITOR
                 if (!assetInfo.IsValid())
@@ -141,6 +149,7 @@ namespace Point.Collections.ResourceControl
             }
 #endif
         }
+
 #if UNITY_ADDRESSABLES
         private void M_LoadHandle_Completed(AsyncOperationHandle<TObject> obj)
         {
@@ -171,6 +180,7 @@ namespace Point.Collections.ResourceControl
 #endif
         }
 
+        protected virtual void OnLoadAsset(Asset asset) { }
         protected virtual void OnLoadCompleted(TObject obj) { }
     }
 }
