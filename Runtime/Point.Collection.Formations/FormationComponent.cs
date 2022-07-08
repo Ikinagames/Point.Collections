@@ -33,6 +33,7 @@ using UnityEngine.Assertions;
 
 namespace Point.Collections.Formations
 {
+    [AddComponentMenu("Point/Collections/Formations/Formation Component")]
     public class FormationComponent : PointMonobehaviour
     {
         public enum ProvideOption

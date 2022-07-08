@@ -27,6 +27,7 @@ using System;
 
 namespace Point.Collections
 {
+    [AddComponentMenu("Point/Collections/GameObject Pool Receiver")]
     public sealed class GameObjectPoolReceiver : PointMonobehaviour
     {
         [SerializeField] private bool m_ReserveOnPaticleStop = false;

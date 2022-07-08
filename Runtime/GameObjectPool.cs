@@ -33,6 +33,7 @@ using UnityEngine.Serialization;
 
 namespace Point.Collections
 {
+    [AddComponentMenu("Point/Collections/GameObject Pool")]
     public class GameObjectPool : PointMonobehaviour
     {
         [Serializable]

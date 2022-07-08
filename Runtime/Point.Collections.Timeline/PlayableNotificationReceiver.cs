@@ -29,6 +29,7 @@ using UnityEngine.Playables;
 namespace Point.Collections.Timeline
 {
     [RequireComponent(typeof(PlayableDirector))]
+    [AddComponentMenu("Point/Collections/Timeline/Playable Notification Receiver")]
     public class PlayableNotificationReceiver : PointMonobehaviour, INotificationReceiver
     {
         private PlayableDirector m_Director;
