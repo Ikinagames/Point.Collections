@@ -38,13 +38,17 @@ namespace Point.Collections.ResourceControl
         where TObject : UnityEngine.Object
     {
         [Serializable]
-        public sealed class Asset
+        public sealed class Asset : IValidation
         {
             [SerializeField] private AssetIndex m_Asset;
             [SerializeField] private UnityEvent<TObject> m_OnCompleted;
 
             [NonSerialized] private bool m_IsLoaded;
             [NonSerialized] private AsyncOperationHandle<TObject> m_LoadHandle;
+
+            public AssetIndex AssetIndex => m_Asset;
+
+            public bool IsValid() => m_Asset.IsValid();
 
             public bool TryLoadAsync(out AsyncOperationHandle<TObject> handle)
             {
@@ -92,6 +96,15 @@ namespace Point.Collections.ResourceControl
             AsyncOperationHandle<TObject> handle;
             for (int i = 0; i < m_Assets.Length; i++)
             {
+#if UNITY_EDITOR
+                if (!m_Assets[i].IsValid())
+                {
+                    PointHelper.LogError(Channel.Collections,
+                        $"Asset({m_Assets[i].AssetIndex}) is not valid. This is not allowed.", this);
+                    Debug.Break();
+                    continue;
+                }
+#endif
                 if (!m_Assets[i].TryLoadAsync(out handle))
                 {
                     continue;

@@ -148,6 +148,26 @@ namespace Point.Collections
         {
             m_IsCompleted = false;
 
+            SetValue(coroutine);
+        }
+
+        ~Promise()
+        {
+            Dispose();
+        }
+        public void Dispose()
+        {
+            m_Value = default(T);
+            m_IsCompleted = false;
+            m_OnCompleted = null;
+        }
+
+        public void SetValue(T t)
+        {
+            OnCompleteMethod(t);
+        }
+        public void SetValue(IEnumerator coroutine)
+        {
             PointApplication.Instance.StartCoroutine(Coroutine(coroutine));
         }
         private IEnumerator Coroutine(IEnumerator target)
@@ -167,22 +187,6 @@ namespace Point.Collections
             }
 
             m_IsCompleted = true;
-        }
-
-        ~Promise()
-        {
-            Dispose();
-        }
-        public void Dispose()
-        {
-            m_Value = default(T);
-            m_IsCompleted = false;
-            m_OnCompleted = null;
-        }
-
-        public void SetValue(T t)
-        {
-            OnCompleteMethod(t);
         }
 
         private void OnCompleteMethod(object obj) => OnCompleteMethod((T)obj);

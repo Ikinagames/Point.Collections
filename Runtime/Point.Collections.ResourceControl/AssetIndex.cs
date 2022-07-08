@@ -61,6 +61,19 @@ namespace Point.Collections.ResourceControl
 
         public bool IsEmpty() => !m_IsCreated;
         public bool IsValid() => ResourceHashMap.Instance.TryGetAssetReference(this, out _);
+
+        public override string ToString()
+        {
+            string msg = string.Empty;
+#if UNITY_EDITOR
+            if (IsValid())
+            {
+                msg += AssetReference.RuntimeKey.ToString();
+            }
+#endif
+            msg += $"({m_Index.x}, {m_Index.y})";
+            return base.ToString();
+        }
     }
 }
 
