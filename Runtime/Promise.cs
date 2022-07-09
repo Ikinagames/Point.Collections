@@ -105,7 +105,7 @@ namespace Point.Collections
         /// <inheritdoc cref="IPromise.Value"/>
         public T Value => m_Value;
         object IPromise.Value => m_Value;
-        public override bool keepWaiting => m_Value == null;
+        public override bool keepWaiting => !m_IsCompleted;
 
         /// <inheritdoc cref="Promise.OnCompleted"/>
         public event Action<T> OnCompleted
