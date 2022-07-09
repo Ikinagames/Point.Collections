@@ -117,6 +117,8 @@ namespace Point.Collections
 
 #if !UNITYENGINE
             Main();   
+#else
+            UnityEngine.SceneManagement.SceneManager.sceneUnloaded += SceneManager_sceneUnloaded;
 #endif
         }
 
@@ -235,6 +237,11 @@ namespace Point.Collections
                 PointHelper.s_LogHandler.CloseLogFile();
             }
             XmlSettings.SaveSettings(this);
+        }
+
+        private void SceneManager_sceneUnloaded(UnityEngine.SceneManagement.Scene arg0)
+        {
+            EventBroadcaster.PostEvent(OnSceneUnloadedEvent.GetEvent());
         }
 
 #if UNITYENGINE && ENABLE_INPUT_SYSTEM

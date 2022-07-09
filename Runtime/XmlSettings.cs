@@ -255,13 +255,13 @@ namespace Point.Collections
                     }
                     else element.Add(item);
 
-                    $"{element.Name}: {item.Name}:{item.Value}".ToLog();
+                    //$"{element.Name}: {item.Name}:{item.Value}".ToLog();
                 }
             }
             else
             {
                 element.Value = xml.Value;
-                $"{element.Name}: {element.Value}".ToLog();
+                //$"{element.Name}: {element.Value}".ToLog();
             }
         }
         private static void LoadValue(XElement objRoot, FieldInfo fieldInfo, object obj)
@@ -295,17 +295,17 @@ namespace Point.Collections
             }
 
             object value = XmlParser.ConvertToObject(fieldInfo.FieldType, element);
-            if (element.HasElements)
-            {
-                foreach (var item in element.Elements())
-                {
-                    $"{fieldInfo.Name}: {item.Name}:{item.Value}".ToLog();
-                }
-            }
-            else
-            {
-                $"{fieldInfo.Name}: {element.Value}".ToLog();
-            }
+            //if (element.HasElements)
+            //{
+            //    foreach (var item in element.Elements())
+            //    {
+            //        $"{fieldInfo.Name}: {item.Name}:{item.Value}".ToLog();
+            //    }
+            //}
+            //else
+            //{
+            //    $"{fieldInfo.Name}: {element.Value}".ToLog();
+            //}
 
             fieldInfo.SetValue(obj, value);
         }

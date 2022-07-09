@@ -121,6 +121,15 @@ namespace Point.Collections
         }
 #endif
 
+        public SceneReference() { }
+        public SceneReference(string path)
+        {
+            this.scenePath = path;
+#if UNITY_EDITOR
+            this.sceneAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEditor.SceneAsset>(path);
+#endif
+        }
+
         public static implicit operator string(SceneReference sceneReference)
         {
             return sceneReference.ScenePath;
