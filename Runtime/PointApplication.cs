@@ -118,6 +118,7 @@ namespace Point.Collections
 #if !UNITYENGINE
             Main();   
 #else
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += SceneManager_sceneLoaded;
             UnityEngine.SceneManagement.SceneManager.sceneUnloaded += SceneManager_sceneUnloaded;
 #endif
         }
@@ -239,6 +240,10 @@ namespace Point.Collections
             XmlSettings.SaveSettings(this);
         }
 
+        private void SceneManager_sceneLoaded(UnityEngine.SceneManagement.Scene arg0, UnityEngine.SceneManagement.LoadSceneMode arg1)
+        {
+            EventBroadcaster.PostEvent(OnSceneLoadedEvent.GetEvent(arg0));
+        }
         private void SceneManager_sceneUnloaded(UnityEngine.SceneManagement.Scene arg0)
         {
             EventBroadcaster.PostEvent(OnSceneUnloadedEvent.GetEvent());
