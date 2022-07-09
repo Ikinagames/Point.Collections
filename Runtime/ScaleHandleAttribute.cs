@@ -27,6 +27,7 @@ namespace Point.Collections
     [Conditional("UNITY_EDITOR")]
     public sealed class ScaleHandleAttribute : PropertyAttribute
     {
+        public bool Local;
         public Vector3 Position;
         public string PositionField = string.Empty;
         public string RotationField = string.Empty;

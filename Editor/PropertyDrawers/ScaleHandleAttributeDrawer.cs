@@ -48,7 +48,7 @@ namespace Point.Collections.Editor
                 }
                 else positionField = parent.FindPropertyRelative(attribute.PositionField);
 
-                Popup.Instance.SetProperty(property, 
+                Popup.Instance.SetProperty(property, attribute.Local,
                     positionField,
                     parent.FindPropertyRelative(attribute.RotationField),
                     attribute.Position);
@@ -118,7 +118,7 @@ namespace Point.Collections.Editor
                     obj.ApplyModifiedProperties();
                 }
             }
-            public void SetProperty(SerializedProperty property, 
+            public void SetProperty(SerializedProperty property, bool isLocal,
                 SerializedProperty positionProperty, SerializedProperty rotationProperty,
                 Vector3 defaultPosition = default(Vector3))
             {
@@ -126,6 +126,10 @@ namespace Point.Collections.Editor
                 if (positionProperty != null)
                 {
                     m_PositionValue = positionProperty.GetVector3();
+                    if (isLocal && m_Object is Component com)
+                    {
+                        m_PositionValue += com.transform.position;
+                    }
                 }
                 else
                 {
@@ -189,6 +193,7 @@ namespace Point.Collections.Editor
                 }
 
                 var changed = Handles.DoScaleHandle(m_Value, m_PositionValue, m_RotationValue, HandleUtility.GetHandleSize(m_PositionValue));
+                Handles.DrawWireCube(m_PositionValue, changed);
 
                 if (!m_Value.Equals(changed))
                 {
