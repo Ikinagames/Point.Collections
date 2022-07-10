@@ -26,11 +26,12 @@ using Point.Collections.Buffer;
 using Point.Collections.Diagnostics;
 using Point.Collections.Threading;
 using System;
+using UnityEngine;
 
 namespace Point.Collections.Events
 {
-    public abstract class SynchronousEvent<TEvent> : ISynchronousEvent, IValidation, IDisposable
-        , IStackDebugger
+    public abstract class SynchronousEvent<TEvent> : CustomYieldInstruction,
+        ISynchronousEvent, IValidation, IDisposable, IStackDebugger
         where TEvent : class, ISynchronousEvent, new()
     {
         private static AtomicOperator s_Op = new AtomicOperator();
@@ -81,6 +82,7 @@ namespace Point.Collections.Events
 
         public bool Reserved => m_Reserved;
         bool ISynchronousEvent.InternalEnableLog => EnableLog;
+        public override bool keepWaiting => !Reserved;
 
         #region Interface Instructions
 
