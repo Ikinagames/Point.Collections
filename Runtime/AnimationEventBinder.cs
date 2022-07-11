@@ -28,7 +28,7 @@ using UnityEngine;
 namespace Point.Collections
 {
     [RequireComponent(typeof(Animator))]
-    public abstract class AnimationEventBinder : MonoBehaviour
+    public abstract class AnimationEventBinder : PointMonobehaviour
     {
         /// <summary>
         /// 이 메소드는 <see cref="AnimationClip"/> 내 <see cref="AnimationEvent"/> 호출용 메소드입니다.
