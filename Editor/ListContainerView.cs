@@ -209,6 +209,7 @@ namespace Point.Collections.Editor
 
             VisualElement element = new VisualElement();
             element.AddToClassList("list-content");
+            element.AddToClassList("content-container");
 
             Button button = new Button();
             button.AddToClassList("list-remove-button");
