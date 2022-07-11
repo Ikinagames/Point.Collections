@@ -107,6 +107,7 @@ namespace Point.Collections.Editor
 
                 if (change.changed)
                 {
+                    Undo.RecordObject(property.serializedObject.targetObject, "");
                     ApplyProperty(property, obj);
                 }
             }
