@@ -27,6 +27,14 @@ using UnityEngine;
 
 namespace Point.Collections
 {
+    //////////////////////////////////////////////////////////////////////////////////////////
+    /*                                   Critical Section                                   */
+    /*                                       수정금지                                        */
+    /*                                                                                      */
+    /*                               Do not modify this script                              */
+    /*                              Unless know what you doing.                             */
+    //////////////////////////////////////////////////////////////////////////////////////////
+
     [RequireComponent(typeof(Animator))]
     public abstract class AnimationEventBinder : PointMonobehaviour
     {
@@ -37,6 +45,10 @@ namespace Point.Collections
         [System.Obsolete("Do not use. This method is intended to use only at AnimationClip events.", true)]
         public abstract void TriggerAction(AnimationEvent ev);
     }
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    /*                                End of Critical Section                               */
+    //////////////////////////////////////////////////////////////////////////////////////////
 }
 
 #endif
