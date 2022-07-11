@@ -315,7 +315,7 @@ namespace Point.Collections.Events
                 {
                     copiedEv = ev.Copy();
                 }
-                catch (NotImplementedException)
+                catch (CopyMethodNotImplementedException)
                 {
                     PointHelper.LogError(Channel.Collections,
                         $"Event({TypeHelper.ToString(ev.GetType())}) has no implement of Copy() Method. " +

@@ -151,7 +151,7 @@ namespace Point.Collections.Events
         /// </summary>
         protected virtual void Execute() { }
         protected virtual void OnReserve() { }
-        protected virtual ISynchronousEvent Copy() { throw new NotImplementedException(); }
+        protected virtual ISynchronousEvent Copy() { throw new CopyMethodNotImplementedException(); }
         protected virtual bool IsValid() => true;
     }
 }
