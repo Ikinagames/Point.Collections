@@ -1,0 +1,55 @@
+:root {
+    --unity-icons-animation-firstkey: resource('d_Animation.FirstKey');
+    --unity-icons-animation-firstkey-disabled: resource('Animation.FirstKey');
+    --unity-icons-animation-lastkey: resource('d_Animation.LastKey');
+    --unity-icons-animation-lastkey-disabled: resource('Animation.LastKey');
+    --unity-icons-animation-nextkey: resource('d_Animation.NextKey');
+    --unity-icons-animation-nextkey-disabled: resource('Animation.NextKey');
+    --unity-icons-animation-play: resource('d_Animation.Play');
+    --unity-icons-animation-play-disabled: resource('Animation.Play');
+    --unity-icons-animation-prevkey: resource('d_Animation.PrevKey');
+    --unity-icons-animation-prevkey-disabled: resource('Animation.PrevKey');
+    --unity-icons-animation-record: resource('d_Animation.Record');
+    --unity-icons-animation-record-disabled: resource('Animation.Record');
+}
+
+.animation-button-image {
+    -unity-background-scale-mode: scale-to-fit;
+    width: 16px;
+    height: 20px;
+}
+
+.animation-firstkey {
+    background-image: var(--unity-icons-animation-firstkey);
+}
+.animation-firstkey:disabled {
+    background-image: var(--unity-icons-animation-firstkey-disabled);
+}
+
+.animation-prevkey {
+    background-image: var(--unity-icons-animation-prevkey);
+}
+.animation-prevkey:disabled {
+    background-image: var(--unity-icons-animation-prevkey-disabled);
+}
+
+.animation-playkey {
+    background-image: var(--unity-icons-animation-play);
+}
+.animation-playkey:disabled {
+    background-image: var(--unity-icons-animation-play-disabled);
+}
+
+.animation-nextkey {
+    background-image: var(--unity-icons-animation-nextkey);
+}
+.animation-nextkey:disabled {
+    background-image: var(--unity-icons-animation-nextkey-disabled);
+}
+
+.animation-lastkey {
+    background-image: var(--unity-icons-animation-lastkey);
+}
+.animation-lastkey:disabled {
+    background-image: var(--unity-icons-animation-lastkey-disabled);
+}
