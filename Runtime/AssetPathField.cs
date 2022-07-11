@@ -115,6 +115,7 @@ namespace Point.Collections
         }
 #endif
 
+        public AssetPathField() : this(string.Empty) { }
         public AssetPathField(string path) : this(path, string.Empty) { }
         public AssetPathField(string path, string subAssetName)
         {
@@ -272,6 +273,7 @@ namespace Point.Collections
         }
 #endif
 
+        public AssetPathField() : base(string.Empty) { }
         public AssetPathField(string path) : base(path) { }
 
 #if UNITY_2020_1_OR_NEWER && UNITY_COLLECTIONS

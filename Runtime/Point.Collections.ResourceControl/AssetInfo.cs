@@ -422,6 +422,7 @@ namespace Point.Collections.ResourceControl
                 promise.OnCompleted -= value;
             }
         }
+
         public Hash InstanceID => m_InstanceID;
         /// <summary>
         /// 에셋의 키 값입니다.
