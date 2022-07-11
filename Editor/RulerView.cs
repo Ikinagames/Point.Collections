@@ -40,13 +40,24 @@ namespace Point.Collections.Editor
             }
         }
 
-        private VisualElement m_ContentContainer;
+        private VisualElement m_Ruler;
+        private ScrollView m_ContentContainer;
 
         public override VisualElement contentContainer => m_ContentContainer;
 
         public RulerView()
         {
-            m_ContentContainer = new VisualElement();
+            styleSheets.Add(CoreGUI.VisualElement.DefaultStyleSheet);
+
+            m_Ruler = new VisualElement();
+            m_ContentContainer = new ScrollView();
+            m_ContentContainer.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+            m_ContentContainer.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+            
+            
+
+            hierarchy.Add(m_Ruler);
+            hierarchy.Add(m_ContentContainer);
         }
     }
 }
