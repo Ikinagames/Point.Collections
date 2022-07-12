@@ -1820,7 +1820,11 @@ namespace Point.Collections.Editor
             internal static void ApplyWireMaterial()
             {
                 MethodInfo method = TypeHelper.TypeOf<HandleUtility>.Type
-                    .GetMethod("ApplyWireMaterial", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+                    .GetMethod("ApplyWireMaterial", 
+                    BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public,
+                    null,
+                    Array.Empty<Type>(),
+                    null);
                 method.Invoke(null, null);
             }
         }
@@ -1833,6 +1837,34 @@ namespace Point.Collections.Editor
             internal static int GetNumberOfDecimalsForMinimumDifference(double minDifference)
             {
                 return (int)System.Math.Max(0.0, -System.Math.Floor(System.Math.Log10(System.Math.Abs(minDifference))));
+            }
+
+            internal static float RoundBasedOnMinimumDifference(float valueToRound, float minDifference)
+            {
+                if (minDifference == 0)
+                    return (float)DiscardLeastSignificantDecimal((double)valueToRound);
+                return (float)System.Math.Round(valueToRound, GetNumberOfDecimalsForMinimumDifference(minDifference),
+                    System.MidpointRounding.AwayFromZero);
+            }
+            internal static double RoundBasedOnMinimumDifference(double valueToRound, double minDifference)
+            {
+                if (minDifference == 0)
+                    return DiscardLeastSignificantDecimal(valueToRound);
+                return System.Math.Round(valueToRound, GetNumberOfDecimalsForMinimumDifference(minDifference),
+                    System.MidpointRounding.AwayFromZero);
+            }
+            internal static double DiscardLeastSignificantDecimal(double v)
+            {
+                int decimals = System.Math.Max(0, (int)(5 - System.Math.Log10(System.Math.Abs(v))));
+                try
+                {
+                    return System.Math.Round(v, decimals);
+                }
+                catch (System.ArgumentOutOfRangeException)
+                {
+                    // This can happen for very small numbers.
+                    return 0;
+                }
             }
         }
 

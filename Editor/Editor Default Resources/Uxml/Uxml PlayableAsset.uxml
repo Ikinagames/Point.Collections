@@ -2,5 +2,4 @@
     <Style src="project://database/Assets/Plugins/Point/Point.Collections/Editor/Editor%20Default%20Resources/Uxml/icons-uss.uss?fileID=7433441132597879392&amp;guid=b1dbfe04c9832cf4290531c6a0b7a4ae&amp;type=3#icons-uss" />
     <Point.Collections.Editor.AnimationToolbarView />
     <ui:VisualElement />
-    <Point.Collections.Editor.RulerView />
 </ui:UXML>
