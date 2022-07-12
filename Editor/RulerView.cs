@@ -145,9 +145,44 @@ namespace Point.Collections.Editor
         private ScrollView m_ContentContainer;
         private TimeArea m_TimeArea;
 
-        public float startTime { get; set; }
-        public float stopTime { get; set; } = 100;
-        public float frameRate { get; set; } = 60;
+        private float m_FrameRate = 60f, m_CursorTime = 0;
+
+        public float startTime
+        {
+            get => m_TimeArea.hRangeMin;
+            set => m_TimeArea.hRangeMin = value;
+        }
+        public float stopTime
+        {
+            get => m_TimeArea.hRangeMax;
+            set => m_TimeArea.hRangeMax = value;
+        }
+        public float frameRate
+        {
+            get => m_FrameRate;
+            set
+            {
+                m_FrameRate = value;
+                m_TimeArea.minWidth = 1.0f / value;
+            }
+        }
+        public float cursorTime
+        {
+            get => m_CursorTime;
+            set => m_CursorTime = value;
+        }
+        public float cursorFrame
+        {
+            get
+            {
+                return m_CursorTime * m_FrameRate;
+            }
+            set
+            {
+                m_CursorTime = m_FrameRate * value;
+            }
+        }
+
         public override VisualElement contentContainer => m_ContentContainer;
 
         public RulerView()
@@ -160,11 +195,11 @@ namespace Point.Collections.Editor
                 vRangeLocked = true,
                 hSlider = true,
                 vSlider = false,
-                hRangeMin = startTime,
-                hRangeMax = stopTime,
+                hRangeMin = 0, // startTime
+                hRangeMax = 3, // stopTime
                 margin = 10,
                 scaleWithWindow = true,
-                minWidth = 1.0f / frameRate,
+                minWidth = 1.0f / 60, // frameRate
                 ignoreScrollWheelUntilClicked = true,
             };
             m_TimeArea.SetShownHRangeInsideMargins(startTime, stopTime);
@@ -205,8 +240,6 @@ namespace Point.Collections.Editor
         private float m_StopFrame = 1;
         private float m_AdditivePoseFrame = 0;
         private float m_InitialClipLength = 0;
-
-        public float m_PlayPoint = 50;
 
         // https://github.com/Unity-Technologies/UnityCsReference/blob/master/Editor/Mono/Inspector/AnimationClipEditor.cs
         public void ClipRangeGUI(ref float startFrame, ref float stopFrame, out bool changedStart, out bool changedStop, bool showAdditivePoseFrame, ref float additivePoseframe, out bool changedAdditivePoseframe)
@@ -263,7 +296,7 @@ namespace Point.Collections.Editor
                 m_TimeArea.TimeRuler(timeRect, frameRate);
                 // Current time indicator
                 // TODO: TEST
-                TimeArea.DrawPlayhead(m_PlayPoint, timeRect.yMin, timeRect.yMax, 2f, 1f);
+                TimeArea.DrawPlayhead(m_TimeArea.TimeToPixel(m_CursorTime, timeRect), timeRect.yMin, timeRect.yMax, 2f, 1f);
 
                 using (new EditorGUI.DisabledScope(invalidRange))
                 {
