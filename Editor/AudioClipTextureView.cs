@@ -64,13 +64,16 @@ namespace Point.Collections.Editor
         {
             style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
             style.height = new StyleLength(new Length(100, LengthUnit.Pixel));
+            style.SetBorderColor(Color.gray);
+            style.SetBorderRadius(.15f);
+            style.SetBorderWidth(.1f);
 
             m_OverlayBox = new VisualElement();
             m_OverlayBox.style.position = Position.Absolute;
             m_OverlayBox.style.flexGrow = 1;
             m_OverlayBox.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
             m_OverlayBox.style.height = style.height;
-            m_OverlayBox.style.backgroundColor = new Color(.75f, .75f, .75f, .5f);
+            m_OverlayBox.style.backgroundColor = new Color(.25f, .25f, .25f, .5f);
 
             m_OverlayLabel = new Label();
             m_OverlayLabel.style.flexGrow = 1;
