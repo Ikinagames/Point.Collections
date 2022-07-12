@@ -76,7 +76,7 @@ namespace Point.Collections
             }
         }
 
-        internal Grid(AABB aabb, float cellSize)
+        public Grid(AABB aabb, float cellSize)
         {
             this = default(Grid);
 
