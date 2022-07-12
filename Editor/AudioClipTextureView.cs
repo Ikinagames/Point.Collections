@@ -42,7 +42,7 @@ namespace Point.Collections.Editor
                 m_AudioClip = value;
                 m_Texture = m_AudioClip.PaintWaveformSpectrum(.5f, 600, 100, Color.gray);
 
-                style.backgroundImage = m_Texture;
+                style.backgroundImage = new StyleBackground(m_Texture);
 
                 if (m_AudioClip == null)
                 {
@@ -50,6 +50,7 @@ namespace Point.Collections.Editor
                 }
             }
         }
+        public Texture2D texture => m_Texture;
 
         VisualElement m_OverlayBox;
         Label m_OverlayLabel;
@@ -63,7 +64,9 @@ namespace Point.Collections.Editor
         public AudioClipTextureView()
         {
             style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
-            style.height = new StyleLength(new Length(100, LengthUnit.Pixel));
+            style.flexGrow = 1;
+            style.minHeight = new StyleLength(new Length(50, LengthUnit.Pixel));
+            style.maxHeight = new StyleLength(new Length(100, LengthUnit.Pixel));
             style.SetBorderColor(Color.gray);
             style.SetBorderRadius(.15f);
             style.SetBorderWidth(.1f);

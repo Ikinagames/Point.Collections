@@ -1947,6 +1947,66 @@ namespace Point.Collections.Editor
 
                 return v;
             }
+
+            // https://forum.unity.com/threads/draw-a-line-from-a-to-b.698618/
+            public static void DrawCable(Vector3[] points, float thickness, Color color, MeshGenerationContext context)
+            {
+                List<Vertex> vertices = new List<Vertex>();
+                List<ushort> indices = new List<ushort>();
+
+                for (int i = 0; i < points.Length - 1; i++)
+                {
+                    var pointA = points[i];
+                    var pointB = points[i + 1];
+
+                    float angle = Mathf.Atan2(pointB.y - pointA.y, pointB.x - pointA.x);
+                    float offsetX = thickness / 2 * Mathf.Sin(angle);
+                    float offsetY = thickness / 2 * Mathf.Cos(angle);
+
+                    vertices.Add(new Vertex()
+                    {
+                        position = new Vector3(pointA.x + offsetX, pointA.y - offsetY, Vertex.nearZ),
+                        tint = color
+                    });
+                    vertices.Add(new Vertex()
+                    {
+                        position = new Vector3(pointB.x + offsetX, pointB.y - offsetY, Vertex.nearZ),
+                        tint = color
+                    });
+                    vertices.Add(new Vertex()
+                    {
+                        position = new Vector3(pointB.x - offsetX, pointB.y + offsetY, Vertex.nearZ),
+                        tint = color
+                    });
+                    vertices.Add(new Vertex()
+                    {
+                        position = new Vector3(pointB.x - offsetX, pointB.y + offsetY, Vertex.nearZ),
+                        tint = color
+                    });
+                    vertices.Add(new Vertex()
+                    {
+                        position = new Vector3(pointA.x - offsetX, pointA.y + offsetY, Vertex.nearZ),
+                        tint = color
+                    });
+                    vertices.Add(new Vertex()
+                    {
+                        position = new Vector3(pointA.x + offsetX, pointA.y - offsetY, Vertex.nearZ),
+                        tint = color
+                    });
+
+                    ushort indexOffset(int value) => (ushort)(value + (i * 6));
+                    indices.Add(indexOffset(0));
+                    indices.Add(indexOffset(1));
+                    indices.Add(indexOffset(2));
+                    indices.Add(indexOffset(3));
+                    indices.Add(indexOffset(4));
+                    indices.Add(indexOffset(5));
+                }
+
+                var mesh = context.Allocate(vertices.Count, indices.Count);
+                mesh.SetAllVertices(vertices.ToArray());
+                mesh.SetAllIndices(indices.ToArray());
+            }
         }
 
         public static void Hide(this IStyle t, bool hide)
