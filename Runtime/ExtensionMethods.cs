@@ -254,23 +254,29 @@ namespace Point.Collections
         // https://answers.unity.com/questions/1603418/how-to-create-waveform-texture-from-audioclip.html
         // https://forum.unity.com/threads/how-to-create-waveform-texture-from-audioclip.631480/
         // https://answers.unity.com/questions/699595/how-to-generate-waveform-from-audioclip.html
-        public static Texture2D PaintWaveformSpectrum(this AudioClip audio, float saturation, int width, int height, Color col)
+        public static Texture2D PaintWaveformSpectrum(this AudioClip audio, 
+            float saturation, int width, int height, Color col, float heightOffset = .6f)
         {
             Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             // multiply it by channel to account of clips with multiple channel
             float[] samples = new float[audio.samples * audio.channels];
             float[] waveform = new float[width];
             audio.GetData(samples, 0);
+
             int packSize = (audio.samples / width) + 1;
-            int s = 0;
-            for (int i = 0; i < audio.channels * audio.samples; i += packSize)
+            float max = 0;
+            for (int i = 0, s = 0; i < audio.channels * audio.samples; i += packSize * audio.channels, s++)
             {
                 waveform[s] = Mathf.Abs(samples[i]);
-                s++;
+                if (max < waveform[s]) max = waveform[s];
             }
-
+            
             for (int x = 0; x < width; x++)
             {
+                waveform[x] /= (max * saturation);
+                if (waveform[x] > 1) waveform[x] = 1;
+                waveform[x] *= heightOffset;
+
                 for (int y = 0; y < height; y++)
                 {
                     tex.SetPixel(x, y, Color.black);
@@ -281,8 +287,8 @@ namespace Point.Collections
             {
                 for (int y = 0; y <= waveform[x] * ((float)height * .75f); y++)
                 {
-                    tex.SetPixel(x, (height / 2) + y, col);
-                    tex.SetPixel(x, (height / 2) - y, col);
+                    tex.SetPixel(x, Mathf.RoundToInt((height * .5f) + y), col);
+                    tex.SetPixel(x, Mathf.RoundToInt((height * .5f) - y), col);
                 }
             }
             tex.Apply();
