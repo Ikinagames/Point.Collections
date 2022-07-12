@@ -206,6 +206,8 @@ namespace Point.Collections.Editor
         private float m_AdditivePoseFrame = 0;
         private float m_InitialClipLength = 0;
 
+        public float m_PlayPoint = 50;
+
         public void ClipRangeGUI(ref float startFrame, ref float stopFrame, out bool changedStart, out bool changedStop, bool showAdditivePoseFrame, ref float additivePoseframe, out bool changedAdditivePoseframe)
         {
             changedStart = false;
@@ -260,7 +262,7 @@ namespace Point.Collections.Editor
                 m_TimeArea.TimeRuler(timeRect, frameRate);
                 // Current time indicator
                 // TODO: TEST
-                TimeArea.DrawPlayhead(123, timeRect.yMin, timeRect.yMax, 2f, 1f);
+                TimeArea.DrawPlayhead(m_PlayPoint, timeRect.yMin, timeRect.yMax, 2f, 1f);
 
                 using (new EditorGUI.DisabledScope(invalidRange))
                 {
