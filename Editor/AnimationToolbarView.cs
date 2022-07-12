@@ -64,18 +64,37 @@ namespace Point.Collections.Editor
             m_PlayKeyButton = new ToolbarButton();
             m_NextKeyButton = new ToolbarButton();
             m_LastKeyButton = new ToolbarButton();
+            m_Toolbar.Add(m_FirstKeyButton);
+            m_Toolbar.Add(m_PrevKeyButton);
+            m_Toolbar.Add(m_PlayKeyButton);
+            m_Toolbar.Add(m_NextKeyButton);
+            m_Toolbar.Add(m_LastKeyButton);
 
-            m_FirstKeyButton.AddToClassList(c_BaseClassName);
-            m_PrevKeyButton.AddToClassList(c_BaseClassName);
-            m_PlayKeyButton.AddToClassList(c_BaseClassName);
-            m_NextKeyButton.AddToClassList(c_BaseClassName);
-            m_LastKeyButton.AddToClassList(c_BaseClassName);
+            VisualElement
+                firstKeyImg = new VisualElement(),
+                prevKeyImg = new VisualElement(),
+                playKeyImg = new VisualElement(),
+                nextKeyImg = new VisualElement(),
+                lastKeyImg = new VisualElement();
+            m_FirstKeyButton.Add(firstKeyImg);
+            m_PrevKeyButton.Add(prevKeyImg);
+            m_PlayKeyButton.Add(playKeyImg);
+            m_NextKeyButton.Add(nextKeyImg);
+            m_LastKeyButton.Add(lastKeyImg);
 
-            m_FirstKeyButton.AddToClassList("animation-firstkey");
-            m_PrevKeyButton.AddToClassList("animation-prevkey");
-            m_PlayKeyButton.AddToClassList("animation-playkey");
-            m_NextKeyButton.AddToClassList("animation-nextkey");
-            m_LastKeyButton.AddToClassList("animation-lastkey");
+            firstKeyImg.AddToClassList(c_BaseClassName);
+            prevKeyImg.AddToClassList(c_BaseClassName);
+            playKeyImg.AddToClassList(c_BaseClassName);
+            nextKeyImg.AddToClassList(c_BaseClassName);
+            lastKeyImg.AddToClassList(c_BaseClassName);
+
+            firstKeyImg.AddToClassList("animation-firstkey");
+            prevKeyImg.AddToClassList("animation-prevkey");
+            playKeyImg.AddToClassList("animation-playkey");
+            nextKeyImg.AddToClassList("animation-nextkey");
+            lastKeyImg.AddToClassList("animation-lastkey");
+
+            Add(m_Toolbar);
         }
     }
 }
