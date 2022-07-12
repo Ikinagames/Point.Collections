@@ -258,6 +258,24 @@ namespace Point.Collections
             float saturation, int width, int height, Color col, float heightOffset = .6f)
         {
             Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            int halfHeight = Mathf.RoundToInt(height * .5f);
+
+            if (audio == null)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        tex.SetPixel(x, y, Color.black);
+                    }
+
+                    tex.SetPixel(x, halfHeight, col);
+                }
+
+                tex.Apply();
+                return tex;
+            }
+
             // multiply it by channel to account of clips with multiple channel
             float[] samples = new float[audio.samples * audio.channels];
             float[] waveform = new float[width];
@@ -287,8 +305,8 @@ namespace Point.Collections
             {
                 for (int y = 0; y <= waveform[x] * ((float)height * .75f); y++)
                 {
-                    tex.SetPixel(x, Mathf.RoundToInt((height * .5f) + y), col);
-                    tex.SetPixel(x, Mathf.RoundToInt((height * .5f) - y), col);
+                    tex.SetPixel(x, halfHeight + y, col);
+                    tex.SetPixel(x, halfHeight - y, col);
                 }
             }
             tex.Apply();

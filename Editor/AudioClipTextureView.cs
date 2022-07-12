@@ -37,17 +37,52 @@ namespace Point.Collections.Editor
             get => m_AudioClip;
             set
             {
+                m_OverlayBox.RemoveFromHierarchy();
+
                 m_AudioClip = value;
                 m_Texture = m_AudioClip.PaintWaveformSpectrum(.5f, 600, 100, Color.gray);
 
                 style.backgroundImage = m_Texture;
+
+                if (m_AudioClip == null)
+                {
+                    Add(m_OverlayBox);
+                }
             }
+        }
+
+        VisualElement m_OverlayBox;
+        Label m_OverlayLabel;
+
+        public string emptyString
+        {
+            get => m_OverlayLabel.text;
+            set => m_OverlayLabel.text = value;
         }
 
         public AudioClipTextureView()
         {
             style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
             style.height = new StyleLength(new Length(100, LengthUnit.Pixel));
+
+            m_OverlayBox = new VisualElement();
+            m_OverlayBox.style.position = Position.Absolute;
+            m_OverlayBox.style.flexGrow = 1;
+            m_OverlayBox.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
+            m_OverlayBox.style.height = style.height;
+            m_OverlayBox.style.backgroundColor = new Color(.75f, .75f, .75f, .5f);
+
+            m_OverlayLabel = new Label();
+            m_OverlayLabel.style.flexGrow = 1;
+            m_OverlayLabel.style.alignContent = Align.Center;
+            m_OverlayLabel.style.justifyContent = Justify.SpaceAround;
+            m_OverlayLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+            m_OverlayLabel.style.fontSize = 15;
+            m_OverlayBox.Add(m_OverlayLabel);
+
+            emptyString = "Empty";
+
+            audioClip = null;
         }
     }
 }
