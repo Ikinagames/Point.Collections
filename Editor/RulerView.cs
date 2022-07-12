@@ -208,6 +208,7 @@ namespace Point.Collections.Editor
 
         public float m_PlayPoint = 50;
 
+        // https://github.com/Unity-Technologies/UnityCsReference/blob/master/Editor/Mono/Inspector/AnimationClipEditor.cs
         public void ClipRangeGUI(ref float startFrame, ref float stopFrame, out bool changedStart, out bool changedStop, bool showAdditivePoseFrame, ref float additivePoseframe, out bool changedAdditivePoseframe)
         {
             changedStart = false;
