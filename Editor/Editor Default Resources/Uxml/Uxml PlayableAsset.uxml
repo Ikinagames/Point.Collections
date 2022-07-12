@@ -1,22 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
-    <Style src="project://database/Assets/Plugins/Point/Point.Collections/Editor/Editor%20Default%20Resources/Uxml/playableasset-uss.uss?fileID=7433441132597879392&amp;guid=b1dbfe04c9832cf4290531c6a0b7a4ae&amp;type=3#playableasset-uss" />
-    <uie:Toolbar>
-        <uie:ToolbarButton name="FirstKeyButton">
-            <ui:VisualElement class="animation-firstkey animation-button-image" />
-        </uie:ToolbarButton>
-        <uie:ToolbarButton name="PrevKeyButton">
-            <ui:VisualElement class="animation-prevkey animation-button-image" />
-        </uie:ToolbarButton>
-        <uie:ToolbarButton name="PlayKeyButton">
-            <ui:VisualElement class="animation-button-image animation-playkey" />
-        </uie:ToolbarButton>
-        <uie:ToolbarButton name="NextKeyButton">
-            <ui:VisualElement class="animation-button-image animation-nextkey" />
-        </uie:ToolbarButton>
-        <uie:ToolbarButton name="LastKeyButton">
-            <ui:VisualElement class="animation-button-image animation-lastkey" />
-        </uie:ToolbarButton>
-    </uie:Toolbar>
+    <Style src="project://database/Assets/Plugins/Point/Point.Collections/Editor/Editor%20Default%20Resources/Uxml/icons-uss.uss?fileID=7433441132597879392&amp;guid=b1dbfe04c9832cf4290531c6a0b7a4ae&amp;type=3#icons-uss" />
+    <Point.Collections.Editor.AnimationToolbarView />
     <ui:VisualElement />
     <Point.Collections.Editor.RulerView />
 </ui:UXML>
