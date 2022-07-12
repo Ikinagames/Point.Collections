@@ -51,6 +51,7 @@ namespace Point.Collections.Editor
             m_PlayKeyButton,
             m_NextKeyButton,
             m_LastKeyButton;
+        private IntegerField m_FrameField;
 
         const string c_BaseClassName = "animation-button-image";
 
@@ -93,6 +94,11 @@ namespace Point.Collections.Editor
             playKeyImg.AddToClassList("animation-playkey");
             nextKeyImg.AddToClassList("animation-nextkey");
             lastKeyImg.AddToClassList("animation-lastkey");
+
+            m_FrameField = new IntegerField();
+            m_FrameField.style.minWidth = new StyleLength(new Length(25, LengthUnit.Pixel));
+            m_FrameField.style.maxWidth = new StyleLength(new Length(50, LengthUnit.Pixel));
+            m_Toolbar.Add(m_FrameField);
 
             Add(m_Toolbar);
         }
