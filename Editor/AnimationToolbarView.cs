@@ -51,9 +51,47 @@ namespace Point.Collections.Editor
             m_PlayKeyButton,
             m_NextKeyButton,
             m_LastKeyButton;
-        private IntegerField m_FrameField;
+        private FloatField m_FrameField;
 
         const string c_BaseClassName = "animation-button-image";
+
+        public float frame
+        {
+            get => m_FrameField.value;
+            set => m_FrameField.value = value;
+        }
+
+        public event System.Action OnFirstKeyButton
+        {
+            add => m_FirstKeyButton.clicked += value;
+            remove => m_FirstKeyButton.clicked -= value;
+        }
+        public event System.Action OnPrevKeyButton
+        {
+            add => m_PrevKeyButton.clicked += value;
+            remove => m_PrevKeyButton.clicked -= value;
+        }
+        public event System.Action OnPlayKeyButton
+        {
+            add => m_PlayKeyButton.clicked += value;
+            remove => m_PlayKeyButton.clicked -= value;
+        }
+        public event System.Action OnNextKeyButton
+        {
+            add => m_NextKeyButton.clicked += value;
+            remove => m_NextKeyButton.clicked -= value;
+        }
+        public event System.Action OnLastKeyButton
+        {
+            add => m_LastKeyButton.clicked += value;
+            remove => m_LastKeyButton.clicked -= value;
+        }
+
+        public event EventCallback<ChangeEvent<float>> OnFrameChanged
+        {
+            add => m_FrameField.RegisterValueChangedCallback(value);
+            remove => m_FrameField.UnregisterValueChangedCallback(value);
+        }
 
         public AnimationToolbarView()
         {
@@ -95,12 +133,17 @@ namespace Point.Collections.Editor
             nextKeyImg.AddToClassList("animation-nextkey");
             lastKeyImg.AddToClassList("animation-lastkey");
 
-            m_FrameField = new IntegerField();
+            m_FrameField = new FloatField();
             m_FrameField.style.minWidth = new StyleLength(new Length(25, LengthUnit.Pixel));
             m_FrameField.style.maxWidth = new StyleLength(new Length(50, LengthUnit.Pixel));
             m_Toolbar.Add(m_FrameField);
 
             Add(m_Toolbar);
+        }
+
+        public void SetFrameWithoutNotify(float frame)
+        {
+            m_FrameField.SetValueWithoutNotify(frame);
         }
     }
 }

@@ -145,6 +145,12 @@ namespace Point.Collections.Editor
         private ScrollView m_ContentContainer;
         private TimeArea m_TimeArea;
 
+        private bool
+            m_DraggingRange, m_DraggingRangeBegin, m_DraggingRangeEnd;
+        private float m_DraggingStartFrame = 0;
+        private float m_DraggingStopFrame = 0;
+        private float m_DraggingAdditivePoseFrame = 0;
+
         private float m_FrameRate = 60f, m_CursorTime = 0;
 
         public float startTime
@@ -157,6 +163,11 @@ namespace Point.Collections.Editor
             get => m_TimeArea.hRangeMax;
             set => m_TimeArea.hRangeMax = value;
         }
+        public float stopFrame
+        {
+            get => m_TimeArea.hRangeMax * m_FrameRate;
+            set => m_TimeArea.hRangeMax = value * m_FrameRate;
+        }
         public float frameRate
         {
             get => m_FrameRate;
@@ -166,6 +177,7 @@ namespace Point.Collections.Editor
                 m_TimeArea.minWidth = 1.0f / value;
             }
         }
+
         public float cursorTime
         {
             get => m_CursorTime;
@@ -179,8 +191,20 @@ namespace Point.Collections.Editor
             }
             set
             {
-                m_CursorTime = m_FrameRate * value;
+                m_CursorTime = value / m_FrameRate;
             }
+        }
+
+        public bool drawRangeIndicator { get; set; } = false;
+        public float rangeStartFrame
+        {
+            get => m_DraggingStartFrame;
+            set => m_DraggingStartFrame = value;
+        }
+        public float rangeStopFrame
+        {
+            get => m_DraggingStopFrame;
+            set => m_DraggingStopFrame = value;
         }
 
         public override VisualElement contentContainer => m_ContentContainer;
@@ -213,6 +237,11 @@ namespace Point.Collections.Editor
             hierarchy.Add(m_Ruler);
             hierarchy.Add(m_ContentContainer);
         }
+        public RulerView(float length) : this()
+        {
+            stopTime = length;
+        }
+
         private void OnGUI()
         {
             bool changedStart = false;
@@ -224,12 +253,6 @@ namespace Point.Collections.Editor
                 out changedStart, out changedStop, false, 
                 ref m_AdditivePoseFrame, out changedAdditivePoseFrame);
         }
-
-        private bool
-            m_DraggingRange, m_DraggingRangeBegin, m_DraggingRangeEnd;
-        private float m_DraggingStartFrame = 0;
-        private float m_DraggingStopFrame = 0;
-        private float m_DraggingAdditivePoseFrame = 0;
 
         private bool m_LoopTime = false;
         private bool m_LoopBlend = false;
