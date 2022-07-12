@@ -153,6 +153,17 @@ namespace Point.Collections
 
         #endregion
 
+        #region Color
+
+        // Returns new color that has RGB components multiplied, but leaving alpha untouched.
+        public static Color RGBMultiplied(this Color t, float multiplier) { return new Color(t.r * multiplier, t.g * multiplier, t.b * multiplier, t.a); }
+        // Returns new color that has RGB components multiplied, but leaving alpha untouched.
+        public static Color AlphaMultiplied(this Color t, float multiplier) { return new Color(t.r, t.g, t.b, t.a * multiplier); }
+        // Returns new color that has RGB components multiplied, but leaving alpha untouched.
+        public static Color RGBMultiplied(this Color t, Color multiplier) { return new Color(t.r * multiplier.r, t.g * multiplier.g, t.b * multiplier.b, t.a); }
+
+        #endregion
+
         public static bool IsNullOrEmpty<T>(this T[] t)
         {
             if (t == null || t.Length == 0) return true;
