@@ -62,6 +62,8 @@ namespace Point.Collections.Editor
 
         private void PointerDownHandler(PointerDownEvent evt)
         {
+            if (evt.button != 0) return;
+
             targetStartPosition = target.transform.position;
             pointerStartPosition = evt.position;
             target.CapturePointer(evt.pointerId);
