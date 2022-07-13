@@ -2058,6 +2058,30 @@ namespace Point.Collections.Editor
             t.borderBottomRightRadius = value;
         }
 
+        public static TVisualElement FindClosestElement<TVisualElement>(this VE root, Vector3 position, UQueryBuilder<TVisualElement> slots) 
+            where TVisualElement : VE
+        {
+            List<TVisualElement> slotsList = slots.ToList();
+            float bestDistanceSq = float.MaxValue;
+            TVisualElement closest = null;
+            foreach (TVisualElement slot in slotsList)
+            {
+                Vector3 displacement = RootSpaceOfSlot(root, slot) - position;
+                float distanceSq = displacement.sqrMagnitude;
+                if (distanceSq < bestDistanceSq)
+                {
+                    bestDistanceSq = distanceSq;
+                    closest = slot;
+                }
+            }
+            return closest;
+        }
+        public static Vector3 RootSpaceOfSlot(VE root, VE target)
+        {
+            Vector2 slotWorldSpace = target.parent.LocalToWorld(target.layout.position);
+            return root.WorldToLocal(slotWorldSpace);
+        }
+
         #endregion
 
         #region Editor Window
