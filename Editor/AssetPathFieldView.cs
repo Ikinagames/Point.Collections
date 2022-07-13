@@ -86,6 +86,20 @@ namespace Point.Collections.Editor
                 }
             }
         }
+        public UnityEngine.Object objectValue
+        {
+            get => AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(m_Value);
+            set
+            {
+                string path = value == null ? string.Empty : AssetDatabase.GetAssetPath(value);
+                using (ChangeEvent<string> ev = ChangeEvent<string>.GetPooled(m_Value, path))
+                {
+                    ev.target = this;
+                    SetValueWithoutNotify(path);
+                    SendEvent(ev);
+                }
+            }
+        }
         public string label
         {
             get => m_Label.text;
@@ -212,7 +226,7 @@ namespace Point.Collections.Editor
                 m_ObjectField.SetValueWithoutNotify(target);
             }
 
-            value = newValue;
+            m_Value = newValue;
         }
         private void ObjectChanged(ChangeEvent<UnityEngine.Object> ev)
         {
@@ -232,7 +246,7 @@ namespace Point.Collections.Editor
                 m_PathField.SetValueWithoutNotify(AssetDatabase.GetAssetPath(target));
             }
 
-            value = (m_PathField.value);
+            m_Value = (m_PathField.value);
 
             //guidProperty.stringValue = AssetDatabase.AssetPathToGUID(m_PathField.value);
             //pathProperty.serializedObject.ApplyModifiedProperties();
