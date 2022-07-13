@@ -91,7 +91,13 @@ namespace Point.Collections.Editor
             get => AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(m_Value);
             set
             {
-                string path = value == null ? string.Empty : AssetDatabase.GetAssetPath(value);
+                string path;
+                if (value != null && PrefabUtility.IsPartOfPrefabInstance(value))
+                {
+                    path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(value);
+                }
+                else path = value == null ? string.Empty : AssetDatabase.GetAssetPath(value);
+
                 using (ChangeEvent<string> ev = ChangeEvent<string>.GetPooled(m_Value, path))
                 {
                     ev.target = this;
@@ -211,42 +217,48 @@ namespace Point.Collections.Editor
 
             m_ObjectField.SetValueWithoutNotify(AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(newValue));
             m_PathField.SetValueWithoutNotify(newValue);
+
+            //$"0 {m_Value}".ToLog();
         }   
 
         private void PathChanged(ChangeEvent<string> ev)
         {
-            string newValue = ev.newValue;
-            UnityEngine.Object target = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(ev.newValue);
-            if (target == null)
-            {
-                m_ObjectField.SetValueWithoutNotify(null);
-            }
-            else
-            {
-                m_ObjectField.SetValueWithoutNotify(target);
-            }
+            value = ev.newValue;
+            //string newValue = ev.newValue;
+            //UnityEngine.Object target = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(ev.newValue);
+            //if (target == null)
+            //{
+            //    m_ObjectField.SetValueWithoutNotify(null);
+            //}
+            //else
+            //{
+            //    m_ObjectField.SetValueWithoutNotify(target);
+            //}
 
-            m_Value = newValue;
+            //$"1 {m_Value}".ToLog();
+            //m_Value = newValue;
         }
         private void ObjectChanged(ChangeEvent<UnityEngine.Object> ev)
         {
-            UnityEngine.Object target = ev.newValue;
-            if (target == null)
-            {
-                m_PathField.SetValueWithoutNotify(string.Empty);
-            }
-            else if (PrefabUtility.IsPartOfPrefabInstance(target))
-            {
-                m_PathField.SetValueWithoutNotify(
-                    PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(target)
-                    );
-            }
-            else
-            {
-                m_PathField.SetValueWithoutNotify(AssetDatabase.GetAssetPath(target));
-            }
+            objectValue = ev.newValue;
+            //UnityEngine.Object target = ev.newValue;
+            //if (target == null)
+            //{
+            //    m_PathField.SetValueWithoutNotify(string.Empty);
+            //}
+            //else if (PrefabUtility.IsPartOfPrefabInstance(target))
+            //{
+            //    m_PathField.SetValueWithoutNotify(
+            //        PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(target)
+            //        );
+            //}
+            //else
+            //{
+            //    m_PathField.SetValueWithoutNotify(AssetDatabase.GetAssetPath(target));
+            //}
 
-            m_Value = (m_PathField.value);
+            //m_Value = (m_PathField.value);
+            //$"2 {m_Value}".ToLog();
 
             //guidProperty.stringValue = AssetDatabase.AssetPathToGUID(m_PathField.value);
             //pathProperty.serializedObject.ApplyModifiedProperties();

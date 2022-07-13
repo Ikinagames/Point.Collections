@@ -55,6 +55,7 @@ namespace Point.Collections.Editor
         public TValue value { get; set; }
         public DragManipulator manipulator { get; private set; }
 
+        public event Action<PinPoint<TValue>, Vector3> OnDrag;
         public event Action<PinPoint<TValue>, Vector3> OnDragEnded;
 
         public PinPoint(VisualElement parent)
@@ -69,9 +70,14 @@ namespace Point.Collections.Editor
             manipulator = new DragManipulator();
             manipulator.root = parent;
             manipulator.OnDragEnded += Manipulator_OnDragEnded;
+            manipulator.OnDrag += Manipulator_OnDrag;
             this.AddManipulator(manipulator);
         }
 
+        private void Manipulator_OnDrag(Vector3 obj)
+        {
+            OnDrag?.Invoke(this, obj);
+        }
         private void Manipulator_OnDragEnded(Vector3 obj)
         {
             OnDragEnded?.Invoke(this, obj);

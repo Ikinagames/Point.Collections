@@ -704,24 +704,34 @@ namespace Point.Collections.Editor
 
         private static class AssetPathFieldHelper
         {
-            const string c_Str = "p_AssetPath";
+            const string c_Str = "p_AssetPath", c_GUID = "p_AssetGUID";
 
             public static SerializedProperty GetAssetPathField(SerializedProperty property)
             {
                 return property.FindPropertyRelative(c_Str);
             }
+            public static SerializedProperty GetAssetGUIDField(SerializedProperty property)
+            {
+                return property.FindPropertyRelative(c_GUID);
+            }
         }
         public static void SetAssetPathField(SerializedProperty property, UnityEngine.Object obj)
         {
-            SerializedProperty pathProp = AssetPathFieldHelper.GetAssetPathField(property);
+            SerializedProperty 
+                pathProp = AssetPathFieldHelper.GetAssetPathField(property),
+                guidProp = AssetPathFieldHelper.GetAssetGUIDField(property);
 
             pathProp.stringValue = obj == null ? string.Empty : AssetDatabase.GetAssetPath(obj);
+            guidProp.stringValue = obj == null ? String.Empty : AssetDatabase.AssetPathToGUID(pathProp.stringValue);
         }
         public static void SetAssetPathFieldPath(SerializedProperty property, string path)
         {
-            SerializedProperty pathProp = AssetPathFieldHelper.GetAssetPathField(property);
+            SerializedProperty
+                pathProp = AssetPathFieldHelper.GetAssetPathField(property),
+                guidProp = AssetPathFieldHelper.GetAssetGUIDField(property);
 
             pathProp.stringValue = path;
+            guidProp.stringValue = path.IsNullOrEmpty() ? String.Empty : AssetDatabase.AssetPathToGUID(pathProp.stringValue);
         }
         public static string GetAssetPathFieldPath(SerializedProperty property)
         {

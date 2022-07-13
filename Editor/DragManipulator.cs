@@ -42,6 +42,7 @@ namespace Point.Collections.Editor
 
         public VisualElement root { get; set; }
 
+        public event Action<Vector3> OnDrag;
         public event Action<Vector3> OnDragEnded;
 
         protected override void RegisterCallbacksOnTarget()
@@ -75,6 +76,8 @@ namespace Point.Collections.Editor
                 target.transform.position = new Vector2(
                     Mathf.Clamp(targetStartPosition.x + pointerDelta.x, 0, target.panel.visualTree.worldBound.width),
                     Mathf.Clamp(targetStartPosition.y + pointerDelta.y, 0, target.panel.visualTree.worldBound.height));
+
+                OnDrag?.Invoke(root.WorldToLocal(evt.position));
             }
         }
         private void PointerUpHandler(PointerUpEvent evt)
