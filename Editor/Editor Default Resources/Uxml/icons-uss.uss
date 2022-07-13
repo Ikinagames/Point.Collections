@@ -11,6 +11,20 @@
     --unity-icons-animation-prevkey-disabled: resource('Animation.PrevKey');
     --unity-icons-animation-record: resource('d_Animation.Record');
     --unity-icons-animation-record-disabled: resource('Animation.Record');
+
+    --unity-icons-dot-fill: resource('DotFill');
+    --unity-icons-dot-frame: resource('DotFrame');
+    --unity-icons-dot-framedotted: resource('DotFrameDotted');
+    --unity-icons-dot-selection: resource('DotSelection');
+}
+
+.dot-image {
+    -unity-background-scale-mode: scale-to-fit;
+    width: 15px;
+    height: 15px;
+}
+.dot-fill {
+    background-image: var(--unity-icons-dot-fill);
 }
 
 .animation-button-image {
