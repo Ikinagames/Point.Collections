@@ -20,16 +20,14 @@
 #define UNITYENGINE
 
 using Unity.Burst;
-#if UNITY_MATHEMATICS
 using Unity.Mathematics;
-#endif
 
 namespace Point.Collections.Burst
 {
     /// <summary>
     /// Unity.Burst 와 Unity.Mathematics 가 필요합니다.
     /// </summary>
-    [BurstCompile]
+    [BurstCompile(CompileSynchronously = true)]
     public static unsafe class BurstMath
     {
         [BurstCompile]
@@ -59,14 +57,14 @@ namespace Point.Collections.Burst
                 originExtents = aabb.extents,
                 originMin = (-originExtents + originCenter),
                 originMax = (originExtents + originCenter);
-            float4x4 trMatrix = float4x4.TRS(originCenter, quaternion, originExtents);
+            float4x4 trMatrix = Unity.Mathematics.float4x4.TRS(originCenter, quaternion, originExtents);
 
             float3
                 size = originExtents * 2,
                 minPos = math.mul(trMatrix, new float4(-size, 1)).xyz,
                 maxPos = math.mul(trMatrix, new float4(size, 1)).xyz;
 
-            AABB temp = new AABB(originCenter, float3.zero);
+            AABB temp = new AABB(originCenter, Unity.Mathematics.float3.zero);
 
             // TODO : 최소 width, height 값이 설정되지않아 무한대로 축소함. 수정할 것.
             temp.SetMinMax(
@@ -79,9 +77,9 @@ namespace Point.Collections.Burst
         public static void aabb_calculateRotationWithVertices(in AABB aabb, in quaternion quaternion, in float3 scale, AABB* result)
         {
             float3 originCenter = aabb.center;
-            float4x4 trMatrix = float4x4.TRS(originCenter, quaternion, scale * .5f);
+            float4x4 trMatrix = Unity.Mathematics.float4x4.TRS(originCenter, quaternion, scale * .5f);
 
-            AABB temp = new AABB(originCenter, float3.zero);
+            AABB temp = new AABB(originCenter, Unity.Mathematics.float3.zero);
 
             float3
                 min = aabb.min,

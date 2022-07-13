@@ -120,7 +120,19 @@ namespace Point.Collections.Buffer.LowLevel
 
             m_Buffer = buffer;
             m_Capacity = array.Length;
-            m_Count = array.Length;
+            m_Count = 0;
+        }
+        public UnsafeFixedListWrapper(NativeArray<T> array, int intialCount)
+        {
+            UnsafeReference<T> buffer;
+            unsafe
+            {
+                buffer = (T*)NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(array);
+            }
+
+            m_Buffer = buffer;
+            m_Capacity = array.Length;
+            m_Count = intialCount;
         }
 #if UNITY_COLLECTIONS
         public UnsafeFixedListWrapper(NativeList<T> list)

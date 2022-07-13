@@ -2060,6 +2060,8 @@ namespace Point.Collections.Editor
 
         #endregion
 
+        #region Editor Window
+
         public struct EditorWindow
         {
             public enum WindowType
@@ -2218,6 +2220,8 @@ namespace Point.Collections.Editor
                 return window;
             }
         }
+
+        #endregion
     }
 }
 
