@@ -177,6 +177,10 @@ namespace Point.Collections.ResourceControl
 
         #region Constructors
 
+        public AssetInfo(UnityEngine.Object obj)
+        {
+            this = ResourceManager.InternalRegisterAsset(obj);
+        }
         private AssetInfo(AssetRuntimeKey key)
         {
             this = default(AssetInfo);

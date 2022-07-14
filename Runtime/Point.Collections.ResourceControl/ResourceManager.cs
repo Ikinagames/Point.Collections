@@ -96,6 +96,11 @@ namespace Point.Collections.ResourceControl
         protected override void OnInitialize()
         {
             m_AssetBundleInfos = new NativeList<UnsafeAssetBundleInfo>(AllocatorManager.Persistent);
+            m_AssetBundleInfos.Add(new UnsafeAssetBundleInfo(0)
+            {
+                assets = new UnsafeList<UnsafeAssetInfo>(512, AllocatorManager.Persistent),
+                loaded = true,
+            });
             m_AssetBundles = new List<AssetContainerBase>()
             {
                 new DefaultAssetContainer()
@@ -770,6 +775,7 @@ namespace Point.Collections.ResourceControl
         internal sealed class DefaultAssetContainer : AssetContainerBase
         {
             private Dictionary<AssetRuntimeKey, Promise<UnityEngine.Object>> m_Assets = new Dictionary<AssetRuntimeKey, Promise<UnityEngine.Object>>();
+            private int m_Count = 0;
 
             public override AssetBundle AssetBundle
             {
@@ -777,6 +783,19 @@ namespace Point.Collections.ResourceControl
                 set => throw new NotImplementedException();
             }
 
+            public static AssetRuntimeKey GetRuntimeKey(UnityEngine.Object obj)
+            {
+                AssetRuntimeKey key = new AssetRuntimeKey(unchecked((uint)obj.GetInstanceID()));
+                return key;
+            }
+            public int AddAsset(UnityEngine.Object obj)
+            {
+                AssetRuntimeKey key = GetRuntimeKey(obj);
+                m_Assets[key] = obj;
+                int index = m_Count;
+                m_Count++;
+                return index;
+            }
             public override bool IsLoadedAsset(AssetRuntimeKey hash)
             {
                 return m_Assets.ContainsKey(hash);
@@ -1175,10 +1194,39 @@ namespace Point.Collections.ResourceControl
             Instance.m_AssetBundles[index] = null;
         }
 
+        internal static AssetInfo InternalRegisterAsset(UnityEngine.Object asset)
+        {
+            Instance.m_MapingJobHandle.Complete();
+
+            UnsafeReference<UnsafeAssetBundleInfo> p = GetUnsafeAssetBundleInfo(0);
+            DefaultAssetContainer container = Instance.m_AssetBundles[0] as DefaultAssetContainer;
+            AssetRuntimeKey key = DefaultAssetContainer.GetRuntimeKey(asset);
+            AssetInfo result = new AssetInfo(p, Hash.NewHash(), key);
+
+            if (!container.IsLoadedAsset(key))
+            {
+                int index = container.AddAsset(asset);
+                Instance.m_MappedAssets[key] = new Mapped(0, index);
+
+                UnsafeAssetInfo assetInfo = new UnsafeAssetInfo()
+                {
+                    key = string.Empty,
+                    loaded = true,
+                    assetHandleType = AssetHandleType.Pinned,
+                };
+
+                ref UnsafeAssetBundleInfo bundleInfo = ref Instance.m_AssetBundleInfos.ElementAt(index);
+                bundleInfo.assets.Add(assetInfo);
+
+                bundleInfo.assets.ElementAt(index).checkSum ^= result.m_InstanceID;
+            }
+
+            return result;
+        }
         public static void RegisterAsset(UnityEngine.Object asset)
         {
-            var container = Instance.m_AssetBundles[0] as DefaultAssetContainer;
-
+            AssetInfo info = InternalRegisterAsset(asset);
+            info.Reserve();
         }
 
         public static bool IsLoadedAssetBundle(AssetBundleName name)

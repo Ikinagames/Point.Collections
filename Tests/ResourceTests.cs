@@ -17,7 +17,7 @@
 #define DEBUG_MODE
 #endif
 
-#if UNITY_2020
+#if UNITY_2020_1_OR_NEWER
 #define UNITYENGINE
 #else
 #define POINT_COLLECTIONS_NATIVE
@@ -47,7 +47,7 @@ namespace Point.Collections.Tests
         [Test]
         public void AssetBundleRegisterWithLoadedTest()
         {
-            var names = ResourceAddresses.Instance.StreamingAssetBundles;
+            var names = ResourceHashMap.Instance.StreamingAssetBundles;
             $"loading bundles {names.Count}".ToLog();
             for (int i = 0; i < names.Count; i++)
             {
@@ -70,7 +70,7 @@ namespace Point.Collections.Tests
         [Test]
         public void AssetBundleRegisterWithoutLoadedTestA()
         {
-            var names = ResourceAddresses.Instance.StreamingAssetBundles;
+            var names = ResourceHashMap.Instance.StreamingAssetBundles;
             $"loading bundles {names.Count}".ToLog();
             for (int i = 0; i < names.Count; i++)
             {
@@ -91,7 +91,7 @@ namespace Point.Collections.Tests
         [UnityTest]
         public IEnumerator AssetBundleLoadAsyncTest()
         {
-            var names = ResourceAddresses.Instance.StreamingAssetBundles;
+            var names = ResourceHashMap.Instance.StreamingAssetBundles;
             $"loading bundles {names.Count}".ToLog();
             for (int i = 0; i < names.Count; i++)
             {
@@ -117,7 +117,7 @@ namespace Point.Collections.Tests
         [Test]
         public void AssetBundleLoadAssetsTest()
         {
-            var names = ResourceAddresses.Instance.StreamingAssetBundles;
+            var names = ResourceHashMap.Instance.StreamingAssetBundles;
             for (int i = 0; i < names.Count; i++)
             {
                 AssetBundleInfo info = ResourceManager.RegisterAssetBundlePath(names[i].AssetPath);
@@ -156,7 +156,7 @@ namespace Point.Collections.Tests
         [Test]
         public void AssetBundleCheckSumTest()
         {
-            var names = ResourceAddresses.Instance.StreamingAssetBundles;
+            var names = ResourceHashMap.Instance.StreamingAssetBundles;
             for (int i = 0; i < names.Count; i++)
             {
                 AssetBundleInfo info = ResourceManager.RegisterAssetBundlePath(names[i].AssetPath);
@@ -184,7 +184,7 @@ namespace Point.Collections.Tests
         [Test]
         public void AssetBundleUnregisterErrorTest()
         {
-            var names = ResourceAddresses.Instance.StreamingAssetBundles;
+            var names = ResourceHashMap.Instance.StreamingAssetBundles;
             for (int i = 0; i < names.Count; i++)
             {
                 AssetBundleInfo info = ResourceManager.RegisterAssetBundlePath(names[i].AssetPath);
@@ -215,11 +215,15 @@ namespace Point.Collections.Tests
             }
         }
 
-        //[UnityTearDown]
-        //public IEnumerator TearDown()
-        //{
-        //    yield return new ExitPlayMode();
-        //}
+        [Test]
+        public void RuntimeAssetRegisterTest()
+        {
+            AudioClip clip = AudioClip.Create("test", 1024, 1, 44100, false);
+            AssetInfo info = new AssetInfo(clip);
+
+            Assert.NotNull(info.Asset);
+            info.Reserve();
+        }
     }
 }
 
