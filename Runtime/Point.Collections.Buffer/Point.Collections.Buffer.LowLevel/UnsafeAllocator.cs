@@ -387,6 +387,13 @@ namespace Point.Collections.Buffer.LowLevel
 #endif
                 );
         }
+        public unsafe UnsafeAllocator(T[] array, Allocator allocator) : this(array.Length, allocator, NativeArrayOptions.UninitializedMemory)
+        {
+            fixed (T* p = array)
+            {
+                UnsafeUtility.MemCpy(m_Buffer.Ptr, p, m_Buffer.Size);
+            }
+        }
         /// <summary>
         /// 이미 메모리가 할당된 포인터 <paramref name="ptr"/> 으로 wrapping 하여 반환합니다.
         /// </summary>

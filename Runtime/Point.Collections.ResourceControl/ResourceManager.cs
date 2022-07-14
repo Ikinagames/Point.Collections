@@ -74,7 +74,7 @@ namespace Point.Collections.ResourceControl
         private const float c_UnloadTime = 300.0f;
 
         [NonSerialized] private NativeList<UnsafeAssetBundleInfo> m_AssetBundleInfos;
-        [NonSerialized] private List<AssetContainer> m_AssetBundles;
+        [NonSerialized] private List<AssetContainerBase> m_AssetBundles;
 
         [NonSerialized] private JobHandle 
             m_GlobalJobHandle,
@@ -96,7 +96,10 @@ namespace Point.Collections.ResourceControl
         protected override void OnInitialize()
         {
             m_AssetBundleInfos = new NativeList<UnsafeAssetBundleInfo>(AllocatorManager.Persistent);
-            m_AssetBundles = new List<AssetContainer>();
+            m_AssetBundles = new List<AssetContainerBase>()
+            {
+                new DefaultAssetContainer()
+            };
 
 #if UNITY_COLLECTIONS_NEW
             m_MappedAssets = new NativeParallelHashMap<AssetRuntimeKey, Mapped>(1024, AllocatorManager.Persistent);
@@ -181,7 +184,7 @@ namespace Point.Collections.ResourceControl
 
                 assetInfo.loaded = false;
 
-                AssetContainer bundle = Instance.m_AssetBundles[index.bundleIndex];
+                AssetContainerBase bundle = Instance.m_AssetBundles[index.bundleIndex];
                 bundle.UnloadAsset(assetInfo.key.ToString());
 
                 m_WaitForUnloadIndices.RemoveAt(i);
@@ -295,9 +298,9 @@ namespace Point.Collections.ResourceControl
             return bundleP.Value.GetAssetInfoPointer(in index.assetIndex);
         }
 
-        internal static unsafe AssetContainer GetAssetBundle(in int index)
+        internal static unsafe AssetContainerBase GetAssetBundle(in int index)
         {
-            List<AssetContainer> list = Instance.m_AssetBundles;
+            List<AssetContainerBase> list = Instance.m_AssetBundles;
             if (list == null)
             {
                 "cannot access while shutdown".ToLogError();
@@ -357,7 +360,7 @@ namespace Point.Collections.ResourceControl
 
             p->loaded = true;
 
-            AssetContainer container = GetAssetBundle(in index);
+            AssetContainerBase container = GetAssetBundle(in index);
             container.AssetBundle = bundle;
 
             UpdateAssetInfos(p, bundle);
@@ -594,7 +597,7 @@ namespace Point.Collections.ResourceControl
             assetInfo.loaded = true;
             assetInfo.lastUsage = Timer.Start();
 
-            AssetContainer bundle = Instance.m_AssetBundles[index.bundleIndex];
+            AssetContainerBase bundle = Instance.m_AssetBundles[index.bundleIndex];
             bundle.LoadAsset(key);
         }
         [NotBurstCompatible]
@@ -606,7 +609,7 @@ namespace Point.Collections.ResourceControl
             assetInfo.loaded = true;
             assetInfo.lastUsage = Timer.Start();
 
-            AssetContainer bundle = Instance.m_AssetBundles[index.bundleIndex];
+            AssetContainerBase bundle = Instance.m_AssetBundles[index.bundleIndex];
             bundle.LoadAssetAsync(key);
         }
 
@@ -740,17 +743,82 @@ namespace Point.Collections.ResourceControl
 
         #region Inner Classes
 
-        internal sealed class AssetContainer
+        internal abstract class AssetContainerBase
+        {
+            const string c_KeyFormat = "{0}[{1}]";
+
+            public abstract AssetBundle AssetBundle { get; set; }
+
+            public abstract bool IsLoadedAsset(AssetRuntimeKey hash);
+            public abstract Promise<UnityEngine.Object> GetAsset(AssetRuntimeKey hash);
+            public abstract Promise<UnityEngine.Object> LoadAsset(string key);
+            public abstract Promise<UnityEngine.Object> LoadAssetAsync(string key);
+            public abstract void UnloadAsset(string key);
+            public abstract void Clear();
+
+            protected AssetRuntimeKey StringToKey(in string key)
+            {
+                return new AssetRuntimeKey(key.ToLowerInvariant());
+            }
+            protected AssetRuntimeKey StringToKey(in string key, in string subAssetName)
+            {
+                return new AssetRuntimeKey(
+                    string.Format(c_KeyFormat, key, subAssetName)
+                    );
+            }
+        }
+        internal sealed class DefaultAssetContainer : AssetContainerBase
+        {
+            private Dictionary<AssetRuntimeKey, Promise<UnityEngine.Object>> m_Assets = new Dictionary<AssetRuntimeKey, Promise<UnityEngine.Object>>();
+
+            public override AssetBundle AssetBundle
+            {
+                get => throw new NotImplementedException();
+                set => throw new NotImplementedException();
+            }
+
+            public override bool IsLoadedAsset(AssetRuntimeKey hash)
+            {
+                return m_Assets.ContainsKey(hash);
+            }
+            public override Promise<UnityEngine.Object> GetAsset(AssetRuntimeKey hash)
+            {
+                if (m_Assets.TryGetValue(hash, out Promise<UnityEngine.Object> promise))
+                {
+                    return promise;
+                }
+                return null;
+            }
+            public override Promise<UnityEngine.Object> LoadAsset(string key)
+            {
+                throw new NotImplementedException();
+            }
+            public override Promise<UnityEngine.Object> LoadAssetAsync(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void UnloadAsset(string key)
+            {
+                AssetRuntimeKey hash = StringToKey(key);
+                m_Assets.Remove(hash);
+            }
+
+            public override void Clear()
+            {
+                m_Assets.Clear();
+            }
+        }
+        internal sealed class AssetContainer : AssetContainerBase
         {
             private static Regex s_SubAssetRegex = new Regex(@"(.+)" + Regex.Escape("[") + "(.+)" + Regex.Escape("]"));
-            const string c_KeyFormat = "{0}[{1}]";
 
             private AssetBundle m_AssetBundle;
             //public string[] m_Dependencies = Array.Empty<string>();
             // 현재 로드된 에셋들의 HashMap 입니다.
             private Dictionary<AssetRuntimeKey, Promise<UnityEngine.Object>> m_Assets;
 
-            public AssetBundle AssetBundle
+            public override AssetBundle AssetBundle
             {
                 get => m_AssetBundle;
                 set => m_AssetBundle = value;
@@ -791,8 +859,7 @@ namespace Point.Collections.ResourceControl
                     }
                     else
                     {
-                        tempHash = new AssetRuntimeKey(
-                            string.Format(c_KeyFormat, key, objs[i].name));
+                        tempHash = StringToKey(key, objs[i].name);
                     }
 
                     m_Assets[tempHash] = tempPromise;
@@ -811,12 +878,11 @@ namespace Point.Collections.ResourceControl
                         // If main asset
                         if (Path.GetFileNameWithoutExtension(key).ToLowerInvariant().Equals(objs[i].name.ToLowerInvariant()))
                         {
-                            tempHash = new AssetRuntimeKey(key.ToLowerInvariant());
+                            tempHash = StringToKey(key);
                         }
                         else
                         {
-                            tempHash = new AssetRuntimeKey(
-                                string.Format(c_KeyFormat, key, objs[i].name));
+                            tempHash = StringToKey(key, objs[i].name);
                         }
 
                         if (!m_Assets.TryGetValue(tempHash, out var tempPromise))
@@ -829,11 +895,11 @@ namespace Point.Collections.ResourceControl
                 };
             }
 
-            public bool IsLoadedAsset(AssetRuntimeKey hash)
+            public override bool IsLoadedAsset(AssetRuntimeKey hash)
             {
                 return m_Assets.ContainsKey(hash);
             }
-            public Promise<UnityEngine.Object> GetAsset(AssetRuntimeKey hash)
+            public override Promise<UnityEngine.Object> GetAsset(AssetRuntimeKey hash)
             {
                 if (m_Assets.TryGetValue(hash, out Promise<UnityEngine.Object> promise))
                 {
@@ -841,9 +907,9 @@ namespace Point.Collections.ResourceControl
                 }
                 return null;
             }
-            public Promise<UnityEngine.Object> LoadAsset(string key)
+            public override Promise<UnityEngine.Object> LoadAsset(string key)
             {
-                AssetRuntimeKey hash = new AssetRuntimeKey(key.ToLowerInvariant());
+                AssetRuntimeKey hash = StringToKey(key);
 
                 if (m_Assets.TryGetValue(hash, out Promise<UnityEngine.Object> promise))
                 {
@@ -865,9 +931,9 @@ namespace Point.Collections.ResourceControl
 
                 //return promise;
             }
-            public Promise<UnityEngine.Object> LoadAssetAsync(string key)
+            public override Promise<UnityEngine.Object> LoadAssetAsync(string key)
             {
-                AssetRuntimeKey hash = new AssetRuntimeKey(key.ToLowerInvariant());
+                AssetRuntimeKey hash = StringToKey(key);
 
                 if (m_Assets.TryGetValue(hash, out Promise<UnityEngine.Object> promise))
                 {
@@ -888,9 +954,9 @@ namespace Point.Collections.ResourceControl
 
                 return promise;
             }
-            public void UnloadAsset(string key)
+            public override void UnloadAsset(string key)
             {
-                AssetRuntimeKey hash = new AssetRuntimeKey(key.ToLowerInvariant());
+                AssetRuntimeKey hash = StringToKey(key);
 
                 if (!m_Assets.TryGetValue(hash, out Promise<UnityEngine.Object> promise))
                 {
@@ -908,7 +974,7 @@ namespace Point.Collections.ResourceControl
                 }
             }
 
-            public void Clear()
+            public override void Clear()
             {
                 m_AssetBundle = null;
                 m_Assets.Clear();
@@ -1109,11 +1175,17 @@ namespace Point.Collections.ResourceControl
             Instance.m_AssetBundles[index] = null;
         }
 
+        public static void RegisterAsset(UnityEngine.Object asset)
+        {
+            var container = Instance.m_AssetBundles[0] as DefaultAssetContainer;
+
+        }
+
         public static bool IsLoadedAssetBundle(AssetBundleName name)
         {
             for (int i = 0; i < Instance.m_AssetBundles.Count; i++)
             {
-                AssetContainer target = Instance.m_AssetBundles[i];
+                AssetContainerBase target = Instance.m_AssetBundles[i];
                 if (target.AssetBundle.name.Equals(name.ToString())) return true;
             }
             return false;

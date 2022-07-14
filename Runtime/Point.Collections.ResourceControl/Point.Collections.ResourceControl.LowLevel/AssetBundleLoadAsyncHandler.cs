@@ -28,12 +28,12 @@ namespace Point.Collections.ResourceControl.LowLevel
     internal sealed unsafe class AssetBundleLoadAsyncHandler : IPromiseProvider<AssetBundle>
     {
         private UnsafeAssetBundleInfo* m_Bundle;
-        private ResourceManager.AssetContainer m_AssetContainer;
+        private ResourceManager.AssetContainerBase m_AssetContainer;
 
         private UnityWebRequest m_WebRequest;
         private Action<AssetBundle> m_OnComplete;
 
-        public AsyncOperation Initialize(UnsafeAssetBundleInfo* bundle, ResourceManager.AssetContainer container, UnityWebRequest webRequest)
+        public AsyncOperation Initialize(UnsafeAssetBundleInfo* bundle, ResourceManager.AssetContainerBase container, UnityWebRequest webRequest)
         {
             m_Bundle = bundle;
             m_AssetContainer = container;

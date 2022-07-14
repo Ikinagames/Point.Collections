@@ -99,7 +99,7 @@ namespace Point.Collections.ResourceControl
 #endif
                 this.ThrowIfIsNotValid();
 
-                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+                ResourceManager.AssetContainerBase bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
 
                 var asset = bundleInfo.GetAsset(m_Key)?.Value;
                 if (asset != null)
@@ -125,7 +125,7 @@ namespace Point.Collections.ResourceControl
 #endif
                 this.ThrowIfIsNotValid();
 
-                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+                ResourceManager.AssetContainerBase bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
                 var promise = bundleInfo.GetAsset(m_Key);
 
                 return promise != null && promise.HasValue;
@@ -150,7 +150,7 @@ namespace Point.Collections.ResourceControl
 #endif
                 this.ThrowIfIsNotValid();
 
-                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+                ResourceManager.AssetContainerBase bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
                 Promise<UnityEngine.Object> promise = bundleInfo.LoadAssetAsync(UnsafeInfo.Value.key.ToString());
 
                 promise.OnCompleted += value;
@@ -162,7 +162,7 @@ namespace Point.Collections.ResourceControl
 #endif
                 this.ThrowIfIsNotValid();
 
-                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+                ResourceManager.AssetContainerBase bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
                 if (bundleInfo.GetAsset(m_Key) == null) return;
 
                 Promise<UnityEngine.Object> promise = bundleInfo.LoadAssetAsync(UnsafeInfo.Value.key.ToString());
@@ -177,7 +177,7 @@ namespace Point.Collections.ResourceControl
 
         #region Constructors
 
-        public AssetInfo(AssetRuntimeKey key)
+        private AssetInfo(AssetRuntimeKey key)
         {
             this = default(AssetInfo);
 
@@ -240,7 +240,7 @@ namespace Point.Collections.ResourceControl
 #if UNITY_EDITOR
             if (m_EditorOnly) return true;
 #endif
-            ResourceManager.AssetContainer bundle;
+            ResourceManager.AssetContainerBase bundle;
             if (!m_BundlePointer.IsCreated) return false;
 
             bundle = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
@@ -347,7 +347,7 @@ namespace Point.Collections.ResourceControl
 #endif
                 ((AssetInfo)this).ThrowIfIsNotValid();
 
-                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+                ResourceManager.AssetContainerBase bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
 
                 var asset = bundleInfo.GetAsset(m_Key)?.Value;
                 if (asset == null)
@@ -379,7 +379,7 @@ namespace Point.Collections.ResourceControl
 #endif
                 ((AssetInfo)this).ThrowIfIsNotValid();
 
-                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+                ResourceManager.AssetContainerBase bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
                 var promise = bundleInfo.GetAsset(m_Key);
 
                 return promise != null && promise.HasValue;
@@ -403,7 +403,7 @@ namespace Point.Collections.ResourceControl
 #endif
                 ((AssetInfo)this).ThrowIfIsNotValid();
 
-                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+                ResourceManager.AssetContainerBase bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
                 Promise<UnityEngine.Object> promise = bundleInfo.LoadAssetAsync(UnsafeInfo.key.ToString());
 
                 promise.OnCompleted += value;
@@ -415,7 +415,7 @@ namespace Point.Collections.ResourceControl
 #endif
                 ((AssetInfo)this).ThrowIfIsNotValid();
 
-                ResourceManager.AssetContainer bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+                ResourceManager.AssetContainerBase bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
                 if (bundleInfo.GetAsset(m_Key) == null) return;
 
                 Promise<UnityEngine.Object> promise = bundleInfo.LoadAssetAsync(UnsafeInfo.key.ToString());
@@ -492,7 +492,7 @@ namespace Point.Collections.ResourceControl
 #if UNITY_EDITOR
             if (m_EditorOnly) return true;
 #endif
-            ResourceManager.AssetContainer bundle;
+            ResourceManager.AssetContainerBase bundle;
             if (!m_BundlePointer.IsCreated) return false;
 
             bundle = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
