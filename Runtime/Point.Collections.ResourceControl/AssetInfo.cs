@@ -364,8 +364,7 @@ namespace Point.Collections.ResourceControl
                 {
                     return null;
                 }
-
-                UnsafeInfo.lastUsage = Timer.Start();
+                
                 if (asset is UnityEngine.GameObject gameObject &&
                     TypeHelper.InheritsFrom<UnityEngine.Component>(TypeHelper.TypeOf<T>.Type))
                 {
@@ -570,9 +569,10 @@ namespace Point.Collections.ResourceControl
                 return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(key);
             }
 #endif
-                ((AssetInfo)this).ThrowIfIsNotValid();
+            ((AssetInfo)this).ThrowIfIsNotValid();
 
             ResourceManager.AssetContainerBase bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+            UnsafeInfo.lastUsage = Timer.Start();
 
             return bundleInfo.GetAsset(m_Key);
         }

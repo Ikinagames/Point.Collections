@@ -101,7 +101,7 @@ namespace Point.Collections.ResourceControl
             if (Ref.loaded)
             {
                 PointHelper.LogError(LogChannel.Collections,
-                    $"This Assetbundle({AssetBundle.name}) already loaded but you trying to override. " +
+                    $"This Assetbundle({AssetBundle?.name}) already loaded but you trying to override. " +
                     $"This is not allowed.");
 
                 return AssetBundle;
