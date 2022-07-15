@@ -31,13 +31,15 @@ namespace Point.Collections
 {
     public class Promise : CustomYieldInstruction, IPromise, IDisposable
     {
-        private object m_Value;
+        protected object p_Value;
+        protected IPromiseProvider p_Provider;
         private Action<object> m_OnCompleted;
 
         public object UserData { get; set; }
-        public bool HasValue => m_Value != null;
-        public object Value => m_Value;
-        public override bool keepWaiting => m_Value == null;
+
+        public virtual bool HasValue => p_Value != null;
+        public object Value => p_Value;
+        public override bool keepWaiting => p_Value == null;
 
         /// <summary>
         /// 작업이 완료되고 값이 할당될 때 실행되는 이벤트입니다.
@@ -49,72 +51,9 @@ namespace Point.Collections
         {
             add
             {
-                if (m_Value != null)
+                if (p_Value != null)
                 {
-                    value?.Invoke(m_Value);
-                    return;
-                }
-
-                m_OnCompleted += value;
-            }
-            remove
-            {
-                m_OnCompleted -= value;
-            }
-        }
-
-        public Promise(object value)
-        {
-            m_Value = value;
-        }
-        public Promise(IPromiseProvider provider)
-        {
-            provider.OnComplete(OnCompleteMethod);
-        }
-        ~Promise()
-        {
-            Dispose();
-        }
-        public void Dispose()
-        {
-            m_Value = null;
-            m_OnCompleted = null;
-        }
-
-        public void SetValue(object t)
-        {
-            OnCompleteMethod(t);
-        }
-
-        protected virtual void OnCompleteMethod(object obj)
-        {
-            m_Value = obj;
-
-            m_OnCompleted?.Invoke(obj);
-            m_OnCompleted = null;
-        }
-    }
-    public class Promise<T> : CustomYieldInstruction, IPromise, IDisposable
-    {
-        private T m_Value;
-        private bool m_IsCompleted;
-        private Action<T> m_OnCompleted;
-
-        public object UserData { get; set; }
-        public bool HasValue => m_IsCompleted;
-        /// <inheritdoc cref="IPromise.Value"/>
-        public T Value => m_Value;
-        object IPromise.Value => m_Value;
-        public override bool keepWaiting => !m_IsCompleted;
-
-        /// <inheritdoc cref="Promise.OnCompleted"/>
-        public event Action<T> OnCompleted
-        {
-            add
-            {
-                if (m_IsCompleted)
-                {
-                    value?.Invoke(m_Value);
+                    value?.Invoke(p_Value);
                     return;
                 }
 
@@ -127,20 +66,94 @@ namespace Point.Collections
         }
 
         public Promise() { }
-        public Promise(T obj)
+        public Promise(object value)
         {
-            m_Value = obj;
-            m_IsCompleted = true;
+            p_Value = value;
         }
         public Promise(IPromiseProvider provider)
         {
-            provider.OnComplete(OnCompleteMethod);
+            p_Provider = provider;
 
+            provider.OnComplete(OnCompleteMethod);
+        }
+        ~Promise()
+        {
+            Dispose();
+        }
+        public virtual void Dispose()
+        {
+            p_Value = null;
+            m_OnCompleted = null;
+        }
+
+        public void SetValue(object t)
+        {
+            OnCompleteMethod(t);
+        }
+
+        protected virtual void OnCompleteMethod(object obj)
+        {
+            p_Value = obj;
+
+            m_OnCompleted?.Invoke(obj);
+            m_OnCompleted = null;
+        }
+
+        public static Promise<T> Convert<T>(Promise t)
+        {
+            if (t.HasValue)
+            {
+                return new Promise<T>(t.Value == null ? default(T) : (T)t.Value);
+            }
+
+            Promise<T> promise = new Promise<T>(t.p_Provider);
+            return promise;
+        }
+    }
+    public class Promise<T> : Promise, IPromise, IDisposable
+    {
+        //private T m_Value;
+        private bool m_IsCompleted;
+        private Action<T> m_OnCompleted;
+
+        //public object UserData { get; set; }
+        public override bool HasValue => m_IsCompleted;
+        /// <inheritdoc cref="IPromise.Value"/>
+        public new T Value => p_Value == null ? default(T) : (T)p_Value;
+        object IPromise.Value => p_Value;
+        public override bool keepWaiting => !m_IsCompleted;
+
+        /// <inheritdoc cref="Promise.OnCompleted"/>
+        public new event Action<T> OnCompleted
+        {
+            add
+            {
+                if (m_IsCompleted)
+                {
+                    value?.Invoke(Value);
+                    return;
+                }
+
+                m_OnCompleted += value;
+            }
+            remove
+            {
+                m_OnCompleted -= value;
+            }
+        }
+
+        public Promise() : base() { }
+        public Promise(T obj) : base(obj)
+        {
+            m_IsCompleted = true;
+        }
+        public Promise(IPromiseProvider provider) : base(provider)
+        {
             m_IsCompleted = false;
         }
-        public Promise(IPromiseProvider<T> provider)
+        public Promise(IPromiseProvider<T> provider) : base(provider)
         {
-            provider.OnComplete(OnCompleteMethod);
+            //provider.OnComplete(OnCompleteMethod);
 
             m_IsCompleted = false;
         }
@@ -155,9 +168,8 @@ namespace Point.Collections
         {
             Dispose();
         }
-        public void Dispose()
+        public override void Dispose()
         {
-            m_Value = default(T);
             m_IsCompleted = false;
             m_OnCompleted = null;
         }
@@ -175,7 +187,7 @@ namespace Point.Collections
             yield return PointApplication.Instance.StartCoroutine(target);
 
             Timer timer = Timer.Start();
-            while (m_Value == null)
+            while (p_Value == null)
             {
                 if (timer.IsExceeded(5f))
                 {
@@ -189,10 +201,10 @@ namespace Point.Collections
             m_IsCompleted = true;
         }
 
-        private void OnCompleteMethod(object obj) => OnCompleteMethod((T)obj);
+        protected override sealed void OnCompleteMethod(object obj) => OnCompleteMethod((T)obj);
         protected virtual void OnCompleteMethod(T obj)
         {
-            m_Value = (T)obj;
+            p_Value = (T)obj;
 
             m_OnCompleted?.Invoke((T)obj);
             m_IsCompleted = true;
@@ -230,7 +242,7 @@ namespace Point.Collections
         /// <param name="obj"></param>
         void OnComplete(Action<object> obj);
     }
-    public interface IPromiseProvider<T>
+    public interface IPromiseProvider<T> : IPromiseProvider
     {
         /// <summary>
         /// <see cref="Promise{T}.OnCompleted"/> 를 통해 추가된 이벤트들이 실행되는 구현부입니다.

@@ -31,6 +31,7 @@ namespace Point.Collections.ResourceControl.LowLevel
         private ResourceManager.AssetContainerBase m_AssetContainer;
 
         private UnityWebRequest m_WebRequest;
+        private Action<object> m_OnCompleteUntyped;
         private Action<AssetBundle> m_OnComplete;
 
         public AsyncOperation Initialize(UnsafeAssetBundleInfo* bundle, ResourceManager.AssetContainerBase container, UnityWebRequest webRequest)
@@ -45,6 +46,10 @@ namespace Point.Collections.ResourceControl.LowLevel
             return request;
         }
 
+        void IPromiseProvider.OnComplete(Action<object> obj)
+        {
+            m_OnCompleteUntyped += obj;
+        }
         void IPromiseProvider<AssetBundle>.OnComplete(Action<AssetBundle> obj)
         {
             m_OnComplete += obj;
@@ -59,6 +64,7 @@ namespace Point.Collections.ResourceControl.LowLevel
             ResourceManager.GetAssetBundle(m_Bundle->index).AssetBundle = bundle;
             ResourceManager.UpdateAssetInfos(m_Bundle, bundle);
 
+            m_OnCompleteUntyped?.Invoke(bundle);
             m_OnComplete?.Invoke(bundle);
         }
     }

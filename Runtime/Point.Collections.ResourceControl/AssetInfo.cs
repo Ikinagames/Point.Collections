@@ -284,6 +284,34 @@ namespace Point.Collections.ResourceControl
 
         #endregion
 
+        public Promise<UnityEngine.Object> LoadAsset()
+        {
+#if UNITY_EDITOR
+            if (m_EditorOnly)
+            {
+                string key = m_Key.Key.Key;
+                if (key.IsNullOrEmpty())
+                {
+                    PointHelper.LogError(Channel.Collections,
+                        $"Fatal error. Cannot load an empty key.");
+                    return null;
+                }
+
+                if (ResourceManager.AssetContainer.IsSubAssetKey(key,
+                    out string mainKey, out string subAssetName))
+                {
+                    return new AssetReference(mainKey, subAssetName).editorAsset;
+                }
+                return UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(key);
+            }
+#endif
+                ((AssetInfo)this).ThrowIfIsNotValid();
+
+            ResourceManager.AssetContainerBase bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+
+            return bundleInfo.GetAsset(m_Key);
+        }
+
         public static implicit operator UnityEngine.Object(AssetInfo t) => t.Asset;
     }
 
@@ -330,30 +358,8 @@ namespace Point.Collections.ResourceControl
         {
             get
             {
-#if UNITY_EDITOR
-                if (m_EditorOnly)
-                {
-                    string key = m_Key.Key.Key;
-                    if (key.IsNullOrEmpty())
-                    {
-                        PointHelper.LogError(Channel.Collections,
-                            $"Fatal error. Cannot load an empty key.");
-                        return null;
-                    }
-
-                    if (ResourceManager.AssetContainer.IsSubAssetKey(key,
-                        out string mainKey, out string subAssetName))
-                    {
-                        return new AssetReference(mainKey, subAssetName).editorAsset as T;
-                    }
-                    return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(key);
-                }
-#endif
-                ((AssetInfo)this).ThrowIfIsNotValid();
-
-                ResourceManager.AssetContainerBase bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
-
-                var asset = bundleInfo.GetAsset(m_Key)?.Value;
+                Promise<UnityEngine.Object> promise = LoadAssetUntyped();
+                UnityEngine.Object asset = promise.Value;
                 if (asset == null)
                 {
                     return null;
@@ -537,6 +543,39 @@ namespace Point.Collections.ResourceControl
         }
 
         #endregion
+
+        public Promise<T> LoadAsset()
+        {
+            Promise<UnityEngine.Object> promise = LoadAssetUntyped();
+            return Promise.Convert<T>(promise);
+        }
+        public Promise<UnityEngine.Object> LoadAssetUntyped()
+        {
+#if UNITY_EDITOR
+            if (m_EditorOnly)
+            {
+                string key = m_Key.Key.Key;
+                if (key.IsNullOrEmpty())
+                {
+                    PointHelper.LogError(Channel.Collections,
+                        $"Fatal error. Cannot load an empty key.");
+                    return null;
+                }
+
+                if (ResourceManager.AssetContainer.IsSubAssetKey(key,
+                    out string mainKey, out string subAssetName))
+                {
+                    return new AssetReference(mainKey, subAssetName).editorAsset as T;
+                }
+                return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(key);
+            }
+#endif
+                ((AssetInfo)this).ThrowIfIsNotValid();
+
+            ResourceManager.AssetContainerBase bundleInfo = ResourceManager.GetAssetBundle(m_BundlePointer.Value.index);
+
+            return bundleInfo.GetAsset(m_Key);
+        }
 
         public static explicit operator AssetInfo<T>(AssetInfo t)
         {

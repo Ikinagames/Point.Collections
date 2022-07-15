@@ -60,6 +60,7 @@ namespace Point.Collections.ResourceControl
             {
                 private SceneBindedLabel m_SceneBindedLabel;
                 private Action<IEnumerable<TObject>> m_OnCompleted;
+                private Action<object> m_OnCompletedUntyped;
 
                 public ObjectArrayProvider(SceneBindedLabel other)
                 {
@@ -69,9 +70,16 @@ namespace Point.Collections.ResourceControl
 
                 private void M_SceneBindedLabel_OnCompleted(UnityEngine.Object obj)
                 {
-                    m_OnCompleted?.Invoke(m_SceneBindedLabel.Result.Select(t => t as TObject));
+                    IEnumerable<TObject> iter = m_SceneBindedLabel.Result.Select(t => t as TObject);
+
+                    m_OnCompletedUntyped?.Invoke(iter);
+                    m_OnCompleted?.Invoke(iter);
                 }
 
+                void IPromiseProvider.OnComplete(Action<object> obj)
+                {
+                    m_OnCompletedUntyped += obj;
+                }
                 void IPromiseProvider<IEnumerable<TObject>>.OnComplete(Action<IEnumerable<TObject>> obj)
                 {
                     m_OnCompleted += obj;

@@ -44,8 +44,8 @@ namespace Point.Collections.ResourceControl.LowLevel
         }
 
         private AssetBundleRequest m_Request;
-        private Action<object> m_OnPromiseCompleted;
-        private Action<UnityEngine.Object> m_OnPromiseTCompleted;
+        private Action<object> m_OnPromiseCompletedUntyped;
+        private Action<UnityEngine.Object> m_OnPromiseCompleted;
         private Action<AssetBundleRequest> m_OnRequestCompleted;
 
         public event Action<AssetBundleRequest> completed
@@ -77,14 +77,19 @@ namespace Point.Collections.ResourceControl.LowLevel
 
         private void OnRequestCompleted(AsyncOperation obj)
         {
-            m_OnPromiseCompleted?.Invoke(m_Request);
-            m_OnPromiseTCompleted?.Invoke(m_Request.asset);
+            m_OnPromiseCompletedUntyped?.Invoke(m_Request);
+            m_OnPromiseCompleted?.Invoke(m_Request.asset);
+
             m_OnRequestCompleted?.Invoke(m_Request);
         }
 
+        void IPromiseProvider.OnComplete(Action<object> obj)
+        {
+            m_OnPromiseCompletedUntyped += obj;
+        }
         void IPromiseProvider<UnityEngine.Object>.OnComplete(Action<UnityEngine.Object> obj)
         {
-            m_OnPromiseTCompleted += obj;
+            m_OnPromiseCompleted += obj;
         }
     }
 }
