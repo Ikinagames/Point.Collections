@@ -187,6 +187,12 @@ namespace Point.Collections
 
             Log(channel, in msg);
         }
+        public static void ToLogAsync(this string msg, LogChannel channel = LogChannel.Core)
+        {
+            if ((LogChannel & channel) != channel) return;
+
+            Task.Run(() => ToLog(msg, channel));
+        }
         /// <summary><inheritdoc cref="Log(Channel, in string)"/>></summary>
         /// <param name="msg"></param>
         /// <param name="channel"></param>

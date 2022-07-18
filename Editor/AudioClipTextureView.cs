@@ -32,6 +32,7 @@ namespace Point.Collections.Editor
         private AudioClip m_AudioClip;
         private Texture2D m_Texture;
 
+        public float maxHeight { get; set; } = -1;
         public AudioClip audioClip
         {
             get => m_AudioClip;
@@ -40,7 +41,7 @@ namespace Point.Collections.Editor
                 m_OverlayBox.RemoveFromHierarchy();
 
                 m_AudioClip = value;
-                m_Texture = m_AudioClip.PaintWaveformSpectrum(.5f, 600, 100, Color.gray);
+                m_Texture = m_AudioClip.PaintWaveformSpectrum(.5f, 600, 100, Color.gray, .6f, maxHeight);
 
                 style.backgroundImage = new StyleBackground(m_Texture);
 

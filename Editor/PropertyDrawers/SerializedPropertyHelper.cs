@@ -789,6 +789,22 @@ namespace Point.Collections.Editor
 
         #endregion
 
+        public static T[] ReadArray<T>(SerializedProperty t)
+        {
+            if (!t.isArray) throw new Exception();
+
+            T[] array = new T[t.arraySize];
+            for (int i = 0; i < t.arraySize; i++)
+            {
+                var element = t.GetArrayElementAtIndex(i);
+                object obj = element.GetTargetObject();
+
+                array[i] = obj == null ? default(T) : (T)obj;
+            }
+
+            return array;
+        }
+
         public static Vector3 GetVector3(this SerializedProperty t)
         {
             if (t.propertyType == SerializedPropertyType.Vector3)
