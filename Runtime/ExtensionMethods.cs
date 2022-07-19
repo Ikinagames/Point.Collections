@@ -281,10 +281,7 @@ namespace Point.Collections
             float[] waveform = new float[width];
             audio.GetData(samples, 0);
 
-            //int packSize = (audio.samples / width) + 1;
             int packSize = (audio.samples / width) * audio.channels;
-            //$"{packSize} : {audio.samples} / {width} + 1, {audio.channels}".ToLog();
-            //for (int i = 0, s = 0; i < audio.channels * audio.samples; i += packSize * audio.channels, s++)
             for (int i = 0, s = 0; s < width; i += packSize, s++)
             {
                 waveform[s] = Mathf.Abs(samples[i]);

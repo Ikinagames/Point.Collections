@@ -38,36 +38,46 @@ namespace Point.Collections.Editor
             get => m_AudioClip;
             set
             {
-                //m_OverlayBox.RemoveFromHierarchy();
-
                 m_AudioClip = value;
-
-                //if (m_AudioClip == null)
-                //{
-                //    Add(m_OverlayBox);
-                //}
+                this.MarkDirtyRepaint();
             }
         }
         public Texture2D texture => m_Texture;
-
-        VisualElement m_OverlayBox;
-        Label m_OverlayLabel;
-
         public string emptyString
         {
             get => m_OverlayLabel.text;
             set => m_OverlayLabel.text = value;
         }
 
+        public float width => m_TextureView.resolvedStyle.width;
+        public float height => m_TextureView.resolvedStyle.height;
+
+        ScrollView m_ScrollView;
+        VisualElement m_TextureView;
+        VisualElement m_OverlayBox;
+        Label m_OverlayLabel;
+
+        private bool scrolled => this.resolvedStyle.width != parent.resolvedStyle.width;
+        public override VisualElement contentContainer => m_TextureView;
+
         public AudioClipTextureView()
         {
-            style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
-            style.flexGrow = 1;
-            style.minHeight = new StyleLength(new Length(50, LengthUnit.Pixel));
-            style.maxHeight = new StyleLength(new Length(100, LengthUnit.Pixel));
-            style.SetBorderColor(Color.gray);
-            style.SetBorderRadius(.15f);
-            style.SetBorderWidth(.1f);
+            m_ScrollView = new ScrollView(ScrollViewMode.Horizontal);
+            //m_ScrollView.elasticity = 100;
+            //m_ScrollView.touchScrollBehavior = ScrollView.TouchScrollBehavior.Elastic;
+            m_ScrollView.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+            hierarchy.Add(m_ScrollView);
+
+            m_TextureView = new VisualElement();
+            m_TextureView.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
+            m_TextureView.style.flexGrow = 1;
+            m_TextureView.style.minHeight = new StyleLength(new Length(80, LengthUnit.Pixel));
+            m_TextureView.style.maxHeight = new StyleLength(new Length(100, LengthUnit.Pixel));
+            m_TextureView.style.SetBorderColor(Color.gray);
+            m_TextureView.style.SetBorderRadius(.15f);
+            m_TextureView.style.SetBorderWidth(.1f);
+
+            m_ScrollView.Add(m_TextureView);
 
             m_OverlayBox = new VisualElement();
             m_OverlayBox.style.position = Position.Absolute;
@@ -89,32 +99,50 @@ namespace Point.Collections.Editor
 
             audioClip = null;
 
-            this.generateVisualContent += OnGenerate;
-            Add(m_OverlayBox);
+            m_TextureView.generateVisualContent += OnGenerateVisualContent;
+            hierarchy.Add(m_OverlayBox);
+
+            RegisterCallback<WheelEvent>(WheelEventHandler);
         }
 
+        private void WheelEventHandler(WheelEvent ev)
+        {
+            if (!ev.actionKey) return;
+
+            ev.StopPropagation();
+
+            var scale = m_TextureView.resolvedStyle.width;
+            scale = Mathf.Clamp(scale - (ev.delta.y), parent.resolvedStyle.width, float.MaxValue);
+            m_TextureView.style.width = scale;
+        }
         private void RepaintTexture()
         {
+            //"repaint".ToLog();
+
             m_OverlayBox.RemoveFromHierarchy();
             int
-               width = Mathf.RoundToInt(this.resolvedStyle.width),
-               height = Mathf.RoundToInt(this.resolvedStyle.height);
+               width = Mathf.RoundToInt(m_TextureView.resolvedStyle.width),
+               height = Mathf.RoundToInt(m_TextureView.resolvedStyle.height);
 
             m_Texture = m_AudioClip.PaintWaveformSpectrum(.5f, width, height, Color.gray, .6f, maxHeight);
-            style.backgroundImage = new StyleBackground(m_Texture);
+            m_TextureView.style.backgroundImage = new StyleBackground(m_Texture);
 
             if (m_AudioClip == null)
             {
                 m_OverlayBox.style.width = width;
                 m_OverlayBox.style.height = height;
 
-                Add(m_OverlayBox);
+                hierarchy.Add(m_OverlayBox);
             }
+
+            OnRepaintTexture();
         }
-        private void OnGenerate(MeshGenerationContext ctx)
+
+        protected virtual void OnGenerateVisualContent(MeshGenerationContext ctx)
         {
             this.schedule.Execute(RepaintTexture);
         }
+        protected virtual void OnRepaintTexture() { }
     }
 }
 

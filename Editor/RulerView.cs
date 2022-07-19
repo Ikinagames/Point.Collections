@@ -21,6 +21,7 @@
 
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -144,14 +145,28 @@ namespace Point.Collections.Editor
         private IMGUIContainer m_Ruler;
         private ScrollView m_ContentContainer;
         private TimeArea m_TimeArea;
+        private VisualElement m_RangeFloatFields;
 
         private bool
+            m_DisplayRangeFields = false,
             m_DraggingRange, m_DraggingRangeBegin, m_DraggingRangeEnd;
         private float m_DraggingStartFrame = 0;
         private float m_DraggingStopFrame = 0;
         private float m_DraggingAdditivePoseFrame = 0;
-
+        private float m_AdditivePoseFrame = 0;
         private float m_FrameRate = 60f, m_CursorTime = 0;
+
+        public bool displayRangeFields
+        {
+            get => m_DisplayRangeFields;
+            set
+            {
+                m_RangeFloatFields.RemoveFromHierarchy();
+
+                m_DisplayRangeFields = value;
+                if (value) hierarchy.Add(m_RangeFloatFields);
+            }
+        }
 
         public float startTime
         {
@@ -231,9 +246,27 @@ namespace Point.Collections.Editor
 
             m_Ruler = new IMGUIContainer(OnGUI);
             m_ContentContainer = new ScrollView();
-            m_ContentContainer.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+            m_ContentContainer.horizontalScrollerVisibility = ScrollerVisibility.AlwaysVisible;
             m_ContentContainer.verticalScrollerVisibility = ScrollerVisibility.Hidden;
-            
+
+            m_RangeFloatFields = new VisualElement();
+            {
+                m_RangeFloatFields.style.flexDirection = FlexDirection.Row;
+
+                FloatField 
+                    start = new FloatField("Start"),
+                    end = new FloatField("End");
+
+                start.style.flexGrow = 1;
+                end.style.flexGrow = 1;
+
+                start.RegisterValueChangedCallback(t => m_DraggingStartFrame = Mathf.Round(t.newValue * 1000) / 1000);
+                end.RegisterValueChangedCallback(t => m_DraggingStartFrame = Mathf.Round(t.newValue * 1000) / 1000);
+
+                m_RangeFloatFields.Add(start);
+                m_RangeFloatFields.Add(end);
+            }
+
             hierarchy.Add(m_Ruler);
             hierarchy.Add(m_ContentContainer);
         }
@@ -254,15 +287,15 @@ namespace Point.Collections.Editor
                 ref m_AdditivePoseFrame, out changedAdditivePoseFrame);
         }
 
-        private bool m_LoopTime = false;
-        private bool m_LoopBlend = false;
-        private bool m_LoopBlendOrientation = false;
-        private bool m_LoopBlendPositionY = false;
-        private bool m_LoopBlendPositionXZ = false;
-        private float m_StartFrame = 0;
-        private float m_StopFrame = 1;
-        private float m_AdditivePoseFrame = 0;
-        private float m_InitialClipLength = 0;
+        //private bool m_LoopTime = false;
+        //private bool m_LoopBlend = false;
+        //private bool m_LoopBlendOrientation = false;
+        //private bool m_LoopBlendPositionY = false;
+        //private bool m_LoopBlendPositionXZ = false;
+        //private float m_StartFrame = 0;
+        //private float m_StopFrame = 1;
+        
+        //private float m_InitialClipLength = 0;
 
         // https://github.com/Unity-Technologies/UnityCsReference/blob/master/Editor/Mono/Inspector/AnimationClipEditor.cs
         public void ClipRangeGUI(ref float startFrame, ref float stopFrame, out bool changedStart, out bool changedStop, bool showAdditivePoseFrame, ref float additivePoseframe, out bool changedAdditivePoseframe)
@@ -300,6 +333,11 @@ namespace Point.Collections.Editor
                 m_TimeArea.rect = timeRect;
             m_TimeArea.BeginViewGUI();
             m_TimeArea.EndViewGUI();
+
+            
+            //m_ContentContainer.horizontalScroller.lowButton = m_TimeArea.
+            //m_ContentContainer.horizontalScroller.value = m_TimeArea.translation.x;
+            //$"{m_TimeArea.drawRect.size} :: {m_TimeArea.scale} :: {m_TimeArea.translation} :: {m_ContentContainer.horizontalScroller.value}".ToLog();
             timeRect.height -= 15;
 
             // Start and stop markers
@@ -381,24 +419,24 @@ namespace Point.Collections.Editor
             GUI.EndGroup();
 
             // Start and stop time float fields
-            using (new EditorGUI.DisabledScope(invalidRange))
-            {
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUI.BeginChangeCheck();
-                    startFrame = EditorGUILayout.FloatField(Styles.StartFrame, Mathf.Round(startFrame * 1000) / 1000);
-                    if (EditorGUI.EndChangeCheck())
-                        changedStart = true;
+            //using (new EditorGUI.DisabledScope(invalidRange))
+            //{
+            //    EditorGUILayout.BeginHorizontal();
+            //    {
+            //        EditorGUI.BeginChangeCheck();
+            //        startFrame = EditorGUILayout.FloatField(Styles.StartFrame, Mathf.Round(startFrame * 1000) / 1000);
+            //        if (EditorGUI.EndChangeCheck())
+            //            changedStart = true;
 
-                    GUILayout.FlexibleSpace();
+            //        GUILayout.FlexibleSpace();
 
-                    EditorGUI.BeginChangeCheck();
-                    stopFrame = EditorGUILayout.FloatField(Styles.EndFrame, Mathf.Round(stopFrame * 1000) / 1000);
-                    if (EditorGUI.EndChangeCheck())
-                        changedStop = true;
-                }
-                EditorGUILayout.EndHorizontal();
-            }
+            //        EditorGUI.BeginChangeCheck();
+            //        stopFrame = EditorGUILayout.FloatField(Styles.EndFrame, Mathf.Round(stopFrame * 1000) / 1000);
+            //        if (EditorGUI.EndChangeCheck())
+            //            changedStop = true;
+            //    }
+            //    EditorGUILayout.EndHorizontal();
+            //}
 
             changedStart |= fixRange;
             changedStop |= fixRange;
