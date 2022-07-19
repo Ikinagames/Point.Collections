@@ -255,7 +255,7 @@ namespace Point.Collections
         // https://forum.unity.com/threads/how-to-create-waveform-texture-from-audioclip.631480/
         // https://answers.unity.com/questions/699595/how-to-generate-waveform-from-audioclip.html
         public static Texture2D PaintWaveformSpectrum(this AudioClip audio, 
-            float saturation, int width, int height, Color col, float heightOffset = .6f)
+            float saturation, int width, int height, Color col, float heightOffset = .6f, float max = -1)
         {
             Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             int halfHeight = Mathf.RoundToInt(height * .5f);
@@ -281,14 +281,27 @@ namespace Point.Collections
             float[] waveform = new float[width];
             audio.GetData(samples, 0);
 
-            int packSize = (audio.samples / width) + 1;
-            float max = 0;
-            for (int i = 0, s = 0; i < audio.channels * audio.samples; i += packSize * audio.channels, s++)
+            //int packSize = (audio.samples / width) + 1;
+            int packSize = (audio.samples / width) * audio.channels;
+            //$"{packSize} : {audio.samples} / {width} + 1, {audio.channels}".ToLog();
+            //for (int i = 0, s = 0; i < audio.channels * audio.samples; i += packSize * audio.channels, s++)
+            for (int i = 0, s = 0; s < width; i += packSize, s++)
             {
                 waveform[s] = Mathf.Abs(samples[i]);
-                if (max < waveform[s]) max = waveform[s];
+                //if (max < waveform[s]) max = waveform[s];
             }
-            
+            if (max < 0)
+            {
+                //for (int i = 0, s = 0; i < audio.channels * audio.samples; i += packSize * audio.channels, s++)
+                //{
+                //    if (max < waveform[s]) max = waveform[s];
+                //}
+                for (int i = 0; i < waveform.Length; i++)
+                {
+                    max = math.max(waveform[i], max);
+                }
+            }
+
             for (int x = 0; x < width; x++)
             {
                 waveform[x] /= (max * saturation);
