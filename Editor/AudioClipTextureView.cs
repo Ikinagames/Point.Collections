@@ -62,7 +62,9 @@ namespace Point.Collections.Editor
 
         public AudioClipTextureView()
         {
-            m_ScrollView = new ScrollView(ScrollViewMode.Horizontal);
+            m_ScrollView = new ScrollView(
+                //ScrollViewMode.Horizontal
+                );
             //m_ScrollView.elasticity = 100;
             //m_ScrollView.touchScrollBehavior = ScrollView.TouchScrollBehavior.Elastic;
             m_ScrollView.verticalScrollerVisibility = ScrollerVisibility.Hidden;
@@ -137,6 +139,11 @@ namespace Point.Collections.Editor
 
             OnRepaintTexture();
         }
+
+        //public float GetSamplePosition(Vector3 pos)
+        //{
+        //    float scale = resolvedStyle.width / parent.resolvedStyle.width;
+        //}
 
         protected virtual void OnGenerateVisualContent(MeshGenerationContext ctx)
         {
