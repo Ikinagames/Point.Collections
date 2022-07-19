@@ -38,17 +38,14 @@ namespace Point.Collections.Editor
             get => m_AudioClip;
             set
             {
-                m_OverlayBox.RemoveFromHierarchy();
+                //m_OverlayBox.RemoveFromHierarchy();
 
                 m_AudioClip = value;
-                m_Texture = m_AudioClip.PaintWaveformSpectrum(.5f, 600, 100, Color.gray, .6f, maxHeight);
 
-                style.backgroundImage = new StyleBackground(m_Texture);
-
-                if (m_AudioClip == null)
-                {
-                    Add(m_OverlayBox);
-                }
+                //if (m_AudioClip == null)
+                //{
+                //    Add(m_OverlayBox);
+                //}
             }
         }
         public Texture2D texture => m_Texture;
@@ -76,7 +73,8 @@ namespace Point.Collections.Editor
             m_OverlayBox.style.position = Position.Absolute;
             m_OverlayBox.style.flexGrow = 1;
             m_OverlayBox.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
-            m_OverlayBox.style.height = style.height;
+            m_OverlayBox.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
+            //m_OverlayBox.style.height = style.height;
             m_OverlayBox.style.backgroundColor = new Color(.25f, .25f, .25f, .5f);
 
             m_OverlayLabel = new Label();
@@ -90,6 +88,32 @@ namespace Point.Collections.Editor
             emptyString = "Empty";
 
             audioClip = null;
+
+            this.generateVisualContent += OnGenerate;
+            Add(m_OverlayBox);
+        }
+
+        private void RepaintTexture()
+        {
+            m_OverlayBox.RemoveFromHierarchy();
+            int
+               width = Mathf.RoundToInt(this.resolvedStyle.width),
+               height = Mathf.RoundToInt(this.resolvedStyle.height);
+
+            m_Texture = m_AudioClip.PaintWaveformSpectrum(.5f, width, height, Color.gray, .6f, maxHeight);
+            style.backgroundImage = new StyleBackground(m_Texture);
+
+            if (m_AudioClip == null)
+            {
+                m_OverlayBox.style.width = width;
+                m_OverlayBox.style.height = height;
+
+                Add(m_OverlayBox);
+            }
+        }
+        private void OnGenerate(MeshGenerationContext ctx)
+        {
+            this.schedule.Execute(RepaintTexture);
         }
     }
 }
