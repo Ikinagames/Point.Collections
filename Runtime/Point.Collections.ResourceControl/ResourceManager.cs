@@ -213,7 +213,9 @@ namespace Point.Collections.ResourceControl
         /// <returns><see cref="m_AssetBundleInfos"/> 의 Index</returns>
         private int GetUnusedAssetBundleBuffer()
         {
-            for (int i = 0; i < Instance.m_AssetBundleInfos.Length; i++)
+            /// m_AssetBundles[0] is always <see cref="DefaultAssetContainer"/>,
+            /// so we can skip the index 0.
+            for (int i = 1; i < Instance.m_AssetBundleInfos.Length; i++)
             {
                 if (!Instance.m_AssetBundleInfos[i].IsValid())
                 {
@@ -231,7 +233,9 @@ namespace Point.Collections.ResourceControl
         private bool TryGetAssetBundleWithPath(string path, out AssetBundleInfo assetBundle)
         {
             FixedString4096Bytes temp = path;
-            for (int i = 0; i < Instance.m_AssetBundleInfos.Length; i++)
+            /// m_AssetBundles[0] is always <see cref="DefaultAssetContainer"/>,
+            /// so we can skip the index 0.
+            for (int i = 1; i < Instance.m_AssetBundleInfos.Length; i++)
             {
                 if (Instance.m_AssetBundleInfos[i].uri.Equals(temp))
                 {
@@ -251,7 +255,9 @@ namespace Point.Collections.ResourceControl
         /// <returns></returns>
         private bool TryGetAssetBundleWithBundle(AssetBundle bundle, out AssetBundleInfo assetBundle)
         {
-            for (int i = 0; i < Instance.m_AssetBundles.Count; i++)
+            /// m_AssetBundles[0] is always <see cref="DefaultAssetContainer"/>,
+            /// so we can skip the index 0.
+            for (int i = 1; i < Instance.m_AssetBundles.Count; i++)
             {
                 if (Instance.m_AssetBundles[i]?.AssetBundle == null) continue;
                 else if (Instance.m_AssetBundles[i].AssetBundle.Equals(bundle))
@@ -1231,7 +1237,9 @@ namespace Point.Collections.ResourceControl
 
         public static bool IsLoadedAssetBundle(AssetBundleName name)
         {
-            for (int i = 0; i < Instance.m_AssetBundles.Count; i++)
+            /// m_AssetBundles[0] is always <see cref="DefaultAssetContainer"/>,
+            /// so we can skip the index 0.
+            for (int i = 1; i < Instance.m_AssetBundles.Count; i++)
             {
                 AssetContainerBase target = Instance.m_AssetBundles[i];
                 if (target.AssetBundle.name.Equals(name.ToString())) return true;
