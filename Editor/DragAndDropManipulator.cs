@@ -112,7 +112,7 @@ namespace Point.Collections.Editor
                 target.transform.position =
                     closestOverlappingSlot != null ?
                     closestPos :
-                    targetStartPosition;
+                    (Vector3)targetStartPosition;
 
                 enabled = false;
             }

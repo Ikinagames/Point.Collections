@@ -1463,7 +1463,12 @@ namespace Point.Collections.Editor
                                     num = 0;
                                 }
 
+                                // https://stackoverflow.com/questions/64534896/what-does-array1-mean-in-c-sharp-compiler
+#if !UNITY_2020_1_OR_NEWER
                                 rect.y = positions[^1].yMax;
+#else
+                                rect.y = positions[positions.Length - 1].yMax;
+#endif
                                 if (rect.Contains(current.mousePosition))
                                 {
                                     num = selections.Length - 1;

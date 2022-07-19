@@ -40,17 +40,26 @@ namespace Point.Collections.Editor
 
         public Vector3 position
         {
+#if UNITY_2021_1_OR_NEWER
             get => new Vector3(style.translate.value.x.value + (size.x * .5f), style.translate.value.y.value + (size.y * .5f));
             set
             {
                 style.translate = new StyleTranslate(new Translate(
                     value.x - 7.5f, value.y - 7.5f, 0));
             }
+#else
+            get => transform.position;
+            set => transform.position = value;
+#endif
         }
-        private Vector2 size
-        {
-            get => resolvedStyle.scale.value;
-        }
+//        private Vector2 size
+//        {
+//#if UNITY_2021_1_OR_NEWER
+//            get => resolvedStyle.scale.value;
+//#else
+//            get => transform.scale;
+//#endif
+//        }
         
         public TValue value { get; set; }
         public DragManipulator manipulator { get; private set; }

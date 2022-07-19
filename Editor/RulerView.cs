@@ -351,7 +351,13 @@ namespace Point.Collections.Editor
                 // Draw selected range as blue tint
                 float startPixel = m_TimeArea.FrameToPixel(startFrame, frameRate, timeRect);
                 float stopPixel = m_TimeArea.FrameToPixel(stopFrame, frameRate, timeRect);
-                GUI.Label(new Rect(startPixel, timeRect.y, stopPixel - startPixel, timeRect.height), "", EditorStyles.selectionRect);
+                GUI.Label(new Rect(startPixel, timeRect.y, stopPixel - startPixel, timeRect.height), "",
+#if UNITY_2021_1_OR_NEWER
+                    EditorStyles.selectionRect
+#else
+                    new GUIStyle("box")
+#endif
+                    );
 
                 // Draw time ruler
                 m_TimeArea.TimeRuler(timeRect, frameRate);
