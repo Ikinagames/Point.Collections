@@ -52,15 +52,15 @@ namespace Point.Collections.Editor
             set => transform.position = value;
 #endif
         }
-//        private Vector2 size
-//        {
-//#if UNITY_2021_1_OR_NEWER
-//            get => resolvedStyle.scale.value;
-//#else
-//            get => transform.scale;
-//#endif
-//        }
-        
+        private Vector2 size
+        {
+#if UNITY_2021_1_OR_NEWER
+            get => resolvedStyle.scale.value;
+#else
+            get => transform.scale;
+#endif
+        }
+
         public TValue value { get; set; }
         public DragManipulator manipulator { get; private set; }
 
