@@ -65,9 +65,9 @@ namespace Point.Collections.Editor
             m_ScrollView = new ScrollView(
                 //ScrollViewMode.Horizontal
                 );
-            //m_ScrollView.elasticity = 100;
-            //m_ScrollView.touchScrollBehavior = ScrollView.TouchScrollBehavior.Elastic;
+#if UNITY_2021_1_OR_NEWER
             m_ScrollView.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+#endif
             hierarchy.Add(m_ScrollView);
 
             m_TextureView = new VisualElement();
