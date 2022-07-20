@@ -1229,10 +1229,11 @@ namespace Point.Collections.ResourceControl
 
             return result;
         }
-        public static void RegisterAsset(UnityEngine.Object asset)
+        public static AssetInfo RegisterAsset(UnityEngine.Object asset)
         {
             AssetInfo info = InternalRegisterAsset(asset);
-            info.Reserve();
+
+            return info;
         }
 
         public static bool IsLoadedAssetBundle(AssetBundleName name)
