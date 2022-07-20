@@ -102,6 +102,14 @@ namespace Point.Collections
 
         #region Monobehaviour
 
+        public static T GetOrAddComponent<T>(this UnityEngine.Component t)
+            where T : UnityEngine.Component
+        {
+            T p = t.GetComponent<T>();
+            if (p == null) p = t.gameObject.AddComponent<T>();
+
+            return p;
+        }
         public static T GetOrAddComponent<T>(this GameObject t)
             where T : UnityEngine.Component
         {

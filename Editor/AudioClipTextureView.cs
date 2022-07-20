@@ -39,7 +39,7 @@ namespace Point.Collections.Editor
             set
             {
                 m_AudioClip = value;
-                this.MarkDirtyRepaint();
+                //this.MarkDirtyRepaint();
             }
         }
         public Texture2D texture => m_Texture;
