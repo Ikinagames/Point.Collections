@@ -140,20 +140,21 @@ namespace Point.Collections.Editor
             m_Label = new Label();
             m_Label.AddToClassList(labelUssBaseClassName);
             m_Label.AddToClassList(labelUssClassName);
+            m_Label.style.flexGrow = 1;
             m_Label.style.Hide(true);
             hierarchy.Add(m_Label);
 
             m_ObjectField = new ObjectField();
             m_ObjectField.allowSceneObjects = true;
-            m_ObjectField.style.flexShrink = 1;
-            m_ObjectField.style.flexGrow = 1;
+            //m_ObjectField.style.flexShrink = 1;
+            //m_ObjectField.style.flexGrow = 1;
             m_ObjectField.style.width = new StyleLength(new Length(50, LengthUnit.Percent));
             m_ObjectField.RegisterValueChangedCallback(ObjectChanged);
             hierarchy.Add(m_ObjectField);
 
             m_PathField = new TextField();
-            m_PathField.style.flexShrink = 1;
-            m_PathField.style.flexGrow = 1;
+            //m_PathField.style.flexShrink = 1;
+            //m_PathField.style.flexGrow = 1;
             m_PathField.style.width = new StyleLength(new Length(50, LengthUnit.Percent));
             m_PathField.style.overflow = Overflow.Hidden;
 #if UNITY_2020_1_OR_NEWER
