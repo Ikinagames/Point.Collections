@@ -242,7 +242,8 @@ namespace Point.Collections.ResourceControl
         public bool IsValid()
         {
 #if UNITY_EDITOR
-            if (m_EditorOnly) return true;
+            if (PointApplication.IsShutdown) return false;
+            else if (m_EditorOnly) return true;
 #endif
             ResourceManager.AssetContainerBase bundle;
             if (!m_BundlePointer.IsCreated) return false;
