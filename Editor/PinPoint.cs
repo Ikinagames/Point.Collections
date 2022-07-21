@@ -67,7 +67,7 @@ namespace Point.Collections.Editor
         public event Action<PinPoint<TValue>, Vector3> OnDrag;
         public event Action<PinPoint<TValue>, Vector3> OnDragEnded;
 
-        public PinPoint(VisualElement parent)
+        public PinPoint(VisualElement root)
         {
             styleSheets.Add(CoreGUI.VisualElement.IconStyleSheet);
             this.AddToClassList(PinClassName);
@@ -77,7 +77,7 @@ namespace Point.Collections.Editor
             style.position = Position.Absolute;
 
             manipulator = new DragManipulator();
-            manipulator.root = parent;
+            manipulator.root = root;
             manipulator.OnDragEnded += Manipulator_OnDragEnded;
             manipulator.OnDrag += Manipulator_OnDrag;
             this.AddManipulator(manipulator);

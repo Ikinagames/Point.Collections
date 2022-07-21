@@ -804,6 +804,35 @@ namespace Point.Collections.Editor
 
             return array;
         }
+        //public static void WriteArray<T>(SerializedProperty t, T[] array)
+        //{
+        //    WriteArray(t, array, (t, ta) =>
+        //    {
+        //        if (!t.hasChildren)
+        //        {
+        //            object value = ta;
+        //            t.SetValue(value);
+        //            return;
+        //        }
+
+        //        foreach (var item in t.ForEachChild())
+        //        {
+
+        //        }
+        //    });
+        //}
+        public static void WriteArray<T>(SerializedProperty t, T[] array, Action<SerializedProperty, T> @foreach)
+        {
+            if (!t.isArray) throw new Exception();
+
+            t.ClearArray();
+            for (int i = 0; i < array.Length; i++)
+            {
+                t.InsertArrayElementAtIndex(i);
+                var element = t.GetArrayElementAtIndex(i);
+                @foreach.Invoke(element, array[i]);
+            }
+        }
 
         public static Vector3 GetVector3(this SerializedProperty t)
         {
@@ -1133,6 +1162,108 @@ namespace Point.Collections.Editor
         public static object GetTargetObject(this SerializedProperty t)
         {
             return PropertyDrawerHelper.GetTargetObjectOfProperty(t);
+        }
+        public static void SetValue(this SerializedProperty t, object value)
+        {
+            switch (t.propertyType)
+            {
+                case SerializedPropertyType.Integer:
+                    t.intValue = (int)value;
+                    break;
+                case SerializedPropertyType.Boolean:
+                    t.boolValue = (bool)value;
+                    break;
+                case SerializedPropertyType.Float:
+                    t.floatValue = (float)value;
+                    break;
+                case SerializedPropertyType.String:
+                    t.stringValue = (string)value;
+                    break;
+                case SerializedPropertyType.Color:
+                    t.colorValue = (Color)value;
+                    break;
+                case SerializedPropertyType.ObjectReference:
+                    t.objectReferenceValue = (UnityEngine.Object)value;
+                    break;
+                case SerializedPropertyType.Enum:
+                    t.enumValueIndex = (int)value;
+                    break;
+                case SerializedPropertyType.Vector2:
+                    t.vector2Value = (Vector2)value;
+                    break;
+                case SerializedPropertyType.Vector3:
+                    t.vector3Value = (Vector3)value;
+                    break;
+                case SerializedPropertyType.Vector4:
+                    t.vector4Value = (Vector4)value;
+                    break;
+                case SerializedPropertyType.Rect:
+                    t.rectValue = (Rect)value;
+                    break;
+                case SerializedPropertyType.AnimationCurve:
+                    t.animationCurveValue = (AnimationCurve)value;
+                    break;
+                case SerializedPropertyType.Bounds:
+                    t.boundsValue = (Bounds)value;
+                    break;
+                case SerializedPropertyType.Gradient:
+                    t.colorValue = (Color)value;
+                    break;
+                case SerializedPropertyType.Quaternion:
+                    t.quaternionValue = (Quaternion)value;
+                    break;
+                case SerializedPropertyType.Vector2Int:
+                    t.vector2IntValue = (Vector2Int)value;
+                    break;
+                case SerializedPropertyType.Vector3Int:
+                    t.vector3IntValue = (Vector3Int)value;
+                    break;
+                case SerializedPropertyType.RectInt:
+                    t.rectIntValue = (RectInt)value;
+                    break;
+                case SerializedPropertyType.BoundsInt:
+                    t.boundsIntValue = (BoundsInt)value;
+                    break;
+                case SerializedPropertyType.ManagedReference:
+                    t.managedReferenceValue = value;
+                    break;
+                case SerializedPropertyType.Generic:
+                    if (t.IsInArray())
+                    {
+                        int index = t.GetArrayIndex();
+                        FieldInfo fieldInfo = t.GetFieldInfo();
+                        Type elementType = fieldInfo.FieldType.GetElementType();
+                        
+                        Array array = t.GetParent().GetTargetObject() as Array;
+                        
+                        if (array.Length <= index)
+                        {
+                            t.serializedObject.ApplyModifiedProperties();
+
+                            array = t.GetParent().GetTargetObject() as Array;
+                        }
+                        //object defaultValue = Activator.CreateInstance(elementType);
+                        array.SetValue(value, index);
+
+                        //$"{index} :: {elementType.Name} :: {t.GetParent().propertyPath} :: {index} : {array.Length}".ToLog();
+                        break;
+                    }
+
+                    //FieldInfo field = t.GetFieldInfo();
+                    //object defaultObj = Activator.CreateInstance(field.FieldType.GetElementType());
+
+                    ////var parent = t.GetParent().GetTargetObject();
+                    //field.SetValue(parent, Activator.CreateInstance(field.FieldType.GetElementType()));
+                    //break;
+                    throw new NotImplementedException($"{t.propertyType}");
+                case SerializedPropertyType.LayerMask:
+                case SerializedPropertyType.ArraySize:
+                case SerializedPropertyType.Character:
+                case SerializedPropertyType.FixedBufferSize:
+                case SerializedPropertyType.ExposedReference:
+                default:
+                    throw new NotImplementedException($"{t.propertyType}");
+            }
         }
         public static void SetDefaultValue(this SerializedProperty t)
         {

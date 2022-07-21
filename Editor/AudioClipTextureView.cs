@@ -29,11 +29,11 @@ namespace Point.Collections.Editor
 {
     public class AudioClipTextureView : VisualElement
     {
-        private AudioClip m_AudioClip;
+        protected AudioClip m_AudioClip;
         private Texture2D m_Texture;
 
         public float maxHeight { get; set; } = -1;
-        public AudioClip audioClip
+        public virtual AudioClip audioClip
         {
             get => m_AudioClip;
             set
