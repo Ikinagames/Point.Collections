@@ -78,6 +78,7 @@ namespace Point.Collections.ResourceControl
             if (!path.IsSubAsset)
             {
                 m_Key = new Hash(path.AssetPath.ToLowerInvariant());
+                return;
             }
 
             m_Key = new Hash(string.Format(c_Format, 
