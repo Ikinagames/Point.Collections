@@ -29,6 +29,15 @@ using Unity.Collections;
 
 namespace Point.Collections.ResourceControl
 {
+    /// <summary>
+    /// <see cref="ResourceManager"/> 에서 사용되는 런타임 리소스 키 입니다.
+    /// </summary>
+    /// <remarks>
+    /// 런타임 키는 메모리와 연산 효율을 위해 <seealso cref="AssetReference"/> 에서 <seealso cref="uint">
+    /// 해시 값으로 연산된 값입니다. 에디터에서는 디버그 용도로 원래의 키 값을 확인 할 수 있지만, 배포에서는 제공되지 않습니다.
+    /// 
+    /// 리소스 접근 권한을 가진 구조체 중 메모리 효율이 가장 높습니다. <seealso cref="AssetReference"/>, <seealso cref="AssetIndex"/> 를 참조하세요.
+    /// </remarks>
 #if UNITY_COLLECTIONS
     [BurstCompatible]
 #endif

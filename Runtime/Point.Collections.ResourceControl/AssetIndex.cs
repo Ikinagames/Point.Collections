@@ -31,6 +31,12 @@ using UnityEngine;
 
 namespace Point.Collections.ResourceControl
 {
+    /// <summary>
+    /// <see cref="ResourceHashMap"/> 내 리소스 좌표를 저장하는 구조체입니다.
+    /// </summary>
+    /// <remarks>
+    /// 런타임에서는 효율을 위해 <seealso cref="AssetRuntimeKey"/> 가 사용될 수 있습니다. <seealso cref="AssetReference"/> 다음으로 메모리 효율이 낮습니다.
+    /// </remarks>
     [Serializable]
     public struct AssetIndex : IEmpty, IValidation
     {

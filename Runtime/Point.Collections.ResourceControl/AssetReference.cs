@@ -36,6 +36,12 @@ using AddressableReference = UnityEngine.AddressableAssets.AssetReference;
 
 namespace Point.Collections.ResourceControl
 {
+    /// <summary>
+    /// <see cref="ResourceManager"/> 에서 <see cref="AssetBundle"/>, 혹은 Unity.Addressables 에 접근하기 위한 키 입니다.
+    /// </summary>
+    /// <remarks>
+    /// 런타임에서는 효율을 위해 <seealso cref="AssetRuntimeKey"/> 가 사용될 수 있습니다. 리소스 접근 권한을 가진 구조체 중 메모리 효율이 가장 낮습니다. <seealso cref="AssetRuntimeKey"/>, <seealso cref="AssetIndex"/> 를 참조하세요.
+    /// </remarks>
     [Serializable]
     public struct AssetReference : IValidation, IEmpty, IEquatable<AssetReference>
 #if UNITY_ADDRESSABLES && !UNITYENGINE_OLD
