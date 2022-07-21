@@ -33,7 +33,7 @@ namespace Point.Collections.Editor
     public class AssetPathFieldView : BindableElement, INotifyValueChanged<string>
     {
         public new class UxmlFactory : UxmlFactory<AssetPathFieldView, UxmlTraits> { }
-        public new class UxmlTraits : VisualElement.UxmlTraits
+        public new class UxmlTraits : BindableElement.UxmlTraits
         {
             UxmlStringAttributeDescription m_Label = new UxmlStringAttributeDescription
             {

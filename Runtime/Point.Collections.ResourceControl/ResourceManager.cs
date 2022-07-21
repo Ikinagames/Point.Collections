@@ -756,8 +756,6 @@ namespace Point.Collections.ResourceControl
 
         internal abstract class AssetContainerBase
         {
-            const string c_KeyFormat = "{0}[{1}]";
-
             public abstract AssetBundle AssetBundle { get; set; }
 
             public abstract bool IsLoadedAsset(AssetRuntimeKey hash);
@@ -773,9 +771,7 @@ namespace Point.Collections.ResourceControl
             }
             protected AssetRuntimeKey StringToKey(in string key, in string subAssetName)
             {
-                return new AssetRuntimeKey(
-                    string.Format(c_KeyFormat, key, subAssetName)
-                    );
+                return new AssetRuntimeKey(key, subAssetName);
             }
         }
         internal sealed class DefaultAssetContainer : AssetContainerBase

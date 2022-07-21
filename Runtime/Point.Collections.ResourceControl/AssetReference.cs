@@ -68,7 +68,7 @@ namespace Point.Collections.ResourceControl
                 const string c_Format = "{0}[{1}]";
                 if (!m_SubAssetName.IsEmpty)
                 {
-                    return string.Format(c_Format, m_Key.ToString(), m_SubAssetName.ToString());
+                    return string.Format(c_Format, m_Key.ToString().ToLowerInvariant(), m_SubAssetName.ToString());
                 }
                 return m_Key.ToString();
             }

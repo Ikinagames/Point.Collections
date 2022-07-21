@@ -43,6 +43,8 @@ namespace Point.Collections.ResourceControl
 #endif
     public readonly struct AssetRuntimeKey : IEmpty, IEquatable<AssetRuntimeKey>
     {
+        const string c_Format = "{0}[{1}]";
+
         public static AssetRuntimeKey Empty => new AssetRuntimeKey(0);
 
         private readonly Hash m_Key;
@@ -60,6 +62,27 @@ namespace Point.Collections.ResourceControl
             }
 
             m_Key = new Hash(path);
+        }
+        public AssetRuntimeKey(string path, string subAssetName)
+        {
+            if (path.IsNullOrEmpty())
+            {
+                m_Key = Hash.Empty;
+                return;
+            }
+
+            m_Key = new Hash(string.Format(c_Format, path.ToLowerInvariant(), subAssetName));
+        }
+        public AssetRuntimeKey(AssetPathField path)
+        {
+            if (!path.IsSubAsset)
+            {
+                m_Key = new Hash(path.AssetPath.ToLowerInvariant());
+            }
+
+            m_Key = new Hash(string.Format(c_Format, 
+                path.AssetPath.ToLowerInvariant(), 
+                path.SubAssetName));
         }
 #if UNITY_COLLECTIONS
         public AssetRuntimeKey(FixedString512Bytes path)
