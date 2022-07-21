@@ -39,7 +39,9 @@ namespace Point.Collections.Editor
             set
             {
                 m_AudioClip = value;
-                //this.MarkDirtyRepaint();
+#if UNITY_2021_1_OR_NEWER
+                m_RulerView.stopTime = m_AudioClip.length;
+#endif
             }
         }
         public Texture2D texture => m_Texture;
@@ -53,11 +55,11 @@ namespace Point.Collections.Editor
         public float height => m_TextureView.resolvedStyle.height;
 
         ScrollView m_ScrollView;
+        RulerView m_RulerView;
         VisualElement m_TextureView;
         VisualElement m_OverlayBox;
         Label m_OverlayLabel;
 
-        private bool scrolled => this.resolvedStyle.width != parent.resolvedStyle.width;
         public override VisualElement contentContainer => m_TextureView;
 
         public AudioClipTextureView()
@@ -67,8 +69,14 @@ namespace Point.Collections.Editor
                 );
 #if UNITY_2021_1_OR_NEWER
             m_ScrollView.verticalScrollerVisibility = ScrollerVisibility.Hidden;
-#endif
+
+            m_RulerView = new RulerView();
+            
+            hierarchy.Add(m_RulerView);
+            m_RulerView.Add(m_ScrollView);
+#else
             hierarchy.Add(m_ScrollView);
+#endif
 
             m_TextureView = new VisualElement();
             m_TextureView.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
@@ -78,6 +86,7 @@ namespace Point.Collections.Editor
             m_TextureView.style.SetBorderColor(Color.gray);
             m_TextureView.style.SetBorderRadius(.15f);
             m_TextureView.style.SetBorderWidth(.1f);
+            //m_TextureView.visible = false;
 
             m_ScrollView.Add(m_TextureView);
 

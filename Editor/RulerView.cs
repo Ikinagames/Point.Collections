@@ -142,9 +142,9 @@ namespace Point.Collections.Editor
             public static GUIContent PasteEvents = EditorGUIUtility.TrTextContent("Paste Animation Events");
         }
 
-        private IMGUIContainer m_Ruler;
-        private ScrollView m_ContentContainer;
+        private IMGUIContainer m_RulerStart, m_RulerEnd;
         private TimeArea m_TimeArea;
+        private VisualElement m_ContentContainer;
         private VisualElement m_RangeFloatFields;
 
         private bool
@@ -244,10 +244,12 @@ namespace Point.Collections.Editor
             m_TimeArea.SetShownHRangeInsideMargins(startTime, stopTime);
             m_TimeArea.hTicks.SetTickModulosForFrameRate(frameRate);
 
-            m_Ruler = new IMGUIContainer(OnGUI);
-            m_ContentContainer = new ScrollView();
-            m_ContentContainer.horizontalScrollerVisibility = ScrollerVisibility.AlwaysVisible;
-            m_ContentContainer.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+            m_RulerStart = new IMGUIContainer(OnGUI);
+            m_RulerEnd = new IMGUIContainer(m_TimeArea.EndViewGUI);
+            m_ContentContainer = new VisualElement();
+
+            m_RulerStart.style.height = new StyleLength(new Length(25, LengthUnit.Pixel));
+            m_RulerEnd.style.height = new StyleLength(new Length(10, LengthUnit.Pixel));
 
             m_RangeFloatFields = new VisualElement();
             {
@@ -267,8 +269,9 @@ namespace Point.Collections.Editor
                 m_RangeFloatFields.Add(end);
             }
 
-            hierarchy.Add(m_Ruler);
+            hierarchy.Add(m_RulerStart);
             hierarchy.Add(m_ContentContainer);
+            hierarchy.Add(m_RulerEnd);
         }
         public RulerView(float length) : this()
         {
@@ -332,12 +335,8 @@ namespace Point.Collections.Editor
             if (Event.current.type == EventType.Repaint)
                 m_TimeArea.rect = timeRect;
             m_TimeArea.BeginViewGUI();
-            m_TimeArea.EndViewGUI();
+            //m_TimeArea.EndViewGUI();
 
-            
-            //m_ContentContainer.horizontalScroller.lowButton = m_TimeArea.
-            //m_ContentContainer.horizontalScroller.value = m_TimeArea.translation.x;
-            //$"{m_TimeArea.drawRect.size} :: {m_TimeArea.scale} :: {m_TimeArea.translation} :: {m_ContentContainer.horizontalScroller.value}".ToLog();
             timeRect.height -= 15;
 
             // Start and stop markers
@@ -365,6 +364,7 @@ namespace Point.Collections.Editor
                 // TODO: TEST
                 TimeArea.DrawPlayhead(m_TimeArea.TimeToPixel(m_CursorTime, timeRect), timeRect.yMin, timeRect.yMax, 2f, 1f);
 
+                if (drawRangeIndicator)
                 using (new EditorGUI.DisabledScope(invalidRange))
                 {
                     // Range handles

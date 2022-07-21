@@ -780,7 +780,7 @@ namespace Point.Collections.Editor
 
         public void EndViewGUI()
         {
-            if (m_MinimalGUI && Event.current.type == EventType.Repaint)
+            if (m_MinimalGUI /*&& Event.current.type == EventType.Repaint*/)
                 SliderGUI();
         }
 
@@ -801,7 +801,8 @@ namespace Point.Collections.Editor
                 // Horizontal range slider
                 if (m_HSlider)
                 {
-                    Rect hRangeSliderRect = new Rect(drawRect.x + 1, drawRect.yMax - inset, drawRect.width - otherInset, styles.sliderWidth);
+                    //Rect hRangeSliderRect = new Rect(drawRect.x + 1, drawRect.yMax - inset, drawRect.width - otherInset, styles.sliderWidth);
+                    Rect hRangeSliderRect = GUILayoutUtility.GetRect(drawRect.width - otherInset, styles.sliderWidth);
                     float shownXRange = area.width;
                     float shownXMin = area.xMin;
                     if (allowSliderZoomHorizontal)
@@ -834,9 +835,11 @@ namespace Point.Collections.Editor
                 // Reverse y values since y increses upwards for the draw area but downwards for the slider
                 if (m_VSlider)
                 {
+                    Rect vRangeSliderRect = GUILayoutUtility.GetRect(styles.sliderWidth, drawRect.height - otherInset);
                     if (m_UpDirection == YDirection.Positive)
                     {
-                        Rect vRangeSliderRect = new Rect(drawRect.xMax - inset, drawRect.y, styles.sliderWidth, drawRect.height - otherInset);
+                        //Rect vRangeSliderRect = new Rect(drawRect.xMax - inset, drawRect.y, styles.sliderWidth, drawRect.height - otherInset);
+
                         float shownYRange = area.height;
                         float shownYMin = -area.yMax;
                         if (allowSliderZoomVertical)
@@ -866,7 +869,7 @@ namespace Point.Collections.Editor
                     }
                     else
                     {
-                        Rect vRangeSliderRect = new Rect(drawRect.xMax - inset, drawRect.y, styles.sliderWidth, drawRect.height - otherInset);
+                        //Rect vRangeSliderRect = new Rect(drawRect.xMax - inset, drawRect.y, styles.sliderWidth, drawRect.height - otherInset);
                         float shownYRange = area.height;
                         float shownYMin = area.yMin;
                         if (allowSliderZoomVertical)
