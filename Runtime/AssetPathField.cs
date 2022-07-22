@@ -34,7 +34,7 @@ namespace Point.Collections
     /// <see cref="UnityEngine.Object"/> 의 reletive path 를 담을 수 있습니다.
     /// </summary>
     [System.Serializable]
-    public class AssetPathField : IEmpty, IEquatable<AssetPathField>
+    public class AssetPathField : IEmpty, IEquatable<AssetPathField>, IDisposable
 #if UNITY_EDITOR
         , ISerializationCallbackReceiver
 #endif
@@ -124,6 +124,13 @@ namespace Point.Collections
         }
         ~AssetPathField()
         {
+            Dispose();
+        }
+        public void Dispose()
+        {
+#if UNITY_EDITOR
+            m_EditorAsset = null;
+#endif
 #if UNITY_2020_1_OR_NEWER && UNITY_COLLECTIONS
             if (p_AssetInfo.IsValid())
             {
