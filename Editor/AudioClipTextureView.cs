@@ -129,27 +129,18 @@ namespace Point.Collections.Editor
             scale = Mathf.Clamp(scale - (ev.delta.y), parent.resolvedStyle.width, float.MaxValue);
             m_TextureView.style.width = scale;
         }
-        private void RepaintTexture()
+        public virtual void RepaintTexture()
         {
-            //"repaint".ToLog();
-
-            m_OverlayBox.RemoveFromHierarchy();
-            int
-               width = Mathf.RoundToInt(m_TextureView.resolvedStyle.width),
-               height = Mathf.RoundToInt(m_TextureView.resolvedStyle.height);
-
-            m_Texture = m_AudioClip.PaintWaveformSpectrum(.5f, width, height, Color.gray, .6f, maxHeight);
             m_TextureView.style.backgroundImage = new StyleBackground(m_Texture);
 
+            m_OverlayBox.visible = false;
             if (m_AudioClip == null)
             {
                 m_OverlayBox.style.width = width;
                 m_OverlayBox.style.height = height;
 
-                hierarchy.Add(m_OverlayBox);
+                m_OverlayBox.visible = true;
             }
-
-            OnRepaintTexture();
         }
 
         //public float GetSamplePosition(Vector3 pos)
@@ -157,9 +148,15 @@ namespace Point.Collections.Editor
         //    float scale = resolvedStyle.width / parent.resolvedStyle.width;
         //}
 
-        protected virtual void OnGenerateVisualContent(MeshGenerationContext ctx)
+        private void OnGenerateVisualContent(MeshGenerationContext ctx)
         {
-            this.schedule.Execute(RepaintTexture);
+            int
+               width = Mathf.RoundToInt(m_TextureView.resolvedStyle.width),
+               height = Mathf.RoundToInt(m_TextureView.resolvedStyle.height);
+
+            m_Texture = m_AudioClip.PaintWaveformSpectrum(.5f, width, height, Color.gray, .6f, maxHeight);
+
+            schedule.Execute(RepaintTexture);
         }
         protected virtual void OnRepaintTexture() { }
     }
