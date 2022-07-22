@@ -39,9 +39,12 @@ namespace Point.Collections.Editor
             set
             {
                 m_AudioClip = value;
+                if (value != null)
+                {
 #if UNITY_2021_1_OR_NEWER
-                m_RulerView.stopTime = m_AudioClip.length;
+                    m_RulerView.stopTime = m_AudioClip.length;
 #endif
+                }                
             }
         }
         public Texture2D texture => m_Texture;
