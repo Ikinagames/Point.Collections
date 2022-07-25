@@ -58,7 +58,7 @@ namespace Point.Collections
     /// A wrapper that provides the means to safely serialize Scene Asset References.
     /// </summary>
     [Serializable]
-    public class SceneReference : ISerializationCallbackReceiver, IEquatable<SceneReference>, IEquatable<UnityEngine.SceneManagement.Scene>
+    public class SceneReference : IEmpty, ISerializationCallbackReceiver, IEquatable<SceneReference>, IEquatable<UnityEngine.SceneManagement.Scene>
     {
 #if UNITY_EDITOR
         // What we use in editor to select the scene
@@ -193,13 +193,11 @@ namespace Point.Collections
         }
 #endif
 
-        private Hash m_Hash = Hash.Empty;
+        public bool IsEmpty() => scenePath.IsNullOrEmpty();
+
         public bool Equals(SceneReference other)
         {
-            if (m_Hash.Equals(Hash.Empty) && !string.IsNullOrEmpty(scenePath)) m_Hash = new Hash(scenePath);
-            if (other.m_Hash.Equals(Hash.Empty) && !string.IsNullOrEmpty(other.scenePath)) other.m_Hash = new Hash(other.scenePath);
-
-            return m_Hash.Equals(other.m_Hash);
+            return other.scenePath.Equals(other.scenePath);
         }
         public bool Equals(Scene other)
         {

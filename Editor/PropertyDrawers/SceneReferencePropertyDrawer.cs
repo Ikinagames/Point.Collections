@@ -90,7 +90,7 @@ namespace Point.Collections.Editor
                     EditorGUI.BeginChangeCheck();
                     {
                         // removed the label here since we already have it in the foldout before
-                        sceneAssetProperty.objectReferenceValue = EditorGUI.ObjectField(position, sceneAssetProperty.objectReferenceValue, typeof(SceneAsset), false);
+                        sceneAssetProperty.objectReferenceValue = EditorGUI.ObjectField(position, label, sceneAssetProperty.objectReferenceValue, typeof(SceneAsset), false);
                     }
                     var buildScene = BuildUtils.GetBuildScene(sceneAssetProperty.objectReferenceValue);
                     if (EditorGUI.EndChangeCheck())
