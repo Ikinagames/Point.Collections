@@ -45,12 +45,12 @@ namespace Point.Collections.ResourceControl
         [SerializeField] private AssetPathField[] m_StreamingAssetBundles = Array.Empty<AssetPathField>();
 #if UNITY_ADDRESSABLES
         [Serializable]
-        public sealed class SceneBindedLabel
+        public sealed class SceneBindedLabel : IValidation
         {
             [SerializeField] private AssetLabelReference m_Label;
             [SerializeField] private SceneReference m_Scene;
 
-            [NonSerialized] private bool m_IsLoaded;
+            [NonSerialized] private bool m_IsInitialized, m_IsLoaded;
             [NonSerialized] AsyncOperationHandle<IList<IResourceLocation>> m_LocationOperation;
             [NonSerialized] AsyncOperationHandle<IList<UnityEngine.Object>> m_ResourceOperation;
             [NonSerialized] private Action<UnityEngine.Object> m_OnCompleted;
@@ -125,19 +125,30 @@ namespace Point.Collections.ResourceControl
                 }
             }
 
+            public bool IsValid() => m_Label.RuntimeKeyIsValid();
             public void Initialize()
             {
-                if (!m_Label.RuntimeKeyIsValid())
+                if (m_IsInitialized) return;
+
+                if (!IsValid())
                 {
-                    "?? error".ToLogError();
-                    return;
+                    PointHelper.LogError(Channel.Collections,
+                        $"Fatal Error. ResourceHashMap has invalid {nameof(SceneBindedLabel)} for scene({m_Scene.ScenePath}). This is not allowed. Please remove it or select valid Label.");
+
+                    throw new InvalidOperationException();
                 }
 
                 m_LocationOperation = Addressables.LoadResourceLocationsAsync(m_Label);
+                m_IsInitialized = true;
             }
 
             public void LoadResources(Action<UnityEngine.Object> onCompleted)
             {
+                if (!m_IsInitialized)
+                {
+                    Initialize();
+                }
+
                 if (IsLoaded)
                 {
                     if (m_ResourceOperation.IsDone)

@@ -155,8 +155,19 @@ namespace Point.Collections.ResourceControl
         private void SceneManager_activeSceneChanged(Scene previous, Scene target)
         {
 #if UNITY_ADDRESSABLES
-            ResourceHashMap.Instance.UnloadSceneAssets(target);
-            ResourceHashMap.Instance.LoadSceneAssets(target, null);
+            try
+            {
+                ResourceHashMap.Instance.UnloadSceneAssets(target);
+                ResourceHashMap.Instance.LoadSceneAssets(target, null);
+            }
+            catch (Exception ex)
+            {
+                PointHelper.LogError(Channel.Collections,
+                    $"Fatal Error. Fix the issue before play the game.");
+
+                UnityEngine.Debug.LogException(ex);
+                UnityEngine.Debug.Break();
+            }
 #endif
         }
 

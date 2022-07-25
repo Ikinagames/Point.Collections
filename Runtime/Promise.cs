@@ -157,11 +157,11 @@ namespace Point.Collections
 
             m_IsCompleted = false;
         }
-        public Promise(IEnumerator coroutine)
+        public Promise(IEnumerator coroutine, float timeout = 5f)
         {
             m_IsCompleted = false;
 
-            SetValue(coroutine);
+            SetValue(coroutine, timeout);
         }
 
         ~Promise()
@@ -178,21 +178,21 @@ namespace Point.Collections
         {
             OnCompleteMethod(t);
         }
-        public void SetValue(IEnumerator coroutine)
+        public void SetValue(IEnumerator coroutine, float timeout = 5f)
         {
-            PointApplication.Instance.StartCoroutine(Coroutine(coroutine));
+            PointApplication.Instance.StartCoroutine(Coroutine(coroutine, timeout));
         }
-        private IEnumerator Coroutine(IEnumerator target)
+        private IEnumerator Coroutine(IEnumerator target, float timeout)
         {
             yield return PointApplication.Instance.StartCoroutine(target);
 
             Timer timer = Timer.Start();
             while (p_Value == null)
             {
-                if (timer.IsExceeded(5f))
+                if (timer.IsExceeded(timeout))
                 {
-                    "err?".ToLogError();
-                    break;
+                    $"Promise is exceeding timeout({timeout}).".ToLogError();
+                    timer = Timer.Start();
                 }
 
                 yield return null;
