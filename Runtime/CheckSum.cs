@@ -105,6 +105,12 @@ namespace Point.Collections
         public bool Equals(int other) => m_Hash == other;
         public bool Equals(uint other) => m_Hash == other;
         public override int GetHashCode() => Convert.ToInt32(m_Hash);
+
+        public static implicit operator CheckSum(uint t) => new CheckSum(t);
+        public static implicit operator CheckSum(int t) => new CheckSum(unchecked((uint)t));
+
+        public static CheckSum operator ^(CheckSum x, CheckSum y) => new CheckSum(x.Hash ^ y.Hash);
+        public static CheckSum operator |(CheckSum x, CheckSum y) => new CheckSum(x.Hash | y.Hash);
     }
 }
 
