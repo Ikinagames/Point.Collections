@@ -645,6 +645,28 @@ namespace Point.Collections.Editor
 
         #endregion
 
+        #region Indicator
+
+        public static void DrawIndicator(LogType type, TextAnchor anchor, params GUILayoutOption[] options)
+        {
+            GUIContent icon;
+            if (type == LogType.Log)
+            {
+                icon = EditorGUIUtility.IconContent("d_winbtn_mac_max");
+            }
+            else if (type == LogType.Warning)
+            {
+                icon = EditorGUIUtility.IconContent("d_winbtn_mac_min");
+            }
+            else
+            {
+                icon = EditorGUIUtility.IconContent("d_winbtn_mac_close");
+            }
+            CoreGUI.Label(icon, anchor, options);
+        }
+
+        #endregion
+
         #region Utils
 
         public static float GetLineHeight(int lineCount)
