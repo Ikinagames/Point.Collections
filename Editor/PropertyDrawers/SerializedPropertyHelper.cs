@@ -54,7 +54,7 @@ namespace Point.Collections.Editor
             SerializedProperty
                 bits = property.FindPropertyRelative("m_Value");
 
-            bits.longValue = (long)(ulong)hash;
+            bits.intValue = (int)(uint)hash;
         }
 
         #endregion
