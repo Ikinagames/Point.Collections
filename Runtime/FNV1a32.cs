@@ -36,6 +36,23 @@ namespace Point.Collections
             kOffsetBasis64 = 14695981039346656037LU;
 #endif
 
+        public static unsafe uint impl_Calculate(in string str)
+        {
+            uint hash;
+            if (str == null)
+            {
+                hash = kOffsetBasis32;
+            }
+
+            byte[] bytes = System.Text.Encoding.Default.GetBytes(str);
+            int length = bytes.Length;
+
+            fixed (byte* buffer = bytes)
+            {
+                hash = impl_Calculate(buffer, length);
+            }
+            return hash;
+        }
         public static uint Calculate(in string str)
         {
             uint hash;
@@ -129,6 +146,23 @@ namespace Point.Collections
                     }
 #endif
                 }
+            }
+            return hash;
+        }
+        public static unsafe uint impl_Calculate(byte* bytes, int length)
+        {
+            uint hash;
+            if (bytes == null)
+            {
+                hash = kOffsetBasis32;
+            }
+
+            hash = kOffsetBasis32;
+
+            for (int i = 0; i < length; i++)
+            {
+                hash *= kPrime32;
+                hash ^= (uint)bytes[i];
             }
             return hash;
         }

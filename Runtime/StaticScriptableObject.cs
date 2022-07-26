@@ -85,8 +85,16 @@ namespace Point.Collections
                         Directory.CreateDirectory(Path.Combine(c_EditorAssetPath, path));
                     }
 
+                    if (!UnityEditor.EditorApplication.isPlaying)
+                    {
+                        s_Instance = UnityEditor.AssetDatabase.LoadAssetAtPath<T>(Path.Combine("Assets", path, $"{TypeHelper.TypeOf<T>.ToString()}.asset"));
+                    }
+                    else
 #endif
-                    s_Instance = Resources.Load<T>($"{path}/{TypeHelper.TypeOf<T>.ToString()}");
+                    {
+                        s_Instance = Resources.Load<T>($"{path}/{TypeHelper.TypeOf<T>.ToString()}");
+                    }
+                    
                     if (s_Instance == null)
                     {
                         Debug.Log(

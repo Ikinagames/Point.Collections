@@ -45,14 +45,14 @@ namespace Point.Collections.Editor
         public static Hash ReadHash(SerializedProperty property)
         {
             SerializedProperty
-                bits = property.FindPropertyRelative("mBits");
+                bits = property.FindPropertyRelative("m_Value");
 
             return new Hash((uint)bits.intValue);
         }
         public static void SetHash(SerializedProperty property, Hash hash)
         {
             SerializedProperty
-                bits = property.FindPropertyRelative("mBits");
+                bits = property.FindPropertyRelative("m_Value");
 
             bits.longValue = (long)(ulong)hash;
         }

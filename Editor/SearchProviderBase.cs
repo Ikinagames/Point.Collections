@@ -102,18 +102,27 @@ namespace Point.Collections.Editor
         {
             if (OnSelectEntry(context, SearchTreeEntry as Entry))
             {
+                OnSelect(SearchTreeEntry as Entry, context);
                 OnSelected?.Invoke(SearchTreeEntry as Entry, context);
                 return true;
             }
             return false;
         }
 
-        protected virtual void BuildSearchTree(in SearchWindowContext ctx, in List<Entry> list)
-        {
-        }
+        protected abstract void BuildSearchTree(in SearchWindowContext ctx, in List<Entry> list);
         protected virtual bool OnSelectEntry(in SearchWindowContext ctx, in Entry entry)
         {
             return true;
+        }
+        protected virtual void OnSelect(Entry entry, SearchWindowContext ctx) { }
+
+        protected static Entry CreateEntry(string displayName, TTarget data, int level = 1)
+        {
+            return new Entry(new GUIContent(displayName, CoreGUI.EmptyIcon))
+            {
+                level = level,
+                userData = data
+            };
         }
     }
 }

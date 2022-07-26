@@ -25,6 +25,7 @@
 
 #if UNITYENGINE
 
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -163,6 +164,62 @@ namespace Point.Collections.Editor
             }
 
             return path;
+        }
+
+        public static TObject CreateAssetAtPath<TObject>(string path, string name, TObject templete = null)
+            where TObject : ScriptableObject
+        {
+            if (templete == null)
+            {
+                templete = UnityEngine.ScriptableObject.CreateInstance<TObject>();
+            }
+
+            string targetPath = Path.Combine(path, $"{name}.asset");
+
+            AssetDatabase.CreateAsset(templete, targetPath);
+            AssetDatabase.ImportAsset(targetPath);
+            AssetDatabase.Refresh();
+
+            TObject result = AssetDatabase.LoadAssetAtPath<TObject>(targetPath);
+            Selection.activeObject = result;
+
+            return result;
+        }
+        public static GameObject CreatePrefabAtPath(string path, string name, GameObject templete, bool prefabVariant)
+        {
+            if (prefabVariant)
+            {
+                templete = (GameObject)PrefabUtility.InstantiatePrefab(templete);
+            }
+
+            string targetPath = Path.Combine(path, $"{name}.prefab");
+
+            GameObject result = PrefabUtility.SaveAsPrefabAsset(templete, targetPath);
+            AssetDatabase.ImportAsset(targetPath);
+            AssetDatabase.Refresh();
+
+            Selection.activeObject = result;
+
+            return result;
+        }
+
+        public static bool HasLabel<TObject>(this TObject t, string label)
+            where TObject : UnityEngine.Object
+        {
+            string[] labels = AssetDatabase.GetLabels(t);
+            return label.Contains(label);
+        }
+        public static void AddLabel<TObject>(this TObject t, params string[] labels)
+            where TObject : UnityEngine.Object
+        {
+            List<string> target = AssetDatabase.GetLabels(t).ToList();
+            target.AddRange(labels);
+            AssetDatabase.SetLabels(t, target.ToArray());
+        }
+        public static string[] GetLabels<TObject>(this TObject t)
+            where TObject : UnityEngine.Object
+        {
+            return AssetDatabase.GetLabels(t);
         }
     }
 }
